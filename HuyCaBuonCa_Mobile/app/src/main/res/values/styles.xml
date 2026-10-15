@@ -1,0 +1,12 @@
+<resources>
+    <style name="Theme.HuyCaBuonCaMobile" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/brand_gold</item>
+        <item name="colorPrimaryVariant">@color/brand_orange</item>
+        <item name="colorOnPrimary">#000000</item>
+        <item name="colorSecondary">@color/brand_cyan</item>
+        <item name="android:windowBackground">@color/bg_main</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:statusBarColor">#0B0E14</item>
+        <item name="android:navigationBarColor">#0B0E14</item>
+    </style>
+</resources>

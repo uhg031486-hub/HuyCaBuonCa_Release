@@ -1,0 +1,20 @@
+<resources>
+    <string name="app_name">Huy Cá Buôn Cà</string>
+    <string name="brand_badge">HUY CÁ BUÔN CÀ</string>
+    <string name="brand_slogan">Kho Phim Đẳng Cấp TV Box</string>
+    <string name="brand_copyright">© 2026 Bản quyền phong cách bởi HUY CÁ BUÔN CÀ | TV Box Edition</string>
+    <string name="brand_watermark">Huy Cá Buôn Cà VIP TV</string>
+    <string name="source_kkphim">KKPhim (VIP HLS)</string>
+    <string name="source_nguonc">NguonC (Phim Mới)</string>
+    <string name="source_animehay">AnimeHay (Hoạt Hình)</string>
+    <string name="cat_new">Mới Cập Nhật</string>
+    <string name="cat_series">Phim Bộ</string>
+    <string name="cat_single">Phim Lẻ</string>
+    <string name="cat_anime">Hoạt Hình</string>
+    <string name="search_hint">Nhập tên phim để tìm kiếm...</string>
+    <string name="play_now">Xem Phim</string>
+    <string name="episodes_title">Danh sách tập:</string>
+    <string name="loading">Đang tải dữ liệu...</string>
+    <string name="error_loading">Không tải được dữ liệu, vui lòng thử lại!</string>
+    <string name="no_stream_found">Không tìm thấy luồng phát video cho tập này.</string>
+</resources>
