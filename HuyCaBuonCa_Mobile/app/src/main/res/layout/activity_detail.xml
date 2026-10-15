@@ -50,19 +50,166 @@
             android:textSize="9sp"
             android:textStyle="bold" />
 
-        <!-- Back Button on player -->
+        <!-- Touch surface for gesture controls -->
+        <View
+            android:id="@+id/gestureTouchView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <!-- Gesture HUD Overlay (Volume, Brightness, Seek) -->
+        <LinearLayout
+            android:id="@+id/layoutGestureOverlay"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:background="@drawable/bg_focus_card"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:paddingStart="24dp"
+            android:paddingTop="14dp"
+            android:paddingEnd="24dp"
+            android:paddingBottom="14dp"
+            android:visibility="gone">
+
+            <ImageView
+                android:id="@+id/imgGestureIcon"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:src="@drawable/ic_volume" />
+
+            <TextView
+                android:id="@+id/txtGestureInfo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                tools:text="🔊 Âm lượng: 80%" />
+        </LinearLayout>
+
+        <!-- Top Player Controls Bar (vBook style) -->
+        <LinearLayout
+            android:id="@+id/layoutTopControls"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top"
+            android:background="#66000000"
+            android:elevation="12dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="6dp"
+            android:paddingTop="4dp"
+            android:paddingEnd="6dp"
+            android:paddingBottom="4dp">
+
+            <!-- Back Button -->
+            <ImageButton
+                android:id="@+id/btnPlayerBack"
+                android:layout_width="34dp"
+                android:layout_height="34dp"
+                android:background="@drawable/bg_btn_secondary"
+                android:contentDescription="Quay lại"
+                android:padding="6dp"
+                android:src="@android:drawable/ic_menu_revert" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1" />
+
+            <!-- PiP / Phát trong nền (vBook mode) -->
+            <ImageButton
+                android:id="@+id/btnPip"
+                android:layout_width="34dp"
+                android:layout_height="34dp"
+                android:layout_marginEnd="6dp"
+                android:background="@drawable/bg_btn_secondary"
+                android:contentDescription="Cửa sổ nổi PiP"
+                android:padding="7dp"
+                android:src="@drawable/ic_pip" />
+
+            <!-- Tốc độ phát (Speed) -->
+            <TextView
+                android:id="@+id/btnSpeed"
+                android:layout_width="wrap_content"
+                android:layout_height="34dp"
+                android:layout_marginEnd="6dp"
+                android:background="@drawable/bg_btn_secondary"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:text="1.0x"
+                android:textColor="#FFD700"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+
+            <!-- Tỷ lệ khung hình (Aspect Ratio) -->
+            <ImageButton
+                android:id="@+id/btnAspectRatio"
+                android:layout_width="34dp"
+                android:layout_height="34dp"
+                android:layout_marginEnd="6dp"
+                android:background="@drawable/bg_btn_secondary"
+                android:contentDescription="Tỷ lệ khung hình"
+                android:padding="7dp"
+                android:src="@drawable/ic_aspect_ratio" />
+
+            <!-- Khóa màn hình (Lock) -->
+            <ImageButton
+                android:id="@+id/btnLock"
+                android:layout_width="34dp"
+                android:layout_height="34dp"
+                android:background="@drawable/bg_btn_secondary"
+                android:contentDescription="Khóa màn hình"
+                android:padding="7dp"
+                android:src="@drawable/ic_lock" />
+
+            <!-- Cài đặt chuẩn vBook (Settings) -->
+            <ImageButton
+                android:id="@+id/btnSettings"
+                android:layout_width="34dp"
+                android:layout_height="34dp"
+                android:layout_marginStart="6dp"
+                android:background="@drawable/bg_btn_secondary"
+                android:contentDescription="Cài đặt phát"
+                android:padding="7dp"
+                android:src="@drawable/ic_settings" />
+        </LinearLayout>
+
+        <!-- Unlock button (Only visible when screen is locked) -->
         <ImageButton
-            android:id="@+id/btnPlayerBack"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:layout_margin="8dp"
-            android:background="@drawable/bg_btn_selector"
-            android:contentDescription="Quay lại"
-            android:src="@android:drawable/ic_menu_revert" />
+            android:id="@+id/btnUnlock"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:layout_gravity="start|center_vertical"
+            android:layout_marginStart="16dp"
+            android:background="@drawable/bg_btn_secondary"
+            android:contentDescription="Mở khóa màn hình"
+            android:elevation="12dp"
+            android:padding="10dp"
+            android:src="@drawable/ic_lock_open"
+            android:visibility="gone" />
+
+        <!-- Fullscreen / Landscape Toggle Button -->
+        <ImageButton
+            android:id="@+id/btnFullscreen"
+            android:layout_width="38dp"
+            android:layout_height="38dp"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="10dp"
+            android:background="@drawable/bg_btn_secondary"
+            android:contentDescription="Phóng to toàn màn hình"
+            android:elevation="12dp"
+            android:padding="7dp"
+            android:src="@drawable/ic_fullscreen" />
     </FrameLayout>
 
     <!-- Scrollable content below video player -->
     <androidx.core.widget.NestedScrollView
+        android:id="@+id/scrollDetails"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
@@ -100,27 +247,34 @@
                 android:layout_marginTop="10dp"
                 android:orientation="horizontal">
 
-                <Button
+                <TextView
                     android:id="@+id/btnPrevEpisode"
                     android:layout_width="0dp"
-                    android:layout_height="36dp"
+                    android:layout_height="38dp"
                     android:layout_marginEnd="6dp"
                     android:layout_weight="1"
-                    android:background="@drawable/bg_btn_selector"
+                    android:background="@drawable/bg_btn_secondary"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center"
                     android:text="◄ Tập Trước"
-                    android:textColor="@color/text_primary"
-                    android:textSize="11sp" />
+                    android:textColor="#FFFFFF"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
 
-                <Button
+                <TextView
                     android:id="@+id/btnNextEpisode"
                     android:layout_width="0dp"
-                    android:layout_height="36dp"
+                    android:layout_height="38dp"
                     android:layout_marginStart="6dp"
                     android:layout_weight="1"
-                    android:background="@drawable/bg_btn_selector"
+                    android:background="@drawable/bg_btn_primary"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center"
                     android:text="Tập Tiếp Theo ►"
-                    android:textColor="@color/brand_gold"
-                    android:textSize="11sp"
+                    android:textColor="#0B0E14"
+                    android:textSize="12sp"
                     android:textStyle="bold" />
             </LinearLayout>
 

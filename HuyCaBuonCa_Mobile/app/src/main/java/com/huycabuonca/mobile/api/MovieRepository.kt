@@ -52,18 +52,6 @@ object MovieRepository {
                 FilterItem("Trung Quốc", "https://phimapi.com/v1/api/quoc-gia/trung-quoc"),
                 FilterItem("Âu Mỹ", "https://phimapi.com/v1/api/quoc-gia/au-my")
             )
-            MovieSource.NGUONC -> listOf(
-                FilterItem("Mới Cập Nhật", "https://phim.nguonc.com/api/films/phim-moi-cap-nhat"),
-                FilterItem("Phim Bộ", "https://phim.nguonc.com/api/films/danh-sach/phim-bo"),
-                FilterItem("Phim Lẻ", "https://phim.nguonc.com/api/films/danh-sach/phim-le"),
-                FilterItem("Hoạt Hình", "https://phim.nguonc.com/api/films/danh-sach/hoat-hinh"),
-                FilterItem("Hành Động", "https://phim.nguonc.com/api/films/the-loai/hanh-dong"),
-                FilterItem("Cổ Trang", "https://phim.nguonc.com/api/films/the-loai/co-trang"),
-                FilterItem("Tình Cảm", "https://phim.nguonc.com/api/films/the-loai/tinh-cam"),
-                FilterItem("Trung Quốc", "https://phim.nguonc.com/api/films/quoc-gia/trung-quoc"),
-                FilterItem("Hàn Quốc", "https://phim.nguonc.com/api/films/quoc-gia/han-quoc"),
-                FilterItem("Âu Mỹ", "https://phim.nguonc.com/api/films/quoc-gia/au-my")
-            )
             MovieSource.PHIMFUN -> listOf(
                 FilterItem("Phim Mới", "https://phimfun.net/the-loai/phim-moi-1"),
                 FilterItem("Cập Nhật", "https://phimfun.net/the-loai/phim-cap-nhat-1"),
@@ -86,7 +74,6 @@ object MovieRepository {
             try {
                 when (source) {
                     MovieSource.KKPHIM, MovieSource.ANIMEHAY -> fetchKKPhimList(filterUrl, page, source)
-                    MovieSource.NGUONC -> fetchNguonCList(filterUrl, page)
                     MovieSource.PHIMFUN -> fetchPhimFunList(filterUrl, page)
                 }
             } catch (e: Exception) {
@@ -101,7 +88,6 @@ object MovieRepository {
             try {
                 when (source) {
                     MovieSource.KKPHIM, MovieSource.ANIMEHAY -> fetchKKPhimDetail(slug, source)
-                    MovieSource.NGUONC -> fetchNguonCDetail(slug)
                     MovieSource.PHIMFUN -> fetchPhimFunDetail(slug)
                 }
             } catch (e: Exception) {
@@ -255,99 +241,6 @@ object MovieRepository {
                 quality = movie.getSafeString("quality", "HD"),
                 lang = movie.getSafeString("lang", "Vietsub"),
                 source = source,
-                servers = serverGroups
-            )
-        }
-    }
-
-    // --- NguonC API Handlers ---
-    private fun fetchNguonCList(baseFilterUrl: String, page: Int): List<MovieItem> {
-        val sep = if (baseFilterUrl.contains("?")) "&" else "?"
-        val url = "$baseFilterUrl${sep}page=$page"
-
-        val req = Request.Builder().url(url).header("User-Agent", "Mozilla/5.0").build()
-        client.newCall(req).execute().use { resp ->
-            if (!resp.isSuccessful) return emptyList()
-            val body = resp.body?.string() ?: return emptyList()
-            val root = gson.fromJson(body, JsonObject::class.java)
-            val items = root.getAsJsonArray("items") ?: return emptyList()
-
-            val list = mutableListOf<MovieItem>()
-            items.forEach { el ->
-                if (el.isJsonObject) {
-                    val o = el.asJsonObject
-                    list.add(
-                        MovieItem(
-                            id = o.getSafeString("id"),
-                            name = o.getSafeString("name"),
-                            slug = o.getSafeString("slug"),
-                            originName = o.getSafeString("original_name"),
-                            thumbUrl = o.getSafeString("thumb_url"),
-                            posterUrl = o.getSafeString("poster_url"),
-                            year = o.getSafeString("year"),
-                            quality = o.getSafeString("quality", "HD"),
-                            episodeCurrent = o.getSafeString("current_episode"),
-                            source = MovieSource.NGUONC
-                        )
-                    )
-                }
-            }
-            return list
-        }
-    }
-
-    private fun fetchNguonCDetail(slug: String): MovieDetail? {
-        val url = "https://phim.nguonc.com/api/film/$slug"
-        val req = Request.Builder().url(url).header("User-Agent", "Mozilla/5.0").build()
-        client.newCall(req).execute().use { resp ->
-            if (!resp.isSuccessful) return null
-            val body = resp.body?.string() ?: return null
-            val root = gson.fromJson(body, JsonObject::class.java)
-            val movie = root.getAsJsonObject("movie") ?: return null
-
-            val serverGroups = mutableListOf<ServerGroup>()
-            val episodesArray = movie.getAsJsonArray("episodes")
-            episodesArray?.forEach { sElement ->
-                if (sElement.isJsonObject) {
-                    val sObj = sElement.asJsonObject
-                    val sName = sObj.getSafeString("server_name", "Nguồn C")
-                    val epList = mutableListOf<EpisodeItem>()
-                    val sItems = sObj.getAsJsonArray("items")
-                    sItems?.forEach { epEl ->
-                        if (epEl.isJsonObject) {
-                            val epObj = epEl.asJsonObject
-                            val m3u8 = epObj.getSafeString("m3u8")
-                            val embed = epObj.getSafeString("embed")
-                            epList.add(
-                                EpisodeItem(
-                                    name = epObj.getSafeString("name", "Tập"),
-                                    slug = epObj.getSafeString("slug"),
-                                    filename = "",
-                                    linkM3u8 = m3u8.ifEmpty { null },
-                                    linkEmbed = embed.ifEmpty { null }
-                                )
-                            )
-                        }
-                    }
-                    if (epList.isNotEmpty()) {
-                        serverGroups.add(ServerGroup(serverName = sName, episodes = epList))
-                    }
-                }
-            }
-
-            return MovieDetail(
-                id = movie.getSafeString("id"),
-                name = movie.getSafeString("name"),
-                slug = slug,
-                originName = movie.getSafeString("original_name"),
-                content = movie.getSafeString("description").replace("<[^>]*>".toRegex(), ""),
-                thumbUrl = movie.getSafeString("thumb_url"),
-                posterUrl = movie.getSafeString("poster_url"),
-                year = movie.getSafeString("year"),
-                time = movie.getSafeString("time"),
-                quality = movie.getSafeString("quality", "HD"),
-                lang = movie.getSafeString("language", "Vietsub"),
-                source = MovieSource.NGUONC,
                 servers = serverGroups
             )
         }

@@ -1,17 +1,23 @@
 package com.huycabuonca.mobile.ui
 
 import android.annotation.SuppressLint
+import android.content.pm.ActivityInfo
+import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup
 import android.webkit.WebChromeClient
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import android.widget.Button
 import android.widget.LinearLayout
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
@@ -27,6 +33,7 @@ import com.huycabuonca.mobile.model.MovieDetail
 import com.huycabuonca.mobile.model.MovieItem
 import com.huycabuonca.mobile.model.ServerGroup
 import com.huycabuonca.mobile.ui.adapter.EpisodeAdapter
+import com.huycabuonca.mobile.util.PlayerGestureHelper
 import kotlinx.coroutines.launch
 
 class DetailActivity : AppCompatActivity() {
@@ -40,9 +47,23 @@ class DetailActivity : AppCompatActivity() {
     private var currentServerIndex = 0
     private var currentEpisodeIndex = 0
     private val currentEpisodes = mutableListOf<EpisodeItem>()
+    private var areControlsVisible = true
+    private lateinit var gestureHelper: PlayerGestureHelper
+    private var isScreenLocked = false
+    private var autoNextEpisode = true
+    private var pipOnHome = true
+    private val speeds = listOf(1.0f, 1.25f, 1.5f, 2.0f, 0.75f)
+    private var currentSpeedIndex = 0
+    private var currentResizeModeIndex = 0
+    private val resizeModes = listOf(
+        androidx.media3.ui.AspectRatioFrameLayout.RESIZE_MODE_FIT to "Vừa màn hình (16:9)",
+        androidx.media3.ui.AspectRatioFrameLayout.RESIZE_MODE_ZOOM to "Tràn viền (Cắt viền đen)",
+        androidx.media3.ui.AspectRatioFrameLayout.RESIZE_MODE_FILL to "Kéo giãn toàn màn hình"
+    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         binding = ActivityDetailBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -57,7 +78,68 @@ class DetailActivity : AppCompatActivity() {
     }
 
     private fun setupUI() {
-        binding.btnPlayerBack.setOnClickListener { finish() }
+        binding.btnPlayerBack.setOnClickListener {
+            if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+            } else {
+                finish()
+            }
+        }
+
+        binding.btnFullscreen.setOnClickListener {
+            toggleFullscreen()
+        }
+
+        // Cài đặt chuẩn vBook
+        binding.btnSettings.setOnClickListener {
+            showVBookSettingsDialog()
+        }
+
+        // 1. PiP / Xem trong nền (vBook style)
+        binding.btnPip.setOnClickListener {
+            enterPipMode()
+        }
+
+        // 2. Tốc độ phát (Speed)
+        binding.btnSpeed.setOnClickListener {
+            currentSpeedIndex = (currentSpeedIndex + 1) % speeds.size
+            val speed = speeds[currentSpeedIndex]
+            player?.setPlaybackSpeed(speed)
+            binding.btnSpeed.text = "${speed}x"
+            Toast.makeText(this, "Tốc độ phát: ${speed}x", Toast.LENGTH_SHORT).show()
+        }
+
+        // 3. Tỷ lệ khung hình (Aspect Ratio / Resize Mode)
+        binding.btnAspectRatio.setOnClickListener {
+            currentResizeModeIndex = (currentResizeModeIndex + 1) % resizeModes.size
+            val (mode, label) = resizeModes[currentResizeModeIndex]
+            binding.playerView.resizeMode = mode
+            Toast.makeText(this, "Khung hình: $label", Toast.LENGTH_SHORT).show()
+        }
+
+        // 4. Khóa cảm ứng màn hình (Lock screen)
+        binding.btnLock.setOnClickListener {
+            setScreenLock(true)
+        }
+
+        binding.btnUnlock.setOnClickListener {
+            setScreenLock(false)
+        }
+
+        // 5. Cử chỉ vuốt vBook (Swipe Âm lượng/Độ sáng, Double-tap tua ±10s)
+        gestureHelper = PlayerGestureHelper(
+            activity = this,
+            touchView = binding.gestureTouchView,
+            overlayLayout = binding.layoutGestureOverlay,
+            iconView = binding.imgGestureIcon,
+            infoView = binding.txtGestureInfo,
+            playerGetter = { player },
+            onSingleTap = {
+                if (!isScreenLocked) {
+                    toggleControlsVisibility()
+                }
+            }
+        )
 
         val movie = movieItem!!
         binding.txtDetailTitle.text = movie.name
@@ -93,6 +175,174 @@ class DetailActivity : AppCompatActivity() {
         }
     }
 
+    private fun setScreenLock(locked: Boolean) {
+        isScreenLocked = locked
+        gestureHelper.isLocked = locked
+        if (locked) {
+            binding.layoutTopControls.visibility = View.GONE
+            binding.btnFullscreen.visibility = View.GONE
+            binding.btnUnlock.visibility = View.VISIBLE
+            Toast.makeText(this, "Đã khóa màn hình! Chạm vào icon ổ khóa để mở lại", Toast.LENGTH_SHORT).show()
+        } else {
+            binding.layoutTopControls.visibility = View.VISIBLE
+            binding.btnFullscreen.visibility = View.VISIBLE
+            binding.btnUnlock.visibility = View.GONE
+            Toast.makeText(this, "Đã mở khóa màn hình", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun enterPipMode() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            try {
+                val params = android.app.PictureInPictureParams.Builder()
+                    .setAspectRatio(android.util.Rational(16, 9))
+                    .build()
+                enterPictureInPictureMode(params)
+            } catch (e: Exception) {
+                Toast.makeText(this, "Không thể bật PiP: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+        } else {
+            Toast.makeText(this, "Thiết bị Android cần từ bản 8.0 trở lên để dùng PiP", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    override fun onUserLeaveHint() {
+        super.onUserLeaveHint()
+        if (player?.isPlaying == true && !isInPictureInPictureModeSafely()) {
+            enterPipMode()
+        }
+    }
+
+    private fun isInPictureInPictureModeSafely(): Boolean {
+        return if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+            isInPictureInPictureMode
+        } else false
+    }
+
+    override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean, newConfig: Configuration) {
+        super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
+        if (isInPictureInPictureMode) {
+            binding.layoutTopControls.visibility = View.GONE
+            binding.btnFullscreen.visibility = View.GONE
+            binding.scrollDetails.visibility = View.GONE
+            binding.layoutGestureOverlay.visibility = View.GONE
+            binding.btnUnlock.visibility = View.GONE
+        } else {
+            binding.layoutTopControls.visibility = View.VISIBLE
+            binding.btnFullscreen.visibility = View.VISIBLE
+            updateOrientationUI(resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE)
+        }
+    }
+
+    private fun toggleControlsVisibility() {
+        areControlsVisible = !areControlsVisible
+        val vis = if (areControlsVisible) View.VISIBLE else View.GONE
+        binding.layoutTopControls.visibility = vis
+        binding.btnFullscreen.visibility = vis
+    }
+
+    private fun toggleFullscreen() {
+        val isLandscape = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+        if (isLandscape) {
+            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        } else {
+            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+        }
+    }
+
+    private fun showVBookSettingsDialog() {
+        val dialog = com.google.android.material.bottomsheet.BottomSheetDialog(this)
+        val view = layoutInflater.inflate(R.layout.dialog_vbook_settings, null)
+        dialog.setContentView(view)
+
+        val switchAutoNext = view.findViewById<androidx.appcompat.widget.SwitchCompat>(R.id.switchAutoNext)
+        val switchPipOnHome = view.findViewById<androidx.appcompat.widget.SwitchCompat>(R.id.switchPipOnHome)
+        val rgSeekStep = view.findViewById<android.widget.RadioGroup>(R.id.rgSeekStep)
+        val switchBrightnessGesture = view.findViewById<androidx.appcompat.widget.SwitchCompat>(R.id.switchBrightnessGesture)
+        val switchVolumeGesture = view.findViewById<androidx.appcompat.widget.SwitchCompat>(R.id.switchVolumeGesture)
+        val switchKeepScreenOn = view.findViewById<androidx.appcompat.widget.SwitchCompat>(R.id.switchKeepScreenOn)
+
+        switchAutoNext?.isChecked = autoNextEpisode
+        switchAutoNext?.setOnCheckedChangeListener { _, isChecked -> autoNextEpisode = isChecked }
+
+        switchPipOnHome?.isChecked = pipOnHome
+        switchPipOnHome?.setOnCheckedChangeListener { _, isChecked -> pipOnHome = isChecked }
+
+        when (gestureHelper.seekStepSeconds) {
+            5 -> view.findViewById<android.widget.RadioButton>(R.id.rbSeek5)?.isChecked = true
+            15 -> view.findViewById<android.widget.RadioButton>(R.id.rbSeek15)?.isChecked = true
+            30 -> view.findViewById<android.widget.RadioButton>(R.id.rbSeek30)?.isChecked = true
+            else -> view.findViewById<android.widget.RadioButton>(R.id.rbSeek10)?.isChecked = true
+        }
+
+        rgSeekStep?.setOnCheckedChangeListener { _, checkedId ->
+            gestureHelper.seekStepSeconds = when (checkedId) {
+                R.id.rbSeek5 -> 5
+                R.id.rbSeek15 -> 15
+                R.id.rbSeek30 -> 30
+                else -> 10
+            }
+        }
+
+        switchBrightnessGesture?.isChecked = gestureHelper.isBrightnessGestureEnabled
+        switchBrightnessGesture?.setOnCheckedChangeListener { _, isChecked ->
+            gestureHelper.isBrightnessGestureEnabled = isChecked
+        }
+
+        switchVolumeGesture?.isChecked = gestureHelper.isVolumeGestureEnabled
+        switchVolumeGesture?.setOnCheckedChangeListener { _, isChecked ->
+            gestureHelper.isVolumeGestureEnabled = isChecked
+        }
+
+        switchKeepScreenOn?.isChecked = true
+        switchKeepScreenOn?.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            } else {
+                window.clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            }
+        }
+
+        dialog.show()
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        updateOrientationUI(newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE)
+    }
+
+    private fun updateOrientationUI(isLandscape: Boolean) {
+        val insetsController = WindowCompat.getInsetsController(window, window.decorView)
+        if (isLandscape) {
+            insetsController.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            insetsController.hide(WindowInsetsCompat.Type.systemBars())
+            binding.scrollDetails.visibility = View.GONE
+            binding.layoutPlayerContainer.layoutParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
+            binding.btnFullscreen.setImageResource(R.drawable.ic_fullscreen_exit)
+        } else {
+            insetsController.show(WindowInsetsCompat.Type.systemBars())
+            binding.scrollDetails.visibility = View.VISIBLE
+            val playerHeight = (resources.displayMetrics.widthPixels * 9) / 16
+            binding.layoutPlayerContainer.layoutParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                playerHeight.coerceAtLeast(350)
+            )
+            binding.btnFullscreen.setImageResource(R.drawable.ic_fullscreen)
+        }
+    }
+
+    @Deprecated("Deprecated in Java")
+    override fun onBackPressed() {
+        if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        } else {
+            super.onBackPressed()
+        }
+    }
+
     private fun loadDetail() {
         val movie = movieItem ?: return
         binding.progressEpisodes.visibility = View.VISIBLE
@@ -120,17 +370,24 @@ class DetailActivity : AppCompatActivity() {
         if (servers.isEmpty()) return
 
         servers.forEachIndexed { index, server ->
-            val serverBtn = Button(this).apply {
+            val serverTab = TextView(this).apply {
+                val padH = (16 * resources.displayMetrics.density).toInt()
+                val padV = (8 * resources.displayMetrics.density).toInt()
+                setPadding(padH, padV, padH, padV)
                 layoutParams = LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.WRAP_CONTENT,
-                    resources.getDimensionPixelSize(android.R.dimen.app_icon_size).coerceAtMost(80)
+                    LinearLayout.LayoutParams.WRAP_CONTENT
                 ).apply {
-                    setMargins(0, 0, 12, 0)
+                    setMargins(0, 0, (10 * resources.displayMetrics.density).toInt(), 0)
                 }
                 setBackgroundResource(R.drawable.bg_btn_selector)
                 text = server.serverName
                 setTextColor(Color.WHITE)
-                textSize = 11f
+                textSize = 12f
+                setTypeface(null, android.graphics.Typeface.BOLD)
+                gravity = android.view.Gravity.CENTER
+                isClickable = true
+                isFocusable = true
                 isSelected = (index == 0)
 
                 setOnClickListener {
@@ -141,7 +398,7 @@ class DetailActivity : AppCompatActivity() {
                     switchServer(index)
                 }
             }
-            binding.layoutServers.addView(serverBtn)
+            binding.layoutServers.addView(serverTab)
         }
 
         switchServer(0)
@@ -205,6 +462,14 @@ class DetailActivity : AppCompatActivity() {
                         binding.playerLoading.visibility = View.VISIBLE
                     } else {
                         binding.playerLoading.visibility = View.GONE
+                    }
+
+                    if (playbackState == Player.STATE_ENDED) {
+                        if (autoNextEpisode && currentEpisodeIndex < currentEpisodes.size - 1) {
+                            currentEpisodeIndex++
+                            playEpisode(currentEpisodes[currentEpisodeIndex])
+                            Toast.makeText(this@DetailActivity, "Tự động chuyển sang tập tiếp theo!", Toast.LENGTH_SHORT).show()
+                        }
                     }
                 }
             })

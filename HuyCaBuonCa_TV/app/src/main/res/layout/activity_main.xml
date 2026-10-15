@@ -68,17 +68,6 @@
                     android:textSize="12sp"
                     android:textStyle="bold" />
 
-                <Button
-                    android:id="@+id/btnSourceNguonC"
-                    android:layout_width="wrap_content"
-                    android:layout_height="38dp"
-                    android:layout_marginEnd="8dp"
-                    android:background="@drawable/bg_btn_selector"
-                    android:focusable="true"
-                    android:text="🎬 NguonC (Phim Mới)"
-                    android:textColor="@color/text_primary"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
 
                 <Button
                     android:id="@+id/btnSourcePhimFun"

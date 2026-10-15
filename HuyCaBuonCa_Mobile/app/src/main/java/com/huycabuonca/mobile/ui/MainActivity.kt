@@ -82,7 +82,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupSourceSelectors() {
         binding.btnSourceKKPhim.setOnClickListener { switchSource(MovieSource.KKPHIM, it as Button) }
-        binding.btnSourceNguonC.setOnClickListener { switchSource(MovieSource.NGUONC, it as Button) }
         binding.btnSourcePhimFun.setOnClickListener { switchSource(MovieSource.PHIMFUN, it as Button) }
         binding.btnSourceAnime.setOnClickListener { switchSource(MovieSource.ANIMEHAY, it as Button) }
 
@@ -93,7 +92,6 @@ class MainActivity : AppCompatActivity() {
         if (currentSource == source) return
         currentSource = source
         binding.btnSourceKKPhim.isSelected = false
-        binding.btnSourceNguonC.isSelected = false
         binding.btnSourcePhimFun.isSelected = false
         binding.btnSourceAnime.isSelected = false
         btn.isSelected = true
