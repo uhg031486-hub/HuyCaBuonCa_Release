@@ -1,10 +1,13 @@
 package com.huycabuonca.mobile.ui
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.WebChromeClient
@@ -12,6 +15,7 @@ import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.LinearLayout
+import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -25,6 +29,7 @@ import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.hls.HlsMediaSource
 import androidx.recyclerview.widget.GridLayoutManager
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.huycabuonca.mobile.R
 import com.huycabuonca.mobile.api.MovieRepository
 import com.huycabuonca.mobile.databinding.ActivityDetailBinding
@@ -47,10 +52,46 @@ class DetailActivity : AppCompatActivity() {
     private var currentServerIndex = 0
     private var currentEpisodeIndex = 0
     private val currentEpisodes = mutableListOf<EpisodeItem>()
+
+    // Trạng thái bộ điều khiển (Controls)
     private var areControlsVisible = true
-    private lateinit var gestureHelper: PlayerGestureHelper
     private var isScreenLocked = false
+    private var isUserSeeking = false
+    private var hasResumedPositionForCurrentEpisode = false
+
+    // Bộ hẹn giờ (Handlers)
+    private val mainHandler = Handler(Looper.getMainLooper())
+    private val hideControlsRunnable = Runnable {
+        if (player?.isPlaying == true && !isScreenLocked) {
+            hideControls()
+        }
+    }
+
+    private val updateProgressRunnable = object : Runnable {
+        override fun run() {
+            val p = player
+            if (p != null) {
+                val duration = p.duration.coerceAtLeast(0L)
+                val currentPos = p.currentPosition.coerceAtLeast(0L)
+
+                if (!isUserSeeking && duration > 0) {
+                    binding.videoSeekBar.max = duration.toInt()
+                    binding.videoSeekBar.progress = currentPos.toInt()
+                    binding.txtCurrentTime.text = formatTime(currentPos)
+                    binding.txtTotalDuration.text = formatTime(duration)
+
+                    // Lưu vị trí xem dở (vBook auto resume)
+                    savePlaybackPosition(currentPos)
+                }
+            }
+            mainHandler.postDelayed(this, 500)
+        }
+    }
+
+    // Cài đặt nâng cao chuẩn vBook
+    private lateinit var gestureHelper: PlayerGestureHelper
     private var autoNextEpisode = true
+    private var autoResumePosition = true
     private var pipOnHome = true
     private val speeds = listOf(1.0f, 1.25f, 1.5f, 2.0f, 0.75f)
     private var currentSpeedIndex = 0
@@ -74,73 +115,11 @@ class DetailActivity : AppCompatActivity() {
         }
 
         setupUI()
+        setupPlayerControls()
         loadDetail()
     }
 
     private fun setupUI() {
-        binding.btnPlayerBack.setOnClickListener {
-            if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-            } else {
-                finish()
-            }
-        }
-
-        binding.btnFullscreen.setOnClickListener {
-            toggleFullscreen()
-        }
-
-        // Cài đặt chuẩn vBook
-        binding.btnSettings.setOnClickListener {
-            showVBookSettingsDialog()
-        }
-
-        // 1. PiP / Xem trong nền (vBook style)
-        binding.btnPip.setOnClickListener {
-            enterPipMode()
-        }
-
-        // 2. Tốc độ phát (Speed)
-        binding.btnSpeed.setOnClickListener {
-            currentSpeedIndex = (currentSpeedIndex + 1) % speeds.size
-            val speed = speeds[currentSpeedIndex]
-            player?.setPlaybackSpeed(speed)
-            binding.btnSpeed.text = "${speed}x"
-            Toast.makeText(this, "Tốc độ phát: ${speed}x", Toast.LENGTH_SHORT).show()
-        }
-
-        // 3. Tỷ lệ khung hình (Aspect Ratio / Resize Mode)
-        binding.btnAspectRatio.setOnClickListener {
-            currentResizeModeIndex = (currentResizeModeIndex + 1) % resizeModes.size
-            val (mode, label) = resizeModes[currentResizeModeIndex]
-            binding.playerView.resizeMode = mode
-            Toast.makeText(this, "Khung hình: $label", Toast.LENGTH_SHORT).show()
-        }
-
-        // 4. Khóa cảm ứng màn hình (Lock screen)
-        binding.btnLock.setOnClickListener {
-            setScreenLock(true)
-        }
-
-        binding.btnUnlock.setOnClickListener {
-            setScreenLock(false)
-        }
-
-        // 5. Cử chỉ vuốt vBook (Swipe Âm lượng/Độ sáng, Double-tap tua ±10s)
-        gestureHelper = PlayerGestureHelper(
-            activity = this,
-            touchView = binding.gestureTouchView,
-            overlayLayout = binding.layoutGestureOverlay,
-            iconView = binding.imgGestureIcon,
-            infoView = binding.txtGestureInfo,
-            playerGetter = { player },
-            onSingleTap = {
-                if (!isScreenLocked) {
-                    toggleControlsVisibility()
-                }
-            }
-        )
-
         val movie = movieItem!!
         binding.txtDetailTitle.text = movie.name
         binding.txtDetailMeta.text = "Nguồn: ${movie.source.displayName} • ${movie.year}"
@@ -156,22 +135,213 @@ class DetailActivity : AppCompatActivity() {
         binding.recyclerEpisodes.layoutManager = GridLayoutManager(this, 4)
         binding.recyclerEpisodes.adapter = episodeAdapter
 
-        binding.btnPrevEpisode.setOnClickListener {
-            if (currentEpisodeIndex > 0) {
-                currentEpisodeIndex--
-                playEpisode(currentEpisodes[currentEpisodeIndex])
+        binding.btnPrevEpisode.setOnClickListener { playPreviousEpisode() }
+        binding.btnNextEpisode.setOnClickListener { playNextEpisode() }
+    }
+
+    private fun setupPlayerControls() {
+        // 1. Nút Back
+        binding.btnPlayerBack.setOnClickListener {
+            if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
             } else {
-                Toast.makeText(this, "Đây là tập đầu tiên!", Toast.LENGTH_SHORT).show()
+                finish()
             }
         }
 
-        binding.btnNextEpisode.setOnClickListener {
-            if (currentEpisodeIndex < currentEpisodes.size - 1) {
-                currentEpisodeIndex++
-                playEpisode(currentEpisodes[currentEpisodeIndex])
-            } else {
-                Toast.makeText(this, "Đây là tập cuối cùng!", Toast.LENGTH_SHORT).show()
+        // 2. Chạm vào vùng trống của Overlay để bật/tắt bộ điều khiển
+        binding.layoutPlayerControlsOverlay.setOnClickListener {
+            toggleControlsVisibility()
+        }
+
+        // 3. NÚT PLAY / PAUSE TRUNG TÂM TO RÕ
+        binding.btnCenterPlayPause.setOnClickListener {
+            togglePlayPause()
+        }
+
+        // 4. Nút tua lùi & tua tới 10 giây
+        binding.btnRewind10.setOnClickListener {
+            seekDelta(-10000L)
+        }
+
+        binding.btnForward10.setOnClickListener {
+            seekDelta(10000L)
+        }
+
+        // 5. Nút tập trước / tập sau trên thanh điều khiển
+        binding.btnPrevEpPlayer.setOnClickListener {
+            playPreviousEpisode()
+        }
+
+        binding.btnNextEpPlayer.setOnClickListener {
+            playNextEpisode()
+        }
+
+        // 6. THANH TIẾN TRÌNH SEEKBAR VÀNG KIM (TUA TỚI GIỮA PHIM HOẶC BẤT KỲ ĐOẠN NÀO)
+        binding.videoSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                if (fromUser) {
+                    binding.txtCurrentTime.text = formatTime(progress.toLong())
+                }
             }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {
+                isUserSeeking = true
+                removeAutoHideTimer()
+            }
+
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                val targetPos = seekBar?.progress?.toLong() ?: 0L
+                player?.seekTo(targetPos)
+                isUserSeeking = false
+                resetAutoHideTimer()
+            }
+        })
+
+        // 7. Nút Toàn màn hình / Thu nhỏ
+        binding.btnFullscreen.setOnClickListener {
+            toggleFullscreen()
+        }
+
+        // 8. Nút chọn tập nhanh (BottomSheet chuẩn vBook)
+        binding.btnEpisodeSheet.setOnClickListener {
+            showEpisodesBottomSheet()
+        }
+
+        // 9. Nút Tốc độ phát (Speed)
+        binding.btnSpeed.setOnClickListener {
+            currentSpeedIndex = (currentSpeedIndex + 1) % speeds.size
+            val speed = speeds[currentSpeedIndex]
+            player?.setPlaybackSpeed(speed)
+            binding.btnSpeed.text = "${speed}x"
+            Toast.makeText(this, "Tốc độ phát: ${speed}x", Toast.LENGTH_SHORT).show()
+            resetAutoHideTimer()
+        }
+
+        // 10. Nút Tỷ lệ khung hình (Aspect Ratio / Resize Mode)
+        binding.btnAspectRatio.setOnClickListener {
+            currentResizeModeIndex = (currentResizeModeIndex + 1) % resizeModes.size
+            val (mode, label) = resizeModes[currentResizeModeIndex]
+            binding.playerView.resizeMode = mode
+            Toast.makeText(this, "Khung hình: $label", Toast.LENGTH_SHORT).show()
+            resetAutoHideTimer()
+        }
+
+        // 11. Khóa cảm ứng màn hình (Lock)
+        binding.btnLock.setOnClickListener {
+            setScreenLock(true)
+        }
+
+        binding.btnUnlock.setOnClickListener {
+            setScreenLock(false)
+        }
+
+        // 12. PiP / Phát trong nền (vBook style)
+        binding.btnPip.setOnClickListener {
+            enterPipMode()
+        }
+
+        // 13. Cài đặt phát chuẩn vBook
+        binding.btnSettings.setOnClickListener {
+            showVBookSettingsDialog()
+        }
+
+        // 14. Cử chỉ vuốt âm lượng / độ sáng / double tap
+        gestureHelper = PlayerGestureHelper(
+            activity = this,
+            touchView = binding.gestureTouchView,
+            overlayLayout = binding.layoutGestureOverlay,
+            iconView = binding.imgGestureIcon,
+            infoView = binding.txtGestureInfo,
+            playerGetter = { player },
+            onSingleTap = {
+                if (!isScreenLocked) {
+                    toggleControlsVisibility()
+                }
+            }
+        )
+
+        // Bắt đầu cập nhật SeekBar
+        mainHandler.post(updateProgressRunnable)
+    }
+
+    private fun togglePlayPause() {
+        val p = player ?: return
+        if (p.isPlaying) {
+            p.pause()
+            binding.btnCenterPlayPause.setImageResource(R.drawable.ic_play)
+            removeAutoHideTimer()
+        } else {
+            if (p.playbackState == Player.STATE_ENDED) {
+                p.seekTo(0L)
+            }
+            p.play()
+            binding.btnCenterPlayPause.setImageResource(R.drawable.ic_pause)
+            resetAutoHideTimer()
+        }
+    }
+
+    private fun seekDelta(deltaMs: Long) {
+        val p = player ?: return
+        val current = p.currentPosition
+        val duration = p.duration.coerceAtLeast(0L)
+        val target = if (duration > 0) {
+            (current + deltaMs).coerceIn(0L, duration)
+        } else {
+            (current + deltaMs).coerceAtLeast(0L)
+        }
+        p.seekTo(target)
+        binding.videoSeekBar.progress = target.toInt()
+        binding.txtCurrentTime.text = formatTime(target)
+        resetAutoHideTimer()
+    }
+
+    private fun playPreviousEpisode() {
+        if (currentEpisodeIndex > 0) {
+            currentEpisodeIndex--
+            playEpisode(currentEpisodes[currentEpisodeIndex])
+        } else {
+            Toast.makeText(this, "Đây là tập đầu tiên!", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun playNextEpisode() {
+        if (currentEpisodeIndex < currentEpisodes.size - 1) {
+            currentEpisodeIndex++
+            playEpisode(currentEpisodes[currentEpisodeIndex])
+        } else {
+            Toast.makeText(this, "Đây là tập cuối cùng!", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun resetAutoHideTimer() {
+        mainHandler.removeCallbacks(hideControlsRunnable)
+        if (player?.isPlaying == true && !isScreenLocked) {
+            mainHandler.postDelayed(hideControlsRunnable, 4000)
+        }
+    }
+
+    private fun removeAutoHideTimer() {
+        mainHandler.removeCallbacks(hideControlsRunnable)
+    }
+
+    private fun showControls() {
+        areControlsVisible = true
+        binding.layoutPlayerControlsOverlay.visibility = View.VISIBLE
+        resetAutoHideTimer()
+    }
+
+    private fun hideControls() {
+        areControlsVisible = false
+        binding.layoutPlayerControlsOverlay.visibility = View.GONE
+    }
+
+    private fun toggleControlsVisibility() {
+        if (isScreenLocked) return
+        if (areControlsVisible) {
+            hideControls()
+        } else {
+            showControls()
         }
     }
 
@@ -179,16 +349,40 @@ class DetailActivity : AppCompatActivity() {
         isScreenLocked = locked
         gestureHelper.isLocked = locked
         if (locked) {
-            binding.layoutTopControls.visibility = View.GONE
-            binding.btnFullscreen.visibility = View.GONE
+            hideControls()
             binding.btnUnlock.visibility = View.VISIBLE
-            Toast.makeText(this, "Đã khóa màn hình! Chạm vào icon ổ khóa để mở lại", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Đã khóa màn hình! Chạm icon ổ khóa để mở lại", Toast.LENGTH_SHORT).show()
         } else {
-            binding.layoutTopControls.visibility = View.VISIBLE
-            binding.btnFullscreen.visibility = View.VISIBLE
+            showControls()
             binding.btnUnlock.visibility = View.GONE
             Toast.makeText(this, "Đã mở khóa màn hình", Toast.LENGTH_SHORT).show()
         }
+    }
+
+    private fun showEpisodesBottomSheet() {
+        if (currentEpisodes.isEmpty()) return
+        val dialog = BottomSheetDialog(this)
+        val view = layoutInflater.inflate(R.layout.dialog_episodes_sheet, null)
+        dialog.setContentView(view)
+
+        val txtTitle = view.findViewById<TextView>(R.id.txtSheetTitle)
+        val recycler = view.findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.recyclerSheetEpisodes)
+
+        txtTitle?.text = "Danh sách tập (${currentEpisodes.size} tập)"
+        val sheetAdapter = EpisodeAdapter { episode ->
+            val idx = currentEpisodes.indexOf(episode)
+            if (idx != -1) {
+                currentEpisodeIndex = idx
+            }
+            playEpisode(episode)
+            dialog.dismiss()
+        }
+
+        recycler?.layoutManager = GridLayoutManager(this, 4)
+        recycler?.adapter = sheetAdapter
+        sheetAdapter.submitList(currentEpisodes.toList())
+
+        dialog.show()
     }
 
     private fun enterPipMode() {
@@ -202,13 +396,13 @@ class DetailActivity : AppCompatActivity() {
                 Toast.makeText(this, "Không thể bật PiP: ${e.message}", Toast.LENGTH_SHORT).show()
             }
         } else {
-            Toast.makeText(this, "Thiết bị Android cần từ bản 8.0 trở lên để dùng PiP", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Cần Android 8.0 trở lên để dùng tính năng PiP", Toast.LENGTH_SHORT).show()
         }
     }
 
     override fun onUserLeaveHint() {
         super.onUserLeaveHint()
-        if (player?.isPlaying == true && !isInPictureInPictureModeSafely()) {
+        if (pipOnHome && player?.isPlaying == true && !isInPictureInPictureModeSafely()) {
             enterPipMode()
         }
     }
@@ -222,36 +416,64 @@ class DetailActivity : AppCompatActivity() {
     override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean, newConfig: Configuration) {
         super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
         if (isInPictureInPictureMode) {
-            binding.layoutTopControls.visibility = View.GONE
-            binding.btnFullscreen.visibility = View.GONE
+            hideControls()
             binding.scrollDetails.visibility = View.GONE
             binding.layoutGestureOverlay.visibility = View.GONE
             binding.btnUnlock.visibility = View.GONE
         } else {
-            binding.layoutTopControls.visibility = View.VISIBLE
-            binding.btnFullscreen.visibility = View.VISIBLE
+            showControls()
             updateOrientationUI(resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE)
         }
     }
 
-    private fun toggleControlsVisibility() {
-        areControlsVisible = !areControlsVisible
-        val vis = if (areControlsVisible) View.VISIBLE else View.GONE
-        binding.layoutTopControls.visibility = vis
-        binding.btnFullscreen.visibility = vis
-    }
-
     private fun toggleFullscreen() {
         val isLandscape = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+        requestedOrientation = if (isLandscape) {
+            ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        } else {
+            ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+        }
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        updateOrientationUI(newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE)
+    }
+
+    private fun updateOrientationUI(isLandscape: Boolean) {
+        val insetsController = WindowCompat.getInsetsController(window, window.decorView)
         if (isLandscape) {
+            insetsController.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            insetsController.hide(WindowInsetsCompat.Type.systemBars())
+            binding.scrollDetails.visibility = View.GONE
+            binding.layoutPlayerContainer.layoutParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
+            binding.btnFullscreen.setImageResource(R.drawable.ic_fullscreen_exit)
+        } else {
+            insetsController.show(WindowInsetsCompat.Type.systemBars())
+            binding.scrollDetails.visibility = View.VISIBLE
+            val playerHeight = (resources.displayMetrics.widthPixels * 9) / 16
+            binding.layoutPlayerContainer.layoutParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                playerHeight.coerceAtLeast(350)
+            )
+            binding.btnFullscreen.setImageResource(R.drawable.ic_fullscreen)
+        }
+    }
+
+    @Deprecated("Deprecated in Java")
+    override fun onBackPressed() {
+        if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         } else {
-            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+            super.onBackPressed()
         }
     }
 
     private fun showVBookSettingsDialog() {
-        val dialog = com.google.android.material.bottomsheet.BottomSheetDialog(this)
+        val dialog = BottomSheetDialog(this)
         val view = layoutInflater.inflate(R.layout.dialog_vbook_settings, null)
         dialog.setContentView(view)
 
@@ -304,43 +526,6 @@ class DetailActivity : AppCompatActivity() {
         }
 
         dialog.show()
-    }
-
-    override fun onConfigurationChanged(newConfig: Configuration) {
-        super.onConfigurationChanged(newConfig)
-        updateOrientationUI(newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE)
-    }
-
-    private fun updateOrientationUI(isLandscape: Boolean) {
-        val insetsController = WindowCompat.getInsetsController(window, window.decorView)
-        if (isLandscape) {
-            insetsController.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-            insetsController.hide(WindowInsetsCompat.Type.systemBars())
-            binding.scrollDetails.visibility = View.GONE
-            binding.layoutPlayerContainer.layoutParams = LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT
-            )
-            binding.btnFullscreen.setImageResource(R.drawable.ic_fullscreen_exit)
-        } else {
-            insetsController.show(WindowInsetsCompat.Type.systemBars())
-            binding.scrollDetails.visibility = View.VISIBLE
-            val playerHeight = (resources.displayMetrics.widthPixels * 9) / 16
-            binding.layoutPlayerContainer.layoutParams = LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                playerHeight.coerceAtLeast(350)
-            )
-            binding.btnFullscreen.setImageResource(R.drawable.ic_fullscreen)
-        }
-    }
-
-    @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {
-        if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-        } else {
-            super.onBackPressed()
-        }
     }
 
     private fun loadDetail() {
@@ -428,7 +613,10 @@ class DetailActivity : AppCompatActivity() {
             return
         }
 
-        binding.txtDetailMeta.text = "${movieItem?.name} • Đang phát: ${episode.name}"
+        hasResumedPositionForCurrentEpisode = false
+        val titleText = "${movieItem?.name} • ${episode.name}"
+        binding.txtDetailMeta.text = titleText
+        binding.txtPlayerTitle.text = titleText
 
         val isM3u8 = episode.linkM3u8 != null || streamUrl.contains(".m3u8")
         if (isM3u8) {
@@ -440,13 +628,18 @@ class DetailActivity : AppCompatActivity() {
 
     private fun initExoPlayer(url: String) {
         binding.playerView.visibility = View.VISIBLE
+        binding.gestureTouchView.visibility = View.VISIBLE
         binding.webViewPlayer.visibility = View.GONE
         binding.playerLoading.visibility = View.VISIBLE
 
         player?.release()
 
         val dataSourceFactory = DefaultHttpDataSource.Factory()
-            .setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
+            .setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36")
+            .setDefaultRequestProperties(mapOf(
+                "Referer" to "https://player.phimapi.com/",
+                "Origin" to "https://player.phimapi.com"
+            ))
             .setAllowCrossProtocolRedirects(true)
 
         val mediaSource = HlsMediaSource.Factory(dataSourceFactory)
@@ -457,30 +650,106 @@ class DetailActivity : AppCompatActivity() {
             prepare()
             playWhenReady = true
             addListener(object : Player.Listener {
-                override fun onPlaybackStateChanged(playbackState: Int) {
-                    if (playbackState == Player.STATE_BUFFERING) {
-                        binding.playerLoading.visibility = View.VISIBLE
+                override fun onPlayerError(error: androidx.media3.common.PlaybackException) {
+                    binding.playerLoading.visibility = View.GONE
+                    val ep = currentEpisodes.getOrNull(currentEpisodeIndex)
+                    val embedUrl = ep?.linkEmbed
+                    if (!embedUrl.isNullOrEmpty() && binding.webViewPlayer.visibility != View.VISIBLE) {
+                        Toast.makeText(this@DetailActivity, "M3U8 lỗi phản hồi, đang chuyển sang Server dự phòng...", Toast.LENGTH_SHORT).show()
+                        initWebViewPlayer(embedUrl)
                     } else {
-                        binding.playerLoading.visibility = View.GONE
+                        Toast.makeText(this@DetailActivity, "Tập phim này nguồn phát đang bảo trì. Vui lòng thử tập hoặc phim khác!", Toast.LENGTH_LONG).show()
                     }
+                }
 
-                    if (playbackState == Player.STATE_ENDED) {
-                        if (autoNextEpisode && currentEpisodeIndex < currentEpisodes.size - 1) {
-                            currentEpisodeIndex++
-                            playEpisode(currentEpisodes[currentEpisodeIndex])
-                            Toast.makeText(this@DetailActivity, "Tự động chuyển sang tập tiếp theo!", Toast.LENGTH_SHORT).show()
+                override fun onPlaybackStateChanged(playbackState: Int) {
+                    when (playbackState) {
+                        Player.STATE_BUFFERING -> {
+                            binding.playerLoading.visibility = View.VISIBLE
                         }
+                        Player.STATE_READY -> {
+                            binding.playerLoading.visibility = View.GONE
+                            // Tự động tua tiếp từ vị trí trước (vBook auto resume)
+                            if (autoResumePosition && !hasResumedPositionForCurrentEpisode) {
+                                hasResumedPositionForCurrentEpisode = true
+                                val savedPos = getSavedPlaybackPosition()
+                                val dur = duration
+                                if (savedPos > 5000L && (dur <= 0L || savedPos < dur - 10000L)) {
+                                    seekTo(savedPos)
+                                    Toast.makeText(
+                                        this@DetailActivity,
+                                        "Tiếp tục phát từ ${formatTime(savedPos)}",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                            }
+                        }
+                        Player.STATE_ENDED -> {
+                            binding.playerLoading.visibility = View.GONE
+                            binding.btnCenterPlayPause.setImageResource(R.drawable.ic_play)
+                            showControls()
+                            if (autoNextEpisode && currentEpisodeIndex < currentEpisodes.size - 1) {
+                                currentEpisodeIndex++
+                                playEpisode(currentEpisodes[currentEpisodeIndex])
+                                Toast.makeText(this@DetailActivity, "Tự động chuyển sang tập tiếp theo!", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                        else -> {
+                            binding.playerLoading.visibility = View.GONE
+                        }
+                    }
+                }
+
+                override fun onIsPlayingChanged(isPlaying: Boolean) {
+                    if (isPlaying) {
+                        binding.btnCenterPlayPause.setImageResource(R.drawable.ic_pause)
+                        resetAutoHideTimer()
+                    } else {
+                        binding.btnCenterPlayPause.setImageResource(R.drawable.ic_play)
+                        showControls()
                     }
                 }
             })
         }
         binding.playerView.player = player
+        showControls()
+    }
+
+    private fun savePlaybackPosition(pos: Long) {
+        val movie = movieItem ?: return
+        val ep = currentEpisodes.getOrNull(currentEpisodeIndex) ?: return
+        if (pos > 5000L) {
+            val sp = getSharedPreferences("vbook_playback_prefs", Context.MODE_PRIVATE)
+            sp.edit().putLong("resume_${movie.slug}_ep_${ep.slug}", pos).apply()
+        }
+    }
+
+    private fun getSavedPlaybackPosition(): Long {
+        val movie = movieItem ?: return 0L
+        val ep = currentEpisodes.getOrNull(currentEpisodeIndex) ?: return 0L
+        val sp = getSharedPreferences("vbook_playback_prefs", Context.MODE_PRIVATE)
+        return sp.getLong("resume_${movie.slug}_ep_${ep.slug}", 0L)
+    }
+
+    private fun formatTime(millis: Long): String {
+        if (millis <= 0) return "00:00"
+        val totalSeconds = millis / 1000
+        val seconds = totalSeconds % 60
+        val minutes = (totalSeconds / 60) % 60
+        val hours = totalSeconds / 3600
+        return if (hours > 0) {
+            String.format("%02d:%02d:%02d", hours, minutes, seconds)
+        } else {
+            String.format("%02d:%02d", minutes, seconds)
+        }
     }
 
     @SuppressLint("SetJavaScriptEnabled")
     private fun initWebViewPlayer(url: String) {
         player?.pause()
         binding.playerView.visibility = View.GONE
+        binding.gestureTouchView.visibility = View.GONE
+        binding.layoutPlayerControlsOverlay.visibility = View.GONE
         binding.webViewPlayer.visibility = View.VISIBLE
         binding.playerLoading.visibility = View.VISIBLE
 
@@ -508,6 +777,7 @@ class DetailActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        mainHandler.removeCallbacksAndMessages(null)
         player?.release()
         player = null
         binding.webViewPlayer.destroy()

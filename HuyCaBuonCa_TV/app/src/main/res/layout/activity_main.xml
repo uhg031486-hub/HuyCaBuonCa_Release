@@ -68,26 +68,13 @@
                     android:textSize="12sp"
                     android:textStyle="bold" />
 
-
                 <Button
-                    android:id="@+id/btnSourcePhimFun"
-                    android:layout_width="wrap_content"
-                    android:layout_height="38dp"
-                    android:layout_marginEnd="8dp"
-                    android:background="@drawable/bg_btn_selector"
-                    android:focusable="true"
-                    android:text="🌐 PhimFun (Nhóm 2)"
-                    android:textColor="@color/text_primary"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
-
-                <Button
-                    android:id="@+id/btnSourceAnime"
+                    android:id="@+id/btnSourceOther"
                     android:layout_width="wrap_content"
                     android:layout_height="38dp"
                     android:background="@drawable/bg_btn_selector"
                     android:focusable="true"
-                    android:text="⛩️ AnimeHay (Hoạt Hình)"
+                    android:text="🌐 NGUỒN KHÁC (NHÓM 2) ▼"
                     android:textColor="@color/text_primary"
                     android:textSize="12sp"
                     android:textStyle="bold" />

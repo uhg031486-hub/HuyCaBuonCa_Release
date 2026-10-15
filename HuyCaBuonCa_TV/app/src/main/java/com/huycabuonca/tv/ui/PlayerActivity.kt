@@ -57,7 +57,11 @@ class PlayerActivity : AppCompatActivity() {
         binding.playerProgress.visibility = View.VISIBLE
 
         val dataSourceFactory = DefaultHttpDataSource.Factory()
-            .setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
+            .setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36")
+            .setDefaultRequestProperties(mapOf(
+                "Referer" to "https://player.phimapi.com/",
+                "Origin" to "https://player.phimapi.com"
+            ))
             .setAllowCrossProtocolRedirects(true)
 
         val mediaSource = HlsMediaSource.Factory(dataSourceFactory)
@@ -68,6 +72,14 @@ class PlayerActivity : AppCompatActivity() {
             prepare()
             playWhenReady = true
             addListener(object : Player.Listener {
+                override fun onPlayerError(error: androidx.media3.common.PlaybackException) {
+                    binding.playerProgress.visibility = View.GONE
+                    val embedUrl = intent.getStringExtra("EXTRA_EMBED_URL")
+                    if (!embedUrl.isNullOrEmpty() && binding.webViewPlayer.visibility != View.VISIBLE) {
+                        initWebViewPlayer(embedUrl)
+                    }
+                }
+
                 override fun onPlaybackStateChanged(playbackState: Int) {
                     if (playbackState == Player.STATE_BUFFERING) {
                         binding.playerProgress.visibility = View.VISIBLE
@@ -82,6 +94,7 @@ class PlayerActivity : AppCompatActivity() {
 
     @SuppressLint("SetJavaScriptEnabled")
     private fun initWebViewPlayer(url: String) {
+        player?.pause()
         binding.playerView.visibility = View.GONE
         binding.webViewPlayer.visibility = View.VISIBLE
 
@@ -119,7 +132,14 @@ class PlayerActivity : AppCompatActivity() {
                     return true
                 }
                 KeyEvent.KEYCODE_DPAD_CENTER, KeyEvent.KEYCODE_ENTER -> {
-                    if (p.isPlaying) p.pause() else p.play()
+                    if (p.isPlaying) {
+                        p.pause()
+                    } else {
+                        if (p.playbackState == Player.STATE_ENDED) {
+                            p.seekTo(0L)
+                        }
+                        p.play()
+                    }
                     return true
                 }
                 else -> {}

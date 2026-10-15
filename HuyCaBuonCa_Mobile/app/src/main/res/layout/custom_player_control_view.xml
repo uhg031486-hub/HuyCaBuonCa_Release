@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#44000000">
+
+    <!-- TOP BAR: Controls & Tiêu đề -->
+    <LinearLayout
+        android:id="@+id/layoutTopBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top"
+        android:background="#88000000"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="8dp"
+        android:paddingTop="6dp"
+        android:paddingEnd="8dp"
+        android:paddingBottom="6dp">
+
+        <!-- Nút Back -->
+        <ImageButton
+            android:id="@+id/btnPlayerBack"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:background="@drawable/bg_btn_secondary"
+            android:contentDescription="Quay lại"
+            android:padding="6dp"
+            android:src="@android:drawable/ic_menu_revert" />
+
+        <TextView
+            android:id="@+id/txtPlayerTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_weight="1"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="#FFFFFF"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            tools:text="Tên phim đang phát • Tập 01" />
+
+        <!-- Nút PiP (Phát trong nền) -->
+        <ImageButton
+            android:id="@+id/btnPip"
+            android:layout_width="34dp"
+            android:layout_height="34dp"
+            android:layout_marginEnd="6dp"
+            android:background="@drawable/bg_btn_secondary"
+            android:contentDescription="Phát trong nền"
+            android:padding="7dp"
+            android:src="@drawable/ic_pip" />
+
+        <!-- Nút Tốc độ phát -->
+        <TextView
+            android:id="@+id/btnSpeed"
+            android:layout_width="wrap_content"
+            android:layout_height="34dp"
+            android:layout_marginEnd="6dp"
+            android:background="@drawable/bg_btn_secondary"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:text="1.0x"
+            android:textColor="#FFD700"
+            android:textSize="11sp"
+            android:textStyle="bold" />
+
+        <!-- Nút Tỷ lệ màn hình -->
+        <ImageButton
+            android:id="@+id/btnAspectRatio"
+            android:layout_width="34dp"
+            android:layout_height="34dp"
+            android:layout_marginEnd="6dp"
+            android:background="@drawable/bg_btn_secondary"
+            android:contentDescription="Tỷ lệ khung hình"
+            android:padding="7dp"
+            android:src="@drawable/ic_aspect_ratio" />
+
+        <!-- Nút Khóa màn hình -->
+        <ImageButton
+            android:id="@+id/btnLock"
+            android:layout_width="34dp"
+            android:layout_height="34dp"
+            android:layout_marginEnd="6dp"
+            android:background="@drawable/bg_btn_secondary"
+            android:contentDescription="Khóa màn hình"
+            android:padding="7dp"
+            android:src="@drawable/ic_lock" />
+
+        <!-- Nút Cài đặt chuẩn vBook -->
+        <ImageButton
+            android:id="@+id/btnSettings"
+            android:layout_width="34dp"
+            android:layout_height="34dp"
+            android:background="@drawable/bg_btn_secondary"
+            android:contentDescription="Cài đặt phát"
+            android:padding="7dp"
+            android:src="@drawable/ic_settings" />
+    </LinearLayout>
+
+    <!-- CENTER CONTROLS: Tua lùi 10s | PLAY / PAUSE | Tua tới 10s -->
+    <LinearLayout
+        android:id="@+id/layoutCenterControls"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <!-- Nút Tua lùi 10s chuẩn Media3 -->
+        <ImageButton
+            android:id="@id/exo_rew"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginEnd="28dp"
+            android:background="@drawable/bg_btn_secondary"
+            android:contentDescription="Tua lùi 10s"
+            android:padding="10dp"
+            android:src="@drawable/ic_seek_rewind" />
+
+        <!-- Nút PLAY / PAUSE chuẩn Media3 (Tự động chuyển Play <-> Pause 100%) -->
+        <ImageButton
+            android:id="@id/exo_play_pause"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:background="@drawable/bg_btn_primary"
+            android:contentDescription="Phát / Tạm dừng"
+            android:padding="14dp"
+            android:src="@drawable/ic_play" />
+
+        <!-- Nút Tua tới 10s chuẩn Media3 -->
+        <ImageButton
+            android:id="@id/exo_ffwd"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="28dp"
+            android:background="@drawable/bg_btn_secondary"
+            android:contentDescription="Tua tới 10s"
+            android:padding="10dp"
+            android:src="@drawable/ic_seek_forward" />
+    </LinearLayout>
+
+    <!-- BOTTOM BAR: Thời gian | Thanh Tua Siêu Mượt TimeBar | Thời lượng | Fullscreen -->
+    <LinearLayout
+        android:id="@+id/layoutBottomBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:background="#88000000"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="12dp"
+        android:paddingTop="6dp"
+        android:paddingEnd="12dp"
+        android:paddingBottom="6dp">
+
+        <!-- Thời gian hiện tại chuẩn Media3 -->
+        <TextView
+            android:id="@id/exo_position"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#FFFFFF"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            tools:text="00:15" />
+
+        <!-- Thanh Timeline / TimeBar chuẩn Media3 (Kéo tua mượt đến bất kỳ đoạn nào) -->
+        <androidx.media3.ui.DefaultTimeBar
+            android:id="@id/exo_progress"
+            android:layout_width="0dp"
+            android:layout_height="28dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_weight="1"
+            app:bar_height="3dp"
+            app:buffered_color="#66FFFFFF"
+            app:played_color="#FFD700"
+            app:scrubber_color="#FFD700"
+            app:scrubber_dragged_size="16dp"
+            app:scrubber_enabled_size="10dp"
+            app:unplayed_color="#33FFFFFF" />
+
+        <!-- Tổng thời lượng chuẩn Media3 -->
+        <TextView
+            android:id="@id/exo_duration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#B0B8C4"
+            android:textSize="11sp"
+            tools:text="45:20" />
+
+        <!-- Nút Phóng to / Xoay ngang toàn màn hình -->
+        <ImageButton
+            android:id="@+id/btnFullscreen"
+            android:layout_width="34dp"
+            android:layout_height="34dp"
+            android:layout_marginStart="10dp"
+            android:background="@drawable/bg_btn_secondary"
+            android:contentDescription="Toàn màn hình"
+            android:padding="6dp"
+            android:src="@drawable/ic_fullscreen" />
+    </LinearLayout>
+
+</FrameLayout>

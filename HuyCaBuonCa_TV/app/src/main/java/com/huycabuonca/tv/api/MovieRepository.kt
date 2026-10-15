@@ -1,7 +1,6 @@
 package com.huycabuonca.tv.api
 
 import com.google.gson.Gson
-import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.huycabuonca.tv.model.*
 import kotlinx.coroutines.Dispatchers
@@ -10,7 +9,6 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.net.URLEncoder
 import java.util.concurrent.TimeUnit
-import java.util.regex.Pattern
 
 object MovieRepository {
 
@@ -22,7 +20,6 @@ object MovieRepository {
     private val gson = Gson()
     private const val KKPHIM_IMG_BASE = "https://phimimg.com/"
 
-    // Extension to safely get String from JsonObject without throwing on JsonNull
     private fun JsonObject.getSafeString(key: String, default: String = ""): String {
         if (!has(key)) return default
         val el = get(key)
@@ -52,19 +49,12 @@ object MovieRepository {
                 FilterItem("Trung Quốc", "https://phimapi.com/v1/api/quoc-gia/trung-quoc"),
                 FilterItem("Âu Mỹ", "https://phimapi.com/v1/api/quoc-gia/au-my")
             )
-            MovieSource.PHIMFUN -> listOf(
-                FilterItem("Phim Mới", "https://phimfun.net/the-loai/phim-moi-1"),
-                FilterItem("Cập Nhật", "https://phimfun.net/the-loai/phim-cap-nhat-1"),
-                FilterItem("Phim Bộ", "https://phimfun.net/the-loai/phim-bo-1"),
-                FilterItem("Phim Lẻ", "https://phimfun.net/the-loai/phim-le-1"),
-                FilterItem("Chiếu Rạp", "https://phimfun.net/the-loai/phim-chieu-rap-1"),
-                FilterItem("Hoạt Hình", "https://phimfun.net/the-loai/hoat-hinh-1")
-            )
             MovieSource.ANIMEHAY -> listOf(
-                FilterItem("Anime Mới", "https://phimapi.com/v1/api/danh-sach/hoat-hinh"),
-                FilterItem("3D Trung Quốc", "https://phimapi.com/v1/api/the-loai/than-thoai"),
-                FilterItem("Hành Động Anime", "https://phimapi.com/v1/api/the-loai/hanh-dong"),
-                FilterItem("Học Đường Anime", "https://phimapi.com/v1/api/the-loai/hoc-duong")
+                FilterItem("Anime Mới Cập Nhật", "https://phimapi.com/v1/api/danh-sach/hoat-hinh"),
+                FilterItem("Anime Hành Động", "https://phimapi.com/v1/api/the-loai/hanh-dong"),
+                FilterItem("Anime Thần Thoại", "https://phimapi.com/v1/api/the-loai/than-thoai"),
+                FilterItem("Anime Học Đường", "https://phimapi.com/v1/api/the-loai/hoc-duong"),
+                FilterItem("Anime Viễn Tưởng", "https://phimapi.com/v1/api/the-loai/vien-tuong")
             )
         }
     }
@@ -72,10 +62,7 @@ object MovieRepository {
     suspend fun getMovies(source: MovieSource, filterUrl: String, page: Int = 1): List<MovieItem> {
         return withContext(Dispatchers.IO) {
             try {
-                when (source) {
-                    MovieSource.KKPHIM, MovieSource.ANIMEHAY -> fetchKKPhimList(filterUrl, page, source)
-                    MovieSource.PHIMFUN -> fetchPhimFunList(filterUrl, page)
-                }
+                fetchKKPhimList(filterUrl, page, source)
             } catch (e: Exception) {
                 e.printStackTrace()
                 emptyList()
@@ -86,10 +73,7 @@ object MovieRepository {
     suspend fun getMovieDetail(source: MovieSource, slug: String): MovieDetail? {
         return withContext(Dispatchers.IO) {
             try {
-                when (source) {
-                    MovieSource.KKPHIM, MovieSource.ANIMEHAY -> fetchKKPhimDetail(slug, source)
-                    MovieSource.PHIMFUN -> fetchPhimFunDetail(slug)
-                }
+                fetchKKPhimDetail(slug, source)
             } catch (e: Exception) {
                 e.printStackTrace()
                 null
@@ -138,7 +122,7 @@ object MovieRepository {
         }
     }
 
-    // --- KKPhim API Handlers (Safe parser) ---
+    // --- API Handlers (HLS VIP) ---
     private fun fetchKKPhimList(baseFilterUrl: String, page: Int, source: MovieSource): List<MovieItem> {
         val sep = if (baseFilterUrl.contains("?")) "&" else "?"
         val url = "$baseFilterUrl${sep}page=$page"
@@ -242,100 +226,6 @@ object MovieRepository {
                 lang = movie.getSafeString("lang", "Vietsub"),
                 source = source,
                 servers = serverGroups
-            )
-        }
-    }
-
-    // --- PhimFun Web Handlers ---
-    private fun fetchPhimFunList(baseFilterUrl: String, page: Int): List<MovieItem> {
-        val requestUrl = baseFilterUrl.replace(Regex("-\\d+$"), "-$page")
-        val req = Request.Builder().url(requestUrl)
-            .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
-            .build()
-        client.newCall(req).execute().use { resp ->
-            if (!resp.isSuccessful) return emptyList()
-            val html = resp.body?.string() ?: return emptyList()
-
-            val pattern = Pattern.compile(
-                "<a href=\"(/phim/[^\"]+)\".*?<img.*?src=\"([^\"]+)\".*?<h3 class=\"Title\">([^<]+)</h3>",
-                Pattern.DOTALL
-            )
-            val matcher = pattern.matcher(html)
-            val list = mutableListOf<MovieItem>()
-            while (matcher.find()) {
-                val link = matcher.group(1) ?: ""
-                val img = matcher.group(2) ?: ""
-                val title = matcher.group(3) ?: ""
-                val fullImg = if (img.startsWith("http")) img else "https://phimfun.net$img"
-                val slug = link.substringAfter("/phim/")
-
-                list.add(
-                    MovieItem(
-                        id = slug,
-                        name = android.text.Html.fromHtml(title).toString(),
-                        slug = slug,
-                        originName = "",
-                        thumbUrl = fullImg,
-                        posterUrl = fullImg,
-                        year = "",
-                        quality = "Full HD",
-                        episodeCurrent = "",
-                        source = MovieSource.PHIMFUN
-                    )
-                )
-            }
-            return list
-        }
-    }
-
-    private fun fetchPhimFunDetail(slug: String): MovieDetail? {
-        val watchUrl = "https://phimfun.net/xem-phim/$slug"
-        val req = Request.Builder().url(watchUrl)
-            .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
-            .build()
-        client.newCall(req).execute().use { resp ->
-            if (!resp.isSuccessful) return null
-            val html = resp.body?.string() ?: return null
-
-            // Extract episodes
-            val epPattern = Pattern.compile("<a\\s+href=\"([^\"]+)\"[^>]*>([^<]+)</a>")
-            val epMatcher = epPattern.matcher(html)
-            val episodes = mutableListOf<EpisodeItem>()
-
-            while (epMatcher.find()) {
-                val href = epMatcher.group(1) ?: ""
-                val name = epMatcher.group(2)?.trim() ?: ""
-                if (href.contains("/xem-phim/")) {
-                    val fullUrl = if (href.startsWith("http")) href else "https://phimfun.net$href"
-                    episodes.add(
-                        EpisodeItem(
-                            name = name,
-                            slug = href,
-                            linkEmbed = fullUrl
-                        )
-                    )
-                }
-            }
-
-            if (episodes.isEmpty()) {
-                episodes.add(
-                    EpisodeItem(
-                        name = "Xem Phim",
-                        slug = slug,
-                        linkEmbed = watchUrl
-                    )
-                )
-            }
-
-            return MovieDetail(
-                id = slug,
-                name = slug.replace("-", " ").capitalize(),
-                slug = slug,
-                content = "Xem phim trực tuyến chất lượng cao trên PhimFun",
-                thumbUrl = "",
-                posterUrl = "",
-                source = MovieSource.PHIMFUN,
-                servers = listOf(ServerGroup("Server PhimFun", episodes))
             )
         }
     }

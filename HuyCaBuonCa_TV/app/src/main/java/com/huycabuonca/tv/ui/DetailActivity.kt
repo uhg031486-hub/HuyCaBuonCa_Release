@@ -107,6 +107,7 @@ class DetailActivity : AppCompatActivity() {
 
         val intent = Intent(this, PlayerActivity::class.java).apply {
             putExtra("EXTRA_STREAM_URL", streamUrl)
+            putExtra("EXTRA_EMBED_URL", episode.linkEmbed)
             putExtra("EXTRA_IS_M3U8", episode.linkM3u8 != null)
             putExtra("EXTRA_TITLE", movieItem?.name ?: "Xem Phim")
             putExtra("EXTRA_EPISODE", episode.name)

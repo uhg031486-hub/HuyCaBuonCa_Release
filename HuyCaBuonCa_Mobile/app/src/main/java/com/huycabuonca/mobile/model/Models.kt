@@ -4,8 +4,7 @@ import java.io.Serializable
 
 enum class MovieSource(val displayName: String) {
     KKPHIM("KKPhim (HLS VIP)"),
-    PHIMFUN("PhimFun (Web Phim - Nhóm 2)"),
-    ANIMEHAY("AnimeHay (Hoạt Hình - Nhóm 2)")
+    ANIMEHAY("AnimeHay (Hoạt Hình Anime)")
 }
 
 data class FilterItem(

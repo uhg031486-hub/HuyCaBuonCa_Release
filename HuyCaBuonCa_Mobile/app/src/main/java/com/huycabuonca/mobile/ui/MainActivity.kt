@@ -81,20 +81,39 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupSourceSelectors() {
-        binding.btnSourceKKPhim.setOnClickListener { switchSource(MovieSource.KKPHIM, it as Button) }
-        binding.btnSourcePhimFun.setOnClickListener { switchSource(MovieSource.PHIMFUN, it as Button) }
-        binding.btnSourceAnime.setOnClickListener { switchSource(MovieSource.ANIMEHAY, it as Button) }
+        binding.btnSourceKKPhim.setOnClickListener {
+            binding.btnSourceOther.text = "🌐 NGUỒN KHÁC (NHÓM 2) ▼"
+            switchSource(MovieSource.KKPHIM)
+        }
+
+        binding.btnSourceOther.setOnClickListener {
+            showOtherSourcesPopup(it)
+        }
 
         binding.btnSourceKKPhim.isSelected = true
     }
 
-    private fun switchSource(source: MovieSource, btn: Button) {
+    private fun showOtherSourcesPopup(anchor: View) {
+        val popup = androidx.appcompat.widget.PopupMenu(this, anchor)
+        popup.menu.add(0, 1, 0, "⛩️ AnimeHay (Hoạt Hình Anime)")
+        popup.setOnMenuItemClickListener { item ->
+            when (item.itemId) {
+                1 -> {
+                    binding.btnSourceOther.text = "⛩️ AnimeHay (Nhóm 2) ▼"
+                    switchSource(MovieSource.ANIMEHAY)
+                    true
+                }
+                else -> false
+            }
+        }
+        popup.show()
+    }
+
+    private fun switchSource(source: MovieSource) {
         if (currentSource == source) return
         currentSource = source
-        binding.btnSourceKKPhim.isSelected = false
-        binding.btnSourcePhimFun.isSelected = false
-        binding.btnSourceAnime.isSelected = false
-        btn.isSelected = true
+        binding.btnSourceKKPhim.isSelected = (source == MovieSource.KKPHIM)
+        binding.btnSourceOther.isSelected = (source != MovieSource.KKPHIM)
 
         updateDynamicFilters()
         loadMovies(reset = true)

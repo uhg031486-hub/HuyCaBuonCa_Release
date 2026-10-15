@@ -18,8 +18,8 @@
             android:id="@+id/playerView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:show_buffering="when_playing"
-            app:use_controller="true" />
+            app:show_buffering="never"
+            app:use_controller="false" />
 
         <WebView
             android:id="@+id/webViewPlayer"
@@ -27,11 +27,18 @@
             android:layout_height="match_parent"
             android:visibility="gone" />
 
+        <!-- Touch surface for gesture controls (bắt cử chỉ vuốt) -->
+        <View
+            android:id="@+id/gestureTouchView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
         <ProgressBar
             android:id="@+id/playerLoading"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="52dp"
+            android:layout_height="52dp"
             android:layout_gravity="center"
+            android:indeterminateTint="#FFD700"
             android:visibility="gone" />
 
         <!-- Watermark -->
@@ -49,12 +56,6 @@
             android:textColor="#000000"
             android:textSize="9sp"
             android:textStyle="bold" />
-
-        <!-- Touch surface for gesture controls -->
-        <View
-            android:id="@+id/gestureTouchView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
 
         <!-- Gesture HUD Overlay (Volume, Brightness, Seek) -->
         <LinearLayout
@@ -88,98 +89,243 @@
                 tools:text="🔊 Âm lượng: 80%" />
         </LinearLayout>
 
-        <!-- Top Player Controls Bar (vBook style) -->
-        <LinearLayout
-            android:id="@+id/layoutTopControls"
+        <!-- TOÀN BỘ BỘ ĐIỀU KHIỂN CHUYÊN NGHIỆP (CONTROLS OVERLAY) -->
+        <FrameLayout
+            android:id="@+id/layoutPlayerControlsOverlay"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="top"
-            android:background="#66000000"
-            android:elevation="12dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingStart="6dp"
-            android:paddingTop="4dp"
-            android:paddingEnd="6dp"
-            android:paddingBottom="4dp">
+            android:layout_height="match_parent"
+            android:background="#44000000">
 
-            <!-- Back Button -->
-            <ImageButton
-                android:id="@+id/btnPlayerBack"
-                android:layout_width="34dp"
-                android:layout_height="34dp"
-                android:background="@drawable/bg_btn_secondary"
-                android:contentDescription="Quay lại"
-                android:padding="6dp"
-                android:src="@android:drawable/ic_menu_revert" />
-
-            <View
-                android:layout_width="0dp"
-                android:layout_height="1dp"
-                android:layout_weight="1" />
-
-            <!-- PiP / Phát trong nền (vBook mode) -->
-            <ImageButton
-                android:id="@+id/btnPip"
-                android:layout_width="34dp"
-                android:layout_height="34dp"
-                android:layout_marginEnd="6dp"
-                android:background="@drawable/bg_btn_secondary"
-                android:contentDescription="Cửa sổ nổi PiP"
-                android:padding="7dp"
-                android:src="@drawable/ic_pip" />
-
-            <!-- Tốc độ phát (Speed) -->
-            <TextView
-                android:id="@+id/btnSpeed"
-                android:layout_width="wrap_content"
-                android:layout_height="34dp"
-                android:layout_marginEnd="6dp"
-                android:background="@drawable/bg_btn_secondary"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center"
+            <!-- TOP CONTROLS BAR -->
+            <LinearLayout
+                android:id="@+id/layoutTopControls"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top"
+                android:background="#99000000"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
                 android:paddingStart="8dp"
+                android:paddingTop="4dp"
                 android:paddingEnd="8dp"
-                android:text="1.0x"
-                android:textColor="#FFD700"
-                android:textSize="11sp"
-                android:textStyle="bold" />
+                android:paddingBottom="4dp">
 
-            <!-- Tỷ lệ khung hình (Aspect Ratio) -->
-            <ImageButton
-                android:id="@+id/btnAspectRatio"
-                android:layout_width="34dp"
-                android:layout_height="34dp"
-                android:layout_marginEnd="6dp"
-                android:background="@drawable/bg_btn_secondary"
-                android:contentDescription="Tỷ lệ khung hình"
-                android:padding="7dp"
-                android:src="@drawable/ic_aspect_ratio" />
+                <ImageButton
+                    android:id="@+id/btnPlayerBack"
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:background="@drawable/bg_btn_secondary"
+                    android:contentDescription="Quay lại"
+                    android:padding="6dp"
+                    android:src="@android:drawable/ic_menu_revert" />
 
-            <!-- Khóa màn hình (Lock) -->
-            <ImageButton
-                android:id="@+id/btnLock"
-                android:layout_width="34dp"
-                android:layout_height="34dp"
-                android:background="@drawable/bg_btn_secondary"
-                android:contentDescription="Khóa màn hình"
-                android:padding="7dp"
-                android:src="@drawable/ic_lock" />
+                <TextView
+                    android:id="@+id/txtPlayerTitle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp"
+                    android:layout_weight="1"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:textColor="#FFFFFF"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    tools:text="Tên Phim • Tập 01" />
 
-            <!-- Cài đặt chuẩn vBook (Settings) -->
-            <ImageButton
-                android:id="@+id/btnSettings"
-                android:layout_width="34dp"
-                android:layout_height="34dp"
-                android:layout_marginStart="6dp"
-                android:background="@drawable/bg_btn_secondary"
-                android:contentDescription="Cài đặt phát"
-                android:padding="7dp"
-                android:src="@drawable/ic_settings" />
-        </LinearLayout>
+                <ImageButton
+                    android:id="@+id/btnPip"
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:layout_marginEnd="6dp"
+                    android:background="@drawable/bg_btn_secondary"
+                    android:contentDescription="Cửa sổ nổi PiP"
+                    android:padding="7dp"
+                    android:src="@drawable/ic_pip" />
 
-        <!-- Unlock button (Only visible when screen is locked) -->
+                <TextView
+                    android:id="@+id/btnSpeed"
+                    android:layout_width="wrap_content"
+                    android:layout_height="34dp"
+                    android:layout_marginEnd="6dp"
+                    android:background="@drawable/bg_btn_secondary"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:text="1.0x"
+                    android:textColor="#FFD700"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+
+                <ImageButton
+                    android:id="@+id/btnAspectRatio"
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:layout_marginEnd="6dp"
+                    android:background="@drawable/bg_btn_secondary"
+                    android:contentDescription="Tỷ lệ khung hình"
+                    android:padding="7dp"
+                    android:src="@drawable/ic_aspect_ratio" />
+
+                <ImageButton
+                    android:id="@+id/btnEpisodeSheet"
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:layout_marginEnd="6dp"
+                    android:background="@drawable/bg_btn_secondary"
+                    android:contentDescription="Chọn tập"
+                    android:padding="7dp"
+                    android:src="@drawable/ic_episodes_list" />
+
+                <ImageButton
+                    android:id="@+id/btnLock"
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:layout_marginEnd="6dp"
+                    android:background="@drawable/bg_btn_secondary"
+                    android:contentDescription="Khóa màn hình"
+                    android:padding="7dp"
+                    android:src="@drawable/ic_lock" />
+
+                <ImageButton
+                    android:id="@+id/btnSettings"
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:background="@drawable/bg_btn_secondary"
+                    android:contentDescription="Cài đặt phát"
+                    android:padding="7dp"
+                    android:src="@drawable/ic_settings" />
+            </LinearLayout>
+
+            <!-- CENTER CONTROLS (Tua -10s | Tập Trước | PLAY / PAUSE To | Tập Sau | Tua +10s) -->
+            <LinearLayout
+                android:id="@+id/layoutCenterControls"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <!-- Tua lùi 10s -->
+                <ImageButton
+                    android:id="@+id/btnRewind10"
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:layout_marginEnd="12dp"
+                    android:background="@drawable/bg_btn_secondary"
+                    android:contentDescription="Tua lùi 10 giây"
+                    android:padding="10dp"
+                    android:src="@drawable/ic_seek_rewind" />
+
+                <!-- Tập trước đó -->
+                <ImageButton
+                    android:id="@+id/btnPrevEpPlayer"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_marginEnd="16dp"
+                    android:background="@drawable/bg_btn_secondary"
+                    android:contentDescription="Tập trước"
+                    android:padding="9dp"
+                    android:src="@drawable/ic_skip_previous" />
+
+                <!-- NÚT PLAY / PAUSE TRUNG TÂM TO RÕ RÀNG -->
+                <ImageButton
+                    android:id="@+id/btnCenterPlayPause"
+                    android:layout_width="62dp"
+                    android:layout_height="62dp"
+                    android:background="@drawable/bg_center_play_btn"
+                    android:contentDescription="Phát / Dừng"
+                    android:padding="14dp"
+                    android:src="@drawable/ic_pause" />
+
+                <!-- Tập tiếp theo -->
+                <ImageButton
+                    android:id="@+id/btnNextEpPlayer"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_marginStart="16dp"
+                    android:background="@drawable/bg_btn_secondary"
+                    android:contentDescription="Tập sau"
+                    android:padding="9dp"
+                    android:src="@drawable/ic_skip_next" />
+
+                <!-- Tua tới 10s -->
+                <ImageButton
+                    android:id="@+id/btnForward10"
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:layout_marginStart="12dp"
+                    android:background="@drawable/bg_btn_secondary"
+                    android:contentDescription="Tua tới 10 giây"
+                    android:padding="10dp"
+                    android:src="@drawable/ic_seek_forward" />
+            </LinearLayout>
+
+            <!-- BOTTOM CONTROLS BAR: Thời gian + Thanh SeekBar vàng + Toàn màn hình -->
+            <LinearLayout
+                android:id="@+id/layoutBottomControls"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:background="#99000000"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="10dp"
+                android:paddingTop="4dp"
+                android:paddingEnd="10dp"
+                android:paddingBottom="6dp">
+
+                <!-- Thời gian hiện tại -->
+                <TextView
+                    android:id="@+id/txtCurrentTime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="00:00"
+                    android:textColor="#FFFFFF"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+
+                <!-- Thanh SeekBar chuyên dụng cho phép kéo tua mượt mà tới giữa phim -->
+                <SeekBar
+                    android:id="@+id/videoSeekBar"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="6dp"
+                    android:layout_marginEnd="6dp"
+                    android:layout_weight="1"
+                    android:maxHeight="4dp"
+                    android:minHeight="4dp"
+                    android:paddingStart="10dp"
+                    android:paddingEnd="10dp"
+                    android:progressDrawable="@drawable/seekbar_progress"
+                    android:thumb="@drawable/seekbar_thumb"
+                    android:thumbOffset="8dp" />
+
+                <!-- Tổng thời lượng -->
+                <TextView
+                    android:id="@+id/txtTotalDuration"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="00:00"
+                    android:textColor="#B0B8C4"
+                    android:textSize="11sp" />
+
+                <!-- Nút Fullscreen -->
+                <ImageButton
+                    android:id="@+id/btnFullscreen"
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:layout_marginStart="8dp"
+                    android:background="@drawable/bg_btn_secondary"
+                    android:contentDescription="Toàn màn hình"
+                    android:padding="6dp"
+                    android:src="@drawable/ic_fullscreen" />
+            </LinearLayout>
+        </FrameLayout>
+
+        <!-- Unlock button (Chỉ hiện khi màn hình bị khóa) -->
         <ImageButton
             android:id="@+id/btnUnlock"
             android:layout_width="44dp"
@@ -192,19 +338,6 @@
             android:padding="10dp"
             android:src="@drawable/ic_lock_open"
             android:visibility="gone" />
-
-        <!-- Fullscreen / Landscape Toggle Button -->
-        <ImageButton
-            android:id="@+id/btnFullscreen"
-            android:layout_width="38dp"
-            android:layout_height="38dp"
-            android:layout_gravity="bottom|end"
-            android:layout_margin="10dp"
-            android:background="@drawable/bg_btn_secondary"
-            android:contentDescription="Phóng to toàn màn hình"
-            android:elevation="12dp"
-            android:padding="7dp"
-            android:src="@drawable/ic_fullscreen" />
     </FrameLayout>
 
     <!-- Scrollable content below video player -->
