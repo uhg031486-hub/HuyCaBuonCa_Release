@@ -44,17 +44,20 @@ object MovieRepository {
 
     private fun TvChannelItem.toMovieItem(): MovieItem {
         val defaultTvLogo = "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png"
-        val finalLogo = if (logo.isNotEmpty()) logo else defaultTvLogo
+        val finalLogo = if (!logo.isNullOrEmpty()) logo else defaultTvLogo
+        val finalId = if (!id.isNullOrEmpty()) id else "tv_${name.hashCode().toUInt().toString(16)}"
+        val safeGroup = if (!group.isNullOrEmpty()) group else "Truyền Hình"
+        val safeName = if (!name.isNullOrEmpty()) name else "Kênh TV"
         return MovieItem(
-            id = id,
-            name = name,
-            slug = id,
-            originName = "[$group]",
+            id = finalId,
+            name = safeName,
+            slug = finalId,
+            originName = "[$safeGroup]",
             thumbUrl = finalLogo,
             posterUrl = finalLogo,
             year = "24/7",
             quality = "LIVE",
-            episodeCurrent = group,
+            episodeCurrent = safeGroup,
             source = MovieSource.XEMTIVI
         )
     }
@@ -97,12 +100,14 @@ object MovieRepository {
             )
             MovieSource.XEMTIVI -> listOf(
                 FilterItem("Tất Cả Kênh", "tv://all"),
+                FilterItem("⚽ Bóng Đá & C1", "tv://football"),
+                FilterItem("🏆 Thể Thao ESPN & FOX", "tv://sports_intl"),
+                FilterItem("🏎️ Đua Xe & Võ Thuật", "tv://racing_combat"),
                 FilterItem("VTV Quốc Gia", "tv://vtv"),
-                FilterItem("Bóng Đá & Thể Thao", "tv://sports"),
                 FilterItem("VTVcab", "tv://vtvcab"),
                 FilterItem("SCTV", "tv://sctv"),
                 FilterItem("Rạp Phim", "tv://movies"),
-                FilterItem("Sự Kiện Live 🔴", "tv://live"),
+                FilterItem("Sự Kiện TV360", "tv://live"),
                 FilterItem("Kênh Quốc Tế", "tv://intl"),
                 FilterItem("Đài Địa Phương", "tv://local"),
                 FilterItem("Radio Trực Tuyến", "tv://radio")
@@ -117,17 +122,32 @@ object MovieRepository {
                     val channels = cachedTvChannels ?: emptyList()
                     val filtered = when (filterUrl) {
                         "tv://vtv" -> channels.filter { it.group.equals("VTV", ignoreCase = true) }
+                        "tv://football" -> channels.filter {
+                            it.group.contains("Bóng Đá", ignoreCase = true)
+                        }
+                        "tv://sports_intl" -> channels.filter {
+                            it.group.contains("ESPN", ignoreCase = true) ||
+                            it.group.contains("Bóng Rổ", ignoreCase = true)
+                        }
+                        "tv://racing_combat" -> channels.filter {
+                            it.group.contains("Đua Xe", ignoreCase = true) ||
+                            it.group.contains("Võ Thuật", ignoreCase = true)
+                        }
                         "tv://sports" -> channels.filter {
-                            it.group.contains("THỂ THAO", ignoreCase = true) ||
+                            it.group.contains("Bóng Đá", ignoreCase = true) ||
                             it.group.contains("Thể thao", ignoreCase = true) ||
-                            it.group.contains("CUP", ignoreCase = true)
+                            it.group.contains("THỂ THAO", ignoreCase = true) ||
+                            it.group.contains("ESPN", ignoreCase = true) ||
+                            it.group.contains("Đua Xe", ignoreCase = true) ||
+                            it.group.contains("Võ Thuật", ignoreCase = true) ||
+                            it.group.contains("Bóng Rổ", ignoreCase = true)
                         }
                         "tv://vtvcab" -> channels.filter { it.group.contains("VTVcab", ignoreCase = true) }
                         "tv://sctv" -> channels.filter { it.group.contains("SCTV", ignoreCase = true) }
                         "tv://movies" -> channels.filter { it.group.contains("Rạp Phim", ignoreCase = true) }
                         "tv://live" -> channels.filter {
-                            it.group.contains("LIVE", ignoreCase = true) ||
-                            it.group.contains("Sự Kiện", ignoreCase = true)
+                            it.group.contains("Sự Kiện", ignoreCase = true) ||
+                            it.group.contains("LIVE", ignoreCase = true)
                         }
                         "tv://intl" -> channels.filter {
                             it.group.contains("Quốc Tế", ignoreCase = true) ||
