@@ -62,19 +62,6 @@
             android:textSize="13sp"
             android:textStyle="bold"
             tools:text="Tên Phim - Tập 01" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/bg_brand_badge"
-            android:paddingStart="8dp"
-            android:paddingTop="3dp"
-            android:paddingEnd="8dp"
-            android:paddingBottom="3dp"
-            android:text="HUY CÁ BUÔN CÀ VIP"
-            android:textColor="#000000"
-            android:textSize="10sp"
-            android:textStyle="bold" />
     </LinearLayout>
 
 </FrameLayout>

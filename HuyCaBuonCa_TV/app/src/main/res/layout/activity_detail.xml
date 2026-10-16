@@ -62,17 +62,6 @@
             android:text="← Quay Lại"
             android:textColor="@color/text_secondary"
             android:textSize="12sp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:gravity="center"
-            android:text="Huy Cá Buôn Cà VIP TV"
-            android:textColor="@color/brand_gold"
-            android:textSize="10sp"
-            android:textStyle="bold|italic" />
-
     </LinearLayout>
 
     <!-- Right Column: Details, Description, Episodes -->

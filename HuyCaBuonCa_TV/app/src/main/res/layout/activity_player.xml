@@ -52,19 +52,6 @@
             android:textSize="15sp"
             android:textStyle="bold"
             tools:text="Tên Phim - Tập 01 (Vietsub)" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/bg_brand_badge"
-            android:paddingStart="10dp"
-            android:paddingTop="4dp"
-            android:paddingEnd="10dp"
-            android:paddingBottom="4dp"
-            android:text="HUY CÁ BUÔN CÀ VIP TV"
-            android:textColor="#000000"
-            android:textSize="12sp"
-            android:textStyle="bold" />
     </LinearLayout>
 
     <!-- TV Remote Help Bar at Bottom (Auto fades out) -->

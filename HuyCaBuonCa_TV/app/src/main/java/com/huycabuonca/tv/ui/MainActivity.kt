@@ -46,7 +46,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupUI() {
         TvFocusUtil.setupFocusScale(binding.btnSourceKKPhim)
-        TvFocusUtil.setupFocusScale(binding.btnSourceOther)
+        TvFocusUtil.setupFocusScale(binding.btnSourceAnimeHay)
         TvFocusUtil.setupFocusScale(binding.btnSearch)
 
         adapter = MovieAdapter { movie ->
@@ -81,38 +81,22 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupSourceSelectors() {
         binding.btnSourceKKPhim.setOnClickListener {
-            binding.btnSourceOther.text = "🌐 NGUỒN KHÁC (NHÓM 2) ▼"
             switchSource(MovieSource.KKPHIM)
         }
 
-        binding.btnSourceOther.setOnClickListener {
-            showOtherSourcesPopup(it)
+        binding.btnSourceAnimeHay.setOnClickListener {
+            switchSource(MovieSource.ANIMEHAY)
         }
 
         binding.btnSourceKKPhim.isSelected = true
-    }
-
-    private fun showOtherSourcesPopup(anchor: View) {
-        val popup = androidx.appcompat.widget.PopupMenu(this, anchor)
-        popup.menu.add(0, 1, 0, "⛩️ AnimeHay (Hoạt Hình Anime)")
-        popup.setOnMenuItemClickListener { item ->
-            when (item.itemId) {
-                1 -> {
-                    binding.btnSourceOther.text = "⛩️ AnimeHay (Nhóm 2) ▼"
-                    switchSource(MovieSource.ANIMEHAY)
-                    true
-                }
-                else -> false
-            }
-        }
-        popup.show()
+        binding.btnSourceAnimeHay.isSelected = false
     }
 
     private fun switchSource(source: MovieSource) {
         if (currentSource == source) return
         currentSource = source
         binding.btnSourceKKPhim.isSelected = (source == MovieSource.KKPHIM)
-        binding.btnSourceOther.isSelected = (source != MovieSource.KKPHIM)
+        binding.btnSourceAnimeHay.isSelected = (source == MovieSource.ANIMEHAY)
 
         updateDynamicFilters()
         loadMovies(reset = true)

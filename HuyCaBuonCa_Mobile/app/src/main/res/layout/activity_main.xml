@@ -80,11 +80,11 @@
                 android:textStyle="bold" />
 
             <Button
-                android:id="@+id/btnSourceOther"
+                android:id="@+id/btnSourceAnimeHay"
                 android:layout_width="wrap_content"
                 android:layout_height="36dp"
                 android:background="@drawable/bg_btn_selector"
-                android:text="🌐 NGUỒN KHÁC (NHÓM 2) ▼"
+                android:text="⛩️ AnimeHay"
                 android:textColor="@color/text_primary"
                 android:textSize="11sp"
                 android:textStyle="bold" />
