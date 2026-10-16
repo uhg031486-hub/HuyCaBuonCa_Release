@@ -26,6 +26,11 @@ data class TvChannelItem(
     val url: String
 )
 
+data class FreeReelsUnlocked(
+    val streamUrl: String,
+    val subtitleUrl: String?
+)
+
 object MovieRepository {
 
     private val client = OkHttpClient.Builder()
@@ -99,6 +104,41 @@ object MovieRepository {
             val same = all.filter { it.group.equals(cur.group, ignoreCase = true) }
             if (same.isNotEmpty()) same else all
         } else all
+    }
+
+    fun isChannelFavorite(context: Context, channelId: String): Boolean {
+        val sp = context.getSharedPreferences("favorite_channels_prefs", Context.MODE_PRIVATE)
+        val favSet = sp.getStringSet("fav_ids", emptySet()) ?: emptySet()
+        return favSet.contains(channelId)
+    }
+
+    fun toggleChannelFavorite(context: Context, channelId: String): Boolean {
+        val sp = context.getSharedPreferences("favorite_channels_prefs", Context.MODE_PRIVATE)
+        val favSet = (sp.getStringSet("fav_ids", emptySet()) ?: emptySet()).toMutableSet()
+        val isFav = if (favSet.contains(channelId)) {
+            favSet.remove(channelId)
+            false
+        } else {
+            favSet.add(channelId)
+            true
+        }
+        sp.edit().putStringSet("fav_ids", favSet).apply()
+        return isFav
+    }
+
+    fun getFavoriteChannelIds(context: Context): Set<String> {
+        val sp = context.getSharedPreferences("favorite_channels_prefs", Context.MODE_PRIVATE)
+        return sp.getStringSet("fav_ids", emptySet()) ?: emptySet()
+    }
+
+    fun getLastWatchedChannelId(context: Context): String? {
+        val sp = context.getSharedPreferences("tv_history_prefs", Context.MODE_PRIVATE)
+        return sp.getString("last_watched_channel_id", null)
+    }
+
+    fun setLastWatchedChannelId(context: Context, channelId: String) {
+        val sp = context.getSharedPreferences("tv_history_prefs", Context.MODE_PRIVATE)
+        sp.edit().putString("last_watched_channel_id", channelId).apply()
     }
 
     fun importM3uPlaylist(context: Context, m3uContent: String): Int {
@@ -291,8 +331,9 @@ object MovieRepository {
                 FilterItem("Anime Viễn Tưởng", "https://phimapi.com/v1/api/the-loai/vien-tuong")
             )
             MovieSource.XEMTIVI -> listOf(
+                FilterItem("⭐ Kênh Yêu Thích", "tv://favorites"),
                 FilterItem("Tất Cả Kênh", "tv://all"),
-                FilterItem("⭐ Kênh Tự Thêm", "tv://custom"),
+                FilterItem("📁 Kênh Tự Thêm", "tv://custom"),
                 FilterItem("⚽ Bóng Đá & C1", "tv://football"),
                 FilterItem("🏆 Thể Thao ESPN & FOX", "tv://sports_intl"),
                 FilterItem("🏎️ Đua Xe & Võ Thuật", "tv://racing_combat"),
@@ -306,19 +347,26 @@ object MovieRepository {
                 FilterItem("Radio Trực Tuyến", "tv://radio")
             )
             MovieSource.FREEREELS -> listOf(
-                FilterItem("🔥 Thịnh Hành (Hot Drama)", "freereels://hot"),
-                FilterItem("✨ Đề Xuất (For You)", "freereels://foryou"),
-                FilterItem("⏰ Sắp Chiếu (Coming Soon)", "freereels://coming")
+                FilterItem("🔥 Thịnh Hành (For You)", "freereels://foryou"),
+                FilterItem("✨ Mới Nhất", "freereels://tab_505"),
+                FilterItem("🎀 Dành Cho Nữ", "freereels://tab_504"),
+                FilterItem("👑 Dành Cho Nam", "freereels://tab_506"),
+                FilterItem("🎭 Hoạt Hình Ngắn", "freereels://tab_547"),
+                FilterItem("⏰ Sắp Chiếu", "freereels://coming")
             )
         }
     }
 
-    suspend fun getMovies(source: MovieSource, filterUrl: String, page: Int = 1): List<MovieItem> {
+    suspend fun getMovies(source: MovieSource, filterUrl: String, page: Int = 1, context: Context? = null): List<MovieItem> {
         return withContext(Dispatchers.IO) {
             try {
                 if (source == MovieSource.XEMTIVI) {
                     val channels = cachedTvChannels ?: emptyList()
                     val filtered = when (filterUrl) {
+                        "tv://favorites" -> {
+                            val favIds = if (context != null) getFavoriteChannelIds(context) else emptySet()
+                            channels.filter { it.id in favIds }
+                        }
                         "tv://custom" -> channels.filter {
                             it.id.startsWith("custom_") ||
                             it.group.contains("Tự Thêm", ignoreCase = true) ||
@@ -426,7 +474,7 @@ object MovieRepository {
         }
     }
 
-    suspend fun unlockFreeReelsEpisode(seriesId: String, episodeId: String): String? {
+    suspend fun unlockFreeReelsEpisode(seriesId: String, episodeId: String): FreeReelsUnlocked? {
         return withContext(Dispatchers.IO) {
             FreeReelsClient.unlockEpisode(client, gson, seriesId, episodeId)
         }
@@ -701,15 +749,27 @@ object FreeReelsClient {
     fun getDramaList(client: OkHttpClient, gson: Gson, filterUrl: String, page: Int): List<MovieItem> {
         val list = mutableListOf<MovieItem>()
         try {
-            val req = when (filterUrl) {
-                "freereels://coming" -> {
-                    buildAuthorizedRequest(client, gson, "$API_BASE/coming-soon/list?next=", "GET")
+            val req = when {
+                filterUrl.startsWith("freereels://tab_") -> {
+                    val tabKey = filterUrl.removePrefix("freereels://tab_")
+                    if (page <= 1) {
+                        buildAuthorizedRequest(client, gson, "$API_BASE/homepage/v2/tab/index?tab_key=$tabKey&position_index=10000&rec_trigger=0", "GET")
+                    } else {
+                        val cursor = "offset=${(page - 1) * 10}"
+                        buildAuthorizedRequest(client, gson, "$API_BASE/foryou/feed?next=$cursor", "GET")
+                    }
                 }
-                "freereels://foryou" -> {
-                    buildAuthorizedRequest(client, gson, "$API_BASE/foryou/feed?next=", "GET")
+                filterUrl == "freereels://coming" -> {
+                    if (page <= 1) {
+                        buildAuthorizedRequest(client, gson, "$API_BASE/homepage/v2/tab/index?tab_key=622&position_index=10000&rec_trigger=0", "GET")
+                    } else {
+                        val cursor = "offset=${(page - 1) * 10}"
+                        buildAuthorizedRequest(client, gson, "$API_BASE/foryou/feed?next=$cursor", "GET")
+                    }
                 }
                 else -> {
-                    buildAuthorizedRequest(client, gson, "$API_BASE/foryou/feed?next=", "GET")
+                    val cursor = if (page <= 1) "" else "offset=${(page - 1) * 10}"
+                    buildAuthorizedRequest(client, gson, "$API_BASE/foryou/feed?next=$cursor", "GET")
                 }
             } ?: return emptyList()
 
@@ -720,7 +780,12 @@ object FreeReelsClient {
                 val data = root.getAsJsonObject("data") ?: return emptyList()
 
                 val itemsArray = if (data.has("items") && !data.get("items").isJsonNull) {
-                    data.getAsJsonArray("items")
+                    val itArr = data.getAsJsonArray("items")
+                    if (itArr.size() > 0 && itArr[0].isJsonObject && itArr[0].asJsonObject.has("items")) {
+                        itArr[0].asJsonObject.getAsJsonArray("items")
+                    } else {
+                        itArr
+                    }
                 } else if (data.has("list") && !data.get("list").isJsonNull) {
                     data.getAsJsonArray("list")
                 } else null
@@ -788,7 +853,7 @@ object FreeReelsClient {
 
                 val title = info.getSafeString("name").ifEmpty { info.getSafeString("title") }
                 val cover = info.getSafeString("cover").ifEmpty { info.getSafeString("poster") }
-                val desc = info.getSafeString("desc").ifEmpty { "Phim ngắn màn hình dọc FreeReels chất lượng cao (9:16)." }
+                val desc = info.getSafeString("desc").ifEmpty { "Phim ngắn màn hình dọc FreeReels chất lượng cao (9:16) kèm phụ đề/thuyết minh Tiếng Việt." }
                 val epCount = info.getSafeString("episode_count", "Nhiều")
 
                 val epList = mutableListOf<EpisodeItem>()
@@ -809,13 +874,31 @@ object FreeReelsClient {
                             rawName
                         }
 
+                        var viSubUrl: String? = null
+                        if (epObj.has("subtitle_list") && epObj.get("subtitle_list").isJsonArray) {
+                            val subs = epObj.getAsJsonArray("subtitle_list")
+                            subs.forEach { sEl ->
+                                if (sEl.isJsonObject) {
+                                    val sObj = sEl.asJsonObject
+                                    val lang = sObj.getSafeString("language").lowercase()
+                                    val disp = sObj.getSafeString("display_name").lowercase()
+                                    if (lang.contains("vi") || disp.contains("việt")) {
+                                        val vtt = sObj.getSafeString("vtt")
+                                        val srt = sObj.getSafeString("subtitle")
+                                        viSubUrl = if (vtt.isNotEmpty()) vtt else srt
+                                    }
+                                }
+                            }
+                        }
+
                         epList.add(
                             EpisodeItem(
                                 name = epName,
                                 slug = epId,
                                 filename = epName,
                                 linkM3u8 = "freereels_unlock:$seriesId:$epId",
-                                linkEmbed = null
+                                linkEmbed = null,
+                                subtitleUrl = viSubUrl
                             )
                         )
                     }
@@ -824,9 +907,12 @@ object FreeReelsClient {
                 // Tự động mở khóa trước link tập 1 để phát mượt ngay tức thì
                 if (epList.isNotEmpty()) {
                     val firstEp = epList[0]
-                    val streamFirst = unlockEpisode(client, gson, seriesId, firstEp.slug)
-                    if (!streamFirst.isNullOrEmpty()) {
-                        epList[0] = firstEp.copy(linkM3u8 = streamFirst)
+                    val unlockRes = unlockEpisode(client, gson, seriesId, firstEp.slug)
+                    if (unlockRes != null) {
+                        epList[0] = firstEp.copy(
+                            linkM3u8 = unlockRes.streamUrl,
+                            subtitleUrl = unlockRes.subtitleUrl ?: firstEp.subtitleUrl
+                        )
                     }
                 }
 
@@ -841,11 +927,11 @@ object FreeReelsClient {
                     year = "2026",
                     time = "$epCount tập",
                     quality = "9:16 Dọc HD",
-                    lang = "Lồng Tiếng / Thuyết Minh Tiếng Việt",
+                    lang = "Vietsub / Thuyết Minh Tiếng Việt",
                     source = MovieSource.FREEREELS,
                     servers = listOf(
                         ServerGroup(
-                            serverName = "FreeReels VIP (Lồng Tiếng Việt)",
+                            serverName = "FreeReels VIP (Phụ Đề / Lồng Tiếng Việt)",
                             episodes = epList
                         )
                     )
@@ -857,7 +943,7 @@ object FreeReelsClient {
         }
     }
 
-    fun unlockEpisode(client: OkHttpClient, gson: Gson, seriesId: String, episodeId: String): String? {
+    fun unlockEpisode(client: OkHttpClient, gson: Gson, seriesId: String, episodeId: String): FreeReelsUnlocked? {
         return try {
             val jsonBody = JsonObject().apply {
                 addProperty("series_id", seriesId)
@@ -877,13 +963,31 @@ object FreeReelsClient {
                 val m3u8H264 = data.getSafeString("external_audio_h264_m3u8")
                 val m3u8Url = data.getSafeString("m3u8_url")
                 val videoUrl = data.getSafeString("video_url")
-
-                when {
+                val stream = when {
                     m3u8H264.isNotEmpty() -> m3u8H264
                     m3u8Url.isNotEmpty() -> m3u8Url
                     videoUrl.isNotEmpty() -> videoUrl
                     else -> null
+                } ?: return null
+
+                var viSubUrl: String? = null
+                if (data.has("subtitle_list") && data.get("subtitle_list").isJsonArray) {
+                    val subs = data.getAsJsonArray("subtitle_list")
+                    subs.forEach { sEl ->
+                        if (sEl.isJsonObject) {
+                            val sObj = sEl.asJsonObject
+                            val lang = sObj.getSafeString("language").lowercase()
+                            val disp = sObj.getSafeString("display_name").lowercase()
+                            if (lang.contains("vi") || disp.contains("việt")) {
+                                val vtt = sObj.getSafeString("vtt")
+                                val srt = sObj.getSafeString("subtitle")
+                                viSubUrl = if (vtt.isNotEmpty()) vtt else srt
+                            }
+                        }
+                    }
                 }
+
+                FreeReelsUnlocked(streamUrl = stream, subtitleUrl = viSubUrl)
             }
         } catch (e: Exception) {
             e.printStackTrace()

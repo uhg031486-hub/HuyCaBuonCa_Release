@@ -36,12 +36,36 @@ class PlayerGestureHelper(
     var isBrightnessGestureEnabled = true
     var isVolumeGestureEnabled = true
     var seekStepSeconds = 10
+    var isShortsMode = false
+    var onSwipeVerticalShorts: ((isNext: Boolean) -> Unit)? = null
 
     private enum class Mode {
         NONE, VOLUME, BRIGHTNESS
     }
 
     private val gestureDetector = GestureDetector(activity, object : GestureDetector.SimpleOnGestureListener() {
+
+        override fun onFling(
+            e1: MotionEvent?,
+            e2: MotionEvent,
+            velocityX: Float,
+            velocityY: Float
+        ): Boolean {
+            if (isLocked) return false
+            if (isShortsMode && onSwipeVerticalShorts != null && e1 != null) {
+                val deltaY = e1.y - e2.y
+                val deltaX = e1.x - e2.x
+                if (abs(deltaY) > abs(deltaX) && abs(deltaY) > 60 && abs(velocityY) > 150) {
+                    if (deltaY > 0) {
+                        onSwipeVerticalShorts?.invoke(true)
+                    } else {
+                        onSwipeVerticalShorts?.invoke(false)
+                    }
+                    return true
+                }
+            }
+            return false
+        }
 
         override fun onDown(e: MotionEvent): Boolean {
             if (isLocked) return false

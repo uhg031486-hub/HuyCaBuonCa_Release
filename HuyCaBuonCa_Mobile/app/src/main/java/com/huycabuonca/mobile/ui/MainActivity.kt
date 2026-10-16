@@ -306,19 +306,25 @@ class MainActivity : AppCompatActivity() {
         }
 
         lifecycleScope.launch {
-            val items = MovieRepository.getMovies(currentSource, currentFilterUrl, currentPage)
+            val items = MovieRepository.getMovies(currentSource, currentFilterUrl, currentPage, this@MainActivity)
             binding.progressBar.visibility = View.GONE
             binding.swipeRefresh.isRefreshing = false
             isLoading = false
 
             if (items.isNotEmpty()) {
-                movieList.addAll(items)
-                adapter.submitList(movieList.toList())
-                binding.txtStatus.visibility = View.GONE
+                val existingIds = movieList.map { it.id }.toSet()
+                val newItems = items.filter { it.id !in existingIds }
+                if (newItems.isNotEmpty()) {
+                    movieList.addAll(newItems)
+                    adapter.submitList(movieList.toList())
+                    binding.txtStatus.visibility = View.GONE
 
-                // Ở lần đầu, tải thêm trang 2 ngay lập tức để có sẵn nhiều phim
-                if (reset && currentPage == 1 && items.size >= 10) {
-                    loadMoreMovies()
+                    // Ở lần đầu, tải thêm trang 2 ngay lập tức để có sẵn nhiều phim
+                    if (reset && currentPage == 1 && items.size >= 10) {
+                        loadMoreMovies()
+                    }
+                } else {
+                    isLastPage = true
                 }
             } else if (movieList.isEmpty()) {
                 binding.txtStatus.visibility = View.VISIBLE
@@ -336,13 +342,19 @@ class MainActivity : AppCompatActivity() {
         binding.progressLoadMore.visibility = View.VISIBLE
 
         lifecycleScope.launch {
-            val items = MovieRepository.getMovies(currentSource, currentFilterUrl, currentPage)
+            val items = MovieRepository.getMovies(currentSource, currentFilterUrl, currentPage, this@MainActivity)
             binding.progressLoadMore.visibility = View.GONE
             isLoading = false
 
             if (items.isNotEmpty()) {
-                movieList.addAll(items)
-                adapter.submitList(movieList.toList())
+                val existingIds = movieList.map { it.id }.toSet()
+                val newItems = items.filter { it.id !in existingIds }
+                if (newItems.isNotEmpty()) {
+                    movieList.addAll(newItems)
+                    adapter.submitList(movieList.toList())
+                } else {
+                    isLastPage = true
+                }
             } else {
                 isLastPage = true
             }

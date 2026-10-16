@@ -94,8 +94,10 @@ class PlayerActivity : AppCompatActivity() {
             android.util.Log.d("TV_ZAP", "Movie Mode (not TV): title=$title, url=$streamUrl")
         }
 
+        val subtitleUrl = intent.getStringExtra("EXTRA_SUBTITLE_URL")
+
         if (isM3u8) {
-            initExoPlayer(streamUrl)
+            initExoPlayer(streamUrl, subtitleUrl)
         } else {
             initWebViewPlayer(streamUrl)
         }
@@ -116,7 +118,7 @@ class PlayerActivity : AppCompatActivity() {
         }
     }
 
-    private fun initExoPlayer(url: String) {
+    private fun initExoPlayer(url: String, subtitleUrl: String? = null) {
         player?.release()
         binding.playerView.visibility = View.VISIBLE
         binding.webViewPlayer.visibility = View.GONE
@@ -130,10 +132,38 @@ class PlayerActivity : AppCompatActivity() {
             ))
             .setAllowCrossProtocolRedirects(true)
 
-        val mediaSource = HlsMediaSource.Factory(dataSourceFactory)
-            .createMediaSource(MediaItem.fromUri(url))
+        val mediaItemBuilder = MediaItem.Builder().setUri(url)
 
-        player = ExoPlayer.Builder(this).build().apply {
+        if (!subtitleUrl.isNullOrEmpty()) {
+            val mimeType = if (subtitleUrl.contains(".vtt", ignoreCase = true)) {
+                androidx.media3.common.MimeTypes.TEXT_VTT
+            } else {
+                androidx.media3.common.MimeTypes.APPLICATION_SUBRIP
+            }
+            val subConfig = MediaItem.SubtitleConfiguration.Builder(android.net.Uri.parse(subtitleUrl))
+                .setMimeType(mimeType)
+                .setLanguage("vi")
+                .setLabel("Tiếng Việt")
+                .setSelectionFlags(androidx.media3.common.C.SELECTION_FLAG_DEFAULT or androidx.media3.common.C.SELECTION_FLAG_FORCED)
+                .build()
+            mediaItemBuilder.setSubtitleConfigurations(listOf(subConfig))
+        }
+
+        val mediaItem = mediaItemBuilder.build()
+        val mediaSource = HlsMediaSource.Factory(dataSourceFactory)
+            .createMediaSource(mediaItem)
+
+        val trackSelector = androidx.media3.exoplayer.trackselection.DefaultTrackSelector(this).apply {
+            setParameters(
+                buildUponParameters()
+                    .setPreferredTextLanguage("vi")
+                    .setSelectUndeterminedTextLanguage(true)
+            )
+        }
+
+        player = ExoPlayer.Builder(this)
+            .setTrackSelector(trackSelector)
+            .build().apply {
             setMediaSource(mediaSource)
             prepare()
             playWhenReady = true

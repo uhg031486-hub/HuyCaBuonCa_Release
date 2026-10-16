@@ -110,14 +110,17 @@ class DetailActivity : AppCompatActivity() {
             if (tokens.size >= 3) {
                 binding.progressEpisodes.visibility = View.VISIBLE
                 lifecycleScope.launch {
-                    val realM3u8 = MovieRepository.unlockFreeReelsEpisode(tokens[1], tokens[2])
+                    val res = MovieRepository.unlockFreeReelsEpisode(tokens[1], tokens[2])
                     binding.progressEpisodes.visibility = View.GONE
-                    if (!realM3u8.isNullOrEmpty()) {
+                    if (res != null && res.streamUrl.isNotEmpty()) {
                         val intent = Intent(this@DetailActivity, PlayerActivity::class.java).apply {
-                            putExtra("EXTRA_STREAM_URL", realM3u8)
+                            putExtra("EXTRA_STREAM_URL", res.streamUrl)
+                            putExtra("EXTRA_SUBTITLE_URL", res.subtitleUrl ?: episode.subtitleUrl)
                             putExtra("EXTRA_IS_M3U8", true)
                             putExtra("EXTRA_TITLE", movieItem?.name ?: "Phim Ngắn")
                             putExtra("EXTRA_EPISODE", episode.name)
+                            putExtra("EXTRA_SOURCE", movieItem?.source?.name)
+                            putExtra("EXTRA_CHANNEL_ID", movieItem?.id)
                         }
                         startActivity(intent)
                     } else {
@@ -130,6 +133,7 @@ class DetailActivity : AppCompatActivity() {
 
         val intent = Intent(this, PlayerActivity::class.java).apply {
             putExtra("EXTRA_STREAM_URL", streamUrl)
+            putExtra("EXTRA_SUBTITLE_URL", episode.subtitleUrl)
             putExtra("EXTRA_EMBED_URL", episode.linkEmbed)
             putExtra("EXTRA_IS_M3U8", episode.linkM3u8 != null)
             putExtra("EXTRA_TITLE", movieItem?.name ?: "Xem Phim")

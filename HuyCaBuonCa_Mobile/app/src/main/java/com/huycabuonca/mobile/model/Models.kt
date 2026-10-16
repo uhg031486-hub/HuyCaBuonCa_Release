@@ -53,7 +53,8 @@ data class EpisodeItem(
     val slug: String,
     val filename: String = "",
     val linkM3u8: String? = null,
-    val linkEmbed: String? = null
+    val linkEmbed: String? = null,
+    val subtitleUrl: String? = null
 ) : Serializable
 
 data class FootballMatch(

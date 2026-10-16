@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.graphics.Color
+import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -334,7 +335,27 @@ class DetailActivity : AppCompatActivity() {
                     toggleControlsVisibility()
                 }
             }
-        )
+        ).apply {
+            onSwipeVerticalShorts = { isNext ->
+                if (isNext) {
+                    if (currentEpisodeIndex < currentEpisodes.size - 1) {
+                        currentEpisodeIndex++
+                        playEpisode(currentEpisodes[currentEpisodeIndex])
+                        Toast.makeText(this@DetailActivity, "📱 Vuốt lên: Tập tiếp theo (${currentEpisodes[currentEpisodeIndex].name})", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(this@DetailActivity, "Đã là tập cuối cùng!", Toast.LENGTH_SHORT).show()
+                    }
+                } else {
+                    if (currentEpisodeIndex > 0) {
+                        currentEpisodeIndex--
+                        playEpisode(currentEpisodes[currentEpisodeIndex])
+                        Toast.makeText(this@DetailActivity, "📱 Vuốt xuống: Tập trước (${currentEpisodes[currentEpisodeIndex].name})", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(this@DetailActivity, "Đã là tập đầu tiên!", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        }
 
         // Bắt đầu cập nhật SeekBar
         mainHandler.post(updateProgressRunnable)
@@ -480,8 +501,10 @@ class DetailActivity : AppCompatActivity() {
     private fun enterPipMode() {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             try {
+                val isVertical = (player?.videoSize?.height ?: 0) > (player?.videoSize?.width ?: 0) && (player?.videoSize?.width ?: 0) > 0
+                val rational = if (isVertical) android.util.Rational(9, 16) else android.util.Rational(16, 9)
                 val params = android.app.PictureInPictureParams.Builder()
-                    .setAspectRatio(android.util.Rational(16, 9))
+                    .setAspectRatio(rational)
                     .build()
                 enterPictureInPictureMode(params)
             } catch (e: Exception) {
@@ -960,10 +983,11 @@ class DetailActivity : AppCompatActivity() {
                 val epId = tokens[2]
                 binding.playerLoading.visibility = View.VISIBLE
                 lifecycleScope.launch {
-                    val realM3u8 = MovieRepository.unlockFreeReelsEpisode(sId, epId)
+                    val res = MovieRepository.unlockFreeReelsEpisode(sId, epId)
                     binding.playerLoading.visibility = View.GONE
-                    if (!realM3u8.isNullOrEmpty()) {
-                        initExoPlayer(realM3u8)
+                    if (res != null && res.streamUrl.isNotEmpty()) {
+                        val subUrl = res.subtitleUrl ?: episode.subtitleUrl
+                        initExoPlayer(res.streamUrl, subUrl)
                     } else {
                         Toast.makeText(this@DetailActivity, "Tập phim ngắn này đang tải luồng phát, vui lòng thử lại!", Toast.LENGTH_SHORT).show()
                     }
@@ -974,13 +998,13 @@ class DetailActivity : AppCompatActivity() {
 
         val isM3u8 = episode.linkM3u8 != null || streamUrl.contains(".m3u8")
         if (isM3u8) {
-            initExoPlayer(streamUrl)
+            initExoPlayer(streamUrl, episode.subtitleUrl)
         } else {
             initWebViewPlayer(streamUrl)
         }
     }
 
-    private fun initExoPlayer(url: String) {
+    private fun initExoPlayer(url: String, subtitleUrl: String? = null) {
         binding.playerView.visibility = View.VISIBLE
         binding.gestureTouchView.visibility = View.VISIBLE
         binding.webViewPlayer.visibility = View.GONE
@@ -996,10 +1020,38 @@ class DetailActivity : AppCompatActivity() {
             ))
             .setAllowCrossProtocolRedirects(true)
 
-        val mediaSource = HlsMediaSource.Factory(dataSourceFactory)
-            .createMediaSource(MediaItem.fromUri(url))
+        val mediaItemBuilder = MediaItem.Builder().setUri(url)
 
-        player = ExoPlayer.Builder(this).build().apply {
+        if (!subtitleUrl.isNullOrEmpty()) {
+            val mimeType = if (subtitleUrl.contains(".vtt", ignoreCase = true)) {
+                androidx.media3.common.MimeTypes.TEXT_VTT
+            } else {
+                androidx.media3.common.MimeTypes.APPLICATION_SUBRIP
+            }
+            val subConfig = MediaItem.SubtitleConfiguration.Builder(Uri.parse(subtitleUrl))
+                .setMimeType(mimeType)
+                .setLanguage("vi")
+                .setLabel("Tiếng Việt")
+                .setSelectionFlags(androidx.media3.common.C.SELECTION_FLAG_DEFAULT or androidx.media3.common.C.SELECTION_FLAG_FORCED)
+                .build()
+            mediaItemBuilder.setSubtitleConfigurations(listOf(subConfig))
+        }
+
+        val mediaItem = mediaItemBuilder.build()
+        val mediaSource = HlsMediaSource.Factory(dataSourceFactory)
+            .createMediaSource(mediaItem)
+
+        val trackSelector = androidx.media3.exoplayer.trackselection.DefaultTrackSelector(this).apply {
+            setParameters(
+                buildUponParameters()
+                    .setPreferredTextLanguage("vi")
+                    .setSelectUndeterminedTextLanguage(true)
+            )
+        }
+
+        player = ExoPlayer.Builder(this)
+            .setTrackSelector(trackSelector)
+            .build().apply {
             setMediaSource(mediaSource)
             prepare()
             playWhenReady = true
@@ -1012,8 +1064,9 @@ class DetailActivity : AppCompatActivity() {
 
                 override fun onVideoSizeChanged(videoSize: androidx.media3.common.VideoSize) {
                     val isVertical = videoSize.height > videoSize.width && videoSize.width > 0
-                    if (isVertical) {
+                    if (isVertical || movieItem?.source == MovieSource.FREEREELS) {
                         // Tự động nhận diện video màn hình dọc 9:16 (Chuẩn TikTok/Reels/Shorts)
+                        gestureHelper.isShortsMode = true
                         binding.playerView.resizeMode = androidx.media3.ui.AspectRatioFrameLayout.RESIZE_MODE_FIT
                         if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
                             val dm = resources.displayMetrics
@@ -1024,6 +1077,7 @@ class DetailActivity : AppCompatActivity() {
                             binding.txtDetailMeta.text = "${binding.txtDetailMeta.text} • 📱 Video Dọc (9:16)"
                         }
                     } else {
+                        gestureHelper.isShortsMode = false
                         binding.playerView.resizeMode = androidx.media3.ui.AspectRatioFrameLayout.RESIZE_MODE_FIT
                         if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
                             binding.layoutPlayerContainer.layoutParams.height = (220 * resources.displayMetrics.density).toInt()
