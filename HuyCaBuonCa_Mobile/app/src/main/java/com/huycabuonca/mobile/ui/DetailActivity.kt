@@ -29,7 +29,12 @@ import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.hls.HlsMediaSource
 import androidx.recyclerview.widget.GridLayoutManager
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import androidx.media3.ui.CaptionStyleCompat
+import android.util.TypedValue
+import android.widget.RadioButton
+import android.widget.RadioGroup
 import com.huycabuonca.mobile.R
 import com.huycabuonca.mobile.api.MovieRepository
 import com.huycabuonca.mobile.databinding.ActivityDetailBinding
@@ -365,6 +370,20 @@ class DetailActivity : AppCompatActivity() {
         val view = layoutInflater.inflate(R.layout.dialog_episodes_sheet, null)
         dialog.setContentView(view)
 
+        dialog.setOnShowListener { dialogInterface ->
+            val bottomSheetDialog = dialogInterface as? BottomSheetDialog
+            val bottomSheet = bottomSheetDialog?.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
+            if (bottomSheet != null) {
+                val behavior = BottomSheetBehavior.from(bottomSheet)
+                behavior.state = BottomSheetBehavior.STATE_EXPANDED
+                behavior.skipCollapsed = true
+                if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                    behavior.peekHeight = resources.displayMetrics.heightPixels
+                    bottomSheet.layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT
+                }
+            }
+        }
+
         val txtTitle = view.findViewById<TextView>(R.id.txtSheetTitle)
         val recycler = view.findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.recyclerSheetEpisodes)
 
@@ -472,10 +491,101 @@ class DetailActivity : AppCompatActivity() {
         }
     }
 
+    private fun applySubtitleStyle(sizeSp: Float, colorHex: String) {
+        try {
+            val colorInt = Color.parseColor(colorHex)
+            val style = CaptionStyleCompat(
+                colorInt,
+                Color.TRANSPARENT,
+                Color.TRANSPARENT,
+                CaptionStyleCompat.EDGE_TYPE_OUTLINE,
+                Color.BLACK,
+                null
+            )
+            binding.playerView.subtitleView?.apply {
+                setStyle(style)
+                setFixedTextSize(TypedValue.COMPLEX_UNIT_SP, sizeSp)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
     private fun showVBookSettingsDialog() {
         val dialog = BottomSheetDialog(this)
         val view = layoutInflater.inflate(R.layout.dialog_vbook_settings, null)
         dialog.setContentView(view)
+
+        dialog.setOnShowListener { dialogInterface ->
+            val bottomSheetDialog = dialogInterface as? BottomSheetDialog
+            val bottomSheet = bottomSheetDialog?.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
+            if (bottomSheet != null) {
+                val behavior = BottomSheetBehavior.from(bottomSheet)
+                behavior.state = BottomSheetBehavior.STATE_EXPANDED
+                behavior.skipCollapsed = true
+                if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                    behavior.peekHeight = resources.displayMetrics.heightPixels
+                    bottomSheet.layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT
+                }
+            }
+        }
+
+        val sp = getSharedPreferences("vbook_playback_prefs", Context.MODE_PRIVATE)
+
+        // Phụ đề (Subtitle Controls)
+        val txtSubPreview = view.findViewById<TextView>(R.id.txtSubPreview)
+        val rgSubSize = view.findViewById<RadioGroup>(R.id.rgSubSize)
+        val rgSubColor = view.findViewById<RadioGroup>(R.id.rgSubColor)
+
+        var curSubSize = sp.getFloat("sub_font_size", 18f)
+        var curSubColor = sp.getString("sub_font_color", "#FFD700") ?: "#FFD700"
+
+        txtSubPreview?.textSize = curSubSize
+        try {
+            txtSubPreview?.setTextColor(Color.parseColor(curSubColor))
+        } catch (_: Exception) {}
+
+        when (curSubSize.toInt()) {
+            14 -> view.findViewById<RadioButton>(R.id.rbSubSmall)?.isChecked = true
+            22 -> view.findViewById<RadioButton>(R.id.rbSubLarge)?.isChecked = true
+            26 -> view.findViewById<RadioButton>(R.id.rbSubExtra)?.isChecked = true
+            else -> view.findViewById<RadioButton>(R.id.rbSubMedium)?.isChecked = true
+        }
+
+        when (curSubColor.uppercase()) {
+            "#FFFFFF" -> view.findViewById<RadioButton>(R.id.rbColorWhite)?.isChecked = true
+            "#00E5FF" -> view.findViewById<RadioButton>(R.id.rbColorCyan)?.isChecked = true
+            "#EEFF41" -> view.findViewById<RadioButton>(R.id.rbColorYellow)?.isChecked = true
+            else -> view.findViewById<RadioButton>(R.id.rbColorGold)?.isChecked = true
+        }
+
+        rgSubSize?.setOnCheckedChangeListener { _, checkedId ->
+            val newSize = when (checkedId) {
+                R.id.rbSubSmall -> 14f
+                R.id.rbSubLarge -> 22f
+                R.id.rbSubExtra -> 26f
+                else -> 18f
+            }
+            curSubSize = newSize
+            txtSubPreview?.textSize = newSize
+            applySubtitleStyle(newSize, curSubColor)
+            sp.edit().putFloat("sub_font_size", newSize).apply()
+        }
+
+        rgSubColor?.setOnCheckedChangeListener { _, checkedId ->
+            val newColor = when (checkedId) {
+                R.id.rbColorWhite -> "#FFFFFF"
+                R.id.rbColorCyan -> "#00E5FF"
+                R.id.rbColorYellow -> "#EEFF41"
+                else -> "#FFD700"
+            }
+            curSubColor = newColor
+            try {
+                txtSubPreview?.setTextColor(Color.parseColor(newColor))
+            } catch (_: Exception) {}
+            applySubtitleStyle(curSubSize, newColor)
+            sp.edit().putString("sub_font_color", newColor).apply()
+        }
 
         val switchAutoNext = view.findViewById<androidx.appcompat.widget.SwitchCompat>(R.id.switchAutoNext)
         val switchPipOnHome = view.findViewById<androidx.appcompat.widget.SwitchCompat>(R.id.switchPipOnHome)
@@ -712,6 +822,10 @@ class DetailActivity : AppCompatActivity() {
             })
         }
         binding.playerView.player = player
+        val sp = getSharedPreferences("vbook_playback_prefs", Context.MODE_PRIVATE)
+        val subSize = sp.getFloat("sub_font_size", 18f)
+        val subColor = sp.getString("sub_font_color", "#FFD700") ?: "#FFD700"
+        applySubtitleStyle(subSize, subColor)
         showControls()
     }
 

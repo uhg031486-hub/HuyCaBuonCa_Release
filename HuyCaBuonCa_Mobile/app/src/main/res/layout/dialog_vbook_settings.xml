@@ -1,226 +1,381 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="#161B26"
-    android:orientation="vertical"
-    android:padding="20dp">
+    android:fillViewport="true">
 
-    <!-- Header -->
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Cài đặt phát (vBook Style)"
-        android:textColor="@color/brand_gold"
-        android:textSize="18sp"
-        android:textStyle="bold" />
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginTop="12dp"
-        android:layout_marginBottom="12dp"
-        android:background="#2E3C56" />
-
-    <!-- Section: Phát lại -->
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Phát lại"
-        android:textColor="@color/brand_cyan"
-        android:textSize="13sp"
-        android:textStyle="bold" />
-
-    <!-- Tự động chuyển tập -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:gravity="center_vertical"
-        android:orientation="horizontal">
+        android:orientation="vertical"
+        android:padding="20dp">
 
+        <!-- Header -->
         <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Tự động chuyển tập"
-            android:textColor="#FFFFFF"
-            android:textSize="14sp" />
-
-        <androidx.appcompat.widget.SwitchCompat
-            android:id="@+id/switchAutoNext"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:checked="true" />
-    </LinearLayout>
+            android:text="Cài đặt phát &amp; Phụ đề (vBook Style)"
+            android:textColor="@color/brand_gold"
+            android:textSize="18sp"
+            android:textStyle="bold" />
 
-    <!-- Tiếp tục phát trong PiP -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:gravity="center_vertical"
-        android:orientation="horizontal">
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="12dp"
+            android:background="#2E3C56" />
 
+        <!-- ================= SECTION: PHỤ ĐỀ (SUBTITLES) ================= -->
         <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Tiếp tục phát trong PiP (Xem trong nền)"
-            android:textColor="#FFFFFF"
-            android:textSize="14sp" />
-
-        <androidx.appcompat.widget.SwitchCompat
-            android:id="@+id/switchPipOnHome"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:checked="true" />
-    </LinearLayout>
+            android:text="Tùy chỉnh Phụ đề (Kích cỡ &amp; Màu sắc)"
+            android:textColor="@color/brand_cyan"
+            android:textSize="13sp"
+            android:textStyle="bold" />
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginTop="12dp"
-        android:layout_marginBottom="12dp"
-        android:background="#2E3C56" />
+        <!-- Subtitle Preview Box -->
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginTop="8dp"
+            android:background="#0A0D14"
+            android:padding="6dp">
 
-    <!-- Section: Tua video -->
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Thời gian nháy đúp tua (Tua tới / Tua lùi)"
-        android:textColor="@color/brand_cyan"
-        android:textSize="13sp"
-        android:textStyle="bold" />
+            <TextView
+                android:id="@+id/txtSubPreview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:shadowColor="#000000"
+                android:shadowDx="2"
+                android:shadowDy="2"
+                android:shadowRadius="3"
+                android:text="Đây là phụ đề mẫu: Huy Cá Buôn Cà"
+                android:textColor="#FFD700"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+        </FrameLayout>
 
-    <RadioGroup
-        android:id="@+id/rgSeekStep"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:orientation="horizontal">
-
-        <RadioButton
-            android:id="@+id/rbSeek5"
-            android:layout_width="0dp"
+        <!-- Kích cỡ phụ đề -->
+        <TextView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="5s"
-            android:textColor="#FFFFFF"
+            android:layout_marginTop="10dp"
+            android:text="Kích cỡ chữ phụ đề:"
+            android:textColor="#CCCCCC"
             android:textSize="12sp" />
 
-        <RadioButton
-            android:id="@+id/rbSeek10"
-            android:layout_width="0dp"
+        <RadioGroup
+            android:id="@+id/rgSubSize"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:checked="true"
-            android:text="10s"
-            android:textColor="#FFFFFF"
-            android:textSize="12sp" />
+            android:layout_marginTop="4dp"
+            android:orientation="horizontal">
 
-        <RadioButton
-            android:id="@+id/rbSeek15"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="15s"
-            android:textColor="#FFFFFF"
-            android:textSize="12sp" />
+            <RadioButton
+                android:id="@+id/rbSubSmall"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Nhỏ\n(14sp)"
+                android:textColor="#FFFFFF"
+                android:textSize="11sp" />
 
-        <RadioButton
-            android:id="@+id/rbSeek30"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="30s"
-            android:textColor="#FFFFFF"
-            android:textSize="12sp" />
-    </RadioGroup>
+            <RadioButton
+                android:id="@+id/rbSubMedium"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:checked="true"
+                android:text="Vừa\n(18sp)"
+                android:textColor="#FFFFFF"
+                android:textSize="11sp" />
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginTop="12dp"
-        android:layout_marginBottom="12dp"
-        android:background="#2E3C56" />
+            <RadioButton
+                android:id="@+id/rbSubLarge"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Lớn\n(22sp)"
+                android:textColor="#FFFFFF"
+                android:textSize="11sp" />
 
-    <!-- Section: Cử chỉ & Hiển thị -->
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Cử chỉ &amp; Hiển thị"
-        android:textColor="@color/brand_cyan"
-        android:textSize="13sp"
-        android:textStyle="bold" />
+            <RadioButton
+                android:id="@+id/rbSubExtra"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Rất lớn\n(26sp)"
+                android:textColor="#FFFFFF"
+                android:textSize="11sp" />
+        </RadioGroup>
 
-    <!-- Vuốt bên trái chỉnh độ sáng -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:gravity="center_vertical"
-        android:orientation="horizontal">
-
+        <!-- Màu sắc phụ đề -->
         <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Vuốt bên trái để điều chỉnh độ sáng"
-            android:textColor="#FFFFFF"
-            android:textSize="14sp" />
-
-        <androidx.appcompat.widget.SwitchCompat
-            android:id="@+id/switchBrightnessGesture"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:checked="true" />
-    </LinearLayout>
+            android:layout_marginTop="10dp"
+            android:text="Màu sắc chữ phụ đề:"
+            android:textColor="#CCCCCC"
+            android:textSize="12sp" />
 
-    <!-- Vuốt bên phải chỉnh âm lượng -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:gravity="center_vertical"
-        android:orientation="horizontal">
-
-        <TextView
-            android:layout_width="0dp"
+        <RadioGroup
+            android:id="@+id/rgSubColor"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Vuốt bên phải để điều chỉnh âm lượng"
-            android:textColor="#FFFFFF"
-            android:textSize="14sp" />
+            android:layout_marginTop="4dp"
+            android:orientation="horizontal">
 
-        <androidx.appcompat.widget.SwitchCompat
-            android:id="@+id/switchVolumeGesture"
+            <RadioButton
+                android:id="@+id/rbColorGold"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:checked="true"
+                android:text="Vàng Kim\n(Rạp phim)"
+                android:textColor="#FFD700"
+                android:textSize="11sp" />
+
+            <RadioButton
+                android:id="@+id/rbColorWhite"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Trắng Tinh\n(Chuẩn)"
+                android:textColor="#FFFFFF"
+                android:textSize="11sp" />
+
+            <RadioButton
+                android:id="@+id/rbColorCyan"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Xanh Lơ\n(Neon)"
+                android:textColor="#00E5FF"
+                android:textSize="11sp" />
+
+            <RadioButton
+                android:id="@+id/rbColorYellow"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Vàng Chanh\n(Dễ nhìn)"
+                android:textColor="#EEFF41"
+                android:textSize="11sp" />
+        </RadioGroup>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="12dp"
+            android:background="#2E3C56" />
+
+        <!-- ================= SECTION: PHÁT LẠI ================= -->
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:checked="true" />
-    </LinearLayout>
+            android:text="Phát lại"
+            android:textColor="@color/brand_cyan"
+            android:textSize="13sp"
+            android:textStyle="bold" />
 
-    <!-- Giữ màn hình luôn bật -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:gravity="center_vertical"
-        android:orientation="horizontal">
-
-        <TextView
-            android:layout_width="0dp"
+        <!-- Tự động chuyển tập -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Giữ màn hình luôn bật"
-            android:textColor="#FFFFFF"
-            android:textSize="14sp" />
+            android:layout_marginTop="8dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
-        <androidx.appcompat.widget.SwitchCompat
-            android:id="@+id/switchKeepScreenOn"
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Tự động chuyển tập tiếp theo"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp" />
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/switchAutoNext"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true" />
+        </LinearLayout>
+
+        <!-- Tiếp tục phát trong PiP -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Tự động bật PiP khi về màn hình chính"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp" />
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/switchPipOnHome"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="12dp"
+            android:background="#2E3C56" />
+
+        <!-- ================= SECTION: TUA VIDEO ================= -->
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:checked="true" />
+            android:text="Thời gian nháy đúp tua (Tua tới / Tua lùi)"
+            android:textColor="@color/brand_cyan"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+
+        <RadioGroup
+            android:id="@+id/rgSeekStep"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/rbSeek5"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="5s"
+                android:textColor="#FFFFFF"
+                android:textSize="12sp" />
+
+            <RadioButton
+                android:id="@+id/rbSeek10"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:checked="true"
+                android:text="10s"
+                android:textColor="#FFFFFF"
+                android:textSize="12sp" />
+
+            <RadioButton
+                android:id="@+id/rbSeek15"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="15s"
+                android:textColor="#FFFFFF"
+                android:textSize="12sp" />
+
+            <RadioButton
+                android:id="@+id/rbSeek30"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="30s"
+                android:textColor="#FFFFFF"
+                android:textSize="12sp" />
+        </RadioGroup>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="12dp"
+            android:background="#2E3C56" />
+
+        <!-- ================= SECTION: CỬ CHỈ & HIỂN THỊ ================= -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Cử chỉ &amp; Hiển thị"
+            android:textColor="@color/brand_cyan"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+
+        <!-- Vuốt bên trái chỉnh độ sáng -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Vuốt bên trái để điều chỉnh độ sáng"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp" />
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/switchBrightnessGesture"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true" />
+        </LinearLayout>
+
+        <!-- Vuốt bên phải chỉnh âm lượng -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Vuốt bên phải để điều chỉnh âm lượng"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp" />
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/switchVolumeGesture"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true" />
+        </LinearLayout>
+
+        <!-- Giữ màn hình luôn bật -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Giữ màn hình luôn bật khi xem"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp" />
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/switchKeepScreenOn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true" />
+        </LinearLayout>
+
     </LinearLayout>
 
-</LinearLayout>
+</androidx.core.widget.NestedScrollView>
