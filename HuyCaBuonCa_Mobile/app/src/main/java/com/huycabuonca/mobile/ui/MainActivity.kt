@@ -37,6 +37,8 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        MovieRepository.initTvChannels(this)
+
         setupUI()
         setupSourceSelectors()
         updateDynamicFilters()
@@ -89,8 +91,13 @@ class MainActivity : AppCompatActivity() {
             switchSource(MovieSource.ANIMEHAY)
         }
 
+        binding.btnSourceXemTiVi.setOnClickListener {
+            switchSource(MovieSource.XEMTIVI)
+        }
+
         binding.btnSourceKKPhim.isSelected = true
         binding.btnSourceAnimeHay.isSelected = false
+        binding.btnSourceXemTiVi.isSelected = false
     }
 
     private fun switchSource(source: MovieSource) {
@@ -98,6 +105,7 @@ class MainActivity : AppCompatActivity() {
         currentSource = source
         binding.btnSourceKKPhim.isSelected = (source == MovieSource.KKPHIM)
         binding.btnSourceAnimeHay.isSelected = (source == MovieSource.ANIMEHAY)
+        binding.btnSourceXemTiVi.isSelected = (source == MovieSource.XEMTIVI)
 
         updateDynamicFilters()
         loadMovies(reset = true)

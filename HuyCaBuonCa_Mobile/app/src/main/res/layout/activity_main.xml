@@ -83,8 +83,19 @@
                 android:id="@+id/btnSourceAnimeHay"
                 android:layout_width="wrap_content"
                 android:layout_height="36dp"
+                android:layout_marginEnd="8dp"
                 android:background="@drawable/bg_btn_selector"
                 android:text="⛩️ AnimeHay"
+                android:textColor="@color/text_primary"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/btnSourceXemTiVi"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:background="@drawable/bg_btn_selector"
+                android:text="📺 Xem tiVi"
                 android:textColor="@color/text_primary"
                 android:textSize="11sp"
                 android:textStyle="bold" />

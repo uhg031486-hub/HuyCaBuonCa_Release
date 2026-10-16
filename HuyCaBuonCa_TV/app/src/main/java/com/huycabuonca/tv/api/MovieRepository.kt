@@ -1,7 +1,9 @@
 package com.huycabuonca.tv.api
 
+import android.content.Context
 import com.google.gson.Gson
 import com.google.gson.JsonObject
+import com.google.gson.reflect.TypeToken
 import com.huycabuonca.tv.model.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -9,6 +11,14 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.net.URLEncoder
 import java.util.concurrent.TimeUnit
+
+data class TvChannelItem(
+    val id: String,
+    val name: String,
+    val group: String,
+    val logo: String,
+    val url: String
+)
 
 object MovieRepository {
 
@@ -19,6 +29,35 @@ object MovieRepository {
 
     private val gson = Gson()
     private const val KKPHIM_IMG_BASE = "https://phimimg.com/"
+    private var cachedTvChannels: List<TvChannelItem>? = null
+
+    fun initTvChannels(context: Context) {
+        if (cachedTvChannels != null) return
+        try {
+            val jsonString = context.assets.open("tv_channels.json").bufferedReader().use { it.readText() }
+            val itemType = object : TypeToken<List<TvChannelItem>>() {}.type
+            cachedTvChannels = gson.fromJson(jsonString, itemType)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    private fun TvChannelItem.toMovieItem(): MovieItem {
+        val defaultTvLogo = "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png"
+        val finalLogo = if (logo.isNotEmpty()) logo else defaultTvLogo
+        return MovieItem(
+            id = id,
+            name = name,
+            slug = id,
+            originName = "[$group]",
+            thumbUrl = finalLogo,
+            posterUrl = finalLogo,
+            year = "24/7",
+            quality = "LIVE",
+            episodeCurrent = group,
+            source = MovieSource.XEMTIVI
+        )
+    }
 
     private fun JsonObject.getSafeString(key: String, default: String = ""): String {
         if (!has(key)) return default
@@ -56,13 +95,57 @@ object MovieRepository {
                 FilterItem("Anime Học Đường", "https://phimapi.com/v1/api/the-loai/hoc-duong"),
                 FilterItem("Anime Viễn Tưởng", "https://phimapi.com/v1/api/the-loai/vien-tuong")
             )
+            MovieSource.XEMTIVI -> listOf(
+                FilterItem("Tất Cả Kênh", "tv://all"),
+                FilterItem("VTV Quốc Gia", "tv://vtv"),
+                FilterItem("Bóng Đá & Thể Thao", "tv://sports"),
+                FilterItem("VTVcab", "tv://vtvcab"),
+                FilterItem("SCTV", "tv://sctv"),
+                FilterItem("Rạp Phim", "tv://movies"),
+                FilterItem("Sự Kiện Live 🔴", "tv://live"),
+                FilterItem("Kênh Quốc Tế", "tv://intl"),
+                FilterItem("Đài Địa Phương", "tv://local"),
+                FilterItem("Radio Trực Tuyến", "tv://radio")
+            )
         }
     }
 
     suspend fun getMovies(source: MovieSource, filterUrl: String, page: Int = 1): List<MovieItem> {
         return withContext(Dispatchers.IO) {
             try {
-                fetchKKPhimList(filterUrl, page, source)
+                if (source == MovieSource.XEMTIVI) {
+                    val channels = cachedTvChannels ?: emptyList()
+                    val filtered = when (filterUrl) {
+                        "tv://vtv" -> channels.filter { it.group.equals("VTV", ignoreCase = true) }
+                        "tv://sports" -> channels.filter {
+                            it.group.contains("THỂ THAO", ignoreCase = true) ||
+                            it.group.contains("Thể thao", ignoreCase = true) ||
+                            it.group.contains("CUP", ignoreCase = true)
+                        }
+                        "tv://vtvcab" -> channels.filter { it.group.contains("VTVcab", ignoreCase = true) }
+                        "tv://sctv" -> channels.filter { it.group.contains("SCTV", ignoreCase = true) }
+                        "tv://movies" -> channels.filter { it.group.contains("Rạp Phim", ignoreCase = true) }
+                        "tv://live" -> channels.filter {
+                            it.group.contains("LIVE", ignoreCase = true) ||
+                            it.group.contains("Sự Kiện", ignoreCase = true)
+                        }
+                        "tv://intl" -> channels.filter {
+                            it.group.contains("Quốc Tế", ignoreCase = true) ||
+                            it.group.contains("Hàn Quốc", ignoreCase = true) ||
+                            it.group.contains("Trung Quốc", ignoreCase = true) ||
+                            it.group.contains("Israel", ignoreCase = true) ||
+                            it.group.contains("TVB", ignoreCase = true)
+                        }
+                        "tv://local" -> channels.filter { it.group.contains("Địa phương", ignoreCase = true) || it.group.contains("HTV", ignoreCase = true) }
+                        "tv://radio" -> channels.filter { it.group.contains("Radio", ignoreCase = true) }
+                        else -> channels
+                    }
+                    if (page == 1) {
+                        filtered.map { it.toMovieItem() }
+                    } else emptyList()
+                } else {
+                    fetchKKPhimList(filterUrl, page, source)
+                }
             } catch (e: Exception) {
                 e.printStackTrace()
                 emptyList()
@@ -73,7 +156,41 @@ object MovieRepository {
     suspend fun getMovieDetail(source: MovieSource, slug: String): MovieDetail? {
         return withContext(Dispatchers.IO) {
             try {
-                fetchKKPhimDetail(slug, source)
+                if (source == MovieSource.XEMTIVI) {
+                    val channel = cachedTvChannels?.find { it.id == slug }
+                    if (channel != null) {
+                        val defaultTvLogo = "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png"
+                        val finalLogo = if (channel.logo.isNotEmpty()) channel.logo else defaultTvLogo
+                        MovieDetail(
+                            id = channel.id,
+                            name = channel.name,
+                            slug = channel.id,
+                            originName = "[${channel.group}]",
+                            content = "Kênh truyền hình trực tuyến: ${channel.name} thuộc nhóm ${channel.group}. Luồng phát HLS/M3U8 ổn định từ tiện ích Xem tiVi (Chanhnh).",
+                            thumbUrl = finalLogo,
+                            posterUrl = finalLogo,
+                            year = "2026",
+                            time = "Phát sóng 24/7",
+                            quality = "LIVE",
+                            lang = "Tiếng Việt / Thuyết Minh",
+                            source = MovieSource.XEMTIVI,
+                            servers = listOf(
+                                ServerGroup(
+                                    serverName = "Luồng Trực Tiếp (Live HLS)",
+                                    episodes = listOf(
+                                        EpisodeItem(
+                                            name = "Trực Tiếp (Live)",
+                                            slug = channel.id,
+                                            linkM3u8 = channel.url
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                    } else null
+                } else {
+                    fetchKKPhimDetail(slug, source)
+                }
             } catch (e: Exception) {
                 e.printStackTrace()
                 null
@@ -85,6 +202,13 @@ object MovieRepository {
         return withContext(Dispatchers.IO) {
             val results = mutableListOf<MovieItem>()
             try {
+                // 1. Tim trong kenh TV
+                val tvMatches = cachedTvChannels?.filter {
+                    it.name.contains(keyword, ignoreCase = true) || it.group.contains(keyword, ignoreCase = true)
+                } ?: emptyList()
+                results.addAll(tvMatches.map { it.toMovieItem() })
+
+                // 2. Tim trong phim KKPhim
                 val encoded = URLEncoder.encode(keyword, "UTF-8")
                 val urlKK = "https://phimapi.com/v1/api/tim-kiem?keyword=$encoded"
                 val req = Request.Builder().url(urlKK).header("User-Agent", "Mozilla/5.0").build()
