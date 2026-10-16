@@ -1,0 +1,8 @@
+{
+  "versionCode": 11,
+  "versionName": "2.0",
+  "title": "Huy Cá Buôn Cà v2.0",
+  "changelog": "- Chuẩn hóa 100% avatar kênh TV không còn lỗi hình ảnh.\n- Tự động nhận diện video dọc theo kích thước thực.\n- Bấm phím số (0-9) trên Remote TV Box chuyển kênh tức thì.\n- Tự động phát tập tiếp theo kèm đếm ngược 5s.\n- Bộ đệm video thông minh 15s - 60s chống giật lag.\n- Chế độ thu nhỏ góc màn hình (PiP) trên điện thoại.",
+  "mobileApkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v2.0/HuyCaBuonCa_Mobile_v2.0.apk",
+  "tvApkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v2.0/HuyCaBuonCa_TV_v2.0.apk"
+}

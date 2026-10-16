@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit
 
 object AppUpdateManager {
 
-    private const val UPDATE_CONFIG_URL = "https://raw.githubusercontent.com/huycabuonca/app-releases/main/version.json"
+    private const val UPDATE_CONFIG_URL = "https://raw.githubusercontent.com/uhg031486-hub/HuyCaBuonCa_Release/main/version.json"
 
     data class UpdateInfo(
         val versionCode: Int,
