@@ -2,9 +2,11 @@
 <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:background="#161B26"
-    android:fillViewport="true">
+    android:clipToPadding="false"
+    android:fillViewport="true"
+    android:paddingBottom="72dp">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -229,6 +231,76 @@
                 android:layout_height="wrap_content"
                 android:checked="true" />
         </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="12dp"
+            android:background="#2E3C56" />
+
+        <!-- ================= SECTION: HẸN GIỜ TẮT (SLEEP TIMER) ================= -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="⏰ Hẹn giờ tắt (Sleep Timer)"
+            android:textColor="@color/brand_cyan"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+
+        <RadioGroup
+            android:id="@+id/rgSleepTimer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/rbSleepOff"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:checked="true"
+                android:text="Tắt"
+                android:textColor="#FFFFFF"
+                android:textSize="11sp" />
+
+            <RadioButton
+                android:id="@+id/rbSleep15"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="15p"
+                android:textColor="#FFFFFF"
+                android:textSize="11sp" />
+
+            <RadioButton
+                android:id="@+id/rbSleep30"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="30p"
+                android:textColor="#FFFFFF"
+                android:textSize="11sp" />
+
+            <RadioButton
+                android:id="@+id/rbSleep60"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="60p"
+                android:textColor="#FFFFFF"
+                android:textSize="11sp" />
+
+            <RadioButton
+                android:id="@+id/rbSleepEndEpisode"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1.2"
+                android:text="Hết tập"
+                android:textColor="#FFD700"
+                android:textSize="11sp" />
+        </RadioGroup>
 
         <View
             android:layout_width="match_parent"

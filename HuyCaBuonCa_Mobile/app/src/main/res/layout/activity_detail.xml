@@ -309,18 +309,47 @@
             </LinearLayout>
         </FrameLayout>
 
+        <!-- Bề mặt cảm ứng khi khóa (bắt chạm để nhắc nhở nút mở khóa) -->
+        <View
+            android:id="@+id/lockTouchSurface"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone" />
+
         <!-- Unlock button (Chỉ hiện khi màn hình bị khóa) -->
         <ImageButton
             android:id="@+id/btnUnlock"
-            android:layout_width="44dp"
-            android:layout_height="44dp"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:layout_gravity="start|center_vertical"
             android:layout_marginStart="16dp"
             android:background="@drawable/bg_btn_secondary"
             android:contentDescription="Mở khóa màn hình"
-            android:elevation="12dp"
-            android:padding="10dp"
+            android:elevation="16dp"
+            android:padding="11dp"
             android:src="@drawable/ic_lock_open"
+            android:visibility="gone" />
+
+        <!-- Nút Bỏ qua Intro (+85s) chuẩn Netflix/vBook -->
+        <TextView
+            android:id="@+id/btnSkipIntro"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="60dp"
+            android:background="@drawable/bg_btn_selector"
+            android:clickable="true"
+            android:elevation="14dp"
+            android:focusable="true"
+            android:paddingStart="12dp"
+            android:paddingTop="6dp"
+            android:paddingEnd="12dp"
+            android:paddingBottom="6dp"
+            android:text="+85s Bỏ qua Intro ►"
+            android:textColor="#FFD700"
+            android:textSize="12sp"
+            android:textStyle="bold"
             android:visibility="gone" />
     </FrameLayout>
 

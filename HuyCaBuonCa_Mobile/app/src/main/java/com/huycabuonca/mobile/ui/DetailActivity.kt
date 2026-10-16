@@ -64,6 +64,11 @@ class DetailActivity : AppCompatActivity() {
     private var isUserSeeking = false
     private var hasResumedPositionForCurrentEpisode = false
 
+    // Hẹn giờ tắt (Sleep Timer) & Bỏ qua Intro
+    private var sleepTimerMinutes = 0
+    private var sleepTimerEndEpisode = false
+    private var sleepTimerRunnable: Runnable? = null
+
     // Bộ hẹn giờ (Handlers)
     private val mainHandler = Handler(Looper.getMainLooper())
     private val hideControlsRunnable = Runnable {
@@ -87,6 +92,17 @@ class DetailActivity : AppCompatActivity() {
 
                     // Lưu vị trí xem dở (vBook auto resume)
                     savePlaybackPosition(currentPos)
+                }
+
+                // Nút Bỏ qua Intro (+85s) tự động xuất hiện trong khoảng 1.000ms đến 95.000ms
+                if (duration > 300_000L && currentPos in 1000L..95_000L && !isScreenLocked) {
+                    if (binding.btnSkipIntro.visibility != View.VISIBLE) {
+                        binding.btnSkipIntro.visibility = View.VISIBLE
+                    }
+                } else {
+                    if (binding.btnSkipIntro.visibility == View.VISIBLE) {
+                        binding.btnSkipIntro.visibility = View.GONE
+                    }
                 }
             }
             mainHandler.postDelayed(this, 500)
@@ -232,13 +248,28 @@ class DetailActivity : AppCompatActivity() {
             resetAutoHideTimer()
         }
 
-        // 11. Khóa cảm ứng màn hình (Lock)
+        // 11. Khóa cảm ứng màn hình (Lock) & Mở khóa
         binding.btnLock.setOnClickListener {
             setScreenLock(true)
         }
 
         binding.btnUnlock.setOnClickListener {
             setScreenLock(false)
+        }
+
+        binding.lockTouchSurface.setOnClickListener {
+            binding.btnUnlock.visibility = View.VISIBLE
+            binding.btnUnlock.animate().scaleX(1.25f).scaleY(1.25f).setDuration(150).withEndAction {
+                binding.btnUnlock.animate().scaleX(1.0f).scaleY(1.0f).setDuration(150).start()
+            }.start()
+            Toast.makeText(this, "Chạm biểu tượng ổ khóa bên trái để mở khóa màn hình", Toast.LENGTH_SHORT).show()
+        }
+
+        // Nút Bỏ qua Intro (+85s)
+        binding.btnSkipIntro.setOnClickListener {
+            seekDelta(85000L)
+            binding.btnSkipIntro.visibility = View.GONE
+            Toast.makeText(this, "Đã bỏ qua đoạn mở đầu (+85s)!", Toast.LENGTH_SHORT).show()
         }
 
         // 12. PiP / Phát trong nền (vBook style)
@@ -355,11 +386,14 @@ class DetailActivity : AppCompatActivity() {
         gestureHelper.isLocked = locked
         if (locked) {
             hideControls()
+            binding.btnSkipIntro.visibility = View.GONE
+            binding.lockTouchSurface.visibility = View.VISIBLE
             binding.btnUnlock.visibility = View.VISIBLE
-            Toast.makeText(this, "Đã khóa màn hình! Chạm icon ổ khóa để mở lại", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Đã khóa màn hình! Chạm biểu tượng ổ khóa bên trái để mở lại", Toast.LENGTH_SHORT).show()
         } else {
-            showControls()
+            binding.lockTouchSurface.visibility = View.GONE
             binding.btnUnlock.visibility = View.GONE
+            showControls()
             Toast.makeText(this, "Đã mở khóa màn hình", Toast.LENGTH_SHORT).show()
         }
     }
@@ -450,7 +484,7 @@ class DetailActivity : AppCompatActivity() {
         requestedOrientation = if (isLandscape) {
             ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         } else {
-            ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+            ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
         }
     }
 
@@ -484,6 +518,10 @@ class DetailActivity : AppCompatActivity() {
 
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
+        if (isScreenLocked) {
+            Toast.makeText(this, "Màn hình đang khóa! Vui lòng chạm biểu tượng ổ khóa bên trái để mở", Toast.LENGTH_SHORT).show()
+            return
+        }
         if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         } else {
@@ -511,6 +549,27 @@ class DetailActivity : AppCompatActivity() {
         }
     }
 
+    private fun setSleepTimer(minutes: Int, endEpisode: Boolean) {
+        sleepTimerRunnable?.let { mainHandler.removeCallbacks(it) }
+        sleepTimerMinutes = minutes
+        sleepTimerEndEpisode = endEpisode
+
+        if (endEpisode) {
+            Toast.makeText(this, "Đã hẹn: Tự động dừng phát khi hết tập hiện tại", Toast.LENGTH_LONG).show()
+        } else if (minutes > 0) {
+            val millis = minutes * 60 * 1000L
+            val runnable = Runnable {
+                player?.pause()
+                Toast.makeText(this, "⏰ Hẹn giờ tắt: Đã hết $minutes phút, tạm dừng phát!", Toast.LENGTH_LONG).show()
+            }
+            sleepTimerRunnable = runnable
+            mainHandler.postDelayed(runnable, millis)
+            Toast.makeText(this, "Đã hẹn giờ tắt sau $minutes phút", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(this, "Đã tắt hẹn giờ", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     private fun showVBookSettingsDialog() {
         val dialog = BottomSheetDialog(this)
         val view = layoutInflater.inflate(R.layout.dialog_vbook_settings, null)
@@ -523,9 +582,21 @@ class DetailActivity : AppCompatActivity() {
                 val behavior = BottomSheetBehavior.from(bottomSheet)
                 behavior.state = BottomSheetBehavior.STATE_EXPANDED
                 behavior.skipCollapsed = true
-                if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                    behavior.peekHeight = resources.displayMetrics.heightPixels
+                behavior.isDraggable = true
+                val displayMetrics = resources.displayMetrics
+                val isLandscape = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+                if (isLandscape) {
+                    behavior.peekHeight = displayMetrics.heightPixels
+                    behavior.maxHeight = displayMetrics.heightPixels
+                    val panelWidth = (displayMetrics.widthPixels * 0.48).toInt().coerceAtLeast((360 * displayMetrics.density).toInt())
+                    dialog.window?.let { win ->
+                        win.setLayout(panelWidth, ViewGroup.LayoutParams.MATCH_PARENT)
+                        win.setGravity(android.view.Gravity.END or android.view.Gravity.TOP)
+                    }
                     bottomSheet.layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT
+                    bottomSheet.layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT
+                } else {
+                    behavior.peekHeight = (displayMetrics.heightPixels * 0.8).toInt()
                 }
             }
         }
@@ -589,7 +660,8 @@ class DetailActivity : AppCompatActivity() {
 
         val switchAutoNext = view.findViewById<androidx.appcompat.widget.SwitchCompat>(R.id.switchAutoNext)
         val switchPipOnHome = view.findViewById<androidx.appcompat.widget.SwitchCompat>(R.id.switchPipOnHome)
-        val rgSeekStep = view.findViewById<android.widget.RadioGroup>(R.id.rgSeekStep)
+        val rgSleepTimer = view.findViewById<RadioGroup>(R.id.rgSleepTimer)
+        val rgSeekStep = view.findViewById<RadioGroup>(R.id.rgSeekStep)
         val switchBrightnessGesture = view.findViewById<androidx.appcompat.widget.SwitchCompat>(R.id.switchBrightnessGesture)
         val switchVolumeGesture = view.findViewById<androidx.appcompat.widget.SwitchCompat>(R.id.switchVolumeGesture)
         val switchKeepScreenOn = view.findViewById<androidx.appcompat.widget.SwitchCompat>(R.id.switchKeepScreenOn)
@@ -600,11 +672,33 @@ class DetailActivity : AppCompatActivity() {
         switchPipOnHome?.isChecked = pipOnHome
         switchPipOnHome?.setOnCheckedChangeListener { _, isChecked -> pipOnHome = isChecked }
 
+        // Khởi tạo trạng thái Sleep Timer
+        if (sleepTimerEndEpisode) {
+            view.findViewById<RadioButton>(R.id.rbSleepEndEpisode)?.isChecked = true
+        } else {
+            when (sleepTimerMinutes) {
+                15 -> view.findViewById<RadioButton>(R.id.rbSleep15)?.isChecked = true
+                30 -> view.findViewById<RadioButton>(R.id.rbSleep30)?.isChecked = true
+                60 -> view.findViewById<RadioButton>(R.id.rbSleep60)?.isChecked = true
+                else -> view.findViewById<RadioButton>(R.id.rbSleepOff)?.isChecked = true
+            }
+        }
+
+        rgSleepTimer?.setOnCheckedChangeListener { _, checkedId ->
+            when (checkedId) {
+                R.id.rbSleep15 -> setSleepTimer(15, false)
+                R.id.rbSleep30 -> setSleepTimer(30, false)
+                R.id.rbSleep60 -> setSleepTimer(60, false)
+                R.id.rbSleepEndEpisode -> setSleepTimer(0, true)
+                else -> setSleepTimer(0, false)
+            }
+        }
+
         when (gestureHelper.seekStepSeconds) {
-            5 -> view.findViewById<android.widget.RadioButton>(R.id.rbSeek5)?.isChecked = true
-            15 -> view.findViewById<android.widget.RadioButton>(R.id.rbSeek15)?.isChecked = true
-            30 -> view.findViewById<android.widget.RadioButton>(R.id.rbSeek30)?.isChecked = true
-            else -> view.findViewById<android.widget.RadioButton>(R.id.rbSeek10)?.isChecked = true
+            5 -> view.findViewById<RadioButton>(R.id.rbSeek5)?.isChecked = true
+            15 -> view.findViewById<RadioButton>(R.id.rbSeek15)?.isChecked = true
+            30 -> view.findViewById<RadioButton>(R.id.rbSeek30)?.isChecked = true
+            else -> view.findViewById<RadioButton>(R.id.rbSeek10)?.isChecked = true
         }
 
         rgSeekStep?.setOnCheckedChangeListener { _, checkedId ->
@@ -798,6 +892,11 @@ class DetailActivity : AppCompatActivity() {
                             binding.playerLoading.visibility = View.GONE
                             binding.btnCenterPlayPause.setImageResource(R.drawable.ic_play)
                             showControls()
+                            if (sleepTimerEndEpisode) {
+                                sleepTimerEndEpisode = false
+                                Toast.makeText(this@DetailActivity, "⏰ Đã xem hết tập! Hẹn giờ dừng phát tự động.", Toast.LENGTH_LONG).show()
+                                return
+                            }
                             if (autoNextEpisode && currentEpisodeIndex < currentEpisodes.size - 1) {
                                 currentEpisodeIndex++
                                 playEpisode(currentEpisodes[currentEpisodeIndex])
