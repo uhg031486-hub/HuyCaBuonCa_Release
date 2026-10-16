@@ -5,7 +5,8 @@ import java.io.Serializable
 enum class MovieSource(val displayName: String) {
     KKPHIM("KKPhim (HLS VIP)"),
     ANIMEHAY("AnimeHay (Hoạt Hình Anime)"),
-    XEMTIVI("Xem TiVi (Truyền Hình Trực Tuyến)")
+    XEMTIVI("Xem TiVi (Truyền Hình Trực Tuyến)"),
+    FREEREELS("FreeReels (Phim Ngắn Dọc)")
 }
 
 data class FilterItem(
@@ -53,4 +54,15 @@ data class EpisodeItem(
     val filename: String = "",
     val linkM3u8: String? = null,
     val linkEmbed: String? = null
+) : Serializable
+
+data class FootballMatch(
+    val id: String,
+    val time: String,
+    val tournament: String,
+    val teamA: String,
+    val teamB: String,
+    val channelName: String,
+    val channelSlug: String,
+    val score: String = "VS"
 ) : Serializable

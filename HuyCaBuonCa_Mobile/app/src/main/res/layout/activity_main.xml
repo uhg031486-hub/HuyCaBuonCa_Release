@@ -43,13 +43,53 @@
                 android:textStyle="italic" />
         </LinearLayout>
 
+        <!-- Lịch thi đấu bóng đá -->
+        <Button
+            android:id="@+id/btnSchedule"
+            android:layout_width="wrap_content"
+            android:layout_height="34dp"
+            android:layout_marginEnd="6dp"
+            android:background="@drawable/bg_btn_selector"
+            android:text="⚽ Lịch đấu"
+            android:textColor="#FFD700"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp" />
+
+        <!-- Nhập kênh IPTV tùy biến -->
+        <Button
+            android:id="@+id/btnCustomIptv"
+            android:layout_width="wrap_content"
+            android:layout_height="34dp"
+            android:layout_marginEnd="6dp"
+            android:background="@drawable/bg_btn_selector"
+            android:text="➕ IPTV"
+            android:textColor="@color/brand_cyan"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp" />
+
+        <!-- Sao lưu / Khôi phục -->
+        <ImageButton
+            android:id="@+id/btnBackupSync"
+            android:layout_width="34dp"
+            android:layout_height="34dp"
+            android:layout_marginEnd="6dp"
+            android:background="@drawable/bg_btn_selector"
+            android:contentDescription="Sao lưu &amp; Khôi phục"
+            android:padding="6dp"
+            android:src="@android:drawable/ic_menu_save" />
+
         <!-- Search button -->
         <ImageButton
             android:id="@+id/btnSearch"
-            android:layout_width="38dp"
-            android:layout_height="38dp"
+            android:layout_width="34dp"
+            android:layout_height="34dp"
             android:background="@drawable/bg_btn_selector"
             android:contentDescription="Tìm kiếm"
+            android:padding="6dp"
             android:src="@android:drawable/ic_menu_search" />
     </LinearLayout>
 
@@ -94,8 +134,19 @@
                 android:id="@+id/btnSourceXemTiVi"
                 android:layout_width="wrap_content"
                 android:layout_height="36dp"
+                android:layout_marginEnd="8dp"
                 android:background="@drawable/bg_btn_selector"
                 android:text="📺 Xem tiVi"
+                android:textColor="@color/text_primary"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/btnSourceFreeReels"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:background="@drawable/bg_btn_selector"
+                android:text="🎬 Phim Ngắn (FreeReels)"
                 android:textColor="@color/text_primary"
                 android:textSize="11sp"
                 android:textStyle="bold" />

@@ -54,6 +54,50 @@
             tools:text="Tên Phim - Tập 01 (Vietsub)" />
     </LinearLayout>
 
+    <!-- On-screen TV Channel Zapping Banner (Hiện khi đổi kênh TV) -->
+    <LinearLayout
+        android:id="@+id/layoutChannelBanner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|start"
+        android:layout_marginStart="28dp"
+        android:layout_marginTop="56dp"
+        android:background="@drawable/bg_btn_secondary"
+        android:orientation="vertical"
+        android:paddingStart="16dp"
+        android:paddingTop="10dp"
+        android:paddingEnd="20dp"
+        android:paddingBottom="10dp"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/txtChannelNumber"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="KÊNH 01"
+            android:textColor="@color/brand_cyan"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/txtChannelName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="VTV6 Thể Thao HD"
+            android:textColor="#FFD700"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/txtChannelGroup"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Nhóm: Bóng Đá &amp; Thể Thao"
+            android:textColor="#FFFFFF"
+            android:textSize="11sp" />
+    </LinearLayout>
+
     <!-- TV Remote Help Bar at Bottom (Auto fades out) -->
     <TextView
         android:id="@+id/txtRemoteTips"
@@ -66,8 +110,49 @@
         android:paddingTop="6dp"
         android:paddingEnd="16dp"
         android:paddingBottom="6dp"
-        android:text="Điều khiển Remote: [ ◄ / ► ] Tua 10s  •  [ OK ] Phát/Dừng  •  [ BACK ] Thoát"
+        android:text="Điều khiển Remote: [ ▲ / ▼ ] Đổi Kênh Cùng Nhóm  •  [ ◄ ] Danh Sách Kênh  •  [ ► ] Tua 10s  •  [ OK ] Phát/Dừng"
         android:textColor="@color/brand_gold"
         android:textSize="11sp" />
+
+    <!-- Side Quick Channel Strip (Danh sách kênh cùng nhóm khi bấm Phím Trái hoặc Menu) -->
+    <LinearLayout
+        android:id="@+id/layoutSideChannelList"
+        android:layout_width="320dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:background="#F00D1117"
+        android:elevation="20dp"
+        android:orientation="vertical"
+        android:paddingStart="16dp"
+        android:paddingTop="20dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="20dp"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/txtSideGroupTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="DANH SÁCH KÊNH CÙNG NHÓM"
+            android:textColor="#FFD700"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/txtSideGroupSub"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="Bấm OK/Enter để chuyển kênh tức thì"
+            android:textColor="#8B949E"
+            android:textSize="11sp" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerSideChannels"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="12dp"
+            android:layout_weight="1" />
+    </LinearLayout>
 
 </FrameLayout>

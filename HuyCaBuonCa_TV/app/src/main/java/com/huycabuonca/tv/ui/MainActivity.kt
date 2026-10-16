@@ -50,6 +50,7 @@ class MainActivity : AppCompatActivity() {
         TvFocusUtil.setupFocusScale(binding.btnSourceKKPhim)
         TvFocusUtil.setupFocusScale(binding.btnSourceAnimeHay)
         TvFocusUtil.setupFocusScale(binding.btnSourceXemTiVi)
+        TvFocusUtil.setupFocusScale(binding.btnSourceFreeReels)
         TvFocusUtil.setupFocusScale(binding.btnSearch)
 
         adapter = MovieAdapter { movie ->
@@ -95,9 +96,14 @@ class MainActivity : AppCompatActivity() {
             switchSource(MovieSource.XEMTIVI)
         }
 
+        binding.btnSourceFreeReels.setOnClickListener {
+            switchSource(MovieSource.FREEREELS)
+        }
+
         binding.btnSourceKKPhim.isSelected = true
         binding.btnSourceAnimeHay.isSelected = false
         binding.btnSourceXemTiVi.isSelected = false
+        binding.btnSourceFreeReels.isSelected = false
     }
 
     private fun switchSource(source: MovieSource) {
@@ -106,6 +112,7 @@ class MainActivity : AppCompatActivity() {
         binding.btnSourceKKPhim.isSelected = (source == MovieSource.KKPHIM)
         binding.btnSourceAnimeHay.isSelected = (source == MovieSource.ANIMEHAY)
         binding.btnSourceXemTiVi.isSelected = (source == MovieSource.XEMTIVI)
+        binding.btnSourceFreeReels.isSelected = (source == MovieSource.FREEREELS)
 
         updateDynamicFilters()
         loadMovies(reset = true)

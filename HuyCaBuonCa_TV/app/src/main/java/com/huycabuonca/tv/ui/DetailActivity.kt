@@ -105,12 +105,37 @@ class DetailActivity : AppCompatActivity() {
             return
         }
 
+        if (streamUrl.startsWith("freereels_unlock:")) {
+            val tokens = streamUrl.split(":")
+            if (tokens.size >= 3) {
+                binding.progressEpisodes.visibility = View.VISIBLE
+                lifecycleScope.launch {
+                    val realM3u8 = MovieRepository.unlockFreeReelsEpisode(tokens[1], tokens[2])
+                    binding.progressEpisodes.visibility = View.GONE
+                    if (!realM3u8.isNullOrEmpty()) {
+                        val intent = Intent(this@DetailActivity, PlayerActivity::class.java).apply {
+                            putExtra("EXTRA_STREAM_URL", realM3u8)
+                            putExtra("EXTRA_IS_M3U8", true)
+                            putExtra("EXTRA_TITLE", movieItem?.name ?: "Phim Ngắn")
+                            putExtra("EXTRA_EPISODE", episode.name)
+                        }
+                        startActivity(intent)
+                    } else {
+                        Toast.makeText(this@DetailActivity, "Không thể tải luồng phát tập này, vui lòng thử lại!", Toast.LENGTH_SHORT).show()
+                    }
+                }
+                return
+            }
+        }
+
         val intent = Intent(this, PlayerActivity::class.java).apply {
             putExtra("EXTRA_STREAM_URL", streamUrl)
             putExtra("EXTRA_EMBED_URL", episode.linkEmbed)
             putExtra("EXTRA_IS_M3U8", episode.linkM3u8 != null)
             putExtra("EXTRA_TITLE", movieItem?.name ?: "Xem Phim")
             putExtra("EXTRA_EPISODE", episode.name)
+            putExtra("EXTRA_SOURCE", movieItem?.source?.name)
+            putExtra("EXTRA_CHANNEL_ID", movieItem?.id)
         }
         startActivity(intent)
     }

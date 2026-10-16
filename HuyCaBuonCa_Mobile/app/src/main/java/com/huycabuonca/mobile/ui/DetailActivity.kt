@@ -33,14 +33,23 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import androidx.media3.ui.CaptionStyleCompat
 import android.util.TypedValue
+import android.view.LayoutInflater
+import android.widget.Button
+import android.widget.ImageView
 import android.widget.RadioButton
 import android.widget.RadioGroup
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.huycabuonca.mobile.R
 import com.huycabuonca.mobile.api.MovieRepository
+import com.huycabuonca.mobile.api.MovieRepository.toMovieItem
+import com.huycabuonca.mobile.api.TvChannelItem
 import com.huycabuonca.mobile.databinding.ActivityDetailBinding
 import com.huycabuonca.mobile.model.EpisodeItem
 import com.huycabuonca.mobile.model.MovieDetail
 import com.huycabuonca.mobile.model.MovieItem
+import com.huycabuonca.mobile.model.MovieSource
 import com.huycabuonca.mobile.model.ServerGroup
 import com.huycabuonca.mobile.ui.adapter.EpisodeAdapter
 import com.huycabuonca.mobile.util.PlayerGestureHelper
@@ -123,6 +132,14 @@ class DetailActivity : AppCompatActivity() {
         androidx.media3.ui.AspectRatioFrameLayout.RESIZE_MODE_FILL to "Kéo giãn toàn màn hình"
     )
 
+    private var loudnessEnhancer: android.media.audiofx.LoudnessEnhancer? = null
+    private var currentGainMb = 0
+    private var isDataSaverEnabled = false
+
+    // Chuyển kênh nhanh TV (Quick Zapping) & Danh sách kênh cùng nhóm
+    private var currentTvChannel: TvChannelItem? = null
+    private var sameGroupChannels = mutableListOf<TvChannelItem>()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
@@ -142,6 +159,7 @@ class DetailActivity : AppCompatActivity() {
 
     private fun setupUI() {
         val movie = movieItem!!
+        val isTv = movie.source == MovieSource.XEMTIVI
         binding.txtDetailTitle.text = movie.name
         binding.txtDetailMeta.text = "Nguồn: ${movie.source.displayName} • ${movie.year}"
 
@@ -156,8 +174,29 @@ class DetailActivity : AppCompatActivity() {
         binding.recyclerEpisodes.layoutManager = GridLayoutManager(this, 4)
         binding.recyclerEpisodes.adapter = episodeAdapter
 
-        binding.btnPrevEpisode.setOnClickListener { playPreviousEpisode() }
-        binding.btnNextEpisode.setOnClickListener { playNextEpisode() }
+        if (isTv) {
+            binding.btnPrevEpisode.text = "⏮️ Kênh Trước"
+            binding.btnNextEpisode.text = "Kênh Sau ⏭️"
+            binding.btnSameGroupChannels.visibility = View.VISIBLE
+
+            val allTv = MovieRepository.getAllTvChannels(this)
+            currentTvChannel = allTv.find { it.id == movie.slug || it.name.equals(movie.name, ignoreCase = true) }
+            if (currentTvChannel != null) {
+                sameGroupChannels = MovieRepository.getChannelsInSameGroup(currentTvChannel!!.id, this).toMutableList()
+            } else {
+                sameGroupChannels = allTv.toMutableList()
+            }
+            val groupName = currentTvChannel?.group ?: "Truyền Hình"
+            binding.btnSameGroupChannels.text = "📋 Nhóm [${groupName}]: ${sameGroupChannels.size} Kênh (Chạm để chọn)"
+
+            binding.btnPrevEpisode.setOnClickListener { switchPreviousChannel() }
+            binding.btnNextEpisode.setOnClickListener { switchNextChannel() }
+            binding.btnSameGroupChannels.setOnClickListener { showSameGroupChannelsBottomSheet() }
+        } else {
+            binding.btnSameGroupChannels.visibility = View.GONE
+            binding.btnPrevEpisode.setOnClickListener { playPreviousEpisode() }
+            binding.btnNextEpisode.setOnClickListener { playNextEpisode() }
+        }
     }
 
     private fun setupPlayerControls() {
@@ -189,13 +228,13 @@ class DetailActivity : AppCompatActivity() {
             seekDelta(10000L)
         }
 
-        // 5. Nút tập trước / tập sau trên thanh điều khiển
+        // 5. Nút tập trước / tập sau trên thanh điều khiển (Hỗ trợ cả đổi kênh TV)
         binding.btnPrevEpPlayer.setOnClickListener {
-            playPreviousEpisode()
+            if (movieItem?.source == MovieSource.XEMTIVI) switchPreviousChannel() else playPreviousEpisode()
         }
 
         binding.btnNextEpPlayer.setOnClickListener {
-            playNextEpisode()
+            if (movieItem?.source == MovieSource.XEMTIVI) switchNextChannel() else playNextEpisode()
         }
 
         // 6. THANH TIẾN TRÌNH SEEKBAR VÀNG KIM (TUA TỚI GIỮA PHIM HOẶC BẤT KỲ ĐOẠN NÀO)
@@ -729,7 +768,98 @@ class DetailActivity : AppCompatActivity() {
             }
         }
 
+        // 🔊 Khuếch đại âm lượng (Volume Boost 200%)
+        val rgVolumeBoost = view.findViewById<RadioGroup>(R.id.rgVolumeBoost)
+        val savedBoost = sp.getInt("volume_boost_gain", 0)
+        currentGainMb = savedBoost
+        when (savedBoost) {
+            400 -> view.findViewById<RadioButton>(R.id.rbBoost130)?.isChecked = true
+            800 -> view.findViewById<RadioButton>(R.id.rbBoost160)?.isChecked = true
+            1500 -> view.findViewById<RadioButton>(R.id.rbBoost200)?.isChecked = true
+            else -> view.findViewById<RadioButton>(R.id.rbBoost100)?.isChecked = true
+        }
+
+        rgVolumeBoost?.setOnCheckedChangeListener { _, checkedId ->
+            val gain = when (checkedId) {
+                R.id.rbBoost130 -> 400
+                R.id.rbBoost160 -> 800
+                R.id.rbBoost200 -> 1500
+                else -> 0
+            }
+            setVolumeBoostGain(gain)
+            val label = when (gain) {
+                400 -> "130%"
+                800 -> "160%"
+                1500 -> "200% (Siêu lớn)"
+                else -> "100% (Chuẩn)"
+            }
+            Toast.makeText(this, "Âm lượng khuếch đại: $label", Toast.LENGTH_SHORT).show()
+        }
+
+        // 📶 Tiết kiệm dữ liệu (Data Saver 720p)
+        val switchDataSaver = view.findViewById<androidx.appcompat.widget.SwitchCompat>(R.id.switchDataSaver)
+        isDataSaverEnabled = sp.getBoolean("data_saver", false)
+        switchDataSaver?.isChecked = isDataSaverEnabled
+        switchDataSaver?.setOnCheckedChangeListener { _, isChecked ->
+            isDataSaverEnabled = isChecked
+            sp.edit().putBoolean("data_saver", isChecked).apply()
+            applyDataSaverSetting()
+            if (isChecked) {
+                Toast.makeText(this, "Đã bật Tiết Kiệm Dữ Liệu (tối đa 720p)", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(this, "Đã tắt Tiết Kiệm Dữ Liệu (chuẩn Full HD)", Toast.LENGTH_SHORT).show()
+            }
+        }
+
         dialog.show()
+    }
+
+    private fun initLoudnessEnhancer(sessionId: Int) {
+        if (sessionId <= 0) return
+        try {
+            loudnessEnhancer?.release()
+            loudnessEnhancer = android.media.audiofx.LoudnessEnhancer(sessionId).apply {
+                if (currentGainMb > 0) {
+                    setTargetGain(currentGainMb)
+                    enabled = true
+                } else {
+                    enabled = false
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    private fun setVolumeBoostGain(gainMb: Int) {
+        currentGainMb = gainMb
+        val sp = getSharedPreferences("vbook_playback_prefs", Context.MODE_PRIVATE)
+        sp.edit().putInt("volume_boost_gain", gainMb).apply()
+        try {
+            loudnessEnhancer?.let {
+                if (gainMb > 0) {
+                    it.setTargetGain(gainMb)
+                    it.enabled = true
+                } else {
+                    it.enabled = false
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    private fun applyDataSaverSetting() {
+        val p = player ?: return
+        if (isDataSaverEnabled) {
+            p.trackSelectionParameters = p.trackSelectionParameters.buildUpon()
+                .setMaxVideoSize(1280, 720)
+                .build()
+        } else {
+            p.trackSelectionParameters = p.trackSelectionParameters.buildUpon()
+                .clearVideoSizeConstraints()
+                .build()
+        }
     }
 
     private fun loadDetail() {
@@ -822,6 +952,26 @@ class DetailActivity : AppCompatActivity() {
         binding.txtDetailMeta.text = titleText
         binding.txtPlayerTitle.text = titleText
 
+        // Nếu là tập phim ngắn FreeReels cần giải mã / mở khóa luồng m3u8
+        if (streamUrl.startsWith("freereels_unlock:")) {
+            val tokens = streamUrl.split(":")
+            if (tokens.size >= 3) {
+                val sId = tokens[1]
+                val epId = tokens[2]
+                binding.playerLoading.visibility = View.VISIBLE
+                lifecycleScope.launch {
+                    val realM3u8 = MovieRepository.unlockFreeReelsEpisode(sId, epId)
+                    binding.playerLoading.visibility = View.GONE
+                    if (!realM3u8.isNullOrEmpty()) {
+                        initExoPlayer(realM3u8)
+                    } else {
+                        Toast.makeText(this@DetailActivity, "Tập phim ngắn này đang tải luồng phát, vui lòng thử lại!", Toast.LENGTH_SHORT).show()
+                    }
+                }
+                return
+            }
+        }
+
         val isM3u8 = episode.linkM3u8 != null || streamUrl.contains(".m3u8")
         if (isM3u8) {
             initExoPlayer(streamUrl)
@@ -853,9 +1003,44 @@ class DetailActivity : AppCompatActivity() {
             setMediaSource(mediaSource)
             prepare()
             playWhenReady = true
+            initLoudnessEnhancer(audioSessionId)
+            applyDataSaverSetting()
             addListener(object : Player.Listener {
+                override fun onAudioSessionIdChanged(audioSessionId: Int) {
+                    initLoudnessEnhancer(audioSessionId)
+                }
+
+                override fun onVideoSizeChanged(videoSize: androidx.media3.common.VideoSize) {
+                    val isVertical = videoSize.height > videoSize.width && videoSize.width > 0
+                    if (isVertical) {
+                        // Tự động nhận diện video màn hình dọc 9:16 (Chuẩn TikTok/Reels/Shorts)
+                        binding.playerView.resizeMode = androidx.media3.ui.AspectRatioFrameLayout.RESIZE_MODE_FIT
+                        if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                            val dm = resources.displayMetrics
+                            binding.layoutPlayerContainer.layoutParams.height = (dm.heightPixels * 0.65).toInt()
+                            binding.layoutPlayerContainer.requestLayout()
+                        }
+                        if (!binding.txtDetailMeta.text.contains("📱 Video Dọc")) {
+                            binding.txtDetailMeta.text = "${binding.txtDetailMeta.text} • 📱 Video Dọc (9:16)"
+                        }
+                    } else {
+                        binding.playerView.resizeMode = androidx.media3.ui.AspectRatioFrameLayout.RESIZE_MODE_FIT
+                        if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                            binding.layoutPlayerContainer.layoutParams.height = (220 * resources.displayMetrics.density).toInt()
+                            binding.layoutPlayerContainer.requestLayout()
+                        }
+                    }
+                }
+
                 override fun onPlayerError(error: androidx.media3.common.PlaybackException) {
                     binding.playerLoading.visibility = View.GONE
+                    val servers = movieDetail?.servers
+                    if (servers != null && servers.size > 1 && currentServerIndex < servers.size - 1) {
+                        val nextIdx = currentServerIndex + 1
+                        Toast.makeText(this@DetailActivity, "⚡ Luồng lỗi kết nối, tự động chuyển sang: ${servers[nextIdx].serverName}", Toast.LENGTH_LONG).show()
+                        switchServer(nextIdx)
+                        return
+                    }
                     val ep = currentEpisodes.getOrNull(currentEpisodeIndex)
                     val embedUrl = ep?.linkEmbed
                     if (!embedUrl.isNullOrEmpty() && binding.webViewPlayer.visibility != View.VISIBLE) {
@@ -990,9 +1175,103 @@ class DetailActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        loudnessEnhancer?.release()
+        loudnessEnhancer = null
         mainHandler.removeCallbacksAndMessages(null)
         player?.release()
         player = null
         binding.webViewPlayer.destroy()
     }
+
+    private fun switchPreviousChannel() {
+        if (sameGroupChannels.isEmpty()) return
+        val curIdx = sameGroupChannels.indexOfFirst { it.id == currentTvChannel?.id || it.url == currentTvChannel?.url }
+        val newIdx = if (curIdx <= 0) sameGroupChannels.size - 1 else curIdx - 1
+        switchLiveChannel(sameGroupChannels[newIdx])
+    }
+
+    private fun switchNextChannel() {
+        if (sameGroupChannels.isEmpty()) return
+        val curIdx = sameGroupChannels.indexOfFirst { it.id == currentTvChannel?.id || it.url == currentTvChannel?.url }
+        val newIdx = if (curIdx == -1 || curIdx >= sameGroupChannels.size - 1) 0 else curIdx + 1
+        switchLiveChannel(sameGroupChannels[newIdx])
+    }
+
+    private fun switchLiveChannel(channel: TvChannelItem) {
+        currentTvChannel = channel
+        movieItem = channel.toMovieItem()
+        binding.txtDetailTitle.text = channel.name
+        binding.txtDetailMeta.text = "Trực tiếp • Nhóm: ${channel.group}"
+        binding.txtPlayerTitle.text = "${channel.name} • [${channel.group}]"
+        val groupName = channel.group
+        binding.btnSameGroupChannels.text = "📋 Nhóm [${groupName}]: ${sameGroupChannels.size} Kênh (Chạm để chọn)"
+
+        initExoPlayer(channel.url)
+        Toast.makeText(this, "📺 Đang phát: ${channel.name} (${channel.group})", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun showSameGroupChannelsBottomSheet() {
+        if (sameGroupChannels.isEmpty()) return
+        val dialog = BottomSheetDialog(this)
+        val view = layoutInflater.inflate(R.layout.dialog_same_group_channels, null)
+        dialog.setContentView(view)
+
+        val txtTitle = view.findViewById<TextView>(R.id.txtSheetGroupTitle)
+        val btnClose = view.findViewById<Button>(R.id.btnCloseSheet)
+        val recycler = view.findViewById<RecyclerView>(R.id.recyclerSameGroupChannels)
+
+        val groupName = currentTvChannel?.group ?: "Kênh Cùng Nhóm"
+        txtTitle?.text = "Kênh Thuộc Nhóm: $groupName (${sameGroupChannels.size} kênh)"
+        btnClose?.setOnClickListener { dialog.dismiss() }
+
+        val currentId = currentTvChannel?.id ?: ""
+        val quickAdapter = QuickChannelAdapter(currentId) { selected ->
+            dialog.dismiss()
+            switchLiveChannel(selected)
+        }
+        recycler?.layoutManager = LinearLayoutManager(this)
+        recycler?.adapter = quickAdapter
+        quickAdapter.submit(sameGroupChannels)
+
+        dialog.show()
+    }
+}
+
+class QuickChannelAdapter(
+    private val currentId: String,
+    private val onChannelClick: (TvChannelItem) -> Unit
+) : RecyclerView.Adapter<QuickChannelAdapter.VH>() {
+    private var channels = listOf<TvChannelItem>()
+    fun submit(list: List<TvChannelItem>) {
+        channels = list
+        notifyDataSetChanged()
+    }
+    class VH(v: View) : RecyclerView.ViewHolder(v) {
+        val imgLogo: ImageView = v.findViewById(R.id.imgQuickChannelLogo)
+        val txtName: TextView = v.findViewById(R.id.txtQuickChannelName)
+        val txtGroup: TextView = v.findViewById(R.id.txtQuickChannelGroup)
+        val txtBadge: TextView = v.findViewById(R.id.txtQuickStatusBadge)
+    }
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
+        val v = LayoutInflater.from(parent.context).inflate(R.layout.item_quick_channel, parent, false)
+        return VH(v)
+    }
+    override fun onBindViewHolder(holder: VH, position: Int) {
+        val item = channels[position]
+        holder.txtName.text = item.name
+        holder.txtGroup.text = "Nhóm: ${item.group}"
+        val isCurrent = item.id == currentId || item.url == currentId
+        holder.txtBadge.visibility = if (isCurrent) View.VISIBLE else View.GONE
+        if (isCurrent) {
+            holder.itemView.setBackgroundResource(R.drawable.bg_focus_card)
+        } else {
+            holder.itemView.setBackgroundResource(R.drawable.bg_btn_secondary)
+        }
+        val defaultTvLogo = "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png"
+        Glide.with(holder.itemView.context)
+            .load(item.logo.ifEmpty { defaultTvLogo })
+            .into(holder.imgLogo)
+        holder.itemView.setOnClickListener { onChannelClick(item) }
+    }
+    override fun getItemCount() = channels.size
 }

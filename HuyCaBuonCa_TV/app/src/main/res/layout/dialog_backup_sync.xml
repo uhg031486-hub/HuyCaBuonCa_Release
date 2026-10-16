@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#161B26">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="☁️ Sao Lưu &amp; Khôi Phục Dữ Liệu"
+            android:textColor="#FFD700"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="Đồng bộ kênh IPTV cá nhân, cấu hình phụ đề, âm thanh giữa Mobile và TV"
+            android:textColor="#8899A6"
+            android:textSize="12sp" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="12dp"
+            android:background="#2E3C56" />
+
+        <Button
+            android:id="@+id/btnExportJson"
+            android:layout_width="match_parent"
+            android:layout_height="42dp"
+            android:background="@drawable/bg_btn_selector"
+            android:text="📤 Sao Lưu Dữ Liệu (Xuất JSON ra bộ nhớ tạm)"
+            android:textColor="#FFD700"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:text="Dữ liệu JSON sao lưu (hoặc dán vào đây để khôi phục):"
+            android:textColor="#FFFFFF"
+            android:textSize="13sp" />
+
+        <EditText
+            android:id="@+id/edtBackupJson"
+            android:layout_width="match_parent"
+            android:layout_height="90dp"
+            android:layout_marginTop="6dp"
+            android:background="@drawable/bg_btn_secondary"
+            android:gravity="top|start"
+            android:hint="Dán mã JSON đã sao lưu vào đây..."
+            android:padding="10dp"
+            android:textColor="#FFFFFF"
+            android:textColorHint="#667788"
+            android:textSize="11sp" />
+
+        <Button
+            android:id="@+id/btnImportJson"
+            android:layout_width="match_parent"
+            android:layout_height="42dp"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/bg_btn_selector"
+            android:text="📥 Khôi Phục Dữ Liệu Từ JSON"
+            android:textColor="@color/brand_cyan"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/btnCloseBackup"
+            android:layout_width="match_parent"
+            android:layout_height="38dp"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/bg_btn_secondary"
+            android:text="Đóng"
+            android:textColor="#FFFFFF"
+            android:textSize="12sp" />
+
+    </LinearLayout>
+</ScrollView>

@@ -5,11 +5,17 @@ import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.google.gson.reflect.TypeToken
 import com.huycabuonca.tv.model.*
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.net.URLEncoder
+import java.security.MessageDigest
+import java.util.UUID
 import java.util.concurrent.TimeUnit
 
 data class TvChannelItem(
@@ -31,18 +37,204 @@ object MovieRepository {
     private const val KKPHIM_IMG_BASE = "https://phimimg.com/"
     private var cachedTvChannels: List<TvChannelItem>? = null
 
-    fun initTvChannels(context: Context) {
-        if (cachedTvChannels != null) return
-        try {
-            val jsonString = context.assets.open("tv_channels.json").bufferedReader().use { it.readText() }
-            val itemType = object : TypeToken<List<TvChannelItem>>() {}.type
-            cachedTvChannels = gson.fromJson(jsonString, itemType)
-        } catch (e: Exception) {
-            e.printStackTrace()
+    fun initTvChannels(context: Context, forceReload: Boolean = false) {
+        if (cachedTvChannels != null && !forceReload) return
+        val appContext = context.applicationContext
+        kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
+            try {
+                val jsonString = appContext.assets.open("tv_channels.json").bufferedReader().use { it.readText() }
+                val itemType = object : TypeToken<List<TvChannelItem>>() {}.type
+                val baseList: List<TvChannelItem> = gson.fromJson(jsonString, itemType) ?: emptyList()
+                val custom = getCustomChannels(appContext)
+                cachedTvChannels = custom + baseList
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 
-    private fun TvChannelItem.toMovieItem(): MovieItem {
+    fun getAllTvChannels(context: Context? = null): List<TvChannelItem> {
+        if (cachedTvChannels == null && context != null) {
+            try {
+                val jsonString = context.applicationContext.assets.open("tv_channels.json").bufferedReader().use { it.readText() }
+                val itemType = object : TypeToken<List<TvChannelItem>>() {}.type
+                val baseList: List<TvChannelItem> = gson.fromJson(jsonString, itemType) ?: emptyList()
+                val custom = getCustomChannels(context.applicationContext)
+                cachedTvChannels = custom + baseList
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+        return cachedTvChannels ?: emptyList()
+    }
+
+    fun getCustomChannels(context: Context): List<TvChannelItem> {
+        val sp = context.getSharedPreferences("custom_iptv_prefs", Context.MODE_PRIVATE)
+        val json = sp.getString("custom_channels_json", null) ?: return emptyList()
+        return try {
+            val itemType = object : TypeToken<List<TvChannelItem>>() {}.type
+            gson.fromJson(json, itemType) ?: emptyList()
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
+    fun addCustomChannel(context: Context, name: String, url: String, group: String = "Kênh Tự Thêm"): TvChannelItem {
+        val current = getCustomChannels(context).toMutableList()
+        val id = "custom_${System.currentTimeMillis()}"
+        val defaultLogo = "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png"
+        val newChannel = TvChannelItem(id = id, name = name, group = group, logo = defaultLogo, url = url)
+        current.add(0, newChannel)
+        val sp = context.getSharedPreferences("custom_iptv_prefs", Context.MODE_PRIVATE)
+        sp.edit().putString("custom_channels_json", gson.toJson(current)).apply()
+        
+        initTvChannels(context, forceReload = true)
+        return newChannel
+    }
+
+    fun getChannelsInSameGroup(channelIdOrUrl: String, context: Context? = null): List<TvChannelItem> {
+        val all = getAllTvChannels(context)
+        val cur = all.find { it.id == channelIdOrUrl || it.url == channelIdOrUrl }
+        return if (cur != null) {
+            val same = all.filter { it.group.equals(cur.group, ignoreCase = true) }
+            if (same.isNotEmpty()) same else all
+        } else all
+    }
+
+    fun importM3uPlaylist(context: Context, m3uContent: String): Int {
+        val lines = m3uContent.lines()
+        val imported = mutableListOf<TvChannelItem>()
+        var currentName = ""
+        var currentGroup = "M3U Tự Thêm"
+        var currentLogo = "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png"
+        
+        for (line in lines) {
+            val trimmed = line.trim()
+            if (trimmed.startsWith("#EXTINF")) {
+                val groupMatch = "group-title=\"([^\"]+)\"".toRegex().find(trimmed)
+                if (groupMatch != null) currentGroup = groupMatch.groupValues[1]
+                val logoMatch = "tvg-logo=\"([^\"]+)\"".toRegex().find(trimmed)
+                if (logoMatch != null) currentLogo = logoMatch.groupValues[1]
+                val nameParts = trimmed.split(",")
+                if (nameParts.size > 1) currentName = nameParts.last().trim()
+            } else if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+                if (currentName.isNotEmpty()) {
+                    val id = "custom_${System.currentTimeMillis()}_${imported.size}"
+                    imported.add(TvChannelItem(id = id, name = currentName, group = currentGroup, logo = currentLogo, url = trimmed))
+                    currentName = ""
+                }
+            }
+        }
+        if (imported.isNotEmpty()) {
+            val current = getCustomChannels(context).toMutableList()
+            current.addAll(0, imported)
+            val sp = context.getSharedPreferences("custom_iptv_prefs", Context.MODE_PRIVATE)
+            sp.edit().putString("custom_channels_json", gson.toJson(current)).apply()
+            
+            initTvChannels(context, forceReload = true)
+        }
+        return imported.size
+    }
+
+    fun getLiveMatches(): List<FootballMatch> {
+        return listOf(
+            FootballMatch(
+                id = "match_c1_1",
+                time = "Đang diễn ra • Trực Tiếp",
+                tournament = "🏆 UEFA Champions League",
+                teamA = "Real Madrid",
+                teamB = "Manchester City",
+                channelName = "VTV6 Thể Thao HD (FPT)",
+                channelSlug = "sports_vn_vtv6",
+                score = "LIVE"
+            ),
+            FootballMatch(
+                id = "match_epl_1",
+                time = "Hôm Nay • 20:30",
+                tournament = "🏴󠁧󠁢󠁥󠁮󠁧󠁿 Ngoại Hạng Anh",
+                teamA = "Arsenal",
+                teamB = "Chelsea",
+                channelName = "CBS Sports Golazo (Cúp C1 / Serie A)",
+                channelSlug = "sports_intl_cbs_golazo",
+                score = "20:30"
+            ),
+            FootballMatch(
+                id = "match_laliga_1",
+                time = "Hôm Nay • 23:00",
+                tournament = "🇪🇸 La Liga Tây Ban Nha",
+                teamA = "Barcelona",
+                teamB = "Atletico Madrid",
+                channelName = "beIN SPORTS XTRA HD",
+                channelSlug = "sports_intl_bein_xtra",
+                score = "23:00"
+            ),
+            FootballMatch(
+                id = "match_aff_1",
+                time = "Ngày Mai • 19:30",
+                tournament = "🇻🇳 AFF Mitsubishi Electric Cup",
+                teamA = "Việt Nam",
+                teamB = "Thái Lan",
+                channelName = "VTV5 Tây Nam Bộ",
+                channelSlug = "vtv5_t_y_nam_b_6",
+                score = "19:30"
+            ),
+            FootballMatch(
+                id = "match_uel_1",
+                time = "Hôm Nay • 03:00",
+                tournament = "🏆 UEFA Europa League",
+                teamA = "Manchester United",
+                teamB = "AS Roma",
+                channelName = "Eurosport Live HD",
+                channelSlug = "sports_intl_eurosport_live",
+                score = "03:00"
+            )
+        )
+    }
+
+    fun exportBackupData(context: Context): String {
+        val spCustom = context.getSharedPreferences("custom_iptv_prefs", Context.MODE_PRIVATE)
+        val spVbook = context.getSharedPreferences("vbook_playback_prefs", Context.MODE_PRIVATE)
+        val customChannels = spCustom.getString("custom_channels_json", "[]")
+        
+        val backupObj = JsonObject().apply {
+            addProperty("app", "HuyCaBuonCa")
+            addProperty("version", "1.8")
+            addProperty("export_date", System.currentTimeMillis())
+            add("custom_channels", gson.fromJson(customChannels, com.google.gson.JsonArray::class.java))
+            addProperty("sub_font_size", spVbook.getFloat("sub_font_size", 18f))
+            addProperty("sub_font_color", spVbook.getString("sub_font_color", "#FFD700"))
+            addProperty("data_saver", spVbook.getBoolean("data_saver", false))
+            addProperty("volume_boost", spVbook.getInt("volume_boost_gain", 0))
+        }
+        return gson.toJson(backupObj)
+    }
+
+    fun restoreBackupData(context: Context, jsonString: String): Boolean {
+        return try {
+            val root = gson.fromJson(jsonString, JsonObject::class.java) ?: return false
+            if (!root.has("app")) return false
+            
+            if (root.has("custom_channels")) {
+                val customArr = root.getAsJsonArray("custom_channels")
+                val spCustom = context.getSharedPreferences("custom_iptv_prefs", Context.MODE_PRIVATE)
+                spCustom.edit().putString("custom_channels_json", gson.toJson(customArr)).apply()
+                initTvChannels(context, forceReload = true)
+            }
+            val spVbook = context.getSharedPreferences("vbook_playback_prefs", Context.MODE_PRIVATE)
+            val editor = spVbook.edit()
+            if (root.has("sub_font_size")) editor.putFloat("sub_font_size", root.get("sub_font_size").asFloat)
+            if (root.has("sub_font_color")) editor.putString("sub_font_color", root.get("sub_font_color").asString)
+            if (root.has("data_saver")) editor.putBoolean("data_saver", root.get("data_saver").asBoolean)
+            if (root.has("volume_boost")) editor.putInt("volume_boost_gain", root.get("volume_boost").asInt)
+            editor.apply()
+            true
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+    }
+
+    fun TvChannelItem.toMovieItem(): MovieItem {
         val defaultTvLogo = "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png"
         val finalLogo = if (!logo.isNullOrEmpty()) logo else defaultTvLogo
         val finalId = if (!id.isNullOrEmpty()) id else "tv_${name.hashCode().toUInt().toString(16)}"
@@ -100,6 +292,7 @@ object MovieRepository {
             )
             MovieSource.XEMTIVI -> listOf(
                 FilterItem("Tất Cả Kênh", "tv://all"),
+                FilterItem("⭐ Kênh Tự Thêm", "tv://custom"),
                 FilterItem("⚽ Bóng Đá & C1", "tv://football"),
                 FilterItem("🏆 Thể Thao ESPN & FOX", "tv://sports_intl"),
                 FilterItem("🏎️ Đua Xe & Võ Thuật", "tv://racing_combat"),
@@ -112,6 +305,11 @@ object MovieRepository {
                 FilterItem("Đài Địa Phương", "tv://local"),
                 FilterItem("Radio Trực Tuyến", "tv://radio")
             )
+            MovieSource.FREEREELS -> listOf(
+                FilterItem("🔥 Thịnh Hành (Hot Drama)", "freereels://hot"),
+                FilterItem("✨ Đề Xuất (For You)", "freereels://foryou"),
+                FilterItem("⏰ Sắp Chiếu (Coming Soon)", "freereels://coming")
+            )
         }
     }
 
@@ -121,6 +319,12 @@ object MovieRepository {
                 if (source == MovieSource.XEMTIVI) {
                     val channels = cachedTvChannels ?: emptyList()
                     val filtered = when (filterUrl) {
+                        "tv://custom" -> channels.filter {
+                            it.id.startsWith("custom_") ||
+                            it.group.contains("Tự Thêm", ignoreCase = true) ||
+                            it.group.contains("Cá Nhân", ignoreCase = true) ||
+                            it.group.contains("M3U", ignoreCase = true)
+                        }
                         "tv://vtv" -> channels.filter { it.group.equals("VTV", ignoreCase = true) }
                         "tv://football" -> channels.filter {
                             it.group.contains("Bóng Đá", ignoreCase = true)
@@ -163,6 +367,8 @@ object MovieRepository {
                     if (page == 1) {
                         filtered.map { it.toMovieItem() }
                     } else emptyList()
+                } else if (source == MovieSource.FREEREELS) {
+                    FreeReelsClient.getDramaList(client, gson, filterUrl, page)
                 } else {
                     fetchKKPhimList(filterUrl, page, source)
                 }
@@ -176,7 +382,9 @@ object MovieRepository {
     suspend fun getMovieDetail(source: MovieSource, slug: String): MovieDetail? {
         return withContext(Dispatchers.IO) {
             try {
-                if (source == MovieSource.XEMTIVI) {
+                if (source == MovieSource.FREEREELS) {
+                    FreeReelsClient.getDramaDetail(client, gson, slug)
+                } else if (source == MovieSource.XEMTIVI) {
                     val channel = cachedTvChannels?.find { it.id == slug }
                     if (channel != null) {
                         val defaultTvLogo = "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png"
@@ -218,6 +426,12 @@ object MovieRepository {
         }
     }
 
+    suspend fun unlockFreeReelsEpisode(seriesId: String, episodeId: String): String? {
+        return withContext(Dispatchers.IO) {
+            FreeReelsClient.unlockEpisode(client, gson, seriesId, episodeId)
+        }
+    }
+
     suspend fun searchMovies(keyword: String): List<MovieItem> {
         return withContext(Dispatchers.IO) {
             val results = mutableListOf<MovieItem>()
@@ -228,7 +442,11 @@ object MovieRepository {
                 } ?: emptyList()
                 results.addAll(tvMatches.map { it.toMovieItem() })
 
-                // 2. Tim trong phim KKPhim
+                // 2. Tim trong Phim Ngan FreeReels
+                val freeReelsMatches = FreeReelsClient.search(client, gson, keyword)
+                results.addAll(freeReelsMatches)
+
+                // 3. Tim trong phim KKPhim
                 val encoded = URLEncoder.encode(keyword, "UTF-8")
                 val urlKK = "https://phimapi.com/v1/api/tim-kiem?keyword=$encoded"
                 val req = Request.Builder().url(urlKK).header("User-Agent", "Mozilla/5.0").build()
@@ -372,5 +590,366 @@ object MovieRepository {
                 servers = serverGroups
             )
         }
+    }
+}
+
+object FreeReelsClient {
+    private const val API_BASE = "https://apiv2.free-reels.com/frv2-api"
+    private const val APP_SECRET = "8IAcbWyCsVhYv82S2eofRqK1DF3nNDAv"
+    private const val APP_NAME = "com.freereels.app"
+    private const val APP_VERSION = "2.2.81"
+
+    private var deviceId: String = ""
+    private var sessionId: String = ""
+    private var oauthToken: String = ""
+    private var oauthSecret: String = ""
+
+    private fun md5(s: String): String {
+        val md = java.security.MessageDigest.getInstance("MD5")
+        val bytes = md.digest(s.toByteArray(Charsets.UTF_8))
+        return bytes.joinToString("") { "%02x".format(it) }
+    }
+
+    private fun ensureLogin(client: OkHttpClient, gson: Gson): Boolean {
+        if (oauthToken.isNotEmpty() && oauthSecret.isNotEmpty()) return true
+        return try {
+            if (deviceId.isEmpty()) deviceId = java.util.UUID.randomUUID().toString()
+            if (sessionId.isEmpty()) sessionId = java.util.UUID.randomUUID().toString()
+            val sign = md5(APP_SECRET + deviceId)
+
+            val loginJson = JsonObject().apply {
+                addProperty("device_id", deviceId)
+                addProperty("device_name", "samsung SM-A536E")
+                addProperty("sign", sign)
+            }
+
+            val mediaType = "application/json; charset=utf-8".toMediaType()
+            val body = loginJson.toString().toRequestBody(mediaType)
+
+            val req = Request.Builder()
+                .url("$API_BASE/anonymous/login")
+                .post(body)
+                .header("Accept", "application/json")
+                .header("Content-Type", "application/json")
+                .header("app-name", APP_NAME)
+                .header("app-version", APP_VERSION)
+                .header("device", "android")
+                .header("device-version", "33")
+                .header("device-id", deviceId)
+                .header("session-id", sessionId)
+                .header("language", "vi-VN")
+                .header("country", "VN")
+                .build()
+
+            client.newCall(req).execute().use { resp ->
+                if (!resp.isSuccessful) return false
+                val respStr = resp.body?.string() ?: return false
+                val root = gson.fromJson(respStr, JsonObject::class.java)
+                val data = root.getAsJsonObject("data") ?: return false
+                oauthToken = data.get("auth_key")?.asString ?: ""
+                oauthSecret = data.get("auth_secret")?.asString ?: ""
+                oauthToken.isNotEmpty() && oauthSecret.isNotEmpty()
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+    }
+
+    private fun buildAuthorizedRequest(client: OkHttpClient, gson: Gson, url: String, method: String = "GET", jsonBody: String? = null): Request? {
+        if (!ensureLogin(client, gson)) return null
+        val ts = System.currentTimeMillis().toString()
+        val sig = md5("$APP_SECRET&$oauthSecret")
+        val authHeader = "oauth_signature=$sig,oauth_token=$oauthToken,ts=$ts"
+
+        val builder = Request.Builder()
+            .url(url)
+            .header("Accept", "application/json")
+            .header("Content-Type", "application/json")
+            .header("User-Agent", "Mozilla/5.0")
+            .header("app-name", APP_NAME)
+            .header("app-version", APP_VERSION)
+            .header("device", "android")
+            .header("device-version", "33")
+            .header("device-id", deviceId)
+            .header("session-id", sessionId)
+            .header("language", "vi-VN")
+            .header("country", "VN")
+            .header("Authorization", authHeader)
+
+        val mediaType = "application/json; charset=utf-8".toMediaType()
+        if (method == "POST") {
+            val body = (jsonBody ?: "{}").toRequestBody(mediaType)
+            builder.post(body)
+        } else {
+            builder.get()
+        }
+        return builder.build()
+    }
+
+    private fun JsonObject.getSafeString(key: String, default: String = ""): String {
+        if (!has(key)) return default
+        val el = get(key)
+        if (el == null || el.isJsonNull) return default
+        return try {
+            el.asString
+        } catch (e: Exception) {
+            default
+        }
+    }
+
+    fun getDramaList(client: OkHttpClient, gson: Gson, filterUrl: String, page: Int): List<MovieItem> {
+        val list = mutableListOf<MovieItem>()
+        try {
+            val req = when (filterUrl) {
+                "freereels://coming" -> {
+                    buildAuthorizedRequest(client, gson, "$API_BASE/coming-soon/list?next=", "GET")
+                }
+                "freereels://foryou" -> {
+                    buildAuthorizedRequest(client, gson, "$API_BASE/foryou/feed?next=", "GET")
+                }
+                else -> {
+                    buildAuthorizedRequest(client, gson, "$API_BASE/foryou/feed?next=", "GET")
+                }
+            } ?: return emptyList()
+
+            client.newCall(req).execute().use { resp ->
+                if (!resp.isSuccessful) return emptyList()
+                val respStr = resp.body?.string() ?: return emptyList()
+                val root = gson.fromJson(respStr, JsonObject::class.java)
+                val data = root.getAsJsonObject("data") ?: return emptyList()
+
+                val itemsArray = if (data.has("items") && !data.get("items").isJsonNull) {
+                    data.getAsJsonArray("items")
+                } else if (data.has("list") && !data.get("list").isJsonNull) {
+                    data.getAsJsonArray("list")
+                } else null
+
+                itemsArray?.forEach { el ->
+                    if (el.isJsonObject) {
+                        val obj = el.asJsonObject
+                        val series = if (obj.has("series") && obj.get("series").isJsonObject) {
+                            obj.getAsJsonObject("series")
+                        } else if (obj.has("info") && obj.get("info").isJsonObject) {
+                            obj.getAsJsonObject("info")
+                        } else obj
+
+                        val id = series.getSafeString("id").ifEmpty {
+                            series.getSafeString("key").ifEmpty {
+                                series.getSafeString("series_id")
+                            }
+                        }
+                        val title = series.getSafeString("title").ifEmpty {
+                            series.getSafeString("name")
+                        }
+                        val cover = series.getSafeString("cover").ifEmpty {
+                            series.getSafeString("poster")
+                        }
+                        val epCount = series.getSafeString("episode_count")
+
+                        if (id.isNotEmpty() && title.isNotEmpty()) {
+                            list.add(
+                                MovieItem(
+                                    id = id,
+                                    name = title,
+                                    slug = id,
+                                    originName = if (epCount.isNotEmpty()) "$epCount tập • FreeReels Dọc" else "Phim Ngắn Dọc 9:16",
+                                    thumbUrl = cover,
+                                    posterUrl = cover,
+                                    year = "2026",
+                                    quality = "9:16 Dọc",
+                                    episodeCurrent = if (epCount.isNotEmpty()) "$epCount tập" else "Trọn bộ",
+                                    source = MovieSource.FREEREELS
+                                )
+                            )
+                        }
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return list
+    }
+
+    fun getDramaDetail(client: OkHttpClient, gson: Gson, seriesId: String): MovieDetail? {
+        return try {
+            val req = buildAuthorizedRequest(client, gson, "$API_BASE/drama/info_v2?series_id=$seriesId&scene=search", "GET")
+                ?: return null
+
+            client.newCall(req).execute().use { resp ->
+                if (!resp.isSuccessful) return null
+                val respStr = resp.body?.string() ?: return null
+                val root = gson.fromJson(respStr, JsonObject::class.java)
+                val data = root.getAsJsonObject("data") ?: return null
+                val info = if (data.has("info") && data.get("info").isJsonObject) {
+                    data.getAsJsonObject("info")
+                } else data
+
+                val title = info.getSafeString("name").ifEmpty { info.getSafeString("title") }
+                val cover = info.getSafeString("cover").ifEmpty { info.getSafeString("poster") }
+                val desc = info.getSafeString("desc").ifEmpty { "Phim ngắn màn hình dọc FreeReels chất lượng cao (9:16)." }
+                val epCount = info.getSafeString("episode_count", "Nhiều")
+
+                val epList = mutableListOf<EpisodeItem>()
+                val epArray = if (info.has("episode_list") && !info.get("episode_list").isJsonNull) {
+                    info.getAsJsonArray("episode_list")
+                } else null
+
+                epArray?.forEachIndexed { idx, el ->
+                    if (el.isJsonObject) {
+                        val epObj = el.asJsonObject
+                        val epId = epObj.getSafeString("id").ifEmpty { epObj.getSafeString("key") }
+                        val rawName = epObj.getSafeString("name").trim()
+                        val epName = if (rawName.isEmpty() || rawName.equals(title, ignoreCase = true) || rawName.length > 20) {
+                            "Tập ${idx + 1}"
+                        } else if (rawName.all { it.isDigit() }) {
+                            "Tập $rawName"
+                        } else {
+                            rawName
+                        }
+
+                        epList.add(
+                            EpisodeItem(
+                                name = epName,
+                                slug = epId,
+                                filename = epName,
+                                linkM3u8 = "freereels_unlock:$seriesId:$epId",
+                                linkEmbed = null
+                            )
+                        )
+                    }
+                }
+
+                // Tự động mở khóa trước link tập 1 để phát mượt ngay tức thì
+                if (epList.isNotEmpty()) {
+                    val firstEp = epList[0]
+                    val streamFirst = unlockEpisode(client, gson, seriesId, firstEp.slug)
+                    if (!streamFirst.isNullOrEmpty()) {
+                        epList[0] = firstEp.copy(linkM3u8 = streamFirst)
+                    }
+                }
+
+                MovieDetail(
+                    id = seriesId,
+                    name = title,
+                    slug = seriesId,
+                    originName = "$epCount tập • FreeReels Dọc (9:16)",
+                    content = desc,
+                    thumbUrl = cover,
+                    posterUrl = cover,
+                    year = "2026",
+                    time = "$epCount tập",
+                    quality = "9:16 Dọc HD",
+                    lang = "Lồng Tiếng / Thuyết Minh Tiếng Việt",
+                    source = MovieSource.FREEREELS,
+                    servers = listOf(
+                        ServerGroup(
+                            serverName = "FreeReels VIP (Lồng Tiếng Việt)",
+                            episodes = epList
+                        )
+                    )
+                )
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
+
+    fun unlockEpisode(client: OkHttpClient, gson: Gson, seriesId: String, episodeId: String): String? {
+        return try {
+            val jsonBody = JsonObject().apply {
+                addProperty("series_id", seriesId)
+                addProperty("episode_id", episodeId)
+                addProperty("lang", "vi")
+            }.toString()
+
+            val req = buildAuthorizedRequest(client, gson, "$API_BASE/drama/unlock_episode", "POST", jsonBody)
+                ?: return null
+
+            client.newCall(req).execute().use { resp ->
+                if (!resp.isSuccessful) return null
+                val respStr = resp.body?.string() ?: return null
+                val root = gson.fromJson(respStr, JsonObject::class.java)
+                val data = root.getAsJsonObject("data") ?: return null
+
+                val m3u8H264 = data.getSafeString("external_audio_h264_m3u8")
+                val m3u8Url = data.getSafeString("m3u8_url")
+                val videoUrl = data.getSafeString("video_url")
+
+                when {
+                    m3u8H264.isNotEmpty() -> m3u8H264
+                    m3u8Url.isNotEmpty() -> m3u8Url
+                    videoUrl.isNotEmpty() -> videoUrl
+                    else -> null
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
+
+    fun search(client: OkHttpClient, gson: Gson, keyword: String): List<MovieItem> {
+        val list = mutableListOf<MovieItem>()
+        try {
+            val ts = System.currentTimeMillis().toString()
+            val jsonBody = JsonObject().apply {
+                addProperty("keyword", keyword)
+                addProperty("next", "")
+                addProperty("timestamp", ts)
+            }.toString()
+
+            val req = buildAuthorizedRequest(client, gson, "$API_BASE/search/drama", "POST", jsonBody)
+                ?: return emptyList()
+
+            client.newCall(req).execute().use { resp ->
+                if (!resp.isSuccessful) return emptyList()
+                val respStr = resp.body?.string() ?: return emptyList()
+                val root = gson.fromJson(respStr, JsonObject::class.java)
+                val data = root.getAsJsonObject("data") ?: return emptyList()
+
+                val itemsArray = if (data.has("list") && !data.get("list").isJsonNull) {
+                    data.getAsJsonArray("list")
+                } else if (data.has("items") && !data.get("items").isJsonNull) {
+                    data.getAsJsonArray("items")
+                } else null
+
+                itemsArray?.forEach { el ->
+                    if (el.isJsonObject) {
+                        val obj = el.asJsonObject
+                        val series = if (obj.has("series") && obj.get("series").isJsonObject) {
+                            obj.getAsJsonObject("series")
+                        } else obj
+
+                        val id = series.getSafeString("id").ifEmpty { series.getSafeString("key") }
+                        val title = series.getSafeString("title").ifEmpty { series.getSafeString("name") }
+                        val cover = series.getSafeString("cover").ifEmpty { series.getSafeString("poster") }
+                        val epCount = series.getSafeString("episode_count")
+
+                        if (id.isNotEmpty() && title.isNotEmpty()) {
+                            list.add(
+                                MovieItem(
+                                    id = id,
+                                    name = title,
+                                    slug = id,
+                                    originName = if (epCount.isNotEmpty()) "$epCount tập • FreeReels Dọc" else "Phim Ngắn Dọc 9:16",
+                                    thumbUrl = cover,
+                                    posterUrl = cover,
+                                    year = "2026",
+                                    quality = "9:16 Dọc",
+                                    episodeCurrent = if (epCount.isNotEmpty()) "$epCount tập" else "Trọn bộ",
+                                    source = MovieSource.FREEREELS
+                                )
+                            )
+                        }
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return list
     }
 }
