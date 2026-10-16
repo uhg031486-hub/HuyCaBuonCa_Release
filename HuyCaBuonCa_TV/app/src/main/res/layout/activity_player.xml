@@ -52,6 +52,21 @@
             android:textSize="15sp"
             android:textStyle="bold"
             tools:text="Tên Phim - Tập 01 (Vietsub)" />
+
+        <TextView
+            android:id="@+id/btnToggleFavPlayer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_btn_secondary"
+            android:paddingStart="12dp"
+            android:paddingTop="4dp"
+            android:paddingEnd="12dp"
+            android:paddingBottom="4dp"
+            android:text="⭐ Thêm Yêu Thích"
+            android:textColor="#FFD700"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:focusable="true" />
     </LinearLayout>
 
     <!-- On-screen TV Channel Zapping Banner (Hiện khi đổi kênh TV) -->

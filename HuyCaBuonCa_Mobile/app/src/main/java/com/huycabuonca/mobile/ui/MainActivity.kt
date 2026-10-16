@@ -51,12 +51,35 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupUI() {
-        adapter = MovieAdapter { movie ->
-            val intent = Intent(this, DetailActivity::class.java).apply {
-                putExtra("EXTRA_MOVIE", movie)
+        adapter = MovieAdapter(
+            onMovieClick = { movie ->
+                if (movie.source == MovieSource.XEMTIVI) {
+                    playTvChannelDirectly(movie)
+                } else {
+                    val intent = Intent(this, DetailActivity::class.java).apply {
+                        putExtra("EXTRA_MOVIE", movie)
+                    }
+                    startActivity(intent)
+                }
+            },
+            onMovieLongClick = { movie ->
+                if (movie.source == MovieSource.XEMTIVI) {
+                    val isFav = MovieRepository.toggleChannelFavorite(this, movie.id)
+                    val msg = if (isFav) "⭐ Đã thêm [${movie.name}] vào Kênh Yêu Thích!" else "Đã xóa khỏi Kênh Yêu Thích"
+                    Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+                    if (currentFilterUrl == "tv://favorites") {
+                        loadMovies(reset = true)
+                    }
+                } else {
+                    val isFav = com.huycabuonca.mobile.util.FavoriteMovieManager.toggleFavorite(this, movie)
+                    val msg = if (isFav) "❤️ Đã thêm [${movie.name}] vào Phim Yêu Thích!" else "Đã xóa khỏi Phim Yêu Thích"
+                    Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+                    if (currentFilterUrl == "app://favorites") {
+                        loadMovies(reset = true)
+                    }
+                }
             }
-            startActivity(intent)
-        }
+        )
 
         layoutManager = GridLayoutManager(this, 3)
         binding.recyclerMovies.layoutManager = layoutManager
@@ -86,20 +109,42 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, SearchActivity::class.java))
         }
 
-        binding.btnSchedule.setOnClickListener {
-            showScheduleDialog()
-        }
-
-        binding.btnCustomIptv.setOnClickListener {
-            showAddCustomIptvDialog()
-        }
-
         binding.btnBackupSync.setOnClickListener {
             showBackupSyncDialog()
         }
 
         // Tự động kiểm tra bản cập nhật mới (In-App Auto Update)
         com.huycabuonca.mobile.util.AppUpdateManager.checkForUpdate(this)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        adapter.notifyDataSetChanged()
+    }
+
+    private fun playTvChannelDirectly(movie: MovieItem) {
+        val channels = MovieRepository.getAllTvChannels(this)
+        val channel = channels.find { it.id == movie.id || it.name.equals(movie.name, ignoreCase = true) }
+        if (channel != null && channel.url.isNotEmpty()) {
+            MovieRepository.setLastWatchedChannelId(this, channel.id)
+            com.huycabuonca.mobile.util.WatchHistoryManager.saveHistory(
+                context = this,
+                movie = movie,
+                episodeName = channel.group
+            )
+            val intent = Intent(this, PlayerActivity::class.java).apply {
+                putExtra("EXTRA_STREAM_URL", channel.url)
+                putExtra("EXTRA_IS_M3U8", true)
+                putExtra("EXTRA_TITLE", channel.name)
+                putExtra("EXTRA_EPISODE", channel.group)
+                putExtra("EXTRA_SOURCE", MovieSource.XEMTIVI.name)
+                putExtra("EXTRA_CHANNEL_ID", channel.id)
+                putExtra("EXTRA_MOVIE_ITEM", movie)
+            }
+            startActivity(intent)
+        } else {
+            Toast.makeText(this, "Không tìm thấy luồng phát của kênh này", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun showScheduleDialog() {
@@ -134,9 +179,7 @@ class MainActivity : AppCompatActivity() {
                             episodeCurrent = "Trực Tiếp",
                             source = MovieSource.XEMTIVI
                         )
-                        startActivity(Intent(this@MainActivity, DetailActivity::class.java).apply {
-                            putExtra("EXTRA_MOVIE", movieItem)
-                        })
+                        playTvChannelDirectly(movieItem)
                     } else {
                         Toast.makeText(this@MainActivity, "Kênh trực tiếp cho trận này đang chuẩn bị phát sóng!", Toast.LENGTH_SHORT).show()
                     }
@@ -298,12 +341,30 @@ class MainActivity : AppCompatActivity() {
                 isSelected = (index == 0)
 
                 setOnClickListener {
+                    if (filter.endpointUrl == "tv://schedule") {
+                        showScheduleDialog()
+                        return@setOnClickListener
+                    }
+                    if (filter.endpointUrl == "tv://custom") {
+                        val customChannels = MovieRepository.getCustomChannels(this@MainActivity)
+                        if (customChannels.isEmpty()) {
+                            showAddCustomIptvDialog()
+                            return@setOnClickListener
+                        }
+                    }
                     for (i in 0 until binding.layoutDynamicFilters.childCount) {
                         binding.layoutDynamicFilters.getChildAt(i).isSelected = false
                     }
                     isSelected = true
                     currentFilterUrl = filter.endpointUrl
                     loadMovies(reset = true)
+                }
+
+                setOnLongClickListener {
+                    if (filter.endpointUrl == "tv://custom") {
+                        showAddCustomIptvDialog()
+                        true
+                    } else false
                 }
             }
             binding.layoutDynamicFilters.addView(filterBtn)
@@ -369,7 +430,7 @@ class MainActivity : AppCompatActivity() {
                 val newItems = items.filter { it.id !in existingIds }
                 if (newItems.isNotEmpty()) {
                     movieList.addAll(newItems)
-                    adapter.submitList(movieList.toList())
+                    adapter.addItems(newItems)
                 } else {
                     isLastPage = true
                 }

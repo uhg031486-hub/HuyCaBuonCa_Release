@@ -96,9 +96,9 @@
                 android:layout_width="0dp"
                 android:layout_height="42dp"
                 android:layout_weight="1.2"
-                android:background="@drawable/bg_btn_selector"
+                android:background="@drawable/bg_btn_primary"
                 android:text="Thêm Kênh"
-                android:textColor="#FFD700"
+                android:textColor="#000000"
                 android:textSize="13sp"
                 android:textStyle="bold" />
         </LinearLayout>

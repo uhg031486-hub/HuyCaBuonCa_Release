@@ -321,20 +321,22 @@ object MovieRepository {
                 FilterItem("Kinh Dị", "https://phimapi.com/v1/api/the-loai/kinh-di"),
                 FilterItem("Hàn Quốc", "https://phimapi.com/v1/api/quoc-gia/han-quoc"),
                 FilterItem("Trung Quốc", "https://phimapi.com/v1/api/quoc-gia/trung-quoc"),
-                FilterItem("Âu Mỹ", "https://phimapi.com/v1/api/quoc-gia/au-my")
+                FilterItem("Âu Mỹ", "https://phimapi.com/v1/api/quoc-gia/au-my"),
+                FilterItem("❤️ Phim Yêu Thích", "app://favorites"),
+                FilterItem("🕒 Lịch Sử Xem", "app://history")
             )
             MovieSource.ANIMEHAY -> listOf(
                 FilterItem("Anime Mới Cập Nhật", "https://phimapi.com/v1/api/danh-sach/hoat-hinh"),
                 FilterItem("Anime Hành Động", "https://phimapi.com/v1/api/the-loai/hanh-dong"),
                 FilterItem("Anime Thần Thoại", "https://phimapi.com/v1/api/the-loai/than-thoai"),
                 FilterItem("Anime Học Đường", "https://phimapi.com/v1/api/the-loai/hoc-duong"),
-                FilterItem("Anime Viễn Tưởng", "https://phimapi.com/v1/api/the-loai/vien-tuong")
+                FilterItem("Anime Viễn Tưởng", "https://phimapi.com/v1/api/the-loai/vien-tuong"),
+                FilterItem("❤️ Anime Yêu Thích", "app://favorites"),
+                FilterItem("🕒 Lịch Sử Xem", "app://history")
             )
             MovieSource.XEMTIVI -> listOf(
-                FilterItem("⭐ Kênh Yêu Thích", "tv://favorites"),
                 FilterItem("Tất Cả Kênh", "tv://all"),
-                FilterItem("📁 Kênh Tự Thêm", "tv://custom"),
-                FilterItem("⚽ Bóng Đá & C1", "tv://football"),
+                FilterItem("⚽ Lịch Thi Đấu & Bóng Đá", "tv://football"),
                 FilterItem("🏆 Thể Thao ESPN & FOX", "tv://sports_intl"),
                 FilterItem("🏎️ Đua Xe & Võ Thuật", "tv://racing_combat"),
                 FilterItem("VTV Quốc Gia", "tv://vtv"),
@@ -344,7 +346,9 @@ object MovieRepository {
                 FilterItem("Sự Kiện TV360", "tv://live"),
                 FilterItem("Kênh Quốc Tế", "tv://intl"),
                 FilterItem("Đài Địa Phương", "tv://local"),
-                FilterItem("Radio Trực Tuyến", "tv://radio")
+                FilterItem("Radio Trực Tuyến", "tv://radio"),
+                FilterItem("⭐ Kênh Yêu Thích", "tv://favorites"),
+                FilterItem("➕ Thêm Kênh IPTV", "tv://custom")
             )
             MovieSource.FREEREELS -> listOf(
                 FilterItem("🔥 Thịnh Hành (For You)", "freereels://foryou"),
@@ -352,7 +356,9 @@ object MovieRepository {
                 FilterItem("🎀 Dành Cho Nữ", "freereels://tab_504"),
                 FilterItem("👑 Dành Cho Nam", "freereels://tab_506"),
                 FilterItem("🎭 Hoạt Hình Ngắn", "freereels://tab_547"),
-                FilterItem("⏰ Sắp Chiếu", "freereels://coming")
+                FilterItem("⏰ Sắp Chiếu", "freereels://coming"),
+                FilterItem("❤️ Phim Ngắn Yêu Thích", "app://favorites"),
+                FilterItem("🕒 Lịch Sử Xem", "app://history")
             )
         }
     }
@@ -360,6 +366,15 @@ object MovieRepository {
     suspend fun getMovies(source: MovieSource, filterUrl: String, page: Int = 1, context: Context? = null): List<MovieItem> {
         return withContext(Dispatchers.IO) {
             try {
+                if (filterUrl == "app://favorites") {
+                    val favs = if (context != null) com.huycabuonca.tv.util.FavoriteMovieManager.getFavorites(context) else emptyList()
+                    return@withContext favs.filter { it.source == source }
+                }
+                if (filterUrl == "app://history") {
+                    val history = if (context != null) com.huycabuonca.tv.util.WatchHistoryManager.getHistory(context) else emptyList()
+                    return@withContext history.filter { it.movie.source == source }.map { it.movie }
+                }
+
                 if (source == MovieSource.XEMTIVI) {
                     val channels = cachedTvChannels ?: emptyList()
                     val filtered = when (filterUrl) {

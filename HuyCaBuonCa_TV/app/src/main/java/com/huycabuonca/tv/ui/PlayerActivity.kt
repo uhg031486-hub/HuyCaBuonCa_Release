@@ -35,8 +35,11 @@ import com.huycabuonca.tv.api.MovieRepository
 import com.huycabuonca.tv.api.TvChannelItem
 import com.huycabuonca.tv.databinding.ActivityPlayerBinding
 import com.huycabuonca.tv.model.EpisodeItem
+import com.huycabuonca.tv.model.MovieItem
 import com.huycabuonca.tv.model.MovieSource
+import com.huycabuonca.tv.util.FavoriteMovieManager
 import com.huycabuonca.tv.util.TvFocusUtil
+import com.huycabuonca.tv.util.WatchHistoryManager
 import kotlinx.coroutines.launch
 
 class PlayerActivity : AppCompatActivity() {
@@ -137,6 +140,12 @@ class PlayerActivity : AppCompatActivity() {
             initExoPlayer(streamUrl, subtitleUrl)
         } else {
             initWebViewPlayer(streamUrl)
+        }
+
+        TvFocusUtil.setupFocusScale(binding.btnToggleFavPlayer)
+        updateFavPlayerButton()
+        binding.btnToggleFavPlayer.setOnClickListener {
+            toggleCurrentFavorite()
         }
 
         scheduleHideOverlays()
@@ -540,12 +549,68 @@ class PlayerActivity : AppCompatActivity() {
         windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
     }
 
+    private fun updateFavPlayerButton() {
+        if (isTvMode && currentTvChannel != null) {
+            val isFav = MovieRepository.isChannelFavorite(this, currentTvChannel!!.id)
+            binding.btnToggleFavPlayer.text = if (isFav) "⭐ Đã Thích (Kênh)" else "☆ Thêm Kênh Yêu Thích"
+            binding.btnToggleFavPlayer.setTextColor(if (isFav) android.graphics.Color.parseColor("#FFD700") else android.graphics.Color.WHITE)
+        } else {
+            val movie = intent.getSerializableExtra("EXTRA_MOVIE_ITEM") as? MovieItem
+            if (movie != null) {
+                val isFav = FavoriteMovieManager.isFavorite(this, movie.slug)
+                binding.btnToggleFavPlayer.text = if (isFav) "❤️ Đã Thích" else "🤍 Thêm Yêu Thích"
+                binding.btnToggleFavPlayer.setTextColor(if (isFav) android.graphics.Color.parseColor("#FFD700") else android.graphics.Color.WHITE)
+            } else {
+                binding.btnToggleFavPlayer.visibility = View.GONE
+            }
+        }
+    }
+
+    private fun toggleCurrentFavorite() {
+        if (isTvMode && currentTvChannel != null) {
+            val isFav = MovieRepository.toggleChannelFavorite(this, currentTvChannel!!.id)
+            updateFavPlayerButton()
+            val msg = if (isFav) "⭐ Đã thêm [${currentTvChannel!!.name}] vào Kênh Yêu Thích" else "Đã bỏ khỏi Kênh Yêu Thích"
+            Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+        } else {
+            val movie = intent.getSerializableExtra("EXTRA_MOVIE_ITEM") as? MovieItem
+            if (movie != null) {
+                val isFav = FavoriteMovieManager.toggleFavorite(this, movie)
+                updateFavPlayerButton()
+                val msg = if (isFav) "❤️ Đã thêm [${movie.name}] vào Phim Yêu Thích" else "Đã bỏ khỏi Phim Yêu Thích"
+                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun savePlaybackHistory() {
+        val movie = intent.getSerializableExtra("EXTRA_MOVIE_ITEM") as? MovieItem
+        if (movie != null) {
+            val epName = if (isTvMode) {
+                currentTvChannel?.group ?: ""
+            } else {
+                episodesList.getOrNull(currentEpisodeIndex)?.name ?: intent.getStringExtra("EXTRA_EPISODE") ?: ""
+            }
+            val pos = player?.currentPosition ?: 0L
+            val dur = player?.duration ?: 0L
+            WatchHistoryManager.saveHistory(
+                context = this,
+                movie = movie,
+                episodeName = epName,
+                positionMs = pos,
+                durationMs = dur
+            )
+        }
+    }
+
     override fun onStop() {
         super.onStop()
+        savePlaybackHistory()
         player?.pause()
     }
 
     override fun onDestroy() {
+        savePlaybackHistory()
         super.onDestroy()
         hideHandler.removeCallbacks(hideOverlayRunnable)
         hideHandler.removeCallbacks(hideBannerRunnable)

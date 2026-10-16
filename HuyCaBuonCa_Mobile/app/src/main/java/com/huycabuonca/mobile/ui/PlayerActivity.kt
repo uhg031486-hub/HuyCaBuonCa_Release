@@ -43,6 +43,33 @@ class PlayerActivity : AppCompatActivity() {
         binding.txtPlayerTitle.text = "$title - $episode"
         binding.btnPlayerBack.setOnClickListener { finish() }
 
+        val movie = intent.getSerializableExtra("EXTRA_MOVIE_ITEM") as? com.huycabuonca.mobile.model.MovieItem
+        val channelId = intent.getStringExtra("EXTRA_CHANNEL_ID") ?: ""
+        val source = intent.getStringExtra("EXTRA_SOURCE") ?: ""
+
+        val isTv = source == com.huycabuonca.mobile.model.MovieSource.XEMTIVI.name || channelId.isNotEmpty()
+        val updateFavIcon = {
+            val isFav = if (isTv && channelId.isNotEmpty()) {
+                com.huycabuonca.mobile.api.MovieRepository.isChannelFavorite(this, channelId)
+            } else if (movie != null) {
+                com.huycabuonca.mobile.util.FavoriteMovieManager.isFavorite(this, movie.slug)
+            } else false
+            binding.btnPlayerFav.setColorFilter(if (isFav) android.graphics.Color.parseColor("#FFD700") else android.graphics.Color.WHITE)
+        }
+        updateFavIcon()
+
+        binding.btnPlayerFav.setOnClickListener {
+            if (isTv && channelId.isNotEmpty()) {
+                val isFav = com.huycabuonca.mobile.api.MovieRepository.toggleChannelFavorite(this, channelId)
+                updateFavIcon()
+                android.widget.Toast.makeText(this, if (isFav) "⭐ Đã thêm vào Kênh Yêu Thích" else "Đã bỏ khỏi Kênh Yêu Thích", android.widget.Toast.LENGTH_SHORT).show()
+            } else if (movie != null) {
+                val isFav = com.huycabuonca.mobile.util.FavoriteMovieManager.toggleFavorite(this, movie)
+                updateFavIcon()
+                android.widget.Toast.makeText(this, if (isFav) "❤️ Đã thêm vào Phim Yêu Thích" else "Đã bỏ khỏi Phim Yêu Thích", android.widget.Toast.LENGTH_SHORT).show()
+            }
+        }
+
         if (isM3u8) {
             initExoPlayer(streamUrl)
         } else {
@@ -149,12 +176,30 @@ class PlayerActivity : AppCompatActivity() {
         windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
     }
 
+    private fun savePlaybackHistory() {
+        val movie = intent.getSerializableExtra("EXTRA_MOVIE_ITEM") as? com.huycabuonca.mobile.model.MovieItem
+        if (movie != null) {
+            val ep = intent.getStringExtra("EXTRA_EPISODE") ?: ""
+            val pos = player?.currentPosition ?: 0L
+            val dur = player?.duration ?: 0L
+            com.huycabuonca.mobile.util.WatchHistoryManager.saveHistory(
+                context = this,
+                movie = movie,
+                episodeName = ep,
+                positionMs = pos,
+                durationMs = dur
+            )
+        }
+    }
+
     override fun onStop() {
         super.onStop()
+        savePlaybackHistory()
         player?.pause()
     }
 
     override fun onDestroy() {
+        savePlaybackHistory()
         super.onDestroy()
         hideHandler.removeCallbacks(hideOverlayRunnable)
         player?.release()

@@ -1,8 +1,8 @@
 {
-  "versionCode": 11,
-  "versionName": "2.0",
-  "title": "Huy Cá Buôn Cà v2.0",
-  "changelog": "- Chuẩn hóa 100% avatar kênh TV không còn lỗi hình ảnh.\n- Tự động nhận diện video dọc theo kích thước thực.\n- Bấm phím số (0-9) trên Remote TV Box chuyển kênh tức thì.\n- Tự động phát tập tiếp theo kèm đếm ngược 5s.\n- Bộ đệm video thông minh 15s - 60s chống giật lag.\n- Chế độ thu nhỏ góc màn hình (PiP) trên điện thoại.",
-  "mobileApkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v2.0/HuyCaBuonCa_Mobile_v2.0.apk",
-  "tvApkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v2.0/HuyCaBuonCa_TV_v2.0.apk"
+  "versionCode": 12,
+  "versionName": "2.1",
+  "title": "Huy Cá Buôn Cà v2.1",
+  "changelog": "- Bấm vào kênh TV vào xem trực tiếp ngay lập tức, không qua màn hình chi tiết.\n- Bổ sung tính năng Kênh Yêu Thích & Phim Yêu Thích (bấm giữ hoặc nút ⭐ khi đang xem).\n- Đưa Kênh Yêu Thích và Kênh Tự Thêm (IPTV) xuống 2 vị trí cuối cùng trong danh mục Xem TV.\n- Đưa Lịch Thi Đấu Bóng Đá vào tab danh mục Xem TV với giao diện trực quan, chữ đen nền vàng tương phản cao.\n- Tối ưu màn hình TV Box: Icon nhỏ gọn hiển thị được 3 đến 4 hàng phim (7 cột).\n- Thêm 1 hàng riêng trên đầu cho Phim Đang Xem Dở (Lịch Sử Xem) hiển thị tiến độ % màu vàng.\n- Sửa triệt để lỗi cuộn 4-5 hàng bị nhảy focus remote lên đầu trang.\n- Bổ sung 82+ logo chuẩn chính thức cho toàn bộ kênh thể thao quốc tế và đua xe.\n- Tinh chỉnh nút Xem Tập Đầu (vàng chữ đen) và Quay Lại (xanh than chữ sáng) cực kỳ dễ nhìn.",
+  "mobileApkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v2.1/HuyCaBuonCa_Mobile_v2.1.apk",
+  "tvApkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v2.1/HuyCaBuonCa_TV_v2.1.apk"
 }

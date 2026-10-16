@@ -1,49 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="160dp"
-    android:layout_height="260dp"
-    android:layout_margin="8dp"
+    android:layout_width="120dp"
+    android:layout_height="176dp"
+    android:layout_margin="4dp"
     android:background="@drawable/bg_focus_card"
     android:clickable="true"
     android:focusable="true"
     android:orientation="vertical"
-    android:padding="6dp">
+    android:padding="4dp">
 
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="195dp">
+        android:layout_height="126dp">
 
         <ImageView
             android:id="@+id/imgPoster"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:scaleType="centerCrop"
             android:background="#1A2234"
+            android:scaleType="centerCrop"
             tools:ignore="ContentDescription" />
+
+        <TextView
+            android:id="@+id/txtFavBadge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|start"
+            android:layout_margin="3dp"
+            android:background="#CC000000"
+            android:paddingStart="4dp"
+            android:paddingEnd="4dp"
+            android:text="⭐"
+            android:textColor="#FFD700"
+            android:textSize="9sp"
+            android:visibility="gone" />
 
         <TextView
             android:id="@+id/txtQuality"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="top|end"
-            android:layout_margin="6dp"
+            android:layout_margin="3dp"
             android:background="@drawable/bg_tag"
             android:textColor="@color/brand_cyan"
-            android:textSize="10sp"
+            android:textSize="8sp"
             android:textStyle="bold"
-            tools:text="HD Vietsub" />
+            tools:text="HD" />
     </FrameLayout>
 
     <TextView
         android:id="@+id/txtTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
+        android:layout_marginTop="3dp"
         android:ellipsize="end"
         android:maxLines="2"
         android:textColor="@color/text_primary"
-        android:textSize="12sp"
+        android:textSize="10sp"
         android:textStyle="bold"
         tools:text="Tên phim mẫu ở đây" />
 
@@ -54,7 +68,7 @@
         android:ellipsize="end"
         android:maxLines="1"
         android:textColor="@color/text_secondary"
-        android:textSize="11sp"
+        android:textSize="9sp"
         tools:text="2026 • Tập 12" />
 
 </LinearLayout>

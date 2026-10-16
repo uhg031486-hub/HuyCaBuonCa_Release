@@ -43,33 +43,6 @@
                 android:textStyle="italic" />
         </LinearLayout>
 
-        <!-- Lịch thi đấu bóng đá -->
-        <Button
-            android:id="@+id/btnSchedule"
-            android:layout_width="wrap_content"
-            android:layout_height="34dp"
-            android:layout_marginEnd="6dp"
-            android:background="@drawable/bg_btn_selector"
-            android:text="⚽ Lịch đấu"
-            android:textColor="#FFD700"
-            android:textSize="11sp"
-            android:textStyle="bold"
-            android:paddingStart="8dp"
-            android:paddingEnd="8dp" />
-
-        <!-- Nhập kênh IPTV tùy biến -->
-        <Button
-            android:id="@+id/btnCustomIptv"
-            android:layout_width="wrap_content"
-            android:layout_height="34dp"
-            android:layout_marginEnd="6dp"
-            android:background="@drawable/bg_btn_selector"
-            android:text="➕ IPTV"
-            android:textColor="@color/brand_cyan"
-            android:textSize="11sp"
-            android:textStyle="bold"
-            android:paddingStart="8dp"
-            android:paddingEnd="8dp" />
 
         <!-- Sao lưu / Khôi phục -->
         <ImageButton
@@ -93,66 +66,81 @@
             android:src="@android:drawable/ic_menu_search" />
     </LinearLayout>
 
-    <!-- Source Selector (Horizontal scroll) -->
-    <HorizontalScrollView
+    <!-- Source Selector (Căn 4 ô vừa khít khung ngang điện thoại) -->
+    <LinearLayout
+        android:id="@+id/layoutSources"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:paddingStart="12dp"
-        android:paddingEnd="12dp"
-        android:scrollbars="none">
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:weightSum="4"
+        android:orientation="horizontal">
 
-        <LinearLayout
-            android:id="@+id/layoutSources"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
+        <Button
+            android:id="@+id/btnSourceKKPhim"
+            android:layout_width="0dp"
+            android:layout_height="36dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="4dp"
+            android:background="@drawable/bg_btn_selector"
+            android:paddingStart="2dp"
+            android:paddingEnd="2dp"
+            android:singleLine="true"
+            android:ellipsize="end"
+            android:text="⭐ KKPhim"
+            android:textColor="@color/text_primary"
+            android:textSize="11sp"
+            android:textStyle="bold" />
 
-            <Button
-                android:id="@+id/btnSourceKKPhim"
-                android:layout_width="wrap_content"
-                android:layout_height="36dp"
-                android:layout_marginEnd="8dp"
-                android:background="@drawable/bg_btn_selector"
-                android:text="⭐ KKPhim (HLS VIP)"
-                android:textColor="@color/text_primary"
-                android:textSize="11sp"
-                android:textStyle="bold" />
+        <Button
+            android:id="@+id/btnSourceAnimeHay"
+            android:layout_width="0dp"
+            android:layout_height="36dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="4dp"
+            android:background="@drawable/bg_btn_selector"
+            android:paddingStart="2dp"
+            android:paddingEnd="2dp"
+            android:singleLine="true"
+            android:ellipsize="end"
+            android:text="⛩️ AnimeHay"
+            android:textColor="@color/text_primary"
+            android:textSize="11sp"
+            android:textStyle="bold" />
 
-            <Button
-                android:id="@+id/btnSourceAnimeHay"
-                android:layout_width="wrap_content"
-                android:layout_height="36dp"
-                android:layout_marginEnd="8dp"
-                android:background="@drawable/bg_btn_selector"
-                android:text="⛩️ AnimeHay"
-                android:textColor="@color/text_primary"
-                android:textSize="11sp"
-                android:textStyle="bold" />
+        <Button
+            android:id="@+id/btnSourceXemTiVi"
+            android:layout_width="0dp"
+            android:layout_height="36dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="4dp"
+            android:background="@drawable/bg_btn_selector"
+            android:paddingStart="2dp"
+            android:paddingEnd="2dp"
+            android:singleLine="true"
+            android:ellipsize="end"
+            android:text="📺 Xem TiVi"
+            android:textColor="@color/text_primary"
+            android:textSize="11sp"
+            android:textStyle="bold" />
 
-            <Button
-                android:id="@+id/btnSourceXemTiVi"
-                android:layout_width="wrap_content"
-                android:layout_height="36dp"
-                android:layout_marginEnd="8dp"
-                android:background="@drawable/bg_btn_selector"
-                android:text="📺 Xem tiVi"
-                android:textColor="@color/text_primary"
-                android:textSize="11sp"
-                android:textStyle="bold" />
+        <Button
+            android:id="@+id/btnSourceFreeReels"
+            android:layout_width="0dp"
+            android:layout_height="36dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_btn_selector"
+            android:paddingStart="2dp"
+            android:paddingEnd="2dp"
+            android:singleLine="true"
+            android:ellipsize="end"
+            android:text="🎬 Phim Ngắn"
+            android:textColor="@color/text_primary"
+            android:textSize="11sp"
+            android:textStyle="bold" />
 
-            <Button
-                android:id="@+id/btnSourceFreeReels"
-                android:layout_width="wrap_content"
-                android:layout_height="36dp"
-                android:background="@drawable/bg_btn_selector"
-                android:text="🎬 Phim Ngắn (FreeReels)"
-                android:textColor="@color/text_primary"
-                android:textSize="11sp"
-                android:textStyle="bold" />
-
-        </LinearLayout>
-    </HorizontalScrollView>
+    </LinearLayout>
 
     <!-- DYNAMIC Filter Bar (Thay đổi tự động theo từng nguồn) -->
     <HorizontalScrollView

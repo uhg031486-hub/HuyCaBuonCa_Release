@@ -1224,6 +1224,13 @@ class DetailActivity : AppCompatActivity() {
         if (pos > 5000L) {
             val sp = getSharedPreferences("vbook_playback_prefs", Context.MODE_PRIVATE)
             sp.edit().putLong("resume_${movie.slug}_ep_${ep.slug}", pos).apply()
+            com.huycabuonca.mobile.util.WatchHistoryManager.saveHistory(
+                context = this,
+                movie = movie,
+                episodeName = ep.name,
+                positionMs = pos,
+                durationMs = player?.duration ?: 0L
+            )
         }
     }
 

@@ -6,9 +6,11 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import android.widget.LinearLayout
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.huycabuonca.tv.R
 import com.huycabuonca.tv.api.MovieRepository
@@ -16,14 +18,18 @@ import com.huycabuonca.tv.databinding.ActivityMainBinding
 import com.huycabuonca.tv.model.FilterItem
 import com.huycabuonca.tv.model.MovieItem
 import com.huycabuonca.tv.model.MovieSource
+import com.huycabuonca.tv.ui.adapter.HistoryAdapter
 import com.huycabuonca.tv.ui.adapter.MovieAdapter
+import com.huycabuonca.tv.util.FavoriteMovieManager
 import com.huycabuonca.tv.util.TvFocusUtil
+import com.huycabuonca.tv.util.WatchHistoryManager
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var adapter: MovieAdapter
+    private lateinit var historyAdapter: HistoryAdapter
     private lateinit var layoutManager: GridLayoutManager
 
     private var currentSource = MovieSource.KKPHIM
@@ -55,15 +61,66 @@ class MainActivity : AppCompatActivity() {
         TvFocusUtil.setupFocusScale(binding.btnSourceXemTiVi)
         TvFocusUtil.setupFocusScale(binding.btnSourceFreeReels)
         TvFocusUtil.setupFocusScale(binding.btnSearch)
+        TvFocusUtil.setupFocusScale(binding.btnClearHistory)
 
-        adapter = MovieAdapter { movie ->
-            val intent = Intent(this, DetailActivity::class.java).apply {
-                putExtra("EXTRA_MOVIE", movie)
+        historyAdapter = HistoryAdapter(
+            onItemClick = { item ->
+                if (item.movie.source == MovieSource.XEMTIVI) {
+                    playTvChannelDirectly(item.movie)
+                } else {
+                    val intent = Intent(this, DetailActivity::class.java).apply {
+                        putExtra("EXTRA_MOVIE", item.movie)
+                    }
+                    startActivity(intent)
+                }
+            },
+            onItemLongClick = { item ->
+                WatchHistoryManager.removeHistoryItem(this, item.movie.slug.ifEmpty { item.movie.id })
+                loadHistory()
+                Toast.makeText(this, "Đã xóa khỏi lịch sử xem", Toast.LENGTH_SHORT).show()
             }
-            startActivity(intent)
+        )
+        binding.recyclerHistory.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        binding.recyclerHistory.adapter = historyAdapter
+
+        binding.btnClearHistory.setOnClickListener {
+            WatchHistoryManager.clearHistory(this)
+            loadHistory()
+            Toast.makeText(this, "Đã xóa toàn bộ lịch sử xem", Toast.LENGTH_SHORT).show()
         }
 
-        layoutManager = GridLayoutManager(this, 5)
+        adapter = MovieAdapter(
+            onMovieClick = { movie ->
+                if (movie.source == MovieSource.XEMTIVI) {
+                    playTvChannelDirectly(movie)
+                } else {
+                    val intent = Intent(this, DetailActivity::class.java).apply {
+                        putExtra("EXTRA_MOVIE", movie)
+                    }
+                    startActivity(intent)
+                }
+            },
+            onMovieLongClick = { movie ->
+                if (movie.source == MovieSource.XEMTIVI) {
+                    val isFav = MovieRepository.toggleChannelFavorite(this, movie.id)
+                    val msg = if (isFav) "⭐ Đã thêm [${movie.name}] vào Kênh Yêu Thích!" else "Đã xóa khỏi Kênh Yêu Thích"
+                    Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+                    if (currentFilterUrl == "tv://favorites") {
+                        loadMovies(reset = true)
+                    }
+                } else {
+                    val isFav = FavoriteMovieManager.toggleFavorite(this, movie)
+                    val msg = if (isFav) "❤️ Đã thêm [${movie.name}] vào Phim Yêu Thích!" else "Đã xóa khỏi Phim Yêu Thích"
+                    Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+                    if (currentFilterUrl == "app://favorites") {
+                        loadMovies(reset = true)
+                    }
+                }
+            }
+        )
+
+        // 7 cột card nhỏ gọn để hiển thị được 3 đến 4 hàng phim trên màn hình TV Box
+        layoutManager = GridLayoutManager(this, 7)
         binding.recyclerMovies.layoutManager = layoutManager
         binding.recyclerMovies.adapter = adapter
 
@@ -83,6 +140,47 @@ class MainActivity : AppCompatActivity() {
 
         binding.btnSearch.setOnClickListener {
             startActivity(Intent(this, SearchActivity::class.java))
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        loadHistory()
+        adapter.notifyDataSetChanged()
+    }
+
+    private fun loadHistory() {
+        val history = WatchHistoryManager.getHistory(this)
+        if (history.isNotEmpty()) {
+            binding.layoutContinueWatching.visibility = View.VISIBLE
+            historyAdapter.submitList(history)
+        } else {
+            binding.layoutContinueWatching.visibility = View.GONE
+        }
+    }
+
+    private fun playTvChannelDirectly(movie: MovieItem) {
+        val channels = MovieRepository.getAllTvChannels(this)
+        val channel = channels.find { it.id == movie.id || it.name.equals(movie.name, ignoreCase = true) }
+        if (channel != null && channel.url.isNotEmpty()) {
+            MovieRepository.setLastWatchedChannelId(this, channel.id)
+            WatchHistoryManager.saveHistory(
+                context = this,
+                movie = movie,
+                episodeName = channel.group
+            )
+            val intent = Intent(this, PlayerActivity::class.java).apply {
+                putExtra("EXTRA_STREAM_URL", channel.url)
+                putExtra("EXTRA_IS_M3U8", true)
+                putExtra("EXTRA_TITLE", channel.name)
+                putExtra("EXTRA_EPISODE", channel.group)
+                putExtra("EXTRA_SOURCE", MovieSource.XEMTIVI.name)
+                putExtra("EXTRA_CHANNEL_ID", channel.id)
+                putExtra("EXTRA_MOVIE_ITEM", movie)
+            }
+            startActivity(intent)
+        } else {
+            Toast.makeText(this, "Không tìm thấy luồng phát của kênh này", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -229,7 +327,7 @@ class MainActivity : AppCompatActivity() {
                 val newItems = items.filter { it.id !in existingIds }
                 if (newItems.isNotEmpty()) {
                     movieList.addAll(newItems)
-                    adapter.submitList(movieList.toList())
+                    adapter.addItems(newItems)
                 } else {
                     isLastPage = true
                 }

@@ -1,6 +1,7 @@
 package com.huycabuonca.tv.ui
 
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
@@ -14,6 +15,7 @@ import com.huycabuonca.tv.databinding.ActivityDetailBinding
 import com.huycabuonca.tv.model.EpisodeItem
 import com.huycabuonca.tv.model.MovieDetail
 import com.huycabuonca.tv.model.MovieItem
+import com.huycabuonca.tv.model.MovieSource
 import com.huycabuonca.tv.ui.adapter.EpisodeAdapter
 import com.huycabuonca.tv.util.TvFocusUtil
 import kotlinx.coroutines.launch
@@ -42,6 +44,7 @@ class DetailActivity : AppCompatActivity() {
 
     private fun setupUI() {
         TvFocusUtil.setupFocusScale(binding.btnPlayFirst)
+        TvFocusUtil.setupFocusScale(binding.btnFavDetail)
         TvFocusUtil.setupFocusScale(binding.btnBack)
 
         binding.btnBack.setOnClickListener { finish() }
@@ -50,6 +53,33 @@ class DetailActivity : AppCompatActivity() {
         binding.txtDetailTitle.text = movie.name
         binding.txtDetailQuality.text = if (movie.quality.isNotEmpty()) movie.quality else "HD"
         binding.txtDetailMeta.text = "Năm: ${movie.year} • Nguồn: ${movie.source.displayName}"
+
+        val isTv = movie.source == MovieSource.XEMTIVI
+        val updateFavBtnText = {
+            val isFav = if (isTv) MovieRepository.isChannelFavorite(this, movie.id)
+            else com.huycabuonca.tv.util.FavoriteMovieManager.isFavorite(this, movie.slug)
+            if (isFav) {
+                binding.btnFavDetail.text = if (isTv) "⭐ Đã Thích (Kênh)" else "❤️ Đã Yêu Thích"
+                binding.btnFavDetail.setTextColor(Color.parseColor("#FFD700"))
+            } else {
+                binding.btnFavDetail.text = if (isTv) "☆ Thêm Kênh Yêu Thích" else "🤍 Thêm Vào Yêu Thích"
+                binding.btnFavDetail.setTextColor(Color.parseColor("#FFFFFF"))
+            }
+        }
+        updateFavBtnText()
+
+        binding.btnFavDetail.setOnClickListener {
+            if (isTv) {
+                val isFav = MovieRepository.toggleChannelFavorite(this, movie.id)
+                val msg = if (isFav) "⭐ Đã thêm [${movie.name}] vào Kênh Yêu Thích!" else "Đã xóa khỏi Kênh Yêu Thích"
+                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+            } else {
+                val isFav = com.huycabuonca.tv.util.FavoriteMovieManager.toggleFavorite(this, movie)
+                val msg = if (isFav) "❤️ Đã thêm [${movie.name}] vào Phim Yêu Thích!" else "Đã xóa khỏi Phim Yêu Thích"
+                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+            }
+            updateFavBtnText()
+        }
 
         val imgUrl = if (movie.posterUrl.isNotEmpty()) movie.posterUrl else movie.thumbUrl
         Glide.with(this)
@@ -126,6 +156,7 @@ class DetailActivity : AppCompatActivity() {
                             putExtra("EXTRA_CHANNEL_ID", movieItem?.id)
                             putExtra("EXTRA_EPISODES_LIST", ArrayList(allEps))
                             putExtra("EXTRA_CURRENT_EPISODE_INDEX", currentIndex)
+                            putExtra("EXTRA_MOVIE_ITEM", movieItem)
                         }
                         startActivity(intent)
                     } else {
@@ -147,6 +178,7 @@ class DetailActivity : AppCompatActivity() {
             putExtra("EXTRA_CHANNEL_ID", movieItem?.id)
             putExtra("EXTRA_EPISODES_LIST", ArrayList(allEps))
             putExtra("EXTRA_CURRENT_EPISODE_INDEX", currentIndex)
+            putExtra("EXTRA_MOVIE_ITEM", movieItem)
         }
         startActivity(intent)
     }

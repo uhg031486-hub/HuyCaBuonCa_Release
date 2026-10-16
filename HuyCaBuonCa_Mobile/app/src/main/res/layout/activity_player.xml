@@ -62,6 +62,15 @@
             android:textSize="13sp"
             android:textStyle="bold"
             tools:text="Tên Phim - Tập 01" />
+
+        <ImageButton
+            android:id="@+id/btnPlayerFav"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:background="@drawable/bg_btn_selector"
+            android:contentDescription="Yêu thích"
+            android:padding="6dp"
+            android:src="@android:drawable/btn_star" />
     </LinearLayout>
 
 </FrameLayout>

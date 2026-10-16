@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="168dp"
+    android:layout_height="100dp"
+    android:layout_marginEnd="8dp"
+    android:background="@drawable/bg_focus_card"
+    android:clickable="true"
+    android:focusable="true"
+    android:orientation="vertical"
+    android:padding="4dp">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="62dp">
+
+        <ImageView
+            android:id="@+id/imgHistoryThumb"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#161B26"
+            android:scaleType="centerCrop"
+            tools:ignore="ContentDescription" />
+
+        <TextView
+            android:id="@+id/txtHistoryBadge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|start"
+            android:layout_margin="3dp"
+            android:background="#D9FF2E7E"
+            android:paddingStart="4dp"
+            android:paddingEnd="4dp"
+            android:text="ĐANG XEM"
+            android:textColor="#FFFFFF"
+            android:textSize="7sp"
+            android:textStyle="bold" />
+
+        <ProgressBar
+            android:id="@+id/progressHistoryBar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="3dp"
+            android:layout_gravity="bottom"
+            android:max="100"
+            android:progress="45"
+            android:progressDrawable="@drawable/custom_progress_bar" />
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/txtHistoryTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textColor="@color/text_primary"
+        android:textSize="10sp"
+        android:textStyle="bold"
+        tools:text="Tên phim đang xem dở" />
+
+    <TextView
+        android:id="@+id/txtHistoryEpisode"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textColor="@color/brand_gold"
+        android:textSize="8sp"
+        tools:text="Tập 3 • Xem tiếp" />
+
+</LinearLayout>
