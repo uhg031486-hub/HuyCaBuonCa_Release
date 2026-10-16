@@ -99,6 +99,9 @@ class DetailActivity : AppCompatActivity() {
     }
 
     private fun playEpisode(episode: EpisodeItem) {
+        val allEps = movieDetail?.servers?.flatMap { it.episodes } ?: emptyList()
+        val currentIndex = allEps.indexOfFirst { it.slug == episode.slug || it.name == episode.name }.coerceAtLeast(0)
+
         val streamUrl = episode.linkM3u8 ?: episode.linkEmbed
         if (streamUrl.isNullOrEmpty()) {
             Toast.makeText(this, getString(R.string.no_stream_found), Toast.LENGTH_SHORT).show()
@@ -121,6 +124,8 @@ class DetailActivity : AppCompatActivity() {
                             putExtra("EXTRA_EPISODE", episode.name)
                             putExtra("EXTRA_SOURCE", movieItem?.source?.name)
                             putExtra("EXTRA_CHANNEL_ID", movieItem?.id)
+                            putExtra("EXTRA_EPISODES_LIST", ArrayList(allEps))
+                            putExtra("EXTRA_CURRENT_EPISODE_INDEX", currentIndex)
                         }
                         startActivity(intent)
                     } else {
@@ -140,6 +145,8 @@ class DetailActivity : AppCompatActivity() {
             putExtra("EXTRA_EPISODE", episode.name)
             putExtra("EXTRA_SOURCE", movieItem?.source?.name)
             putExtra("EXTRA_CHANNEL_ID", movieItem?.id)
+            putExtra("EXTRA_EPISODES_LIST", ArrayList(allEps))
+            putExtra("EXTRA_CURRENT_EPISODE_INDEX", currentIndex)
         }
         startActivity(intent)
     }

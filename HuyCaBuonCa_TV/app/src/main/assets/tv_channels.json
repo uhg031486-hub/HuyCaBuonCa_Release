@@ -45,7 +45,7 @@
     "id": "vtv5_t_y_nam_b_6",
     "name": "VTV5 Tây Nam Bộ",
     "group": "VTV",
-    "logo": "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/maxresdefault.jpg",
+    "logo": "https://s12811.cdn.mytvnet.vn/vimages/b5/5c/cc/c2/22/29/b5cc2-pvtv5hd-channel-unkn.png",
     "url": "https://vips-livecdn.fptplay.net/live/media/vtv5tnb/live-hls-avc/vtv5tnb-avc1_4000000=10000-mp4a_131600=20000.m3u8"
   },
   {
@@ -59,14 +59,14 @@
     "id": "vtv6_8",
     "name": "VTV6",
     "group": "VTV",
-    "logo": "https://raw.githubusercontent.com/vuminhthanh12/Logo/refs/heads/main/VTV6.png",
+    "logo": "https://img-zlr1.tv360.vn/image1/2023/04/03/16/1680514594557/ab2557f0b015_640_360.png",
     "url": "https://vips-livecdn.fptplay.net/live/media/vtv6/live247-hls-avc/vtv6-avc1_5600000=10000-mp4a_131600=20000.m3u8"
   },
   {
     "id": "vtv7_9",
     "name": "VTV7",
     "group": "VTV",
-    "logo": "https://i.ytimg.com/vi/hWt5JN_B66Y/maxresdefault.jpg",
+    "logo": "https://s12811.cdn.mytvnet.vn/vimages/b5/5c/cc/c2/22/29/b5cc2-pvtv5hd-channel-unkn.png",
     "url": "https://vips-livecdn.fptplay.net/live/media/vtv7/live247-hls-avc/vtv7-avc1_5600000=10000-mp4a_131600=20000.m3u8"
   },
   {
@@ -80,7 +80,7 @@
     "id": "vtv9_11",
     "name": "VTV9",
     "group": "VTV",
-    "logo": "https://i.ytimg.com/vi/APl10jiVAlQ/maxresdefault.jpg",
+    "logo": "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/VTV10.png",
     "url": "https://vips-livecdn.fptplay.net/live/media/vtv9/live247-hls-avc/vtv9-avc1_5600000=10000-mp4a_131600=20000.m3u8"
   },
   {
@@ -94,601 +94,601 @@
     "id": "sports_vn_vtv6",
     "name": "VTV6 Thể Thao HD (FPT)",
     "group": "⚽ Bóng Đá & Thể Thao VN",
-    "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/VTV6_2013.svg/200px-VTV6_2013.svg.png",
+    "logo": "https://img-zlr1.tv360.vn/image1/2023/04/03/16/1680514594557/ab2557f0b015_640_360.png",
     "url": "https://vips-livecdn.fptplay.net/live/media/vtv6/live247-hls-avc/index.m3u8"
   },
   {
     "id": "sports_vn_htvc_thethao",
     "name": "HTVC Thể Thao HD (FPT)",
     "group": "⚽ Bóng Đá & Thể Thao VN",
-    "logo": "https://i.imgur.com/8QZ9q2P.png",
+    "logo": "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
     "url": "https://vips-livecdn.fptplay.net/live/media/htvthethao/live247-hls-avc/index.m3u8"
   },
   {
     "id": "sports_vn_htv_thethao",
     "name": "HTV Thể Thao",
     "group": "⚽ Bóng Đá & Thể Thao VN",
-    "logo": "https://i.imgur.com/8QZ9q2P.png",
+    "logo": "https://img-zlr1.tv360.vn/image1/2023/04/03/16/1680514594557/ab2557f0b015_640_360.png",
     "url": "https://dethich.pw/htvthethao/index.m3u8"
   },
   {
     "id": "sports_vn_dongnai2",
     "name": "Đồng Nai 2 (Thể Thao & Giải Trí)",
     "group": "⚽ Bóng Đá & Thể Thao VN",
-    "logo": "https://i.imgur.com/2sXv4cW.png",
+    "logo": "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/%C4%90NNRTV2.png",
     "url": "https://vtvgolive-ott3.vtvdigital.vn/live/dongnai2tv/chunklist_2.m3u8"
   },
   {
     "id": "sports_vn_thvl4",
     "name": "Vĩnh Long 4 Thể Thao",
     "group": "⚽ Bóng Đá & Thể Thao VN",
-    "logo": "https://i.imgur.com/8QZ9q2P.png",
+    "logo": "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/THVL4.webp",
     "url": "https://dethich.pw/thvl4/index.m3u8"
   },
   {
     "id": "sports_intl_cbs_golazo",
     "name": "CBS Sports Golazo (Cúp C1 / Serie A)",
     "group": "⚽ Bóng Đá Quốc Tế & C1",
-    "logo": "https://i.imgur.com/6E2hS6F.png",
+    "logo": "https://r2.thesportsdb.com/images/media/channel/logo/p5csyn1620551587.png",
     "url": "https://dai.google.com/linear/hls/event/7f3Wv6f7QEKfQna22jHqLQ/master.m3u8"
   },
   {
     "id": "sports_intl_bein_xtra",
     "name": "beIN SPORTS XTRA HD",
     "group": "⚽ Bóng Đá Quốc Tế & C1",
-    "logo": "https://i.imgur.com/4gW5V0G.png",
+    "logo": "https://r2.thesportsdb.com/images/media/channel/logo/p5csyn1620551587.png",
     "url": "https://bein-xtra-bein.amagi.tv/playlist.m3u8"
   },
   {
     "id": "sports_intl_fifa_plus_live",
     "name": "FIFA+ Live HD (Trực Tiếp & World Cup)",
     "group": "⚽ Bóng Đá Quốc Tế & C1",
-    "logo": "https://i.imgur.com/h5TzG6a.png",
+    "logo": "https://r2.thesportsdb.com/images/media/channel/logo/p5csyn1620551587.png",
     "url": "https://d2w9q46ikgrcwx.cloudfront.net/v1/master/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-of5cbk3sav3w5/v1/sysdata_s_p_a_fifa_7/samsungheadend_us/latest/main/hls/playlist.m3u8"
   },
   {
     "id": "sports_intl_fifa_plus_global",
     "name": "FIFA+ Global HD",
     "group": "⚽ Bóng Đá Quốc Tế & C1",
-    "logo": "https://i.imgur.com/h5TzG6a.png",
+    "logo": "https://r2.thesportsdb.com/images/media/channel/logo/p5csyn1620551587.png",
     "url": "https://jmp2.uk/plu-660c29b5aec9680008f5b4a4.m3u8"
   },
   {
     "id": "sports_intl_eurosport_live",
     "name": "Eurosport Live HD",
     "group": "⚽ Bóng Đá Quốc Tế & C1",
-    "logo": "https://i.imgur.com/yS7Jj4e.png",
+    "logo": "https://r2.thesportsdb.com/images/media/channel/logo/p5csyn1620551587.png",
     "url": "https://drk6xq0vhn.gpcdn.net/live/euro_sports_hd_abr/index.m3u8"
   },
   {
     "id": "sports_intl_eurosport_1",
     "name": "Eurosport 1 HD (1080p)",
     "group": "⚽ Bóng Đá Quốc Tế & C1",
-    "logo": "https://i.imgur.com/yS7Jj4e.png",
+    "logo": "https://r2.thesportsdb.com/images/media/channel/logo/p5csyn1620551587.png",
     "url": "http://57.128.210.196:8080/264/index.m3u8"
   },
   {
     "id": "sports_intl_eurosport_2",
     "name": "Eurosport 2 HD (1080p)",
     "group": "⚽ Bóng Đá Quốc Tế & C1",
-    "logo": "https://i.imgur.com/yS7Jj4e.png",
+    "logo": "https://r2.thesportsdb.com/images/media/channel/logo/p5csyn1620551587.png",
     "url": "http://57.128.210.196:8080/263/index.m3u8"
   },
   {
     "id": "sports_intl_cctv_football",
     "name": "CCTV-Storm Football (Bóng Đá 24/7)",
     "group": "⚽ Bóng Đá Quốc Tế & C1",
-    "logo": "https://i.imgur.com/6E2hS6F.png",
+    "logo": "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
     "url": "http://38.75.136.137:98/gslb/dsdqpub/fyzq.m3u8?auth=testpub"
   },
   {
     "id": "sports_intl_tyc_sports",
     "name": "TyC Sports HD (Bóng Đá Nam Mỹ)",
     "group": "⚽ Bóng Đá Quốc Tế & C1",
-    "logo": "https://i.imgur.com/6E2hS6F.png",
+    "logo": "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
     "url": "https://amg26268-amg26268c14-freelivesports-emea-10267.playouts.now.amagi.tv/ts-us-e2-n2/playlist/amg26268-sportsstudio-tycsports-freelivesportsemea/playlist.m3u8"
   },
   {
     "id": "sports_intl_lequipe",
     "name": "L'Equipe Live 1080p (Pháp)",
     "group": "⚽ Bóng Đá Quốc Tế & C1",
-    "logo": "https://i.imgur.com/6E2hS6F.png",
+    "logo": "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
     "url": "https://dq37unyetkpcz.cloudfront.net/v1/master/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-m04j89j7k5gtp/LEquipe_FR.m3u8"
   },
   {
     "id": "sports_espn_usa",
     "name": "ESPN HD (United States)",
     "group": "🏆 Kênh Thể Thao ESPN & FOX",
-    "logo": "https://i.imgur.com/t3cWJ3F.png",
+    "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/ESPN_wordmark.svg/300px-ESPN_wordmark.svg.png",
     "url": "http://85.237.89.160:9590/usa-s/ESPN-HD/index.m3u8"
   },
   {
     "id": "sports_espn_2_usa",
     "name": "ESPN 2 HD (United States)",
     "group": "🏆 Kênh Thể Thao ESPN & FOX",
-    "logo": "https://i.imgur.com/t3cWJ3F.png",
+    "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/ESPN_wordmark.svg/300px-ESPN_wordmark.svg.png",
     "url": "http://85.237.89.160:9590/usa-s/ESPN-2-HD/index.m3u8"
   },
   {
     "id": "sports_espn_u",
     "name": "ESPNU HD",
     "group": "🏆 Kênh Thể Thao ESPN & FOX",
-    "logo": "https://i.imgur.com/t3cWJ3F.png",
+    "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/ESPN_wordmark.svg/300px-ESPN_wordmark.svg.png",
     "url": "http://85.237.89.160:9590/usa-s/ESPN-U-HD/index.m3u8"
   },
   {
     "id": "sports_espn_latam_1",
     "name": "ESPN Latin America (1080p)",
     "group": "🏆 Kênh Thể Thao ESPN & FOX",
-    "logo": "https://i.imgur.com/t3cWJ3F.png",
+    "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/ESPN_wordmark.svg/300px-ESPN_wordmark.svg.png",
     "url": "https://barinaslive1.boldmss.com/ESPN/ESPN.isml/ESPN.m3u8"
   },
   {
     "id": "sports_espn_latam_2",
     "name": "ESPN 2 Latin America (1080p)",
     "group": "🏆 Kênh Thể Thao ESPN & FOX",
-    "logo": "https://i.imgur.com/t3cWJ3F.png",
+    "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/ESPN_wordmark.svg/300px-ESPN_wordmark.svg.png",
     "url": "https://barinaslive1.boldmss.com/ESPN_2/ESPN_2.isml/ESPN_2.m3u8"
   },
   {
     "id": "sports_espn_latam_3",
     "name": "ESPN 3 Latin America (1080p)",
     "group": "🏆 Kênh Thể Thao ESPN & FOX",
-    "logo": "https://i.imgur.com/t3cWJ3F.png",
+    "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/ESPN_wordmark.svg/300px-ESPN_wordmark.svg.png",
     "url": "https://barinaslive1.boldmss.com/ESPN_3/ESPN_3.isml/ESPN_3.m3u8"
   },
   {
     "id": "sports_espn_latam_4",
     "name": "ESPN 4 Latin America (1080p)",
     "group": "🏆 Kênh Thể Thao ESPN & FOX",
-    "logo": "https://i.imgur.com/t3cWJ3F.png",
+    "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/ESPN_wordmark.svg/300px-ESPN_wordmark.svg.png",
     "url": "https://barinaslive1.boldmss.com/ESPN_4/ESPN_4.isml/ESPN_4.m3u8"
   },
   {
     "id": "sports_espn_latam_5",
     "name": "ESPN 5 Latin America (1080p)",
     "group": "🏆 Kênh Thể Thao ESPN & FOX",
-    "logo": "https://i.imgur.com/t3cWJ3F.png",
+    "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/ESPN_wordmark.svg/300px-ESPN_wordmark.svg.png",
     "url": "https://barinaslive1.boldmss.com/ESPN_5/ESPN_5.isml/ESPN_5.m3u8"
   },
   {
     "id": "sports_espn_latam_6",
     "name": "ESPN 6 Latin America (1080p)",
     "group": "🏆 Kênh Thể Thao ESPN & FOX",
-    "logo": "https://i.imgur.com/t3cWJ3F.png",
+    "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/ESPN_wordmark.svg/300px-ESPN_wordmark.svg.png",
     "url": "https://barinaslive1.boldmss.com/ESPN_6/ESPN_6.isml/ESPN_6.m3u8"
   },
   {
     "id": "sports_espn_latam_7",
     "name": "ESPN 7 Latin America (1080p)",
     "group": "🏆 Kênh Thể Thao ESPN & FOX",
-    "logo": "https://i.imgur.com/t3cWJ3F.png",
+    "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/ESPN_wordmark.svg/300px-ESPN_wordmark.svg.png",
     "url": "https://barinaslive1.boldmss.com/ESPN_7/ESPN_7.isml/ESPN_7.m3u8"
   },
   {
     "id": "sports_fox_sports_1",
     "name": "Fox Sports 1 (720p)",
     "group": "🏆 Kênh Thể Thao ESPN & FOX",
-    "logo": "https://i.imgur.com/4gW5V0G.png",
+    "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/37/Fox_Sports_logo.svg/300px-Fox_Sports_logo.svg.png",
     "url": "http://85.237.89.160:9590/usa-s/FOX-SPORTS-1/index.m3u8"
   },
   {
     "id": "sports_fox_sports_news",
     "name": "Fox Sports News (1080p Akamai)",
     "group": "🏆 Kênh Thể Thao ESPN & FOX",
-    "logo": "https://i.imgur.com/4gW5V0G.png",
+    "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/37/Fox_Sports_logo.svg/300px-Fox_Sports_logo.svg.png",
     "url": "https://skynewsau-live-premium.akamaized.net/hls/live/2105307/foxsportsnews/live_1080p.m3u8"
   },
   {
     "id": "sports_fubo_sports",
     "name": "Fubo Sports Network (1080p)",
     "group": "🏆 Kênh Thể Thao ESPN & FOX",
-    "logo": "https://i.imgur.com/4gW5V0G.png",
+    "logo": "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
     "url": "https://dnf08l6u6uxnz.cloudfront.net/master.m3u8"
   },
   {
     "id": "sports_eleven_1",
     "name": "Eleven Sports 1 HD",
     "group": "🏆 Kênh Thể Thao ESPN & FOX",
-    "logo": "https://i.imgur.com/4gW5V0G.png",
+    "logo": "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
     "url": "http://92.114.85.87:8002/play/a00e/index.m3u8"
   },
   {
     "id": "sports_eleven_2",
     "name": "Eleven Sports 2 HD",
     "group": "🏆 Kênh Thể Thao ESPN & FOX",
-    "logo": "https://i.imgur.com/4gW5V0G.png",
+    "logo": "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
     "url": "http://92.114.85.87:8002/play/a00f/index.m3u8"
   },
   {
     "id": "sports_eleven_3",
     "name": "Eleven Sports 3 HD",
     "group": "🏆 Kênh Thể Thao ESPN & FOX",
-    "logo": "https://i.imgur.com/4gW5V0G.png",
+    "logo": "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
     "url": "http://92.114.85.87:8002/play/a00g/index.m3u8"
   },
   {
     "id": "sports_eleven_4",
     "name": "Eleven Sports 4 HD",
     "group": "🏆 Kênh Thể Thao ESPN & FOX",
-    "logo": "https://i.imgur.com/4gW5V0G.png",
+    "logo": "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
     "url": "http://92.114.85.87:8002/play/a00h/index.m3u8"
   },
   {
     "id": "sports_redbull_tv",
     "name": "Red Bull TV HD (Akamai)",
     "group": "🏎️ Đua Xe & Mạo Hiểm",
-    "logo": "https://i.imgur.com/6E2hS6F.png",
+    "logo": "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
     "url": "https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master.m3u8"
   },
   {
     "id": "sports_rally_tv",
     "name": "Rally TV 1080p (WRC Trực Tiếp)",
     "group": "🏎️ Đua Xe & Mạo Hiểm",
-    "logo": "https://i.imgur.com/6E2hS6F.png",
+    "logo": "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
     "url": "https://rally-tv-live.akamaized.net/hls/live/2117704/RallyTV-Pri/master.m3u8"
   },
   {
     "id": "sports_racer_select",
     "name": "RACER Select HD",
     "group": "🏎️ Đua Xe & Mạo Hiểm",
-    "logo": "https://i.imgur.com/6E2hS6F.png",
+    "logo": "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
     "url": "https://amg00378-amg00378c4-freelivesports-emea-5637.playouts.now.amagi.tv/playlist.m3u8"
   },
   {
     "id": "sports_nhra_tv",
     "name": "NHRA TV HD (Đua Xe Tốc Độ)",
     "group": "🏎️ Đua Xe & Mạo Hiểm",
-    "logo": "https://i.imgur.com/6E2hS6F.png",
+    "logo": "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
     "url": "https://d265y4sk8257lt.cloudfront.net/nh.m3u8"
   },
   {
     "id": "sports_swerve_combat",
     "name": "Swerve Combat HD (MMA & Boxing)",
     "group": "🥊 Võ Thuật & Đối Kháng",
-    "logo": "https://i.imgur.com/4gW5V0G.png",
+    "logo": "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
     "url": "https://linear-253.frequency.stream/mt/roku/253/hls/master/playlist.m3u8"
   },
   {
     "id": "sports_persiana_fight",
     "name": "Persiana Fight HD",
     "group": "🥊 Võ Thuật & Đối Kháng",
-    "logo": "https://i.imgur.com/4gW5V0G.png",
+    "logo": "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
     "url": "https://fighthls.persiana.live/hls/stream.m3u8"
   },
   {
     "id": "sports_polsat_sport_fight",
     "name": "Polsat Sport Fight (1080p)",
     "group": "🥊 Võ Thuật & Đối Kháng",
-    "logo": "https://i.imgur.com/4gW5V0G.png",
+    "logo": "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
     "url": "http://57.128.210.196:8080/194/index.m3u8"
   },
   {
     "id": "sports_nba_tv",
     "name": "NBA TV HD (Bóng Rổ)",
     "group": "🏀 Bóng Rổ & Quần Vợt",
-    "logo": "https://i.imgur.com/6E2hS6F.png",
+    "logo": "https://upload.wikimedia.org/wikipedia/en/thumb/0/03/National_Basketball_Association_logo.svg/200px-National_Basketball_Association_logo.svg.png",
     "url": "http://23.237.104.106:8080/USA_NBA/index.m3u8"
   },
   {
     "id": "sports_nfl_network",
     "name": "NFL Network HD (Bóng Bầu Dục)",
     "group": "🏀 Bóng Rổ & Quần Vợt",
-    "logo": "https://i.imgur.com/6E2hS6F.png",
+    "logo": "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
     "url": "http://198.58.104.90:8989/nfl/index.m3u8"
   },
   {
     "id": "sports_tennis_channel_2",
     "name": "Tennis Channel 2 HD",
     "group": "🏀 Bóng Rổ & Quần Vợt",
-    "logo": "https://i.imgur.com/6E2hS6F.png",
+    "logo": "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
     "url": "https://mumbai-edge.smartplaytv.in/Tennis2/index.m3u8"
   },
   {
     "id": "sports_pga_tour",
     "name": "PGA Tour HD (Golf)",
     "group": "🏀 Bóng Rổ & Quần Vợt",
-    "logo": "https://i.imgur.com/6E2hS6F.png",
+    "logo": "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
     "url": "https://d11k1mnrgfposz.cloudfront.net/playlist.m3u8"
   },
   {
     "name": "VTV6 Thể Thao HD (FPT)",
     "group": "⚽ Bóng Đá & Thể Thao VN",
-    "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/VTV6_2013.svg/200px-VTV6_2013.svg.png",
+    "logo": "https://img-zlr1.tv360.vn/image1/2023/04/03/16/1680514594557/ab2557f0b015_640_360.png",
     "url": "https://vips-livecdn.fptplay.net/live/media/vtv6/live247-hls-avc/index.m3u8",
     "id": "tv_42aa576f9d"
   },
   {
     "name": "HTVC Thể Thao HD (FPT)",
     "group": "⚽ Bóng Đá & Thể Thao VN",
-    "logo": "https://i.imgur.com/8QZ9q2P.png",
+    "logo": "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
     "url": "https://vips-livecdn.fptplay.net/live/media/htvthethao/live247-hls-avc/index.m3u8",
     "id": "tv_2d29e991cf"
   },
   {
     "name": "HTV Thể Thao",
     "group": "⚽ Bóng Đá & Thể Thao VN",
-    "logo": "https://i.imgur.com/8QZ9q2P.png",
+    "logo": "https://img-zlr1.tv360.vn/image1/2023/04/03/16/1680514594557/ab2557f0b015_640_360.png",
     "url": "https://dethich.pw/htvthethao/index.m3u8",
     "id": "tv_ad49c3ca79"
   },
   {
     "name": "Đồng Nai 2 (Thể Thao & Giải Trí)",
     "group": "⚽ Bóng Đá & Thể Thao VN",
-    "logo": "https://i.imgur.com/2sXv4cW.png",
+    "logo": "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/%C4%90NNRTV2.png",
     "url": "https://vtvgolive-ott3.vtvdigital.vn/live/dongnai2tv/chunklist_2.m3u8",
     "id": "tv_eba75970d2"
   },
   {
     "name": "Vĩnh Long 4 Thể Thao",
     "group": "⚽ Bóng Đá & Thể Thao VN",
-    "logo": "https://i.imgur.com/8QZ9q2P.png",
+    "logo": "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/THVL4.webp",
     "url": "https://dethich.pw/thvl4/index.m3u8",
     "id": "tv_1cc9c8e50b"
   },
   {
     "name": "CBS Sports Golazo (Cúp C1 / Serie A)",
     "group": "⚽ Bóng Đá Quốc Tế & C1",
-    "logo": "https://i.imgur.com/6E2hS6F.png",
+    "logo": "https://r2.thesportsdb.com/images/media/channel/logo/p5csyn1620551587.png",
     "url": "https://dai.google.com/linear/hls/event/7f3Wv6f7QEKfQna22jHqLQ/master.m3u8",
     "id": "tv_51668397b4"
   },
   {
     "name": "beIN SPORTS XTRA HD",
     "group": "⚽ Bóng Đá Quốc Tế & C1",
-    "logo": "https://i.imgur.com/4gW5V0G.png",
+    "logo": "https://r2.thesportsdb.com/images/media/channel/logo/p5csyn1620551587.png",
     "url": "https://bein-xtra-bein.amagi.tv/playlist.m3u8",
     "id": "tv_8d1941795e"
   },
   {
     "name": "FIFA+ Live HD (Trực Tiếp & World Cup)",
     "group": "⚽ Bóng Đá Quốc Tế & C1",
-    "logo": "https://i.imgur.com/h5TzG6a.png",
+    "logo": "https://r2.thesportsdb.com/images/media/channel/logo/p5csyn1620551587.png",
     "url": "https://d2w9q46ikgrcwx.cloudfront.net/v1/master/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-of5cbk3sav3w5/v1/sysdata_s_p_a_fifa_7/samsungheadend_us/latest/main/hls/playlist.m3u8",
     "id": "tv_24f808718f"
   },
   {
     "name": "FIFA+ Global HD",
     "group": "⚽ Bóng Đá Quốc Tế & C1",
-    "logo": "https://i.imgur.com/h5TzG6a.png",
+    "logo": "https://r2.thesportsdb.com/images/media/channel/logo/p5csyn1620551587.png",
     "url": "https://jmp2.uk/plu-660c29b5aec9680008f5b4a4.m3u8",
     "id": "tv_e58c48a4e3"
   },
   {
     "name": "Eurosport Live HD",
     "group": "⚽ Bóng Đá Quốc Tế & C1",
-    "logo": "https://i.imgur.com/yS7Jj4e.png",
+    "logo": "https://r2.thesportsdb.com/images/media/channel/logo/p5csyn1620551587.png",
     "url": "https://drk6xq0vhn.gpcdn.net/live/euro_sports_hd_abr/index.m3u8",
     "id": "tv_16399f85dd"
   },
   {
     "name": "Eurosport 1 HD (1080p)",
     "group": "⚽ Bóng Đá Quốc Tế & C1",
-    "logo": "https://i.imgur.com/yS7Jj4e.png",
+    "logo": "https://r2.thesportsdb.com/images/media/channel/logo/p5csyn1620551587.png",
     "url": "http://57.128.210.196:8080/264/index.m3u8",
     "id": "tv_b4af85a752"
   },
   {
     "name": "Eurosport 2 HD (1080p)",
     "group": "⚽ Bóng Đá Quốc Tế & C1",
-    "logo": "https://i.imgur.com/yS7Jj4e.png",
+    "logo": "https://r2.thesportsdb.com/images/media/channel/logo/p5csyn1620551587.png",
     "url": "http://57.128.210.196:8080/263/index.m3u8",
     "id": "tv_1099a13d77"
   },
   {
     "name": "CCTV-Storm Football (Bóng Đá 24/7)",
     "group": "⚽ Bóng Đá Quốc Tế & C1",
-    "logo": "https://i.imgur.com/6E2hS6F.png",
+    "logo": "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
     "url": "http://38.75.136.137:98/gslb/dsdqpub/fyzq.m3u8?auth=testpub",
     "id": "tv_3a40116567"
   },
   {
     "name": "TyC Sports HD (Bóng Đá Nam Mỹ)",
     "group": "⚽ Bóng Đá Quốc Tế & C1",
-    "logo": "https://i.imgur.com/6E2hS6F.png",
+    "logo": "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
     "url": "https://amg26268-amg26268c14-freelivesports-emea-10267.playouts.now.amagi.tv/ts-us-e2-n2/playlist/amg26268-sportsstudio-tycsports-freelivesportsemea/playlist.m3u8",
     "id": "tv_9884b0fc20"
   },
   {
     "name": "L'Equipe Live 1080p (Pháp)",
     "group": "⚽ Bóng Đá Quốc Tế & C1",
-    "logo": "https://i.imgur.com/6E2hS6F.png",
+    "logo": "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
     "url": "https://dq37unyetkpcz.cloudfront.net/v1/master/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-m04j89j7k5gtp/LEquipe_FR.m3u8",
     "id": "tv_ead8a6b8dc"
   },
   {
     "name": "ESPN HD (United States)",
     "group": "🏆 Kênh Thể Thao ESPN & FOX",
-    "logo": "https://i.imgur.com/t3cWJ3F.png",
+    "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/ESPN_wordmark.svg/300px-ESPN_wordmark.svg.png",
     "url": "http://85.237.89.160:9590/usa-s/ESPN-HD/index.m3u8",
     "id": "tv_89467c791f"
   },
   {
     "name": "ESPN 2 HD (United States)",
     "group": "🏆 Kênh Thể Thao ESPN & FOX",
-    "logo": "https://i.imgur.com/t3cWJ3F.png",
+    "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/ESPN_wordmark.svg/300px-ESPN_wordmark.svg.png",
     "url": "http://85.237.89.160:9590/usa-s/ESPN-2-HD/index.m3u8",
     "id": "tv_1734ba7bb1"
   },
   {
     "name": "ESPNU HD",
     "group": "🏆 Kênh Thể Thao ESPN & FOX",
-    "logo": "https://i.imgur.com/t3cWJ3F.png",
+    "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/ESPN_wordmark.svg/300px-ESPN_wordmark.svg.png",
     "url": "http://85.237.89.160:9590/usa-s/ESPN-U-HD/index.m3u8",
     "id": "tv_0f5d8d0738"
   },
   {
     "name": "ESPN Latin America (1080p)",
     "group": "🏆 Kênh Thể Thao ESPN & FOX",
-    "logo": "https://i.imgur.com/t3cWJ3F.png",
+    "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/ESPN_wordmark.svg/300px-ESPN_wordmark.svg.png",
     "url": "https://barinaslive1.boldmss.com/ESPN/ESPN.isml/ESPN.m3u8",
     "id": "tv_3ee9f8f318"
   },
   {
     "name": "ESPN 2 Latin America (1080p)",
     "group": "🏆 Kênh Thể Thao ESPN & FOX",
-    "logo": "https://i.imgur.com/t3cWJ3F.png",
+    "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/ESPN_wordmark.svg/300px-ESPN_wordmark.svg.png",
     "url": "https://barinaslive1.boldmss.com/ESPN_2/ESPN_2.isml/ESPN_2.m3u8",
     "id": "tv_a32d1cb40d"
   },
   {
     "name": "ESPN 3 Latin America (1080p)",
     "group": "🏆 Kênh Thể Thao ESPN & FOX",
-    "logo": "https://i.imgur.com/t3cWJ3F.png",
+    "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/ESPN_wordmark.svg/300px-ESPN_wordmark.svg.png",
     "url": "https://barinaslive1.boldmss.com/ESPN_3/ESPN_3.isml/ESPN_3.m3u8",
     "id": "tv_b0d7139421"
   },
   {
     "name": "ESPN 4 Latin America (1080p)",
     "group": "🏆 Kênh Thể Thao ESPN & FOX",
-    "logo": "https://i.imgur.com/t3cWJ3F.png",
+    "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/ESPN_wordmark.svg/300px-ESPN_wordmark.svg.png",
     "url": "https://barinaslive1.boldmss.com/ESPN_4/ESPN_4.isml/ESPN_4.m3u8",
     "id": "tv_d6db82f59b"
   },
   {
     "name": "ESPN 5 Latin America (1080p)",
     "group": "🏆 Kênh Thể Thao ESPN & FOX",
-    "logo": "https://i.imgur.com/t3cWJ3F.png",
+    "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/ESPN_wordmark.svg/300px-ESPN_wordmark.svg.png",
     "url": "https://barinaslive1.boldmss.com/ESPN_5/ESPN_5.isml/ESPN_5.m3u8",
     "id": "tv_ec340317c9"
   },
   {
     "name": "ESPN 6 Latin America (1080p)",
     "group": "🏆 Kênh Thể Thao ESPN & FOX",
-    "logo": "https://i.imgur.com/t3cWJ3F.png",
+    "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/ESPN_wordmark.svg/300px-ESPN_wordmark.svg.png",
     "url": "https://barinaslive1.boldmss.com/ESPN_6/ESPN_6.isml/ESPN_6.m3u8",
     "id": "tv_693b64c79e"
   },
   {
     "name": "ESPN 7 Latin America (1080p)",
     "group": "🏆 Kênh Thể Thao ESPN & FOX",
-    "logo": "https://i.imgur.com/t3cWJ3F.png",
+    "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/ESPN_wordmark.svg/300px-ESPN_wordmark.svg.png",
     "url": "https://barinaslive1.boldmss.com/ESPN_7/ESPN_7.isml/ESPN_7.m3u8",
     "id": "tv_c36541e131"
   },
   {
     "name": "Fox Sports 1 (720p)",
     "group": "🏆 Kênh Thể Thao ESPN & FOX",
-    "logo": "https://i.imgur.com/4gW5V0G.png",
+    "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/37/Fox_Sports_logo.svg/300px-Fox_Sports_logo.svg.png",
     "url": "http://85.237.89.160:9590/usa-s/FOX-SPORTS-1/index.m3u8",
     "id": "tv_a7f4c04d5e"
   },
   {
     "name": "Fox Sports News (1080p Akamai)",
     "group": "🏆 Kênh Thể Thao ESPN & FOX",
-    "logo": "https://i.imgur.com/4gW5V0G.png",
+    "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/37/Fox_Sports_logo.svg/300px-Fox_Sports_logo.svg.png",
     "url": "https://skynewsau-live-premium.akamaized.net/hls/live/2105307/foxsportsnews/live_1080p.m3u8",
     "id": "tv_a4116153a7"
   },
   {
     "name": "Fubo Sports Network (1080p)",
     "group": "🏆 Kênh Thể Thao ESPN & FOX",
-    "logo": "https://i.imgur.com/4gW5V0G.png",
+    "logo": "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
     "url": "https://dnf08l6u6uxnz.cloudfront.net/master.m3u8",
     "id": "tv_020954ffe8"
   },
   {
     "name": "Eleven Sports 1 HD",
     "group": "🏆 Kênh Thể Thao ESPN & FOX",
-    "logo": "https://i.imgur.com/4gW5V0G.png",
+    "logo": "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
     "url": "http://92.114.85.87:8002/play/a00e/index.m3u8",
     "id": "tv_6763ba3260"
   },
   {
     "name": "Eleven Sports 2 HD",
     "group": "🏆 Kênh Thể Thao ESPN & FOX",
-    "logo": "https://i.imgur.com/4gW5V0G.png",
+    "logo": "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
     "url": "http://92.114.85.87:8002/play/a00f/index.m3u8",
     "id": "tv_90026d4944"
   },
   {
     "name": "Eleven Sports 3 HD",
     "group": "🏆 Kênh Thể Thao ESPN & FOX",
-    "logo": "https://i.imgur.com/4gW5V0G.png",
+    "logo": "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
     "url": "http://92.114.85.87:8002/play/a00g/index.m3u8",
     "id": "tv_9de0a70a28"
   },
   {
     "name": "Eleven Sports 4 HD",
     "group": "🏆 Kênh Thể Thao ESPN & FOX",
-    "logo": "https://i.imgur.com/4gW5V0G.png",
+    "logo": "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
     "url": "http://92.114.85.87:8002/play/a00h/index.m3u8",
     "id": "tv_c29f3ec966"
   },
   {
     "name": "Red Bull TV HD (Akamai)",
     "group": "🏎️ Đua Xe & Mạo Hiểm",
-    "logo": "https://i.imgur.com/6E2hS6F.png",
+    "logo": "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
     "url": "https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master.m3u8",
     "id": "tv_5ce6b2d7c3"
   },
   {
     "name": "Rally TV 1080p (WRC Trực Tiếp)",
     "group": "🏎️ Đua Xe & Mạo Hiểm",
-    "logo": "https://i.imgur.com/6E2hS6F.png",
+    "logo": "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
     "url": "https://rally-tv-live.akamaized.net/hls/live/2117704/RallyTV-Pri/master.m3u8",
     "id": "tv_372eb11bd8"
   },
   {
     "name": "RACER Select HD",
     "group": "🏎️ Đua Xe & Mạo Hiểm",
-    "logo": "https://i.imgur.com/6E2hS6F.png",
+    "logo": "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
     "url": "https://amg00378-amg00378c4-freelivesports-emea-5637.playouts.now.amagi.tv/playlist.m3u8",
     "id": "tv_263abbb38a"
   },
   {
     "name": "NHRA TV HD (Đua Xe Tốc Độ)",
     "group": "🏎️ Đua Xe & Mạo Hiểm",
-    "logo": "https://i.imgur.com/6E2hS6F.png",
+    "logo": "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
     "url": "https://d265y4sk8257lt.cloudfront.net/nh.m3u8",
     "id": "tv_4b0bdb4254"
   },
   {
     "name": "Swerve Combat HD (MMA & Boxing)",
     "group": "🥊 Võ Thuật & Đối Kháng",
-    "logo": "https://i.imgur.com/4gW5V0G.png",
+    "logo": "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
     "url": "https://linear-253.frequency.stream/mt/roku/253/hls/master/playlist.m3u8",
     "id": "tv_1ba14622e6"
   },
   {
     "name": "Persiana Fight HD",
     "group": "🥊 Võ Thuật & Đối Kháng",
-    "logo": "https://i.imgur.com/4gW5V0G.png",
+    "logo": "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
     "url": "https://fighthls.persiana.live/hls/stream.m3u8",
     "id": "tv_34f0efa569"
   },
   {
     "name": "Polsat Sport Fight (1080p)",
     "group": "🥊 Võ Thuật & Đối Kháng",
-    "logo": "https://i.imgur.com/4gW5V0G.png",
+    "logo": "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
     "url": "http://57.128.210.196:8080/194/index.m3u8",
     "id": "tv_60bc83a4e8"
   },
   {
     "name": "NBA TV HD (Bóng Rổ)",
     "group": "🏀 Bóng Rổ & Quần Vợt",
-    "logo": "https://i.imgur.com/6E2hS6F.png",
+    "logo": "https://upload.wikimedia.org/wikipedia/en/thumb/0/03/National_Basketball_Association_logo.svg/200px-National_Basketball_Association_logo.svg.png",
     "url": "http://23.237.104.106:8080/USA_NBA/index.m3u8",
     "id": "tv_0891d405f5"
   },
   {
     "name": "NFL Network HD (Bóng Bầu Dục)",
     "group": "🏀 Bóng Rổ & Quần Vợt",
-    "logo": "https://i.imgur.com/6E2hS6F.png",
+    "logo": "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
     "url": "http://198.58.104.90:8989/nfl/index.m3u8",
     "id": "tv_c16c1c25dc"
   },
   {
     "name": "Tennis Channel 2 HD",
     "group": "🏀 Bóng Rổ & Quần Vợt",
-    "logo": "https://i.imgur.com/6E2hS6F.png",
+    "logo": "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
     "url": "https://mumbai-edge.smartplaytv.in/Tennis2/index.m3u8",
     "id": "tv_7d9e87aa75"
   },
   {
     "name": "PGA Tour HD (Golf)",
     "group": "🏀 Bóng Rổ & Quần Vợt",
-    "logo": "https://i.imgur.com/6E2hS6F.png",
+    "logo": "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
     "url": "https://d11k1mnrgfposz.cloudfront.net/playlist.m3u8",
     "id": "tv_5d7099ed2b"
   },
@@ -1529,7 +1529,7 @@
     "id": "thvl3_b_o_v_ptth_v_nh_long_208",
     "name": "THVL3 - Báo và PTTH Vĩnh Long",
     "group": "Địa phương",
-    "logo": "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/THVL3.webp",
+    "logo": "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/THVL1.webp",
     "url": "https://vips-livecdn.fptplay.net/live/media/vinhlong3/live247-hls-avc/vinhlong3-avc1_5600000=10000-mp4a_131600=20000.m3u8"
   },
   {
@@ -1762,13 +1762,6 @@
     "group": "Radio",
     "logo": "https://static.wikia.nocookie.net/logos/images/f/f3/Logo_DRT_FM_92%2C4MHz_%26_FM_94%2C7MHz.png/revision/latest/scale-to-width-down/1082?cb=20220613173357&path-prefix=vi",
     "url": "https://cdn.drt.vn/live/285054c4567dea54b3fb14bfd60d61230b5/chunklist.m3u8"
-  },
-  {
-    "id": "_242",
-    "name": "",
-    "group": "Unknown",
-    "logo": "",
-    "url": "https://livevlisctcdnw.seenow.vn/Live_DASHDRM1/BM1/manifest.mpd"
   },
   {
     "id": "box_hits_243",

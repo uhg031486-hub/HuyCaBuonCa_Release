@@ -44,6 +44,9 @@ class MainActivity : AppCompatActivity() {
         setupSourceSelectors()
         updateDynamicFilters()
         loadMovies(reset = true)
+
+        // Tự động kiểm tra bản cập nhật mới trên GitHub Release (In-App Auto Update)
+        com.huycabuonca.tv.util.AppUpdateManager.checkForUpdate(this)
     }
 
     private fun setupUI() {
@@ -113,6 +116,20 @@ class MainActivity : AppCompatActivity() {
         binding.btnSourceAnimeHay.isSelected = (source == MovieSource.ANIMEHAY)
         binding.btnSourceXemTiVi.isSelected = (source == MovieSource.XEMTIVI)
         binding.btnSourceFreeReels.isSelected = (source == MovieSource.FREEREELS)
+
+        if (source == MovieSource.XEMTIVI) {
+            val lastId = MovieRepository.getLastWatchedChannelId(this)
+            if (!lastId.isNullOrEmpty()) {
+                val lastChannel = MovieRepository.getAllTvChannels(this).find { it.id == lastId }
+                if (lastChannel != null) {
+                    android.widget.Toast.makeText(
+                        this,
+                        "📺 Kênh xem gần nhất: ${lastChannel.name} • [${lastChannel.group}]",
+                        android.widget.Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+        }
 
         updateDynamicFilters()
         loadMovies(reset = true)

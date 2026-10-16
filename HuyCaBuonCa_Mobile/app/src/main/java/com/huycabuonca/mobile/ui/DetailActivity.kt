@@ -1049,8 +1049,19 @@ class DetailActivity : AppCompatActivity() {
             )
         }
 
+        val loadControl = androidx.media3.exoplayer.DefaultLoadControl.Builder()
+            .setBufferDurationsMs(
+                /* minBufferMs = */ 15_000,
+                /* maxBufferMs = */ 60_000,
+                /* bufferForPlaybackMs = */ 1_500,
+                /* bufferForPlaybackAfterRebufferMs = */ 3_000
+            )
+            .setPrioritizeTimeOverSizeThresholds(true)
+            .build()
+
         player = ExoPlayer.Builder(this)
             .setTrackSelector(trackSelector)
+            .setLoadControl(loadControl)
             .build().apply {
             setMediaSource(mediaSource)
             prepare()
@@ -1063,8 +1074,8 @@ class DetailActivity : AppCompatActivity() {
                 }
 
                 override fun onVideoSizeChanged(videoSize: androidx.media3.common.VideoSize) {
-                    val isVertical = videoSize.height > videoSize.width && videoSize.width > 0
-                    if (isVertical || movieItem?.source == MovieSource.FREEREELS) {
+                    val isVertical = videoSize.width > 0 && videoSize.height > videoSize.width
+                    if (isVertical) {
                         // Tự động nhận diện video màn hình dọc 9:16 (Chuẩn TikTok/Reels/Shorts)
                         gestureHelper.isShortsMode = true
                         binding.playerView.resizeMode = androidx.media3.ui.AspectRatioFrameLayout.RESIZE_MODE_FIT
@@ -1077,6 +1088,7 @@ class DetailActivity : AppCompatActivity() {
                             binding.txtDetailMeta.text = "${binding.txtDetailMeta.text} • 📱 Video Dọc (9:16)"
                         }
                     } else {
+                        // Video ngang chuẩn (kể cả trong FreeReels nếu là phim quay ngang)
                         gestureHelper.isShortsMode = false
                         binding.playerView.resizeMode = androidx.media3.ui.AspectRatioFrameLayout.RESIZE_MODE_FIT
                         if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
@@ -1137,9 +1149,7 @@ class DetailActivity : AppCompatActivity() {
                                 return
                             }
                             if (autoNextEpisode && currentEpisodeIndex < currentEpisodes.size - 1) {
-                                currentEpisodeIndex++
-                                playEpisode(currentEpisodes[currentEpisodeIndex])
-                                Toast.makeText(this@DetailActivity, "Tự động chuyển sang tập tiếp theo!", Toast.LENGTH_SHORT).show()
+                                triggerAutoNextCountdown()
                             }
                         }
                         else -> {
@@ -1165,6 +1175,47 @@ class DetailActivity : AppCompatActivity() {
         val subColor = sp.getString("sub_font_color", "#FFD700") ?: "#FFD700"
         applySubtitleStyle(subSize, subColor)
         showControls()
+    }
+
+    private fun triggerAutoNextCountdown() {
+        val nextIdx = currentEpisodeIndex + 1
+        if (nextIdx >= currentEpisodes.size) return
+        val nextEp = currentEpisodes[nextIdx]
+        var countdown = 5
+
+        val dialog = androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("🎬 Sắp phát Tập Tiếp Theo")
+            .setMessage("Tự động phát [${nextEp.name}] sau: $countdown giây...")
+            .setCancelable(true)
+            .setPositiveButton("PHÁT NGAY") { d, _ ->
+                d.dismiss()
+                currentEpisodeIndex = nextIdx
+                playEpisode(nextEp)
+            }
+            .setNegativeButton("HỦY", null)
+            .create()
+
+        dialog.show()
+
+        val runnable = object : Runnable {
+            override fun run() {
+                countdown--
+                if (countdown > 0) {
+                    if (dialog.isShowing) {
+                        dialog.setMessage("Tự động phát [${nextEp.name}] sau: $countdown giây...")
+                        mainHandler.postDelayed(this, 1000)
+                    }
+                } else {
+                    if (dialog.isShowing) {
+                        dialog.dismiss()
+                        currentEpisodeIndex = nextIdx
+                        playEpisode(nextEp)
+                        Toast.makeText(this@DetailActivity, "Đang phát [${nextEp.name}]", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        }
+        mainHandler.postDelayed(runnable, 1000)
     }
 
     private fun savePlaybackPosition(pos: Long) {

@@ -97,6 +97,9 @@ class MainActivity : AppCompatActivity() {
         binding.btnBackupSync.setOnClickListener {
             showBackupSyncDialog()
         }
+
+        // Tự động kiểm tra bản cập nhật mới (In-App Auto Update)
+        com.huycabuonca.mobile.util.AppUpdateManager.checkForUpdate(this)
     }
 
     private fun showScheduleDialog() {
@@ -252,6 +255,21 @@ class MainActivity : AppCompatActivity() {
         binding.btnSourceAnimeHay.isSelected = (source == MovieSource.ANIMEHAY)
         binding.btnSourceXemTiVi.isSelected = (source == MovieSource.XEMTIVI)
         binding.btnSourceFreeReels.isSelected = (source == MovieSource.FREEREELS)
+
+        if (source == MovieSource.XEMTIVI) {
+            val lastId = MovieRepository.getLastWatchedChannelId(this)
+            if (!lastId.isNullOrEmpty()) {
+                lifecycleScope.launch(Dispatchers.IO) {
+                    val channels = MovieRepository.getAllTvChannels(this@MainActivity)
+                    val lastCh = channels.find { it.id == lastId }
+                    if (lastCh != null) {
+                        withContext(Dispatchers.Main) {
+                            Toast.makeText(this@MainActivity, "📺 Kênh bạn xem gần nhất: ${lastCh.name}", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+            }
+        }
 
         updateDynamicFilters()
         loadMovies(reset = true)

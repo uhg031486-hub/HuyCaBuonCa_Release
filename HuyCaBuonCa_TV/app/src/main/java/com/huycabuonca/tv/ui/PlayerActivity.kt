@@ -2,6 +2,7 @@ package com.huycabuonca.tv.ui
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.os.Handler
 import android.os.Looper
 import android.view.KeyEvent
@@ -14,13 +15,16 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.datasource.DefaultHttpDataSource
+import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.hls.HlsMediaSource
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -30,8 +34,10 @@ import com.huycabuonca.tv.R
 import com.huycabuonca.tv.api.MovieRepository
 import com.huycabuonca.tv.api.TvChannelItem
 import com.huycabuonca.tv.databinding.ActivityPlayerBinding
+import com.huycabuonca.tv.model.EpisodeItem
 import com.huycabuonca.tv.model.MovieSource
 import com.huycabuonca.tv.util.TvFocusUtil
+import kotlinx.coroutines.launch
 
 class PlayerActivity : AppCompatActivity() {
 
@@ -48,6 +54,16 @@ class PlayerActivity : AppCompatActivity() {
     private var currentTvChannel: TvChannelItem? = null
     private var sameGroupChannels = mutableListOf<TvChannelItem>()
     private var sideAdapter: QuickChannelTvAdapter? = null
+
+    // Quản lý đệm phím số chọn kênh trực tiếp (Number Key Zapping 0-9)
+    private val digitBuffer = StringBuilder()
+    private val zapHandler = Handler(Looper.getMainLooper())
+    private val zapRunnable = Runnable { executeNumberZapping() }
+
+    // Quản lý tập phim và chuyển tập tự động (Auto-next)
+    private var episodesList: ArrayList<EpisodeItem> = arrayListOf()
+    private var currentEpisodeIndex = 0
+    private var autoNextTimer: CountDownTimer? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -67,6 +83,12 @@ class PlayerActivity : AppCompatActivity() {
         val channelIdExtra = intent.getStringExtra("EXTRA_CHANNEL_ID") ?: ""
         val sourceExtra = intent.getStringExtra("EXTRA_SOURCE") ?: ""
 
+        val rawEps = intent.getSerializableExtra("EXTRA_EPISODES_LIST") as? ArrayList<*>
+        if (rawEps != null) {
+            episodesList = rawEps.filterIsInstance<EpisodeItem>() as? ArrayList<EpisodeItem> ?: arrayListOf()
+        }
+        currentEpisodeIndex = intent.getIntExtra("EXTRA_CURRENT_EPISODE_INDEX", 0)
+
         // Nhận diện xem có phải đang phát kênh truyền hình TV không
         val channels = MovieRepository.getAllTvChannels(this)
         val found = channels.find {
@@ -77,6 +99,8 @@ class PlayerActivity : AppCompatActivity() {
         if (found != null || sourceExtra == MovieSource.XEMTIVI.name) {
             isTvMode = true
             currentTvChannel = found ?: channels.firstOrNull()
+            currentTvChannel?.let { MovieRepository.setLastWatchedChannelId(this, it.id) }
+
             sameGroupChannels = MovieRepository.getChannelsInSameGroup(currentTvChannel?.id ?: "", this).toMutableList()
             val grpIdx = sameGroupChannels.indexOfFirst { it.id == currentTvChannel?.id || it.url == currentTvChannel?.url }
             if (grpIdx != -1) currentChannelIndex = grpIdx
@@ -90,8 +114,21 @@ class PlayerActivity : AppCompatActivity() {
                 hideHandler.removeCallbacks(hideBannerRunnable)
                 hideHandler.postDelayed(hideBannerRunnable, 3500)
             }
+            binding.txtRemoteTips.text = "Điều khiển: [ ▲ / ▼ ] Đổi Kênh Cùng Nhóm  •  [ ◄ ] Danh Sách Kênh  •  [ 0-9 ] Bấm Số Kênh  •  [ OK ] Phát/Dừng"
         } else {
             android.util.Log.d("TV_ZAP", "Movie Mode (not TV): title=$title, url=$streamUrl")
+            binding.txtRemoteTips.text = "Điều khiển: [ ▲ / ▼ ] Tập Trước/Sau  •  [ ◄ / ► ] Tua 10s  •  [ OK ] Phát/Dừng"
+        }
+
+        binding.btnPlayNextNow.setOnClickListener {
+            autoNextTimer?.cancel()
+            binding.layoutNextEpCountdown.visibility = View.GONE
+            playEpisodeAtIndex(currentEpisodeIndex + 1)
+        }
+
+        binding.btnCancelNextEp.setOnClickListener {
+            autoNextTimer?.cancel()
+            binding.layoutNextEpCountdown.visibility = View.GONE
         }
 
         val subtitleUrl = intent.getStringExtra("EXTRA_SUBTITLE_URL")
@@ -161,8 +198,19 @@ class PlayerActivity : AppCompatActivity() {
             )
         }
 
+        // Tối ưu Buffer Cache thông minh chống lag giật trên Android TV Box (15s - 60s)
+        val loadControl = DefaultLoadControl.Builder()
+            .setBufferDurationsMs(
+                15_000, // minBufferMs: 15s
+                60_000, // maxBufferMs: 60s
+                2_500,  // bufferForPlaybackMs: 2.5s
+                5_000   // bufferForPlaybackAfterRebufferMs: 5s
+            )
+            .build()
+
         player = ExoPlayer.Builder(this)
             .setTrackSelector(trackSelector)
+            .setLoadControl(loadControl)
             .build().apply {
             setMediaSource(mediaSource)
             prepare()
@@ -176,7 +224,7 @@ class PlayerActivity : AppCompatActivity() {
                 override fun onVideoSizeChanged(videoSize: androidx.media3.common.VideoSize) {
                     val isVertical = videoSize.height > videoSize.width && videoSize.width > 0
                     if (isVertical) {
-                        // Tự nhận diện video dọc: Giữ đúng tỷ lệ 9:16 ở giữa màn hình TV, không bị kéo dãn méo
+                        // Tự nhận diện video dọc theo tỉ lệ thực: Giữ đúng tỷ lệ 9:16 ở giữa màn hình TV
                         binding.playerView.resizeMode = androidx.media3.ui.AspectRatioFrameLayout.RESIZE_MODE_FIT
                     } else {
                         binding.playerView.resizeMode = androidx.media3.ui.AspectRatioFrameLayout.RESIZE_MODE_FIT
@@ -197,10 +245,103 @@ class PlayerActivity : AppCompatActivity() {
                     } else {
                         binding.playerProgress.visibility = View.GONE
                     }
+
+                    if (playbackState == Player.STATE_ENDED) {
+                        if (!isTvMode && currentEpisodeIndex + 1 < episodesList.size) {
+                            triggerAutoNextCountdown()
+                        }
+                    }
                 }
             })
         }
         binding.playerView.player = player
+    }
+
+    private fun triggerAutoNextCountdown() {
+        val nextEp = episodesList.getOrNull(currentEpisodeIndex + 1) ?: return
+        autoNextTimer?.cancel()
+        binding.layoutNextEpCountdown.visibility = View.VISIBLE
+        binding.btnPlayNextNow.requestFocus()
+
+        autoNextTimer = object : CountDownTimer(5000, 1000) {
+            override fun onTick(millisUntilFinished: Long) {
+                val sec = (millisUntilFinished / 1000) + 1
+                binding.txtNextEpTitle.text = "Đang chuyển sang ${nextEp.name} sau ${sec}s..."
+            }
+
+            override fun onFinish() {
+                binding.layoutNextEpCountdown.visibility = View.GONE
+                playEpisodeAtIndex(currentEpisodeIndex + 1)
+            }
+        }.start()
+    }
+
+    private fun playEpisodeAtIndex(index: Int) {
+        if (index !in episodesList.indices) return
+        currentEpisodeIndex = index
+        val episode = episodesList[index]
+        val title = intent.getStringExtra("EXTRA_TITLE") ?: "Xem Phim"
+        binding.txtPlayerTitle.text = "$title - ${episode.name}"
+
+        val streamUrl = episode.linkM3u8 ?: episode.linkEmbed
+        if (streamUrl.isNullOrEmpty()) {
+            Toast.makeText(this, "Không tìm thấy luồng phát của tập này", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        if (streamUrl.startsWith("freereels_unlock:")) {
+            val tokens = streamUrl.split(":")
+            if (tokens.size >= 3) {
+                binding.playerProgress.visibility = View.VISIBLE
+                lifecycleScope.launch {
+                    val res = MovieRepository.unlockFreeReelsEpisode(tokens[1], tokens[2])
+                    binding.playerProgress.visibility = View.GONE
+                    if (res != null && res.streamUrl.isNotEmpty()) {
+                        initExoPlayer(res.streamUrl, res.subtitleUrl ?: episode.subtitleUrl)
+                    } else {
+                        Toast.makeText(this@PlayerActivity, "Lỗi nạp tập kế tiếp", Toast.LENGTH_SHORT).show()
+                    }
+                }
+                return
+            }
+        }
+
+        if (episode.linkM3u8 != null || streamUrl.contains(".m3u8")) {
+            initExoPlayer(streamUrl, episode.subtitleUrl)
+        } else {
+            initWebViewPlayer(streamUrl)
+        }
+    }
+
+    private fun executeNumberZapping() {
+        val numStr = digitBuffer.toString()
+        digitBuffer.clear()
+        val channelNum = numStr.toIntOrNull() ?: return
+        val allChannels = MovieRepository.getAllTvChannels(this)
+        if (allChannels.isEmpty()) return
+
+        if (channelNum in 1..allChannels.size) {
+            val targetChannel = allChannels[channelNum - 1]
+            currentTvChannel = targetChannel
+            MovieRepository.setLastWatchedChannelId(this, targetChannel.id)
+
+            sameGroupChannels = MovieRepository.getChannelsInSameGroup(targetChannel.id, this).toMutableList()
+            val grpIdx = sameGroupChannels.indexOfFirst { it.id == targetChannel.id }
+            currentChannelIndex = if (grpIdx != -1) grpIdx else 0
+
+            binding.txtChannelNumber.text = "KÊNH %02d/%02d".format(channelNum, allChannels.size)
+            binding.txtChannelName.text = targetChannel.name
+            binding.txtChannelGroup.text = "Nhóm: ${targetChannel.group}"
+            binding.layoutChannelBanner.visibility = View.VISIBLE
+            hideHandler.removeCallbacks(hideBannerRunnable)
+            hideHandler.postDelayed(hideBannerRunnable, 3500)
+
+            binding.txtPlayerTitle.text = "${targetChannel.name} • [${targetChannel.group}]"
+            initExoPlayer(targetChannel.url)
+            sideAdapter?.updateCurrent(targetChannel.id)
+        } else {
+            Toast.makeText(this, "Số kênh $channelNum không tồn tại (1 - ${allChannels.size})", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun playChannelInGroup(index: Int) {
@@ -209,6 +350,7 @@ class PlayerActivity : AppCompatActivity() {
         currentChannelIndex = safeIndex
         val channel = sameGroupChannels[safeIndex]
         currentTvChannel = channel
+        MovieRepository.setLastWatchedChannelId(this, channel.id)
 
         binding.txtChannelNumber.text = "KÊNH %02d/%02d".format(safeIndex + 1, sameGroupChannels.size)
         binding.txtChannelName.text = channel.name
@@ -290,14 +432,26 @@ class PlayerActivity : AppCompatActivity() {
                     KeyEvent.KEYCODE_DPAD_UP, KeyEvent.KEYCODE_CHANNEL_UP -> {
                         if (isTvMode) {
                             playChannelInGroup(currentChannelIndex + 1)
-                            return true
+                        } else {
+                            if (currentEpisodeIndex > 0) {
+                                autoNextTimer?.cancel()
+                                binding.layoutNextEpCountdown.visibility = View.GONE
+                                playEpisodeAtIndex(currentEpisodeIndex - 1)
+                            }
                         }
+                        return true
                     }
                     KeyEvent.KEYCODE_DPAD_DOWN, KeyEvent.KEYCODE_CHANNEL_DOWN -> {
                         if (isTvMode) {
                             playChannelInGroup(currentChannelIndex - 1)
-                            return true
+                        } else {
+                            if (currentEpisodeIndex + 1 < episodesList.size) {
+                                autoNextTimer?.cancel()
+                                binding.layoutNextEpCountdown.visibility = View.GONE
+                                playEpisodeAtIndex(currentEpisodeIndex + 1)
+                            }
                         }
+                        return true
                     }
                     KeyEvent.KEYCODE_DPAD_LEFT, KeyEvent.KEYCODE_MENU -> {
                         if (isTvMode) {
@@ -313,10 +467,17 @@ class PlayerActivity : AppCompatActivity() {
                     KeyEvent.KEYCODE_0, KeyEvent.KEYCODE_1, KeyEvent.KEYCODE_2, KeyEvent.KEYCODE_3,
                     KeyEvent.KEYCODE_4, KeyEvent.KEYCODE_5, KeyEvent.KEYCODE_6, KeyEvent.KEYCODE_7,
                     KeyEvent.KEYCODE_8, KeyEvent.KEYCODE_9 -> {
-                        val num = keyCode - KeyEvent.KEYCODE_0
-                        val targetIdx = (num - 1).coerceAtLeast(0)
                         if (isTvMode) {
-                            playChannelInGroup(targetIdx)
+                            val digit = keyCode - KeyEvent.KEYCODE_0
+                            digitBuffer.append(digit)
+                            val allCount = MovieRepository.getAllTvChannels(this).size
+                            binding.txtChannelNumber.text = "BẤM SỐ CHỌN KÊNH"
+                            binding.txtChannelName.text = "🔢 Kênh số: $digitBuffer"
+                            binding.txtChannelGroup.text = "Chuyển đến kênh $digitBuffer... (Tổng: $allCount kênh)"
+                            binding.layoutChannelBanner.visibility = View.VISIBLE
+
+                            zapHandler.removeCallbacks(zapRunnable)
+                            zapHandler.postDelayed(zapRunnable, 1400)
                         }
                         return true
                     }
@@ -328,6 +489,17 @@ class PlayerActivity : AppCompatActivity() {
                         return true
                     }
                     KeyEvent.KEYCODE_DPAD_CENTER, KeyEvent.KEYCODE_ENTER -> {
+                        if (digitBuffer.isNotEmpty()) {
+                            zapHandler.removeCallbacks(zapRunnable)
+                            executeNumberZapping()
+                            return true
+                        }
+                        if (binding.layoutNextEpCountdown.visibility == View.VISIBLE) {
+                            autoNextTimer?.cancel()
+                            binding.layoutNextEpCountdown.visibility = View.GONE
+                            playEpisodeAtIndex(currentEpisodeIndex + 1)
+                            return true
+                        }
                         player?.let { p ->
                             if (p.isPlaying) {
                                 p.pause()
@@ -377,6 +549,8 @@ class PlayerActivity : AppCompatActivity() {
         super.onDestroy()
         hideHandler.removeCallbacks(hideOverlayRunnable)
         hideHandler.removeCallbacks(hideBannerRunnable)
+        zapHandler.removeCallbacks(zapRunnable)
+        autoNextTimer?.cancel()
         loudnessEnhancer?.release()
         loudnessEnhancer = null
         player?.release()

@@ -54,11 +54,26 @@ class MovieAdapter(
             binding.txtQuality.text = if (item.quality.isNotEmpty()) item.quality else "HD"
 
             val imgUrl = if (item.posterUrl.isNotEmpty()) item.posterUrl else item.thumbUrl
+            if (item.source == com.huycabuonca.mobile.model.MovieSource.XEMTIVI) {
+                binding.imgPoster.scaleType = android.widget.ImageView.ScaleType.FIT_CENTER
+                val pad = (8 * binding.imgPoster.context.resources.displayMetrics.density).toInt()
+                binding.imgPoster.setPadding(pad, pad, pad, pad)
+            } else {
+                binding.imgPoster.scaleType = android.widget.ImageView.ScaleType.CENTER_CROP
+                binding.imgPoster.setPadding(0, 0, 0, 0)
+            }
+            val defaultTvLogo = "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png"
+            val finalImgUrl = if (item.source == com.huycabuonca.mobile.model.MovieSource.XEMTIVI && imgUrl.isEmpty()) {
+                defaultTvLogo
+            } else {
+                imgUrl
+            }
+
             Glide.with(binding.imgPoster.context)
-                .load(imgUrl)
+                .load(finalImgUrl)
                 .transition(DrawableTransitionOptions.withCrossFade())
                 .placeholder(R.drawable.bg_focus_card)
-                .error(R.drawable.bg_focus_card)
+                .error(R.drawable.bg_btn_secondary)
                 .into(binding.imgPoster)
         }
     }
