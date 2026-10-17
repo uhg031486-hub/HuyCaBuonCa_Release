@@ -1,4 +1,4 @@
-// Huy Cá Buôn Cà - LG Smart TV webOS Edition (v2.1)
+// Huy Cá Buôn Cà - LG Smart TV webOS Edition (v2.3)
 (function () {
   'use strict';
 
@@ -16,6 +16,9 @@
   let overlayTimeout = null;
   let numberZapBuffer = '';
   let numberZapTimeout = null;
+  let lastBackTime = 0;
+  let currentFocusedElement = null;
+  const isNativeWebOS = /webOS|SmartTV/i.test(navigator.userAgent) || window.webOS !== undefined;
 
   // --- Constants ---
   const KKPHIM_IMG_BASE = 'https://phimimg.com/';
@@ -396,6 +399,7 @@
       const isTv = movie.source === 'XEMTIVI';
       card.className = `movie-card focusable ${isTv ? 'tv-card' : ''}`;
       card.tabIndex = 0;
+      card.dataset.id = movie.id;
 
       const favBadge = isFavorite(movie.id) ? '<div class="badge-fav">⭐</div>' : '';
       const qualityBadge = `<div class="badge-quality">${movie.quality || 'HD'}</div>`;
@@ -433,6 +437,12 @@
 
       grid.appendChild(card);
     });
+
+    // Tự động focus phần tử đầu tiên nếu chưa có focus
+    if (!currentFocusedElement || !document.body.contains(currentFocusedElement)) {
+      const firstCard = grid.querySelector('.movie-card');
+      if (firstCard) setFocus(firstCard);
+    }
   }
 
   // --- History & Favorites Section ---
@@ -550,8 +560,14 @@
       document.getElementById('detailDesc').textContent = 'Không thể tải thông tin phim. Vui lòng thử lại sau!';
     }
 
+    setTimeout(() => {
+      const playFirst = document.getElementById('btnPlayFirst');
+      if (playFirst) setFocus(playFirst);
+    }, 50);
+
     document.getElementById('btnCloseDetail').onclick = () => {
       modal.style.display = 'none';
+      focusCurrentOrFirstMovie();
     };
 
     document.getElementById('btnToggleFavDetail').onclick = () => {
@@ -587,7 +603,7 @@
     setupQuickZapping(movie);
   }
 
-  // --- Video Player (Hls.js) ---
+  // --- Video Player (Native WebOS Hardware Decoding & HLS Fallback) ---
   function playVideo(streamUrl, title, subtitle, movie, detail, epIndex, serverIndex, isTv = false) {
     if (!streamUrl) {
       showToast('Không tìm thấy link luồng phát video!');
@@ -620,22 +636,35 @@
       progress.style.display = 'flex';
     }
 
-    // Reset HLS
+    // Reset video & HLS
     if (hlsInstance) {
       hlsInstance.destroy();
       hlsInstance = null;
     }
+    video.pause();
+    video.removeAttribute('src');
+    video.load();
 
-    if (Hls.isSupported() && streamUrl.includes('.m3u8')) {
+    const isNativeSupported = isNativeWebOS || video.canPlayType('application/vnd.apple.mpegurl');
+
+    if (isNativeSupported && streamUrl.includes('.m3u8')) {
+      // 🚀 NATIVE HARDWARE ACCELERATION: Chip TV LG giải mã trực tiếp, 0% CPU, mượt mà tuyệt đối
+      video.src = streamUrl;
+      video.load();
+      video.play().catch(e => console.log('Native auto play blocked:', e));
+    } else if (window.Hls && Hls.isSupported() && streamUrl.includes('.m3u8')) {
+      // Fallback với bộ đệm siêu nhẹ cho PC hoặc webOS cũ
       hlsInstance = new Hls({
-        maxBufferLength: 30,
-        maxMaxBufferLength: 60,
+        maxBufferLength: 8,
+        maxMaxBufferLength: 15,
+        maxBufferSize: 20 * 1024 * 1024,
+        lowLatencyMode: true,
         enableWorker: true
       });
       hlsInstance.loadSource(streamUrl);
       hlsInstance.attachMedia(video);
       hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
-        video.play().catch(e => console.log('Auto play blocked:', e));
+        video.play().catch(e => console.log('HLS auto play blocked:', e));
       });
       hlsInstance.on(Hls.Events.ERROR, (event, data) => {
         if (data.fatal) {
@@ -654,6 +683,7 @@
       });
     } else {
       video.src = streamUrl;
+      video.load();
       video.play().catch(e => console.log('Auto play blocked:', e));
     }
 
@@ -667,6 +697,12 @@
 
     resetOverlayTimer();
     showToast(`Đang phát: ${title}`);
+
+    // Tự động focus nút Play/Pause trong player
+    setTimeout(() => {
+      const playBtn = document.getElementById('btnPlayPause');
+      if (playBtn) setFocus(playBtn);
+    }, 100);
   }
 
   // --- Player Controls ---
@@ -732,7 +768,7 @@
   });
 
   document.getElementById('btnBackPlayer').addEventListener('click', () => {
-    closePlayer();
+    closePlayer(true);
   });
 
   document.getElementById('btnToggleFavPlayer').addEventListener('click', () => {
@@ -741,13 +777,14 @@
     }
   });
 
-  function closePlayer() {
+  function closePlayer(shouldReturnToDetail = true) {
     if (video) {
       if (currentPlayingMovie && video.duration) {
         saveHistory(currentPlayingMovie, video.currentTime, video.duration, document.getElementById('playerSub').textContent);
       }
       video.pause();
-      video.src = '';
+      video.removeAttribute('src');
+      video.load();
     }
     if (hlsInstance) {
       hlsInstance.destroy();
@@ -755,6 +792,26 @@
     }
     document.getElementById('playerContainer').style.display = 'none';
     document.getElementById('zappingPanel').classList.remove('open');
+
+    // Nếu vừa xem phim từ màn hình chi tiết, mở lại Detail Modal
+    if (shouldReturnToDetail && currentPlayingDetail && currentPlayingMovie && currentPlayingMovie.source !== 'XEMTIVI') {
+      const modal = document.getElementById('detailModal');
+      modal.style.display = 'flex';
+      setTimeout(() => {
+        const epBtns = modal.querySelectorAll('.btn-episode');
+        if (epBtns && epBtns[currentEpisodeIndex]) {
+          setFocus(epBtns[currentEpisodeIndex]);
+        } else {
+          const firstBtn = modal.querySelector('.btn-primary-yellow') || document.getElementById('btnCloseDetail');
+          if (firstBtn) setFocus(firstBtn);
+        }
+      }, 50);
+    } else {
+      // Với TV hoặc không có detail, quay về Grid và focus lại kênh
+      setTimeout(() => {
+        focusCurrentOrFirstMovie();
+      }, 50);
+    }
   }
 
   function resetOverlayTimer() {
@@ -1005,34 +1062,306 @@
     sec.scrollIntoView({ behavior: 'smooth' });
   });
 
-  // --- Remote D-Pad Navigation & LG webOS Keycodes ---
+  // --- Spatial Navigation 2D Engine for LG Remote & Smart TV ---
+  function setFocus(el) {
+    if (!el) return;
+    if (currentFocusedElement && currentFocusedElement !== el) {
+      currentFocusedElement.classList.remove('focused');
+    }
+    currentFocusedElement = el;
+    el.classList.add('focused');
+    try {
+      el.focus();
+    } catch (e) {}
+    el.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+  }
+
+  function getActiveScope() {
+    const zap = document.getElementById('zappingPanel');
+    if (zap && zap.classList.contains('open')) return zap;
+
+    const player = document.getElementById('playerContainer');
+    if (player && player.style.display === 'flex') return player;
+
+    const search = document.getElementById('searchModal');
+    if (search && search.style.display === 'flex') return search;
+
+    const detail = document.getElementById('detailModal');
+    if (detail && detail.style.display === 'flex') return detail;
+
+    const sched = document.getElementById('scheduleModal');
+    if (sched && sched.style.display === 'flex') return sched;
+
+    const iptv = document.getElementById('iptvModal');
+    if (iptv && iptv.style.display === 'flex') return iptv;
+
+    return document.body;
+  }
+
+  function getFocusableCandidates(scope) {
+    const candidates = Array.from(scope.querySelectorAll('.focusable, button:not([disabled]), input:not([disabled]), [tabindex="0"]'));
+    return candidates.filter(el => {
+      if (el.disabled || el.getAttribute('aria-hidden') === 'true') return false;
+      const rect = el.getBoundingClientRect();
+      if (rect.width <= 0 || rect.height <= 0) return false;
+      const style = window.getComputedStyle(el);
+      return style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0';
+    });
+  }
+
+  function focusCurrentOrFirstMovie() {
+    const scope = getActiveScope();
+    const candidates = getFocusableCandidates(scope);
+    if (candidates.length === 0) return;
+
+    if (currentPlayingMovie) {
+      const match = candidates.find(c => c.dataset && c.dataset.id === currentPlayingMovie.id);
+      if (match) {
+        setFocus(match);
+        return;
+      }
+    }
+    const firstCard = scope.querySelector('.movie-card') || candidates[0];
+    if (firstCard) setFocus(firstCard);
+  }
+
+  function navigate2D(direction) {
+    const scope = getActiveScope();
+    const isPlayerActive = scope.id === 'playerContainer';
+
+    // Xử lý riêng khi đang ở màn hình Video Player
+    if (isPlayerActive) {
+      const overlay = document.getElementById('playerOverlay');
+      const isOverlayHidden = overlay.classList.contains('hide');
+
+      if (direction === 'left') {
+        video.currentTime = Math.max(0, video.currentTime - 10);
+        resetOverlayTimer();
+        showToast('⏪ -10 giây');
+        return;
+      }
+      if (direction === 'right') {
+        video.currentTime = Math.min(video.duration || 0, video.currentTime + 10);
+        resetOverlayTimer();
+        showToast('⏩ +10 giây');
+        return;
+      }
+      if (isOverlayHidden) {
+        resetOverlayTimer();
+        const playBtn = document.getElementById('btnPlayPause');
+        if (playBtn) setFocus(playBtn);
+        return;
+      }
+    }
+
+    const candidates = getFocusableCandidates(scope);
+    if (candidates.length === 0) return;
+
+    let current = document.activeElement;
+    if (!current || !scope.contains(current) || current === document.body) {
+      current = currentFocusedElement && scope.contains(currentFocusedElement) ? currentFocusedElement : candidates[0];
+      setFocus(current);
+      return;
+    }
+
+    const rect1 = current.getBoundingClientRect();
+    const c1 = {
+      x: rect1.left + rect1.width / 2,
+      y: rect1.top + rect1.height / 2
+    };
+
+    let bestCandidate = null;
+    let minScore = Infinity;
+
+    for (let i = 0; i < candidates.length; i++) {
+      const cand = candidates[i];
+      if (cand === current) continue;
+
+      const rect2 = cand.getBoundingClientRect();
+      const c2 = {
+        x: rect2.left + rect2.width / 2,
+        y: rect2.top + rect2.height / 2
+      };
+
+      const dx = c2.x - c1.x;
+      const dy = c2.y - c1.y;
+
+      let isValidDirection = false;
+      let primaryDist = 0;
+      let secondaryDist = 0;
+
+      if (direction === 'up') {
+        if (rect2.bottom <= rect1.top + 8 || dy < -8) {
+          isValidDirection = true;
+          primaryDist = -dy;
+          secondaryDist = Math.abs(dx);
+        }
+      } else if (direction === 'down') {
+        if (rect2.top >= rect1.bottom - 8 || dy > 8) {
+          isValidDirection = true;
+          primaryDist = dy;
+          secondaryDist = Math.abs(dx);
+        }
+      } else if (direction === 'left') {
+        if (rect2.right <= rect1.left + 8 || dx < -8) {
+          isValidDirection = true;
+          primaryDist = -dx;
+          secondaryDist = Math.abs(dy);
+        }
+      } else if (direction === 'right') {
+        if (rect2.left >= rect1.right - 8 || dx > 8) {
+          isValidDirection = true;
+          primaryDist = dx;
+          secondaryDist = Math.abs(dy);
+        }
+      }
+
+      if (isValidDirection) {
+        // Trọng số phạt cho khoảng cách trục phụ để ưu tiên phần tử thẳng hàng
+        const score = primaryDist + (secondaryDist * 2.2);
+        if (score < minScore) {
+          minScore = score;
+          bestCandidate = cand;
+        }
+      }
+    }
+
+    if (bestCandidate) {
+      setFocus(bestCandidate);
+    }
+  }
+
+  // --- Multi-tiered Back Button Handler ---
+  function handleBackAction(e) {
+    if (e && typeof e.preventDefault === 'function') {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    const zap = document.getElementById('zappingPanel');
+    const player = document.getElementById('playerContainer');
+    const detail = document.getElementById('detailModal');
+    const sched = document.getElementById('scheduleModal');
+    const iptv = document.getElementById('iptvModal');
+    const search = document.getElementById('searchModal');
+
+    // 1. Nếu Quick Zapping Drawer đang mở -> đóng drawer
+    if (zap && zap.classList.contains('open')) {
+      zap.classList.remove('open');
+      const zapBtn = document.getElementById('btnQuickZap');
+      if (zapBtn) setFocus(zapBtn);
+      return;
+    }
+
+    // 2. Nếu Video Player đang mở -> Đóng player và quay lại Detail Modal (với phim) hoặc Grid (với TV)
+    if (player && player.style.display === 'flex') {
+      closePlayer(true);
+      return;
+    }
+
+    // 3. Nếu Detail Modal đang mở -> Đóng modal, quay về grid
+    if (detail && detail.style.display === 'flex') {
+      detail.style.display = 'none';
+      focusCurrentOrFirstMovie();
+      return;
+    }
+
+    // 4. Nếu Schedule Modal đang mở -> Đóng
+    if (sched && sched.style.display === 'flex') {
+      sched.style.display = 'none';
+      const btn = document.getElementById('btnScheduleHeader');
+      if (btn) setFocus(btn);
+      return;
+    }
+
+    // 5. Nếu IPTV Modal đang mở -> Đóng
+    if (iptv && iptv.style.display === 'flex') {
+      iptv.style.display = 'none';
+      focusCurrentOrFirstMovie();
+      return;
+    }
+
+    // 6. Nếu Search Modal đang mở -> Đóng
+    if (search && search.style.display === 'flex') {
+      search.style.display = 'none';
+      const btn = document.getElementById('btnSearch');
+      if (btn) setFocus(btn);
+      return;
+    }
+
+    // 7. Ở màn hình chính -> Bấm 2 lần trong 2.5s để thoát ứng dụng
+    const now = Date.now();
+    if (now - lastBackTime < 2500) {
+      showToast('Đang thoát ứng dụng...');
+      try {
+        if (window.webOS && typeof window.webOS.platformBack === 'function') {
+          window.webOS.platformBack();
+        } else {
+          window.close();
+        }
+      } catch (err) {
+        window.close();
+      }
+    } else {
+      lastBackTime = now;
+      showToast('Nhấn Quay Lại một lần nữa để thoát ứng dụng');
+    }
+  }
+
+  // --- Remote Key Listeners (LG webOS & Spatial Navigation) ---
   window.addEventListener('keydown', (e) => {
     const code = e.keyCode || e.which;
 
-    // LG webOS Back Button (461), Escape (27), Backspace (8)
-    if (code === 461 || code === 27) {
+    // Phím Back: LG webOS Back Button (461), Escape (27), Backspace (8)
+    if (code === 461 || code === 27 || (code === 8 && document.activeElement.tagName !== 'INPUT')) {
       e.preventDefault();
-      const player = document.getElementById('playerContainer');
-      const detail = document.getElementById('detailModal');
-      const zap = document.getElementById('zappingPanel');
-      const sched = document.getElementById('scheduleModal');
-      const iptv = document.getElementById('iptvModal');
-      const search = document.getElementById('searchModal');
+      handleBackAction(e);
+      return;
+    }
 
-      if (zap.classList.contains('open')) {
-        zap.classList.remove('open');
-      } else if (player.style.display === 'flex') {
-        closePlayer();
-      } else if (detail.style.display === 'flex') {
-        detail.style.display = 'none';
-      } else if (sched.style.display === 'flex') {
-        sched.style.display = 'none';
-      } else if (iptv.style.display === 'flex') {
-        iptv.style.display = 'none';
-      } else if (search.style.display === 'flex') {
-        search.style.display = 'none';
-      } else {
-        showToast('Nhấn Trang chủ trên điều khiển để thoát ứng dụng.');
+    // D-Pad Navigation: ArrowUp (38), ArrowDown (40), ArrowLeft (37), ArrowRight (39)
+    if (code === 38) { // Up
+      e.preventDefault();
+      navigate2D('up');
+      return;
+    }
+    if (code === 40) { // Down
+      e.preventDefault();
+      navigate2D('down');
+      return;
+    }
+    if (code === 37) { // Left
+      if (document.activeElement.tagName !== 'INPUT') {
+        e.preventDefault();
+        navigate2D('left');
+        return;
+      }
+    }
+    if (code === 39) { // Right
+      if (document.activeElement.tagName !== 'INPUT') {
+        e.preventDefault();
+        navigate2D('right');
+        return;
+      }
+    }
+
+    // OK / Enter (13)
+    if (code === 13) {
+      const player = document.getElementById('playerContainer');
+      if (player && player.style.display === 'flex') {
+        const overlay = document.getElementById('playerOverlay');
+        if (overlay && overlay.classList.contains('hide')) {
+          e.preventDefault();
+          resetOverlayTimer();
+          btnPlayPause.click();
+          return;
+        }
+      }
+      if (document.activeElement && typeof document.activeElement.click === 'function') {
+        if (document.activeElement.tagName !== 'BUTTON' && document.activeElement.tagName !== 'INPUT') {
+          e.preventDefault();
+          document.activeElement.click();
+        }
       }
       return;
     }
@@ -1044,18 +1373,33 @@
       return;
     }
 
-    // Play/Pause remote keys (415, 19, 413)
+    // Media keys từ Remote LG: Play (415), Pause (19), Stop (413), FastForward (417), Rewind (412)
     if (code === 415) { // Play
-      if (video && video.paused) video.play();
+      if (video && video.paused) {
+        video.play();
+        btnPlayPause.textContent = '⏸️ Tạm Dừng';
+      }
     } else if (code === 19 || code === 413) { // Pause / Stop
-      if (video && !video.paused) video.pause();
-    }
-
-    // Spatial navigation for D-pad (ArrowUp: 38, ArrowDown: 40, ArrowLeft: 37, ArrowRight: 39)
-    if ([37, 38, 39, 40].includes(code)) {
-      resetOverlayTimer();
+      if (video && !video.paused) {
+        video.pause();
+        btnPlayPause.textContent = '▶️ Tiếp Tục';
+      }
+    } else if (code === 412) { // Rewind
+      if (video) {
+        video.currentTime = Math.max(0, video.currentTime - 10);
+        showToast('⏪ -10 giây');
+      }
+    } else if (code === 417) { // FastForward
+      if (video) {
+        video.currentTime = Math.min(video.duration || 0, video.currentTime + 10);
+        showToast('⏩ +10 giây');
+      }
     }
   });
+
+  // Lắng nghe sự kiện webOSBack và popstate từ TV LG
+  document.addEventListener('webOSBack', handleBackAction);
+  window.addEventListener('popstate', handleBackAction);
 
   // Format seconds to mm:ss or hh:mm:ss
   function formatTime(sec) {

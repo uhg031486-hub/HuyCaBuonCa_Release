@@ -1,6 +1,6 @@
 {
   "id": "com.huycabuonca.tv.lg",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "vendor": "HuyCaBuonCa",
   "type": "web",
   "main": "index.html",
@@ -11,6 +11,8 @@
   "resolution": "1920x1080",
   "supportTouch": false,
   "transparent": false,
+  "disableBackHistoryAPI": true,
+  "handlesRelaunch": true,
   "appDescription": "Kho Phim & Truyền Hình Trực Tuyến Đẳng Cấp Huy Cá Buôn Cà dành cho LG Smart TV (webOS)",
   "requiredPermissions": [
     "internet"

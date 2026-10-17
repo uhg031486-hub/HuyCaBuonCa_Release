@@ -44,17 +44,19 @@ body {
   background: var(--primary-gold);
 }
 
-/* Focusable items Glow for LG Remote & Magic Remote */
+/* Focusable items for LG Remote & Magic Remote (Hardware Accelerated) */
 .focusable {
   outline: none;
-  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  transition: transform 0.1s ease;
   cursor: pointer;
+  transform: translateZ(0);
 }
 .focusable:focus,
 .focusable.focused,
 .focusable:hover {
-  transform: scale(1.04);
-  box-shadow: 0 0 16px rgba(0, 229, 255, 0.7);
+  transform: scale(1.04) translateZ(0);
+  outline: 3px solid #00e5ff !important;
+  outline-offset: 2px !important;
   border-color: var(--accent-cyan) !important;
   z-index: 10;
 }
@@ -259,6 +261,9 @@ body {
   display: flex;
   flex-direction: column;
   position: relative;
+  contain: content;
+  transform: translateZ(0);
+  will-change: transform;
 }
 
 .movie-card.tv-card .poster-wrapper {
@@ -349,8 +354,7 @@ body {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.85);
-  backdrop-filter: blur(8px);
+  background: rgba(8, 12, 20, 0.94);
   display: flex;
   justify-content: center;
   align-items: center;

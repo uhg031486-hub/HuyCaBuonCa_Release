@@ -25,8 +25,8 @@ def get_token():
 TOKEN = get_token()
 REPO_OWNER = "uhg031486-hub"
 REPO_NAME = "HuyCaBuonCa_Release"
-TAG = "v2.2"
-TITLE = "Huy Cá Buôn Cà v2.2"
+TAG = "v2.3"
+TITLE = "Huy Cá Buôn Cà v2.3"
 
 HEADERS = {
     "Authorization": f"token {TOKEN}",
@@ -113,9 +113,9 @@ def step4_upload_assets(release):
     existing_assets = {a["name"]: a["id"] for a in release.get("assets", [])}
 
     files_to_upload = [
-        ("HuyCaBuonCa_Mobile_v2.2.apk", "application/vnd.android.package-archive"),
-        ("HuyCaBuonCa_TV_v2.2.apk", "application/vnd.android.package-archive"),
-        ("HuyCaBuonCa_LG_webOS_v2.2.ipk", "application/octet-stream"),
+        ("HuyCaBuonCa_Mobile_v2.3.apk", "application/vnd.android.package-archive"),
+        ("HuyCaBuonCa_TV_v2.3.apk", "application/vnd.android.package-archive"),
+        ("HuyCaBuonCa_LG_webOS_v2.3.ipk", "application/octet-stream"),
     ]
 
     for filename, content_type in files_to_upload:
