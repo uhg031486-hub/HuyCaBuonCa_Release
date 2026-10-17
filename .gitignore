@@ -7,9 +7,10 @@ build/
 local.properties
 .DS_Store
 
-# Binaries / APKs in subdirs
+# Binaries / APKs / IPK in subdirs
 *.apk
 *.aab
+*.ipk
 
 # OS
 Thumbs.db
