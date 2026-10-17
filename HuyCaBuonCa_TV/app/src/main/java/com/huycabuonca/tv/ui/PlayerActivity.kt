@@ -438,7 +438,7 @@ class PlayerActivity : AppCompatActivity() {
                 }
             } else {
                 when (keyCode) {
-                    KeyEvent.KEYCODE_DPAD_UP, KeyEvent.KEYCODE_CHANNEL_UP -> {
+                    KeyEvent.KEYCODE_DPAD_UP, KeyEvent.KEYCODE_CHANNEL_UP, KeyEvent.KEYCODE_MEDIA_NEXT, KeyEvent.KEYCODE_BUTTON_R1 -> {
                         if (isTvMode) {
                             playChannelInGroup(currentChannelIndex + 1)
                         } else {
@@ -450,7 +450,7 @@ class PlayerActivity : AppCompatActivity() {
                         }
                         return true
                     }
-                    KeyEvent.KEYCODE_DPAD_DOWN, KeyEvent.KEYCODE_CHANNEL_DOWN -> {
+                    KeyEvent.KEYCODE_DPAD_DOWN, KeyEvent.KEYCODE_CHANNEL_DOWN, KeyEvent.KEYCODE_MEDIA_PREVIOUS, KeyEvent.KEYCODE_BUTTON_L1 -> {
                         if (isTvMode) {
                             playChannelInGroup(currentChannelIndex - 1)
                         } else {
@@ -660,9 +660,11 @@ class QuickChannelTvAdapter(
         } else {
             holder.itemView.setBackgroundResource(R.drawable.bg_btn_secondary)
         }
-        val defaultTvLogo = "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png"
+        val defaultTvLogo = "file:///android_asset/logos/vtv1.png"
         Glide.with(holder.itemView.context)
-            .load(item.logo.ifEmpty { defaultTvLogo })
+            .load(if (!item.logo.isNullOrEmpty()) item.logo else defaultTvLogo)
+            .placeholder(R.drawable.bg_focus_card)
+            .error(R.drawable.bg_btn_secondary)
             .into(holder.imgLogo)
         holder.itemView.setOnClickListener { onChannelClick(item) }
         holder.itemView.setOnKeyListener { _, keyCode, event ->

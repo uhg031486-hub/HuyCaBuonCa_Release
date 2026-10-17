@@ -53,6 +53,7 @@ import com.huycabuonca.mobile.model.MovieItem
 import com.huycabuonca.mobile.model.MovieSource
 import com.huycabuonca.mobile.model.ServerGroup
 import com.huycabuonca.mobile.ui.adapter.EpisodeAdapter
+import com.huycabuonca.mobile.ui.adapter.QuickChannelAdapter
 import com.huycabuonca.mobile.util.PlayerGestureHelper
 import kotlinx.coroutines.launch
 
@@ -137,6 +138,10 @@ class DetailActivity : AppCompatActivity() {
     private var currentGainMb = 0
     private var isDataSaverEnabled = false
 
+    // Quản lý video dọc (Phim ngắn dọc 9:16) & phóng to toàn màn hình dọc
+    private var isVerticalVideo = false
+    private var isVerticalFullscreen = false
+
     // Chuyển kênh nhanh TV (Quick Zapping) & Danh sách kênh cùng nhóm
     private var currentTvChannel: TvChannelItem? = null
     private var sameGroupChannels = mutableListOf<TvChannelItem>()
@@ -151,6 +156,10 @@ class DetailActivity : AppCompatActivity() {
         if (movieItem == null) {
             finish()
             return
+        }
+
+        if (movieItem?.source == MovieSource.FREEREELS || movieItem?.slug?.startsWith("freereels_") == true) {
+            isVerticalVideo = true
         }
 
         setupUI()
@@ -203,7 +212,9 @@ class DetailActivity : AppCompatActivity() {
     private fun setupPlayerControls() {
         // 1. Nút Back
         binding.btnPlayerBack.setOnClickListener {
-            if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            if (isVerticalFullscreen) {
+                exitVerticalFullscreen()
+            } else if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
                 requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
             } else {
                 finish()
@@ -541,7 +552,44 @@ class DetailActivity : AppCompatActivity() {
         }
     }
 
+    private fun enterVerticalFullscreen() {
+        isVerticalFullscreen = true
+        val insetsController = WindowCompat.getInsetsController(window, window.decorView)
+        insetsController.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        insetsController.hide(WindowInsetsCompat.Type.systemBars())
+        binding.scrollDetails.visibility = View.GONE
+        binding.layoutPlayerContainer.layoutParams = LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.MATCH_PARENT
+        )
+        binding.playerView.resizeMode = androidx.media3.ui.AspectRatioFrameLayout.RESIZE_MODE_ZOOM
+        binding.btnFullscreen.setImageResource(R.drawable.ic_fullscreen_exit)
+    }
+
+    private fun exitVerticalFullscreen() {
+        isVerticalFullscreen = false
+        val insetsController = WindowCompat.getInsetsController(window, window.decorView)
+        insetsController.show(WindowInsetsCompat.Type.systemBars())
+        binding.scrollDetails.visibility = View.VISIBLE
+        val dm = resources.displayMetrics
+        val playerHeight = (dm.heightPixels * 0.65).toInt()
+        binding.layoutPlayerContainer.layoutParams = LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            playerHeight
+        )
+        binding.playerView.resizeMode = androidx.media3.ui.AspectRatioFrameLayout.RESIZE_MODE_FIT
+        binding.btnFullscreen.setImageResource(R.drawable.ic_fullscreen)
+    }
+
     private fun toggleFullscreen() {
+        if (isVerticalVideo) {
+            if (isVerticalFullscreen) {
+                exitVerticalFullscreen()
+            } else {
+                enterVerticalFullscreen()
+            }
+            return
+        }
         val isLandscape = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
         requestedOrientation = if (isLandscape) {
             ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
@@ -552,12 +600,16 @@ class DetailActivity : AppCompatActivity() {
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            isVerticalFullscreen = false
+        }
         updateOrientationUI(newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE)
     }
 
     private fun updateOrientationUI(isLandscape: Boolean) {
         val insetsController = WindowCompat.getInsetsController(window, window.decorView)
         if (isLandscape) {
+            isVerticalFullscreen = false
             insetsController.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
             insetsController.hide(WindowInsetsCompat.Type.systemBars())
             binding.scrollDetails.visibility = View.GONE
@@ -567,12 +619,17 @@ class DetailActivity : AppCompatActivity() {
             )
             binding.btnFullscreen.setImageResource(R.drawable.ic_fullscreen_exit)
         } else {
+            if (isVerticalFullscreen) {
+                enterVerticalFullscreen()
+                return
+            }
             insetsController.show(WindowInsetsCompat.Type.systemBars())
             binding.scrollDetails.visibility = View.VISIBLE
-            val playerHeight = (resources.displayMetrics.widthPixels * 9) / 16
+            val dm = resources.displayMetrics
+            val playerHeight = if (isVerticalVideo) (dm.heightPixels * 0.65).toInt() else ((dm.widthPixels * 9) / 16).coerceAtLeast(350)
             binding.layoutPlayerContainer.layoutParams = LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
-                playerHeight.coerceAtLeast(350)
+                playerHeight
             )
             binding.btnFullscreen.setImageResource(R.drawable.ic_fullscreen)
         }
@@ -582,6 +639,10 @@ class DetailActivity : AppCompatActivity() {
     override fun onBackPressed() {
         if (isScreenLocked) {
             Toast.makeText(this, "Màn hình đang khóa! Vui lòng chạm biểu tượng ổ khóa bên trái để mở", Toast.LENGTH_SHORT).show()
+            return
+        }
+        if (isVerticalFullscreen) {
+            exitVerticalFullscreen()
             return
         }
         if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
@@ -1074,12 +1135,22 @@ class DetailActivity : AppCompatActivity() {
                 }
 
                 override fun onVideoSizeChanged(videoSize: androidx.media3.common.VideoSize) {
-                    val isVertical = videoSize.width > 0 && videoSize.height > videoSize.width
+                    val isVertical = (videoSize.width > 0 && videoSize.height > videoSize.width) ||
+                            (movieItem?.source == MovieSource.FREEREELS) ||
+                            (movieItem?.slug?.startsWith("freereels_") == true)
+                    isVerticalVideo = isVertical
                     if (isVertical) {
                         // Tự động nhận diện video màn hình dọc 9:16 (Chuẩn TikTok/Reels/Shorts)
                         gestureHelper.isShortsMode = true
-                        binding.playerView.resizeMode = androidx.media3.ui.AspectRatioFrameLayout.RESIZE_MODE_FIT
-                        if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                        if (isVerticalFullscreen) {
+                            binding.playerView.resizeMode = androidx.media3.ui.AspectRatioFrameLayout.RESIZE_MODE_ZOOM
+                            binding.scrollDetails.visibility = View.GONE
+                            binding.layoutPlayerContainer.layoutParams = LinearLayout.LayoutParams(
+                                ViewGroup.LayoutParams.MATCH_PARENT,
+                                ViewGroup.LayoutParams.MATCH_PARENT
+                            )
+                        } else if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                            binding.playerView.resizeMode = androidx.media3.ui.AspectRatioFrameLayout.RESIZE_MODE_FIT
                             val dm = resources.displayMetrics
                             binding.layoutPlayerContainer.layoutParams.height = (dm.heightPixels * 0.65).toInt()
                             binding.layoutPlayerContainer.requestLayout()
@@ -1347,43 +1418,4 @@ class DetailActivity : AppCompatActivity() {
 
         dialog.show()
     }
-}
-
-class QuickChannelAdapter(
-    private val currentId: String,
-    private val onChannelClick: (TvChannelItem) -> Unit
-) : RecyclerView.Adapter<QuickChannelAdapter.VH>() {
-    private var channels = listOf<TvChannelItem>()
-    fun submit(list: List<TvChannelItem>) {
-        channels = list
-        notifyDataSetChanged()
-    }
-    class VH(v: View) : RecyclerView.ViewHolder(v) {
-        val imgLogo: ImageView = v.findViewById(R.id.imgQuickChannelLogo)
-        val txtName: TextView = v.findViewById(R.id.txtQuickChannelName)
-        val txtGroup: TextView = v.findViewById(R.id.txtQuickChannelGroup)
-        val txtBadge: TextView = v.findViewById(R.id.txtQuickStatusBadge)
-    }
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
-        val v = LayoutInflater.from(parent.context).inflate(R.layout.item_quick_channel, parent, false)
-        return VH(v)
-    }
-    override fun onBindViewHolder(holder: VH, position: Int) {
-        val item = channels[position]
-        holder.txtName.text = item.name
-        holder.txtGroup.text = "Nhóm: ${item.group}"
-        val isCurrent = item.id == currentId || item.url == currentId
-        holder.txtBadge.visibility = if (isCurrent) View.VISIBLE else View.GONE
-        if (isCurrent) {
-            holder.itemView.setBackgroundResource(R.drawable.bg_focus_card)
-        } else {
-            holder.itemView.setBackgroundResource(R.drawable.bg_btn_secondary)
-        }
-        val defaultTvLogo = "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png"
-        Glide.with(holder.itemView.context)
-            .load(item.logo.ifEmpty { defaultTvLogo })
-            .into(holder.imgLogo)
-        holder.itemView.setOnClickListener { onChannelClick(item) }
-    }
-    override fun getItemCount() = channels.size
 }

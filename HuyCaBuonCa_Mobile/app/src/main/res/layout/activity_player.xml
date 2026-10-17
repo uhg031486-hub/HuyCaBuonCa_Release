@@ -6,13 +6,13 @@
     android:layout_height="match_parent"
     android:background="#000000">
 
-    <!-- Native Media3 ExoPlayer with Touch Controllers -->
+    <!-- Native Media3 ExoPlayer -->
     <androidx.media3.ui.PlayerView
         android:id="@+id/playerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:show_buffering="when_playing"
-        app:use_controller="true" />
+        app:use_controller="false" />
 
     <!-- Fallback WebView for embed streams -->
     <WebView
@@ -21,6 +21,14 @@
         android:layout_height="match_parent"
         android:visibility="gone" />
 
+    <!-- Touch Gesture Overlay: chạm để bật/tắt điều khiển -->
+    <View
+        android:id="@+id/touchOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clickable="true"
+        android:focusable="false" />
+
     <ProgressBar
         android:id="@+id/playerProgress"
         android:layout_width="50dp"
@@ -28,25 +36,27 @@
         android:layout_gravity="center"
         android:visibility="gone" />
 
-    <!-- Top Watermark & Copyright Bar -->
+    <!-- TOP BAR: Quay lại | Tiêu đề | Nút Danh Sách Kênh | Nút Yêu Thích -->
     <LinearLayout
         android:id="@+id/layoutWatermark"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#99000000"
+        android:layout_gravity="top"
+        android:background="#B3000000"
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:paddingStart="16dp"
-        android:paddingTop="10dp"
+        android:paddingTop="12dp"
         android:paddingEnd="16dp"
-        android:paddingBottom="10dp">
+        android:paddingBottom="12dp">
 
         <ImageButton
             android:id="@+id/btnPlayerBack"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:background="@drawable/bg_btn_selector"
+            android:layout_width="38dp"
+            android:layout_height="38dp"
+            android:background="@drawable/bg_btn_secondary"
             android:contentDescription="Quay lại"
+            android:padding="8dp"
             android:src="@android:drawable/ic_menu_revert" />
 
         <TextView
@@ -54,23 +64,226 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="12dp"
-            android:layout_marginEnd="12dp"
+            android:layout_marginEnd="8dp"
             android:layout_weight="1"
             android:ellipsize="end"
             android:maxLines="1"
             android:textColor="@color/text_primary"
-            android:textSize="13sp"
+            android:textSize="14sp"
             android:textStyle="bold"
-            tools:text="Tên Phim - Tập 01" />
+            tools:text="VTV1 HD • Thời Sự - Chính Luận" />
+
+        <!-- Nút Mở Danh Sách Kênh (FPT Play / MyTV Style) -->
+        <LinearLayout
+            android:id="@+id/btnOpenChannelList"
+            android:layout_width="wrap_content"
+            android:layout_height="38dp"
+            android:layout_marginEnd="10dp"
+            android:background="@drawable/bg_btn_secondary"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="10dp"
+            android:paddingEnd="12dp">
+
+            <ImageView
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:src="@drawable/ic_episodes_list"
+                app:tint="#FFD700" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:text="Kênh TV"
+                android:textColor="#FFD700"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+        </LinearLayout>
 
         <ImageButton
             android:id="@+id/btnPlayerFav"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:background="@drawable/bg_btn_selector"
+            android:layout_width="38dp"
+            android:layout_height="38dp"
+            android:background="@drawable/bg_btn_secondary"
             android:contentDescription="Yêu thích"
-            android:padding="6dp"
+            android:padding="8dp"
             android:src="@android:drawable/btn_star" />
+    </LinearLayout>
+
+    <!-- CENTER CONTROLS: Kênh Trước | Play/Pause | Kênh Sau -->
+    <LinearLayout
+        android:id="@+id/layoutCenterControls"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <ImageButton
+            android:id="@+id/btnPrevChannel"
+            android:layout_width="52dp"
+            android:layout_height="52dp"
+            android:layout_marginEnd="32dp"
+            android:background="@drawable/bg_btn_secondary"
+            android:contentDescription="Kênh trước"
+            android:padding="12dp"
+            android:src="@drawable/ic_skip_previous" />
+
+        <ImageButton
+            android:id="@+id/btnPlayPause"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:background="@drawable/bg_btn_primary"
+            android:contentDescription="Phát / Tạm dừng"
+            android:padding="16dp"
+            android:src="@drawable/ic_play" />
+
+        <ImageButton
+            android:id="@+id/btnNextChannel"
+            android:layout_width="52dp"
+            android:layout_height="52dp"
+            android:layout_marginStart="32dp"
+            android:background="@drawable/bg_btn_secondary"
+            android:contentDescription="Kênh sau"
+            android:padding="12dp"
+            android:src="@drawable/ic_skip_next" />
+    </LinearLayout>
+
+    <!-- TV Channel OSD Banner (Hiện khi đổi kênh hoặc chạm màn hình, tự ẩn sau 3.5s) -->
+    <LinearLayout
+        android:id="@+id/layoutChannelBanner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|start"
+        android:layout_marginStart="20dp"
+        android:layout_marginBottom="28dp"
+        android:background="@drawable/bg_btn_secondary"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="14dp"
+        android:paddingTop="10dp"
+        android:paddingEnd="18dp"
+        android:paddingBottom="10dp"
+        android:visibility="gone">
+
+        <ImageView
+            android:id="@+id/imgChannelBannerLogo"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:layout_marginEnd="12dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/tv_banner" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/txtChannelNumber"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="KÊNH 01/85"
+                android:textColor="@color/brand_cyan"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/txtChannelName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="VTV1 HD"
+                android:textColor="#FFD700"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/txtChannelGroup"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Nhóm: VTV"
+                android:textColor="#FFFFFF"
+                android:textSize="11sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- In-Player Channel Drawer: Danh Sách Kênh trượt từ cạnh phải (FPT Play / MyTV Style) -->
+    <LinearLayout
+        android:id="@+id/layoutSideChannelList"
+        android:layout_width="300dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="end"
+        android:background="#F00B0E14"
+        android:elevation="16dp"
+        android:orientation="vertical"
+        android:paddingStart="14dp"
+        android:paddingTop="14dp"
+        android:paddingEnd="14dp"
+        android:paddingBottom="14dp"
+        android:visibility="gone">
+
+        <!-- Header Drawer -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="📺 DANH SÁCH KÊNH"
+                android:textColor="#FFD700"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <ImageButton
+                android:id="@+id/btnSideClose"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:background="@drawable/bg_btn_secondary"
+                android:contentDescription="Đóng"
+                android:padding="6dp"
+                android:src="@android:drawable/ic_menu_close_clear_cancel" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/txtSideGroupSub"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
+            android:layout_marginBottom="8dp"
+            android:text="Chạm vào kênh để xem trực tiếp"
+            android:textColor="#8B949E"
+            android:textSize="11sp" />
+
+        <!-- Thanh lọc nhóm kênh theo Tab cuộn ngang (VTV, HTV, VTVcab, Thể thao...) -->
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:scrollbars="none">
+
+            <LinearLayout
+                android:id="@+id/layoutGroupTabs"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal" />
+        </HorizontalScrollView>
+
+        <!-- Danh sách kênh -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerSideChannels"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:clipToPadding="false"
+            android:paddingBottom="8dp" />
     </LinearLayout>
 
 </FrameLayout>
