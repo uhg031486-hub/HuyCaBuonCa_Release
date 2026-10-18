@@ -58,7 +58,7 @@ public partial class MainWindow : Window
             webView.CoreWebView2.Settings.AreDefaultContextMenusEnabled = true;
             webView.CoreWebView2.Profile.PreferredColorScheme = CoreWebView2PreferredColorScheme.Dark;
 
-            // Lắng nghe thông điệp từ giao diện web (như nút Kiểm tra cập nhật)
+            // Lắng nghe thông điệp từ giao diện web
             webView.CoreWebView2.WebMessageReceived += (s, args) =>
             {
                 try

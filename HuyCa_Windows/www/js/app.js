@@ -697,28 +697,24 @@
     video.removeAttribute('src');
     video.load();
 
-    const isNativeSupported = isNativeWebOS || video.canPlayType('application/vnd.apple.mpegurl');
-
-    if (isNativeSupported && streamUrl.includes('.m3u8')) {
-      // 🚀 NATIVE HARDWARE ACCELERATION: Chip TV LG giải mã trực tiếp, 0% CPU, mượt mà tuyệt đối
-      video.src = streamUrl;
-      video.load();
-      video.play().catch(e => console.log('Native auto play blocked:', e));
-    } else if (window.Hls && Hls.isSupported() && streamUrl.includes('.m3u8')) {
-      // Fallback với bộ đệm siêu nhẹ cho PC hoặc webOS cũ
+    if (window.Hls && Hls.isSupported() && streamUrl.includes('.m3u8')) {
+      // 🚀 HLS.JS: Tương thích 100% với Windows PC, Edge Chromium & WebView2
       hlsInstance = new Hls({
-        maxBufferLength: 8,
-        maxMaxBufferLength: 15,
-        maxBufferSize: 20 * 1024 * 1024,
-        lowLatencyMode: true,
+        maxBufferLength: 30,
+        maxMaxBufferLength: 60,
+        maxBufferSize: 60 * 1024 * 1024,
+        lowLatencyMode: false,
         enableWorker: true
       });
       hlsInstance.loadSource(streamUrl);
       hlsInstance.attachMedia(video);
       hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
-        video.play().catch(e => console.log('HLS auto play blocked:', e));
+        video.play().catch(e => {
+          console.log('Play attempt error:', e);
+        });
       });
       hlsInstance.on(Hls.Events.ERROR, (event, data) => {
+        console.error('HLS ERROR:', data.type, data.details, data.fatal);
         if (data.fatal) {
           switch (data.type) {
             case Hls.ErrorTypes.NETWORK_ERROR:
@@ -733,6 +729,11 @@
           }
         }
       });
+    } else if (isNativeWebOS && streamUrl.includes('.m3u8')) {
+      // 🚀 Dành riêng cho TV LG webOS Native
+      video.src = streamUrl;
+      video.load();
+      video.play().catch(e => console.log('Native auto play blocked:', e));
     } else {
       video.src = streamUrl;
       video.load();
