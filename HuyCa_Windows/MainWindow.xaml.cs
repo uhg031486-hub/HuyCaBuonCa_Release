@@ -1,7 +1,9 @@
 using System;
 using System.IO;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media.Imaging;
 using Microsoft.Web.WebView2.Core;
 
 namespace HuyCa_Windows;
@@ -16,6 +18,17 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+
+        // Nạp icon an toàn, không ném exception nếu thiếu file
+        try
+        {
+            string iconPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "app.ico");
+            if (File.Exists(iconPath))
+            {
+                Icon = new BitmapImage(new Uri(iconPath, UriKind.Absolute));
+            }
+        }
+        catch { }
     }
 
     private async void Window_Loaded(object sender, RoutedEventArgs e)
@@ -29,7 +42,13 @@ public partial class MainWindow : Window
             );
             Directory.CreateDirectory(userDataFolder);
 
-            var env = await CoreWebView2Environment.CreateAsync(null, userDataFolder);
+            // Bật cờ trình duyệt tối ưu: Tắt CORS cho HLS, cho phép phát luồng mixed HTTP/HTTPS, tự động autoplay video
+            var options = new CoreWebView2EnvironmentOptions
+            {
+                AdditionalBrowserArguments = "--disable-web-security --allow-running-insecure-content --autoplay-policy=no-user-gesture-required --ignore-certificate-errors"
+            };
+
+            var env = await CoreWebView2Environment.CreateAsync(null, userDataFolder, options);
             await webView.EnsureCoreWebView2Async(env);
 
             // Cấu hình WebView2 Engine
@@ -38,6 +57,23 @@ public partial class MainWindow : Window
             webView.CoreWebView2.Settings.IsZoomControlEnabled = true;
             webView.CoreWebView2.Settings.AreDefaultContextMenusEnabled = true;
             webView.CoreWebView2.Profile.PreferredColorScheme = CoreWebView2PreferredColorScheme.Dark;
+
+            // Lắng nghe thông điệp từ giao diện web (như nút Kiểm tra cập nhật)
+            webView.CoreWebView2.WebMessageReceived += (s, args) =>
+            {
+                try
+                {
+                    string msg = args.TryGetWebMessageAsString();
+                    if (msg == "check_update")
+                    {
+                        Dispatcher.Invoke(() =>
+                        {
+                            _ = UpdateManager.CheckForUpdateAsync(this, silent: false);
+                        });
+                    }
+                }
+                catch { }
+            };
 
             // Xử lý tự động Fullscreen khi video mở toàn màn hình
             webView.CoreWebView2.ContainsFullScreenElementChanged += (s, args) =>
@@ -61,13 +97,32 @@ public partial class MainWindow : Window
                 {
                     loadingOverlay.Visibility = Visibility.Collapsed;
                 });
+
+                // Tự động kiểm tra cập nhật trong nền sau 3 giây
+                _ = Task.Run(async () =>
+                {
+                    await Task.Delay(3000);
+                    await Dispatcher.InvokeAsync(() =>
+                    {
+                        _ = UpdateManager.CheckForUpdateAsync(this, silent: true);
+                    });
+                });
             };
+
+            // Timeout dự phòng: tự ẩn loading sau 6 giây để không bao giờ bị kẹt
+            _ = Task.Run(async () =>
+            {
+                await Task.Delay(6000);
+                await Dispatcher.InvokeAsync(() =>
+                {
+                    loadingOverlay.Visibility = Visibility.Collapsed;
+                });
+            });
 
             // Tìm thư mục chứa web assets
             string baseDir = AppDomain.CurrentDomain.BaseDirectory;
             string wwwPath = Path.Combine(baseDir, "www");
 
-            // Nếu chạy trong Visual Studio hoặc chế độ dev, fallback tìm www ở parent folder
             if (!Directory.Exists(wwwPath))
             {
                 string devPath = Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", "www"));
@@ -79,7 +134,7 @@ public partial class MainWindow : Window
 
             if (Directory.Exists(wwwPath) && File.Exists(Path.Combine(wwwPath, "index.html")))
             {
-                // Ánh xạ virtual host https://huyca.local/ để tránh lỗi CORS khi tải HLS m3u8
+                // Ánh xạ virtual host https://huyca.local/ để phục vụ web app
                 webView.CoreWebView2.SetVirtualHostNameToFolderMapping(
                     "huyca.local",
                     wwwPath,
@@ -90,8 +145,9 @@ public partial class MainWindow : Window
             }
             else
             {
+                loadingOverlay.Visibility = Visibility.Collapsed;
                 MessageBox.Show(
-                    "Không tìm thấy thư mục tài nguyên 'www/index.html'.\nVui lòng kiểm tra lại quá trình cài đặt ứng dụng!",
+                    "Không tìm thấy thư mục tài nguyên 'www/index.html'.\nVui lòng kiểm tra lại thư mục cài đặt ứng dụng!",
                     "Huy Cá",
                     MessageBoxButton.OK,
                     MessageBoxImage.Error
@@ -100,6 +156,7 @@ public partial class MainWindow : Window
         }
         catch (Exception ex)
         {
+            loadingOverlay.Visibility = Visibility.Collapsed;
             MessageBox.Show(
                 $"Lỗi khởi chạy WebView2: {ex.Message}\n\nLưu ý: Ứng dụng yêu cầu Microsoft Edge WebView2 Runtime (đã tích hợp sẵn trên Windows 10 & 11).",
                 "Huy Cá",
@@ -135,6 +192,13 @@ public partial class MainWindow : Window
                 webView.Reload();
                 e.Handled = true;
             }
+        }
+
+        // Ctrl+U: Kiểm tra cập nhật ứng dụng
+        if (e.Key == Key.U && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
+        {
+            _ = UpdateManager.CheckForUpdateAsync(this, silent: false);
+            e.Handled = true;
         }
     }
 

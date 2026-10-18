@@ -1088,6 +1088,17 @@
     sec.style.display = 'block';
     sec.scrollIntoView({ behavior: 'smooth' });
   });
+  const btnUpdateHeader = document.getElementById('btnUpdateHeader');
+  if (btnUpdateHeader) {
+    btnUpdateHeader.addEventListener('click', () => {
+      showToast('Đang kiểm tra bản cập nhật mới...');
+      if (window.chrome && window.chrome.webview) {
+        window.chrome.webview.postMessage('check_update');
+      } else {
+        showToast('Tính năng cập nhật khả dụng trên ứng dụng Huy Cá Windows!');
+      }
+    });
+  }
 
   // --- Spatial Navigation 2D Engine for LG Remote & Smart TV ---
   function setFocus(el) {
