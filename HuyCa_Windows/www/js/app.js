@@ -241,6 +241,7 @@
   function renderFilterBar() {
     const bar = document.getElementById('filterBar');
     bar.innerHTML = '';
+    bar.scrollLeft = 0;
     const filters = FILTERS[currentSource] || [];
     if (filters.length === 0) return;
 
@@ -252,20 +253,90 @@
       btn.addEventListener('click', () => {
         bar.querySelectorAll('.btn-filter').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
+        btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
         handleFilterClick(f);
       });
       bar.appendChild(btn);
     });
 
+    // Cập nhật trạng thái hiển thị của nút Prev/Next
+    setTimeout(updateFilterNavState, 100);
+
     // Tự động load filter đầu tiên
     handleFilterClick(filters[0]);
   }
 
-  function handleFilterClick(filterItem) {
-    if (filterItem.url === 'tv://football') {
-      showScheduleModal();
-      return;
+  function updateFilterNavState() {
+    const filterBar = document.getElementById('filterBar');
+    const btnPrev = document.getElementById('btnFilterPrev');
+    const btnNext = document.getElementById('btnFilterNext');
+    if (!filterBar || !btnPrev || !btnNext) return;
+    const maxScroll = filterBar.scrollWidth - filterBar.clientWidth;
+    btnPrev.style.opacity = filterBar.scrollLeft <= 5 ? '0.35' : '1';
+    btnNext.style.opacity = filterBar.scrollLeft >= maxScroll - 5 ? '0.35' : '1';
+  }
+
+  // --- Điều Hướng Thanh Filter Cho Windows (Nút Bấm, Con Lăn Chuột & Kéo Chuột) ---
+  function initFilterBarNavigation() {
+    const filterBar = document.getElementById('filterBar');
+    const btnPrev = document.getElementById('btnFilterPrev');
+    const btnNext = document.getElementById('btnFilterNext');
+    if (!filterBar) return;
+
+    if (btnPrev) {
+      btnPrev.addEventListener('click', () => {
+        filterBar.scrollBy({ left: -280, behavior: 'smooth' });
+        setTimeout(updateFilterNavState, 350);
+      });
     }
+
+    if (btnNext) {
+      btnNext.addEventListener('click', () => {
+        filterBar.scrollBy({ left: 280, behavior: 'smooth' });
+        setTimeout(updateFilterNavState, 350);
+      });
+    }
+
+    // 1. Cuộn ngang bằng con lăn chuột (Mouse Wheel) khi rê trên thanh filter
+    filterBar.addEventListener('wheel', (e) => {
+      if (e.deltaY !== 0) {
+        e.preventDefault();
+        filterBar.scrollLeft += e.deltaY * 1.2;
+        updateFilterNavState();
+      }
+    }, { passive: false });
+
+    // 2. Kéo thả chuột ngang (Drag to scroll)
+    let isMouseDown = false;
+    let startX = 0;
+    let scrollStart = 0;
+
+    filterBar.addEventListener('mousedown', (e) => {
+      if (e.button !== 0) return; // Chỉ chuột trái
+      isMouseDown = true;
+      startX = e.pageX - filterBar.offsetLeft;
+      scrollStart = filterBar.scrollLeft;
+    });
+
+    window.addEventListener('mouseup', () => {
+      isMouseDown = false;
+    });
+
+    filterBar.addEventListener('mousemove', (e) => {
+      if (!isMouseDown) return;
+      e.preventDefault();
+      const x = e.pageX - filterBar.offsetLeft;
+      const walk = (x - startX) * 1.5;
+      filterBar.scrollLeft = scrollStart - walk;
+      updateFilterNavState();
+    });
+
+    filterBar.addEventListener('scroll', updateFilterNavState);
+    window.addEventListener('resize', updateFilterNavState);
+    setTimeout(updateFilterNavState, 200);
+  }
+
+  function handleFilterClick(filterItem) {
     if (filterItem.url === 'tv://custom') {
       showIptvModal();
       return;
@@ -286,7 +357,7 @@
     const spinner = document.getElementById('loadingMoreSpinner');
 
     if (reset) {
-      grid.innerHTML = '<div style="color: #94a3b8; font-size: 18px; padding: 40px; text-align: center; width: 100%; grid-column: 1 / -1;">⏳ Đang tải danh sách phim...</div>';
+      grid.innerHTML = '<div style="color: #94a3b8; font-size: 18px; padding: 40px; text-align: center; width: 100%; grid-column: 1 / -1;">⏳ Đang tải danh sách...</div>';
       currentMoviesList = [];
       currentPage = 1;
       if (paginationContainer) paginationContainer.style.display = 'none';
@@ -319,6 +390,25 @@
         if (currentFilter === 'tv://favorites') {
           const favs = getFavorites();
           filtered = allChannels.filter(c => favs.some(f => f.id === c.id));
+        } else if (currentFilter === 'tv://football') {
+          // Lọc toàn bộ kênh bóng đá đỉnh cao Việt Nam & Quốc Tế
+          filtered = allChannels.filter(c => {
+            const grp = (c.group || '').toLowerCase();
+            const nm = (c.name || '').toLowerCase();
+            return grp.includes('bóng đá') || 
+                   grp.includes('thể thao') || 
+                   grp.includes('c1') ||
+                   nm.includes('k+') || 
+                   nm.includes('sport') || 
+                   nm.includes('football') ||
+                   nm.includes('vtv5') || 
+                   nm.includes('vtv6') ||
+                   nm.includes('htv thể thao') ||
+                   nm.includes('bein') ||
+                   nm.includes('cbs') ||
+                   nm.includes('eurosport') ||
+                   nm.includes('espn');
+          });
         } else if (currentFilter === 'tv://vtv') {
           filtered = allChannels.filter(c => (c.group || '').toLowerCase().includes('vtv'));
         } else if (currentFilter === 'tv://vtvcab') {
@@ -326,15 +416,15 @@
         } else if (currentFilter === 'tv://sctv') {
           filtered = allChannels.filter(c => (c.group || '').toLowerCase().includes('sctv'));
         } else if (currentFilter === 'tv://sports_intl') {
-          filtered = allChannels.filter(c => (c.group || '').includes('ESPN') || (c.group || '').includes('Bóng Rổ'));
+          filtered = allChannels.filter(c => (c.group || '').includes('ESPN') || (c.group || '').includes('Bóng Rổ') || (c.group || '').includes('FOX'));
         } else if (currentFilter === 'tv://racing_combat') {
-          filtered = allChannels.filter(c => (c.group || '').includes('Đua Xe') || (c.group || '').includes('Võ Thuật'));
+          filtered = allChannels.filter(c => (c.group || '').includes('Đua Xe') || (c.group || '').includes('Võ Thuật') || (c.group || '').includes('Mạo Hiểm') || (c.group || '').includes('Đối Kháng'));
         } else if (currentFilter === 'tv://movies') {
-          filtered = allChannels.filter(c => (c.group || '').includes('Rạp Phim'));
+          filtered = allChannels.filter(c => (c.group || '').includes('Rạp Phim') || (c.group || '').toLowerCase().includes('phim'));
         } else if (currentFilter === 'tv://live') {
           filtered = allChannels.filter(c => (c.group || '').includes('Sự Kiện') || (c.group || '').includes('LIVE'));
         } else if (currentFilter === 'tv://intl') {
-          filtered = allChannels.filter(c => (c.group || '').includes('Quốc Tế') || (c.group || '').includes('Hàn Quốc') || (c.group || '').includes('Trung Quốc'));
+          filtered = allChannels.filter(c => (c.group || '').includes('Quốc Tế') || (c.group || '').includes('Hàn Quốc') || (c.group || '').includes('Trung Quốc') || (c.group || '').includes('Israel') || (c.group || '').includes('In The Box') || (c.group || '').includes('TVB'));
         } else if (currentFilter === 'tv://local') {
           filtered = allChannels.filter(c => (c.group || '').includes('Địa phương') || (c.group || '').includes('HTV'));
         } else if (currentFilter === 'tv://radio') {
@@ -1369,7 +1459,17 @@
       return;
     }
 
-    // 7. Ở màn hình chính -> Bấm 2 lần trong 2.5s để thoát ứng dụng
+    // 7. Nếu đang ở filter khác filter đầu tiên, quay lại filter đầu tiên
+    const currentFilters = FILTERS[currentSource] || [];
+    if (currentFilters.length > 0 && currentFilter !== currentFilters[0].url) {
+      const firstFilterBtn = document.querySelector('.btn-filter');
+      if (firstFilterBtn) {
+        firstFilterBtn.click();
+        return;
+      }
+    }
+
+    // 8. Ở màn hình chính -> Bấm 2 lần trong 2.5s để thoát ứng dụng
     const now = Date.now();
     if (now - lastBackTime < 2500) {
       showToast('Đang thoát ứng dụng...');
@@ -1514,6 +1614,34 @@
   document.addEventListener('webOSBack', handleBackAction);
   window.addEventListener('popstate', handleBackAction);
 
+  // --- Xử Lý Nút Back Trên Chuột (XButton1 / Mouse Button 3 trong DOM) ---
+  window.addEventListener('mouseup', (e) => {
+    // e.button: 0=Left, 1=Middle, 2=Right, 3=XButton1 (Back), 4=XButton2 (Forward)
+    if (e.button === 3) {
+      e.preventDefault();
+      e.stopPropagation();
+      handleBackAction(e);
+    }
+  }, true);
+
+  window.addEventListener('pointerup', (e) => {
+    if (e.button === 3) {
+      e.preventDefault();
+      e.stopPropagation();
+      handleBackAction(e);
+    }
+  }, true);
+
+  window.addEventListener('mousedown', (e) => {
+    if (e.button === 3) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  }, true);
+
+  // Expose ra window để WPF C# có thể kích hoạt trực tiếp
+  window.handleBackAction = handleBackAction;
+
   // Format seconds to mm:ss or hh:mm:ss
   function formatTime(sec) {
     if (isNaN(sec)) return '00:00';
@@ -1567,6 +1695,7 @@
 
   // --- Initialize App ---
   initSources();
+  initFilterBarNavigation();
   renderFilterBar();
   renderHistoryAndFavs();
 })();

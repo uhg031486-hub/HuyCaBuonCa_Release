@@ -10,8 +10,10 @@
         MinWidth="960" MinHeight="600"
         WindowStartupLocation="CenterScreen"
         Background="#0A0E17"
+        Icon="app.ico"
         Loaded="Window_Loaded"
-        KeyDown="Window_KeyDown">
+        KeyDown="Window_KeyDown"
+        PreviewMouseDown="Window_PreviewMouseDown">
     <Grid Background="#0A0E17">
         <wv2:WebView2 x:Name="webView" DefaultBackgroundColor="#0A0E17" />
         

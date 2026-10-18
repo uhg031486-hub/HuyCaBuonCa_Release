@@ -202,6 +202,26 @@ public partial class MainWindow : Window
         }
     }
 
+    private void Window_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+    {
+        // Xử lý nút Back của chuột (XButton1)
+        if (e.ChangedButton == MouseButton.XButton1)
+        {
+            e.Handled = true;
+            _ = Dispatcher.InvokeAsync(async () =>
+            {
+                try
+                {
+                    if (webView?.CoreWebView2 != null)
+                    {
+                        await webView.CoreWebView2.ExecuteScriptAsync("if (typeof window.handleBackAction === 'function') { window.handleBackAction(); }");
+                    }
+                }
+                catch { }
+            });
+        }
+    }
+
     private void ToggleFullscreen()
     {
         if (!_isFullscreen)

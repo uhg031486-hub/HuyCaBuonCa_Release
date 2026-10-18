@@ -2,8 +2,9 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=1920, height=1080, initial-scale=1.0, user-scalable=no">
-  <title>Huy Cá - LG Smart TV</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Huy Cá - Kho Phim & Truyền Hình Trực Tuyến Đẳng Cấp</title>
+  <link rel="icon" type="image/png" href="icon_256.png">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -11,7 +12,10 @@
   <!-- Header Bar -->
   <header class="header-bar">
     <div class="brand-section">
-      <div class="brand-badge">HUY CÁ</div>
+      <div class="brand-badge">
+        <img src="icon_256.png" class="brand-logo" alt="Logo">
+        <span>HUY CÁ</span>
+      </div>
       <div class="brand-subtitle">Kho Phim & Truyền Hình Đẳng Cấp • Phiên Bản Windows PC v2.4</div>
     </div>
     <div class="header-actions">
@@ -32,8 +36,12 @@
     <button id="srcPhimNgan" class="btn-source focusable" data-source="FREEREELS" tabindex="13">🎬 PHIM NGẮN</button>
   </section>
 
-  <!-- Thanh Thể Loại / Danh Mục (Filter Bar) -->
-  <nav id="filterBar" class="filter-bar"></nav>
+  <!-- Thanh Thể Loại / Danh Mục (Filter Bar Wrapper) -->
+  <div class="filter-wrapper">
+    <button id="btnFilterPrev" class="filter-nav-btn filter-nav-prev" title="Cuộn sang trái">◀</button>
+    <nav id="filterBar" class="filter-bar"></nav>
+    <button id="btnFilterNext" class="filter-nav-btn filter-nav-next" title="Cuộn sang phải">▶</button>
+  </div>
 
   <!-- Hàng Tiếp Tục Xem (Lịch Sử) -->
   <section id="historySection" class="history-section" style="display: none;">
