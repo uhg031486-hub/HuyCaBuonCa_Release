@@ -1,9 +1,10 @@
 {
-  "versionCode": 14,
-  "versionName": "2.3",
-  "title": "Huy Cá Buôn Cà v2.3",
-  "changelog": "- Nâng cấp đột phá cho phiên bản LG Smart TV (webOS) v2.3: Tối ưu 100% hiệu năng, loại bỏ hoàn toàn giật lag khi xem phim và truyền hình nhờ kích hoạt Native Hardware Acceleration (giải mã phần cứng trực tiếp từ chip TV LG, 0% CPU).\n- Tích hợp bộ điều hướng 2D Spatial Navigation chuyên dụng cho Smart TV: Dễ dàng di chuyển mượt mà giữa các ô phim, tab nguồn, thể loại và danh sách tập bằng 4 phím mũi tên D-Pad (Lên/Xuống/Trái/Phải) và phím OK trên Remote cơ hoặc Magic Remote mà không cần dùng chuột.\n- Trong trình phát video TV LG: Bấm Trái/Phải để tua lùi/tới 10s mượt mà; Bấm Lên/Xuống/OK để hiện bảng điều khiển.\n- Sửa triệt để phím Back (Quay lại) trên TV LG: Bổ sung cờ disableBackHistoryAPI ngăn chặn hệ thống đóng app ngoài ý muốn; Cơ chế phân tầng thông minh: Khi xem phim bấm Back sẽ quay lại màn hình thông tin chi tiết phim (chọn tập tiếp theo) chứ không bị thoát app; Cơ chế bấm Quay lại 2 lần để thoát ứng dụng ở màn hình chính an toàn tuyệt đối.\n- Loại bỏ các hiệu ứng đồ họa nặng (blur filter, shadow mờ) giúp giao diện TV phản hồi tức thì 60 FPS mượt mà.\n- Đồng bộ phiên bản v2.3 cho toàn bộ hệ thống Mobile, TV Box và LG Smart TV.",
-  "mobileApkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v2.3/HuyCaBuonCa_Mobile_v2.3.apk",
-  "tvApkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v2.3/HuyCaBuonCa_TV_v2.3.apk",
-  "lgIpkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v2.3/HuyCaBuonCa_LG_webOS_v2.3.ipk"
+  "versionCode": 15,
+  "versionName": "2.4",
+  "title": "Huy Cá v2.4",
+  "changelog": "- Ra mắt chính thức ứng dụng Huy Cá cho máy tính Windows (HuyCa_Windows_v2.4.zip): Ứng dụng Desktop siêu nhẹ, khởi động tức thì, tối ưu card đồ họa rời và tăng tốc phần cứng DirectX/Media Foundation, hỗ trợ xem video 4K sắc nét và chế độ toàn màn hình mượt mà.\n- Đổi mới toàn diện bộ nhận diện thương hiệu thành \"Huy Cá\": Tinh gọn, hiện đại và đồng bộ 100% trên toàn bộ các nền tảng (Android Mobile, Android TV, LG webOS Smart TV, Windows Desktop).\n- Tối ưu trải nghiệm điều hướng: Đưa mục \"🕒 Lịch Sử Xem\" (hoặc Kênh Vừa Xem) và \"❤️ Phim Yêu Thích\" (hoặc Kênh Yêu Thích) lên ngay dòng thứ 2 và thứ 3 của menu danh mục, giúp người xem truy cập lại các nội dung đang theo dõi ngay khi mở ứng dụng mà không cần cuộn xuống cuối.\n- Nâng cấp phiên bản v2.4 đồng bộ trên toàn bộ hệ sinh thái.",
+  "windowsZipUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v2.4/HuyCa_Windows_v2.4.zip",
+  "mobileApkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v2.4/HuyCa_Mobile_v2.4.apk",
+  "tvApkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v2.4/HuyCa_TV_v2.4.apk",
+  "lgIpkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v2.4/HuyCa_LG_webOS_v2.4.ipk"
 }

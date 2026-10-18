@@ -85,7 +85,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="Hãy nhập từ khóa để tìm phim trên hệ thống Huy Cá Buôn Cà"
+            android:text="Hãy nhập từ khóa để tìm phim trên hệ thống Huy Cá"
             android:textColor="@color/text_secondary"
             android:textSize="13sp" />
 

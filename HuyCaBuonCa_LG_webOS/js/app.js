@@ -1,4 +1,4 @@
-// Huy Cá Buôn Cà - LG Smart TV webOS Edition (v2.3)
+// Huy Cá - LG Smart TV webOS Edition (v2.4)
 (function () {
   'use strict';
 
@@ -77,6 +77,8 @@
   const FILTERS = {
     KKPHIM: [
       { name: "Mới Cập Nhật", url: "https://phimapi.com/danh-sach/phim-moi-cap-nhat" },
+      { name: "🕒 Lịch Sử Xem", url: "app://history" },
+      { name: "❤️ Phim Yêu Thích", url: "app://favorites" },
       { name: "Phim Bộ", url: "https://phimapi.com/v1/api/danh-sach/phim-bo" },
       { name: "Phim Lẻ", url: "https://phimapi.com/v1/api/danh-sach/phim-le" },
       { name: "Hoạt Hình", url: "https://phimapi.com/v1/api/danh-sach/hoat-hinh" },
@@ -89,19 +91,21 @@
       { name: "Kinh Dị", url: "https://phimapi.com/v1/api/the-loai/kinh-di" },
       { name: "Hàn Quốc", url: "https://phimapi.com/v1/api/quoc-gia/han-quoc" },
       { name: "Trung Quốc", url: "https://phimapi.com/v1/api/quoc-gia/trung-quoc" },
-      { name: "Âu Mỹ", url: "https://phimapi.com/v1/api/quoc-gia/au-my" },
-      { name: "❤️ Phim Yêu Thích", url: "app://favorites" }
+      { name: "Âu Mỹ", url: "https://phimapi.com/v1/api/quoc-gia/au-my" }
     ],
     ANIMEHAY: [
       { name: "Anime Mới Cập Nhật", url: "https://phimapi.com/v1/api/danh-sach/hoat-hinh" },
+      { name: "🕒 Lịch Sử Xem", url: "app://history" },
+      { name: "❤️ Anime Yêu Thích", url: "app://favorites" },
       { name: "Anime Hành Động", url: "https://phimapi.com/v1/api/the-loai/hanh-dong" },
       { name: "Anime Thần Thoại", url: "https://phimapi.com/v1/api/the-loai/than-thoai" },
       { name: "Anime Học Đường", url: "https://phimapi.com/v1/api/the-loai/hoc-duong" },
-      { name: "Anime Viễn Tưởng", url: "https://phimapi.com/v1/api/the-loai/vien-tuong" },
-      { name: "❤️ Anime Yêu Thích", url: "app://favorites" }
+      { name: "Anime Viễn Tưởng", url: "https://phimapi.com/v1/api/the-loai/vien-tuong" }
     ],
     XEMTIVI: [
       { name: "Tất Cả Kênh", url: "tv://all" },
+      { name: "🕒 Kênh Vừa Xem", url: "app://history" },
+      { name: "⭐ Kênh Yêu Thích", url: "tv://favorites" },
       { name: "⚽ Lịch Thi Đấu & Bóng Đá", url: "tv://football" },
       { name: "🏆 Thể Thao ESPN & FOX", url: "tv://sports_intl" },
       { name: "🏎️ Đua Xe & Võ Thuật", url: "tv://racing_combat" },
@@ -113,13 +117,13 @@
       { name: "Kênh Quốc Tế", url: "tv://intl" },
       { name: "Đài Địa Phương", url: "tv://local" },
       { name: "Radio Trực Tuyến", url: "tv://radio" },
-      { name: "⭐ Kênh Yêu Thích", url: "tv://favorites" },
       { name: "➕ Thêm Kênh IPTV", url: "tv://custom" }
     ],
     FREEREELS: [
       { name: "🔥 Thịnh Hành", url: "https://phimapi.com/danh-sach/phim-moi-cap-nhat" },
-      { name: "✨ Phim Ngắn Mới", url: "https://phimapi.com/v1/api/danh-sach/phim-bo" },
-      { name: "❤️ Phim Ngắn Yêu Thích", url: "app://favorites" }
+      { name: "🕒 Lịch Sử Xem", url: "app://history" },
+      { name: "❤️ Phim Ngắn Yêu Thích", url: "app://favorites" },
+      { name: "✨ Phim Ngắn Mới", url: "https://phimapi.com/v1/api/danh-sach/phim-bo" }
     ]
   };
 
@@ -286,6 +290,13 @@
       if (currentFilter === 'app://favorites') {
         const favs = getFavorites().filter(f => f.source === currentSource || (currentSource === 'KKPHIM' && !f.source));
         renderCards(favs, reset);
+        isLoading = false;
+        return;
+      }
+
+      if (currentFilter === 'app://history') {
+        const hist = getHistory().filter(h => h.source === currentSource || (currentSource === 'KKPHIM' && !h.source));
+        renderCards(hist, reset);
         isLoading = false;
         return;
       }

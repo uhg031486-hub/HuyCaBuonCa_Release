@@ -56,7 +56,7 @@
                 android:shadowDx="2"
                 android:shadowDy="2"
                 android:shadowRadius="3"
-                android:text="Đây là phụ đề mẫu: Huy Cá Buôn Cà"
+                android:text="Đây là phụ đề mẫu: Huy Cá"
                 android:textColor="#FFD700"
                 android:textSize="18sp"
                 android:textStyle="bold" />

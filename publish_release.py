@@ -25,8 +25,8 @@ def get_token():
 TOKEN = get_token()
 REPO_OWNER = "uhg031486-hub"
 REPO_NAME = "HuyCaBuonCa_Release"
-TAG = "v2.3"
-TITLE = "Huy Cá Buôn Cà v2.3"
+TAG = "v2.4"
+TITLE = "Huy Cá v2.4"
 
 HEADERS = {
     "Authorization": f"token {TOKEN}",
@@ -58,7 +58,7 @@ def step2_update_version_json():
 
     b64_content = base64.b64encode(local_content.encode("utf-8")).decode("utf-8")
     payload = {
-        "message": "Nâng cấp version.json lên v2.2 (Mobile, TV, LG webOS)",
+        "message": "Nâng cấp version.json lên v2.4 (Huy Cá: Windows, Mobile, TV, LG webOS)",
         "content": b64_content,
         "branch": "main"
     }
@@ -78,7 +78,7 @@ def step3_create_release():
     with open("version.json", "r", encoding="utf-8") as f:
         version_data = json.load(f)
     
-    changelog = version_data.get("changelog", "Bản cập nhật v2.2")
+    changelog = version_data.get("changelog", "Bản cập nhật v2.4")
     payload = {
         "tag_name": TAG,
         "target_commitish": "main",
@@ -113,9 +113,10 @@ def step4_upload_assets(release):
     existing_assets = {a["name"]: a["id"] for a in release.get("assets", [])}
 
     files_to_upload = [
-        ("HuyCaBuonCa_Mobile_v2.3.apk", "application/vnd.android.package-archive"),
-        ("HuyCaBuonCa_TV_v2.3.apk", "application/vnd.android.package-archive"),
-        ("HuyCaBuonCa_LG_webOS_v2.3.ipk", "application/octet-stream"),
+        ("HuyCa_Windows_v2.4.zip", "application/zip"),
+        ("HuyCa_Mobile_v2.4.apk", "application/vnd.android.package-archive"),
+        ("HuyCa_TV_v2.4.apk", "application/vnd.android.package-archive"),
+        ("HuyCa_LG_webOS_v2.4.ipk", "application/octet-stream"),
     ]
 
     for filename, content_type in files_to_upload:
@@ -151,4 +152,4 @@ if __name__ == "__main__":
     step2_update_version_json()
     release = step3_create_release()
     step4_upload_assets(release)
-    print("\n🎉 === TẤT CẢ ĐÃ HOÀN TẤT 100%! BẢN V2.2 ĐÃ ĐƯỢC XUẤT BẢN THÀNH CÔNG LÊN GITHUB! ===")
+    print("\n🎉 === TẤT CẢ ĐÃ HOÀN TẤT 100%! BẢN V2.4 ĐÃ ĐƯỢC XUẤT BẢN THÀNH CÔNG LÊN GITHUB! ===")

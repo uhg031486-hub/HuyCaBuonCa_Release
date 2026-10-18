@@ -1,9 +1,9 @@
 <resources>
-    <string name="app_name">Huy Cá Buôn Cà</string>
-    <string name="brand_badge">HUY CÁ BUÔN CÀ</string>
+    <string name="app_name">Huy Cá</string>
+    <string name="brand_badge">HUY CÁ</string>
     <string name="brand_slogan">Kho Phim Đẳng Cấp Di Động</string>
-    <string name="brand_copyright">© 2026 Bản quyền bởi HUY CÁ BUÔN CÀ - Mobile Edition</string>
-    <string name="brand_watermark">Huy Cá Buôn Cà Mobile VIP</string>
+    <string name="brand_copyright">© 2026 Bản quyền bởi HUY CÁ - Mobile Edition</string>
+    <string name="brand_watermark">Huy Cá Mobile VIP</string>
     <string name="source_kkphim">KKPhim (HLS VIP)</string>
     <string name="source_nguonc">NguonC (Phim Mới)</string>
     <string name="source_animehay">AnimeHay (Hoạt Hình)</string>

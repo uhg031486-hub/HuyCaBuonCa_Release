@@ -123,7 +123,7 @@ object AppUpdateManager {
             .setMessage("Nội dung cập nhật:\n\n${info.changelog}\n\nBạn có muốn cập nhật ngay bây giờ?")
             .setCancelable(false)
             .setPositiveButton("CẬP NHẬT NGAY") { _, _ ->
-                downloadAndInstallApk(activity, info.apkUrl, "HuyCaBuonCa_Mobile_v${info.versionName}.apk")
+                downloadAndInstallApk(activity, info.apkUrl, "HuyCa_Mobile_v${info.versionName}.apk")
             }
             .setNegativeButton("ĐỂ SAU", null)
             .show()
@@ -145,7 +145,7 @@ object AppUpdateManager {
             }
 
             val request = DownloadManager.Request(Uri.parse(url))
-                .setTitle("Cập nhật Huy Cá Buôn Cà")
+                .setTitle("Cập nhật Huy Cá")
                 .setDescription("Đang tải $fileName...")
                 .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
                 .setDestinationUri(destinationUri)

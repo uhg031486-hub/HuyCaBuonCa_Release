@@ -11,6 +11,8 @@ local.properties
 *.apk
 *.aab
 *.ipk
+*.zip
+Mo_SillyCodex.cmd
 
 # OS
 Thumbs.db

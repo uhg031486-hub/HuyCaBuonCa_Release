@@ -309,6 +309,8 @@ object MovieRepository {
         return when (source) {
             MovieSource.KKPHIM -> listOf(
                 FilterItem("Mới Cập Nhật", "https://phimapi.com/danh-sach/phim-moi-cap-nhat"),
+                FilterItem("🕒 Lịch Sử Xem", "app://history"),
+                FilterItem("❤️ Phim Yêu Thích", "app://favorites"),
                 FilterItem("Phim Bộ", "https://phimapi.com/v1/api/danh-sach/phim-bo"),
                 FilterItem("Phim Lẻ", "https://phimapi.com/v1/api/danh-sach/phim-le"),
                 FilterItem("Hoạt Hình", "https://phimapi.com/v1/api/danh-sach/hoat-hinh"),
@@ -321,21 +323,21 @@ object MovieRepository {
                 FilterItem("Kinh Dị", "https://phimapi.com/v1/api/the-loai/kinh-di"),
                 FilterItem("Hàn Quốc", "https://phimapi.com/v1/api/quoc-gia/han-quoc"),
                 FilterItem("Trung Quốc", "https://phimapi.com/v1/api/quoc-gia/trung-quoc"),
-                FilterItem("Âu Mỹ", "https://phimapi.com/v1/api/quoc-gia/au-my"),
-                FilterItem("❤️ Phim Yêu Thích", "app://favorites"),
-                FilterItem("🕒 Lịch Sử Xem", "app://history")
+                FilterItem("Âu Mỹ", "https://phimapi.com/v1/api/quoc-gia/au-my")
             )
             MovieSource.ANIMEHAY -> listOf(
                 FilterItem("Anime Mới Cập Nhật", "https://phimapi.com/v1/api/danh-sach/hoat-hinh"),
+                FilterItem("🕒 Lịch Sử Xem", "app://history"),
+                FilterItem("❤️ Anime Yêu Thích", "app://favorites"),
                 FilterItem("Anime Hành Động", "https://phimapi.com/v1/api/the-loai/hanh-dong"),
                 FilterItem("Anime Thần Thoại", "https://phimapi.com/v1/api/the-loai/than-thoai"),
                 FilterItem("Anime Học Đường", "https://phimapi.com/v1/api/the-loai/hoc-duong"),
-                FilterItem("Anime Viễn Tưởng", "https://phimapi.com/v1/api/the-loai/vien-tuong"),
-                FilterItem("❤️ Anime Yêu Thích", "app://favorites"),
-                FilterItem("🕒 Lịch Sử Xem", "app://history")
+                FilterItem("Anime Viễn Tưởng", "https://phimapi.com/v1/api/the-loai/vien-tuong")
             )
             MovieSource.XEMTIVI -> listOf(
                 FilterItem("Tất Cả Kênh", "tv://all"),
+                FilterItem("🕒 Kênh Vừa Xem", "app://history"),
+                FilterItem("⭐ Kênh Yêu Thích", "tv://favorites"),
                 FilterItem("⚽ Lịch Thi Đấu & Bóng Đá", "tv://football"),
                 FilterItem("🏆 Thể Thao ESPN & FOX", "tv://sports_intl"),
                 FilterItem("🏎️ Đua Xe & Võ Thuật", "tv://racing_combat"),
@@ -347,18 +349,17 @@ object MovieRepository {
                 FilterItem("Kênh Quốc Tế", "tv://intl"),
                 FilterItem("Đài Địa Phương", "tv://local"),
                 FilterItem("Radio Trực Tuyến", "tv://radio"),
-                FilterItem("⭐ Kênh Yêu Thích", "tv://favorites"),
                 FilterItem("➕ Thêm Kênh IPTV", "tv://custom")
             )
             MovieSource.FREEREELS -> listOf(
                 FilterItem("🔥 Thịnh Hành (For You)", "freereels://foryou"),
+                FilterItem("🕒 Lịch Sử Xem", "app://history"),
+                FilterItem("❤️ Phim Ngắn Yêu Thích", "app://favorites"),
                 FilterItem("✨ Mới Nhất", "freereels://tab_505"),
                 FilterItem("🎀 Dành Cho Nữ", "freereels://tab_504"),
                 FilterItem("👑 Dành Cho Nam", "freereels://tab_506"),
                 FilterItem("🎭 Hoạt Hình Ngắn", "freereels://tab_547"),
-                FilterItem("⏰ Sắp Chiếu", "freereels://coming"),
-                FilterItem("❤️ Phim Ngắn Yêu Thích", "app://favorites"),
-                FilterItem("🕒 Lịch Sử Xem", "app://history")
+                FilterItem("⏰ Sắp Chiếu", "freereels://coming")
             )
         }
     }
