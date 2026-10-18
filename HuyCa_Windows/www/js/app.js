@@ -280,16 +280,26 @@
     if (isLoading) return;
     isLoading = true;
     const grid = document.getElementById('mainGrid');
+    const paginationContainer = document.getElementById('paginationContainer');
+    const paginationInfo = document.getElementById('paginationInfo');
+    const btnLoadMore = document.getElementById('btnLoadMore');
+    const spinner = document.getElementById('loadingMoreSpinner');
 
     if (reset) {
-      grid.innerHTML = '<div style="color: #94a3b8; font-size: 18px; padding: 20px;">Đang tải danh sách...</div>';
+      grid.innerHTML = '<div style="color: #94a3b8; font-size: 18px; padding: 40px; text-align: center; width: 100%; grid-column: 1 / -1;">⏳ Đang tải danh sách phim...</div>';
       currentMoviesList = [];
+      currentPage = 1;
+      if (paginationContainer) paginationContainer.style.display = 'none';
+    } else {
+      if (btnLoadMore) btnLoadMore.style.display = 'none';
+      if (spinner) spinner.style.display = 'block';
     }
 
     try {
       if (currentFilter === 'app://favorites') {
         const favs = getFavorites().filter(f => f.source === currentSource || (currentSource === 'KKPHIM' && !f.source));
         renderCards(favs, reset);
+        if (paginationContainer) paginationContainer.style.display = 'none';
         isLoading = false;
         return;
       }
@@ -297,6 +307,7 @@
       if (currentFilter === 'app://history') {
         const hist = getHistory().filter(h => h.source === currentSource || (currentSource === 'KKPHIM' && !h.source));
         renderCards(hist, reset);
+        if (paginationContainer) paginationContainer.style.display = 'none';
         isLoading = false;
         return;
       }
@@ -345,6 +356,7 @@
         }));
 
         renderCards(items, reset);
+        if (paginationContainer) paginationContainer.style.display = 'none';
         isLoading = false;
         return;
       }
@@ -384,13 +396,42 @@
       });
 
       renderCards(mapped, reset);
+
+      // Cập nhật giao diện phân trang
+      if (paginationContainer) {
+        if (mapped.length > 0) {
+          paginationContainer.style.display = 'flex';
+          if (paginationInfo) paginationInfo.textContent = `Đang hiển thị ${currentMoviesList.length} phim (Trang ${currentPage})`;
+          if (btnLoadMore) {
+            btnLoadMore.style.display = 'inline-flex';
+            const nextPageEl = document.getElementById('nextPageNum');
+            if (nextPageEl) nextPageEl.textContent = currentPage + 1;
+          }
+          if (spinner) spinner.style.display = 'none';
+        } else {
+          if (paginationInfo) paginationInfo.textContent = `Đã tải toàn bộ ${currentMoviesList.length} phim trong danh mục này.`;
+          if (btnLoadMore) btnLoadMore.style.display = 'none';
+          if (spinner) spinner.style.display = 'none';
+        }
+      }
     } catch (err) {
       if (reset) {
-        grid.innerHTML = '<div style="color: #f87171; font-size: 16px; padding: 20px;">Không thể tải dữ liệu. Vui lòng kiểm tra kết nối mạng!</div>';
+        grid.innerHTML = '<div style="color: #f87171; font-size: 16px; padding: 30px; text-align: center; width: 100%; grid-column: 1 / -1;">Không thể tải dữ liệu. Vui lòng kiểm tra kết nối mạng! <button onclick="location.reload()" style="margin-left: 10px; padding: 6px 14px; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer;">🔄 Thử Lại</button></div>';
+      } else {
+        showToast('Không thể tải thêm phim trang tiếp theo.');
+        if (btnLoadMore) btnLoadMore.style.display = 'inline-flex';
+        if (spinner) spinner.style.display = 'none';
       }
     } finally {
       isLoading = false;
     }
+  }
+
+  function loadMoreMovies() {
+    if (isLoading) return;
+    if (currentSource === 'XEMTIVI' || currentFilter === 'app://favorites' || currentFilter === 'app://history') return;
+    currentPage++;
+    loadMovies(false);
   }
 
   // --- Render Movie Cards (7 Columns) ---
@@ -1483,6 +1524,45 @@
     }
     return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
   }
+
+  // --- Phân Trang & Cuộn Chuột Tự Động Tải Thêm Phim (Windows PC) ---
+  const btnLoadMore = document.getElementById('btnLoadMore');
+  if (btnLoadMore) {
+    btnLoadMore.addEventListener('click', () => {
+      loadMoreMovies();
+    });
+  }
+
+  const btnScrollTop = document.getElementById('btnScrollTop');
+  if (btnScrollTop) {
+    btnScrollTop.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
+
+  let scrollThrottle = null;
+  window.addEventListener('scroll', () => {
+    if (btnScrollTop) {
+      if (window.scrollY > 400) {
+        btnScrollTop.style.display = 'flex';
+      } else {
+        btnScrollTop.style.display = 'none';
+      }
+    }
+
+    if (currentSource === 'XEMTIVI' || currentFilter === 'app://favorites' || currentFilter === 'app://history') return;
+    if (isLoading) return;
+
+    if (scrollThrottle) return;
+    scrollThrottle = setTimeout(() => {
+      scrollThrottle = null;
+      const scrollPos = window.innerHeight + window.scrollY;
+      const docHeight = document.documentElement.scrollHeight;
+      if (scrollPos >= docHeight - 600) {
+        loadMoreMovies();
+      }
+    }, 120);
+  });
 
   // --- Initialize App ---
   initSources();

@@ -727,3 +727,79 @@ body {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
   display: none;
 }
+
+/* Pagination & Load More for Windows PC */
+.pagination-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 20px 60px 20px;
+  gap: 12px;
+}
+
+.pagination-info {
+  font-size: 15px;
+  color: #cbd5e1;
+  font-weight: 600;
+}
+
+.btn-load-more {
+  background: linear-gradient(135deg, #1e293b, #0f172a);
+  color: var(--primary-gold);
+  border: 2px solid var(--primary-gold);
+  padding: 14px 40px;
+  border-radius: 30px;
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(255, 215, 0, 0.2);
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-load-more:hover,
+.btn-load-more:focus {
+  background: var(--primary-gold);
+  color: #000000;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 22px rgba(255, 215, 0, 0.4);
+}
+
+.loading-more-spinner {
+  font-size: 16px;
+  font-weight: bold;
+  color: var(--accent-cyan);
+  padding: 10px;
+}
+
+/* Scroll To Top Button */
+.btn-scroll-top {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: rgba(30, 41, 59, 0.9);
+  color: #ffffff;
+  border: 2px solid var(--accent-cyan);
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 1000;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+  transition: all 0.2s ease;
+}
+
+.btn-scroll-top:hover {
+  background: var(--accent-cyan);
+  color: #000000;
+  transform: scale(1.1);
+}
+

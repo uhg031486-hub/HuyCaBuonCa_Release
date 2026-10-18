@@ -47,6 +47,22 @@
   <!-- Lưới Phim & TV 7 Cột -->
   <main id="mainGrid" class="grid-container"></main>
 
+  <!-- Thanh Tải Thêm Phim / Phân Trang -->
+  <div id="paginationContainer" class="pagination-container" style="display: none;">
+    <div id="paginationInfo" class="pagination-info">Đang hiển thị 24 phim</div>
+    <button id="btnLoadMore" class="btn-load-more focusable" tabindex="30">
+      <span>📥 TẢI THÊM PHIM (Trang <span id="nextPageNum">2</span>)</span>
+    </button>
+    <div id="loadingMoreSpinner" class="loading-more-spinner" style="display: none;">
+      ⏳ Đang tải thêm dữ liệu phim...
+    </div>
+  </div>
+
+  <!-- Nút Bay Lên Đầu Trang -->
+  <button id="btnScrollTop" class="btn-scroll-top focusable" style="display: none;" title="Về đầu trang">
+    ⬆️
+  </button>
+
   <!-- Màn Hình Chi Tiết Phim (Detail Modal) -->
   <div id="detailModal" class="modal-overlay" style="display: none;">
     <div class="modal-content">
