@@ -179,56 +179,90 @@ object MovieRepository {
     fun getLiveMatches(): List<FootballMatch> {
         return listOf(
             FootballMatch(
-                id = "match_c1_1",
-                time = "Đang diễn ra • Trực Tiếp",
-                tournament = "🏆 UEFA Champions League",
-                teamA = "Real Madrid",
+                id = "fpl_epl_1",
+                time = "18:30 • Thứ 7 (24/10)",
+                tournament = "🏴󠁧󠁢󠁥󠁮󠁧󠁿 Ngoại Hạng Anh • Vòng 8",
+                teamA = "Aston Villa",
                 teamB = "Manchester City",
-                channelName = "VTV6 Thể Thao HD (FPT)",
-                channelSlug = "sports_vn_vtv6",
-                score = "LIVE"
+                channelName = "True Premier Football 1 HD",
+                channelSlug = "sports_sat_true_premier_1",
+                score = "18:30"
             ),
             FootballMatch(
-                id = "match_epl_1",
-                time = "Hôm Nay • 20:30",
-                tournament = "🏴󠁧󠁢󠁥󠁮󠁧󠁿 Ngoại Hạng Anh",
+                id = "fpl_epl_2",
+                time = "21:00 • Thứ 7 (24/10)",
+                tournament = "🏴󠁧󠁢󠁥󠁮󠁧󠁿 Ngoại Hạng Anh • Vòng 8",
                 teamA = "Arsenal",
-                teamB = "Chelsea",
-                channelName = "CBS Sports Golazo (Cúp C1 / Serie A)",
-                channelSlug = "sports_intl_cbs_golazo",
-                score = "20:30"
+                teamB = "Everton",
+                channelName = "True Premier Football 2 HD",
+                channelSlug = "sports_sat_true_premier_2",
+                score = "21:00"
             ),
             FootballMatch(
-                id = "match_laliga_1",
-                time = "Hôm Nay • 23:00",
-                tournament = "🇪🇸 La Liga Tây Ban Nha",
-                teamA = "Barcelona",
-                teamB = "Atletico Madrid",
-                channelName = "beIN SPORTS XTRA HD",
-                channelSlug = "sports_intl_bein_xtra",
-                score = "23:00"
+                id = "fpl_epl_3",
+                time = "23:30 • Thứ 7 (24/10)",
+                tournament = "🏴󠁧󠁢󠁥󠁮󠁧󠁿 Ngoại Hạng Anh • Vòng 8",
+                teamA = "Chelsea",
+                teamB = "Tottenham Hotspur",
+                channelName = "Astro SuperSport 1 HD",
+                channelSlug = "sports_sat_astro_supersport_1",
+                score = "23:30"
             ),
             FootballMatch(
-                id = "match_aff_1",
-                time = "Ngày Mai • 19:30",
-                tournament = "🇻🇳 AFF Mitsubishi Electric Cup",
-                teamA = "Việt Nam",
-                teamB = "Thái Lan",
-                channelName = "VTV5 Tây Nam Bộ",
-                channelSlug = "vtv5_t_y_nam_b_6",
-                score = "19:30"
+                id = "fpl_epl_4",
+                time = "22:30 • Chủ Nhật (25/10)",
+                tournament = "🏴󠁧󠁢󠁥󠁮󠁧󠁿 Ngoại Hạng Anh • Vòng 8",
+                teamA = "Liverpool",
+                teamB = "Manchester United",
+                channelName = "Sky Sports Premier League",
+                channelSlug = "sports_sat_sky_sports_epl",
+                score = "22:30"
             ),
             FootballMatch(
-                id = "match_uel_1",
-                time = "Hôm Nay • 03:00",
-                tournament = "🏆 UEFA Europa League",
-                teamA = "Manchester United",
-                teamB = "AS Roma",
-                channelName = "Eurosport Live HD",
-                channelSlug = "sports_intl_eurosport_live",
-                score = "03:00"
+                id = "fpl_laliga_1",
+                time = "02:00 • Thứ 2 (26/10)",
+                tournament = "🇪🇸 Siêu Kinh Điển (El Clasico)",
+                teamA = "Real Madrid",
+                teamB = "Barcelona",
+                channelName = "beIN SPORTS 1 HD",
+                channelSlug = "sports_sat_bein_sports_1",
+                score = "02:00"
             )
         )
+    }
+
+    fun setMatchAlarm(context: Context, match: FootballMatch, enable: Boolean) {
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as? android.app.AlarmManager ?: return
+        try {
+            val intent = android.content.Intent().apply {
+                setClassName(context.packageName, "${context.packageName}.receiver.MatchReminderReceiver")
+                putExtra("extra_match_id", match.id)
+                putExtra("extra_team_a", match.teamA)
+                putExtra("extra_team_b", match.teamB)
+                putExtra("extra_time_str", match.time)
+            }
+            val requestCode = match.id.hashCode()
+            val flag = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE
+            } else {
+                android.app.PendingIntent.FLAG_UPDATE_CURRENT
+            }
+            val pendingIntent = android.app.PendingIntent.getBroadcast(context, requestCode, intent, flag)
+
+            if (enable) {
+                // Nhắc trước giờ đá (mặc định thử nghiệm sau 15 giây hoặc đúng giờ đá)
+                val triggerTime = System.currentTimeMillis() + (15 * 1000)
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                    alarmManager.setExactAndAllowWhileIdle(android.app.AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent)
+                } else {
+                    alarmManager.setExact(android.app.AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent)
+                }
+            } else {
+                alarmManager.cancel(pendingIntent)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     fun exportBackupData(context: Context): String {
@@ -338,9 +372,11 @@ object MovieRepository {
                 FilterItem("Tất Cả Kênh", "tv://all"),
                 FilterItem("🕒 Kênh Vừa Xem", "app://history"),
                 FilterItem("⭐ Kênh Yêu Thích", "tv://favorites"),
+                FilterItem("🏴󠁧󠁢󠁥󠁮󠁧󠁿 Ngoại Hạng Anh (EPL)", "tv://epl"),
+                FilterItem("📡 Kênh Vệ Tinh Quốc Tế", "tv://satellite"),
                 FilterItem("⚽ Lịch Thi Đấu", "tv://schedule"),
-                FilterItem("⚽ Bóng Đá & C1", "tv://football"),
-                FilterItem("🏆 Thể Thao ESPN & FOX", "tv://sports_intl"),
+                FilterItem("⚽ Bóng Đá & Thể Thao VN", "tv://football"),
+                FilterItem("🏆 Cúp C1 & Thể Thao ESPN", "tv://sports_intl"),
                 FilterItem("🏎️ Đua Xe & Võ Thuật", "tv://racing_combat"),
                 FilterItem("VTV Quốc Gia", "tv://vtv"),
                 FilterItem("VTVcab", "tv://vtvcab"),
@@ -391,6 +427,21 @@ object MovieRepository {
                             it.group.contains("M3U", ignoreCase = true)
                         }
                         "tv://vtv" -> channels.filter { it.group.equals("VTV", ignoreCase = true) }
+                        "tv://epl" -> channels.filter {
+                            it.group.contains("Vệ Tinh", ignoreCase = true) ||
+                            it.name.contains("True Premier", ignoreCase = true) ||
+                            it.name.contains("Astro", ignoreCase = true) ||
+                            it.name.contains("Sky Sports", ignoreCase = true) ||
+                            it.name.contains("TNT Sports", ignoreCase = true) ||
+                            it.name.contains("beIN", ignoreCase = true)
+                        }
+                        "tv://satellite" -> channels.filter {
+                            it.group.contains("Vệ Tinh", ignoreCase = true) ||
+                            it.name.contains("True Premier", ignoreCase = true) ||
+                            it.name.contains("Astro", ignoreCase = true) ||
+                            it.name.contains("Sky Sports", ignoreCase = true) ||
+                            it.name.contains("TNT Sports", ignoreCase = true)
+                        }
                         "tv://football" -> channels.filter {
                             it.group.contains("Bóng Đá", ignoreCase = true)
                         }

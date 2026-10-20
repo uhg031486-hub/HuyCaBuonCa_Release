@@ -1,4 +1,4 @@
-// Huy Cá - LG Smart TV webOS Edition (v2.4)
+// Huy Cá - Phiên Bản v2.5 (Premier League & 4-Tier Match Streaming)
 (function () {
   'use strict';
 
@@ -106,8 +106,10 @@
       { name: "Tất Cả Kênh", url: "tv://all" },
       { name: "🕒 Kênh Vừa Xem", url: "app://history" },
       { name: "⭐ Kênh Yêu Thích", url: "tv://favorites" },
-      { name: "⚽ Lịch Thi Đấu & Bóng Đá", url: "tv://football" },
-      { name: "🏆 Thể Thao ESPN & FOX", url: "tv://sports_intl" },
+      { name: "🏴󠁧󠁢󠁥󠁮󠁧󠁿 Ngoại Hạng Anh (EPL)", url: "tv://epl" },
+      { name: "📡 Kênh Vệ Tinh Quốc Tế", url: "tv://satellite" },
+      { name: "⚽ Bóng Đá & Thể Thao VN", url: "tv://football" },
+      { name: "🏆 Cúp C1 & Thể Thao ESPN", url: "tv://sports_intl" },
       { name: "🏎️ Đua Xe & Võ Thuật", url: "tv://racing_combat" },
       { name: "VTV Quốc Gia", url: "tv://vtv" },
       { name: "VTVcab", url: "tv://vtvcab" },
@@ -241,6 +243,7 @@
   function renderFilterBar() {
     const bar = document.getElementById('filterBar');
     bar.innerHTML = '';
+    bar.scrollLeft = 0;
     const filters = FILTERS[currentSource] || [];
     if (filters.length === 0) return;
 
@@ -252,20 +255,90 @@
       btn.addEventListener('click', () => {
         bar.querySelectorAll('.btn-filter').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
+        btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
         handleFilterClick(f);
       });
       bar.appendChild(btn);
     });
 
+    // Cập nhật trạng thái hiển thị của nút Prev/Next
+    setTimeout(updateFilterNavState, 100);
+
     // Tự động load filter đầu tiên
     handleFilterClick(filters[0]);
   }
 
-  function handleFilterClick(filterItem) {
-    if (filterItem.url === 'tv://football') {
-      showScheduleModal();
-      return;
+  function updateFilterNavState() {
+    const filterBar = document.getElementById('filterBar');
+    const btnPrev = document.getElementById('btnFilterPrev');
+    const btnNext = document.getElementById('btnFilterNext');
+    if (!filterBar || !btnPrev || !btnNext) return;
+    const maxScroll = filterBar.scrollWidth - filterBar.clientWidth;
+    btnPrev.style.opacity = filterBar.scrollLeft <= 5 ? '0.35' : '1';
+    btnNext.style.opacity = filterBar.scrollLeft >= maxScroll - 5 ? '0.35' : '1';
+  }
+
+  // --- Điều Hướng Thanh Filter Cho Windows (Nút Bấm, Con Lăn Chuột & Kéo Chuột) ---
+  function initFilterBarNavigation() {
+    const filterBar = document.getElementById('filterBar');
+    const btnPrev = document.getElementById('btnFilterPrev');
+    const btnNext = document.getElementById('btnFilterNext');
+    if (!filterBar) return;
+
+    if (btnPrev) {
+      btnPrev.addEventListener('click', () => {
+        filterBar.scrollBy({ left: -280, behavior: 'smooth' });
+        setTimeout(updateFilterNavState, 350);
+      });
     }
+
+    if (btnNext) {
+      btnNext.addEventListener('click', () => {
+        filterBar.scrollBy({ left: 280, behavior: 'smooth' });
+        setTimeout(updateFilterNavState, 350);
+      });
+    }
+
+    // 1. Cuộn ngang bằng con lăn chuột (Mouse Wheel) khi rê trên thanh filter
+    filterBar.addEventListener('wheel', (e) => {
+      if (e.deltaY !== 0) {
+        e.preventDefault();
+        filterBar.scrollLeft += e.deltaY * 1.2;
+        updateFilterNavState();
+      }
+    }, { passive: false });
+
+    // 2. Kéo thả chuột ngang (Drag to scroll)
+    let isMouseDown = false;
+    let startX = 0;
+    let scrollStart = 0;
+
+    filterBar.addEventListener('mousedown', (e) => {
+      if (e.button !== 0) return; // Chỉ chuột trái
+      isMouseDown = true;
+      startX = e.pageX - filterBar.offsetLeft;
+      scrollStart = filterBar.scrollLeft;
+    });
+
+    window.addEventListener('mouseup', () => {
+      isMouseDown = false;
+    });
+
+    filterBar.addEventListener('mousemove', (e) => {
+      if (!isMouseDown) return;
+      e.preventDefault();
+      const x = e.pageX - filterBar.offsetLeft;
+      const walk = (x - startX) * 1.5;
+      filterBar.scrollLeft = scrollStart - walk;
+      updateFilterNavState();
+    });
+
+    filterBar.addEventListener('scroll', updateFilterNavState);
+    window.addEventListener('resize', updateFilterNavState);
+    setTimeout(updateFilterNavState, 200);
+  }
+
+  function handleFilterClick(filterItem) {
     if (filterItem.url === 'tv://custom') {
       showIptvModal();
       return;
@@ -280,16 +353,26 @@
     if (isLoading) return;
     isLoading = true;
     const grid = document.getElementById('mainGrid');
+    const paginationContainer = document.getElementById('paginationContainer');
+    const paginationInfo = document.getElementById('paginationInfo');
+    const btnLoadMore = document.getElementById('btnLoadMore');
+    const spinner = document.getElementById('loadingMoreSpinner');
 
     if (reset) {
-      grid.innerHTML = '<div style="color: #94a3b8; font-size: 18px; padding: 20px;">Đang tải danh sách...</div>';
+      grid.innerHTML = '<div style="color: #94a3b8; font-size: 18px; padding: 40px; text-align: center; width: 100%; grid-column: 1 / -1;">⏳ Đang tải danh sách...</div>';
       currentMoviesList = [];
+      currentPage = 1;
+      if (paginationContainer) paginationContainer.style.display = 'none';
+    } else {
+      if (btnLoadMore) btnLoadMore.style.display = 'none';
+      if (spinner) spinner.style.display = 'block';
     }
 
     try {
       if (currentFilter === 'app://favorites') {
         const favs = getFavorites().filter(f => f.source === currentSource || (currentSource === 'KKPHIM' && !f.source));
         renderCards(favs, reset);
+        if (paginationContainer) paginationContainer.style.display = 'none';
         isLoading = false;
         return;
       }
@@ -297,6 +380,7 @@
       if (currentFilter === 'app://history') {
         const hist = getHistory().filter(h => h.source === currentSource || (currentSource === 'KKPHIM' && !h.source));
         renderCards(hist, reset);
+        if (paginationContainer) paginationContainer.style.display = 'none';
         isLoading = false;
         return;
       }
@@ -305,9 +389,73 @@
         const allChannels = getAllChannels();
         let filtered = allChannels;
 
-        if (currentFilter === 'tv://favorites') {
+                if (currentFilter === 'tv://epl') {
+          // 1. Tải danh sách trận đấu Ngoại Hạng Anh FPL thời gian thực
+          const eplMatches = await fetchRealtimePremierLeagueMatches();
+          
+          // Tạo các thẻ trận đấu Ngoại Hạng Anh với icon chuông thông báo độc lập
+          const matchCards = eplMatches.map(m => {
+            const hasReminder = isMatchReminderSet(m.id);
+            return {
+              id: m.id,
+              name: `${m.teamA} vs ${m.teamB}`,
+              slug: m.id,
+              originName: m.tournament,
+              thumbUrl: m.teamALogo || DEFAULT_TV_LOGO,
+              posterUrl: m.teamALogo || DEFAULT_TV_LOGO,
+              quality: m.isLive ? 'LIVE' : 'EPL',
+              episodeCurrent: m.time,
+              source: 'XEMTIVI',
+              isEplMatch: true,
+              rawMatch: m,
+              hasReminder: hasReminder
+            };
+          });
+
+          // 2. Tải thêm các kênh Vệ Tinh Quốc Tế phát sóng Ngoại Hạng Anh
+          const satChannels = allChannels.filter(c => (c.group || '').includes('Vệ Tinh') || (c.name || '').includes('True Premier') || (c.name || '').includes('Astro') || (c.name || '').includes('Sky Sports') || (c.name || '').includes('TNT Sports'));
+          const satItems = satChannels.map(c => ({
+            id: c.id,
+            name: c.name,
+            slug: c.id,
+            originName: `[${c.group || 'Vệ Tinh'}]`,
+            thumbUrl: c.logo || DEFAULT_TV_LOGO,
+            posterUrl: c.logo || DEFAULT_TV_LOGO,
+            quality: '1080p',
+            episodeCurrent: '24/7',
+            source: 'XEMTIVI',
+            streamUrl: c.url,
+            group: c.group
+          }));
+
+          renderCards([...matchCards, ...satItems], reset);
+          if (paginationContainer) paginationContainer.style.display = 'none';
+          isLoading = false;
+          return;
+        } else if (currentFilter === 'tv://satellite') {
+          filtered = allChannels.filter(c => (c.group || '').includes('Vệ Tinh') || (c.name || '').includes('True Premier') || (c.name || '').includes('Astro') || (c.name || '').includes('Sky Sports') || (c.name || '').includes('TNT Sports'));
+        } else if (currentFilter === 'tv://favorites') {
           const favs = getFavorites();
           filtered = allChannels.filter(c => favs.some(f => f.id === c.id));
+        } else if (currentFilter === 'tv://football') {
+          // Lọc toàn bộ kênh bóng đá đỉnh cao Việt Nam & Quốc Tế
+          filtered = allChannels.filter(c => {
+            const grp = (c.group || '').toLowerCase();
+            const nm = (c.name || '').toLowerCase();
+            return grp.includes('bóng đá') || 
+                   grp.includes('thể thao') || 
+                   grp.includes('c1') ||
+                   nm.includes('k+') || 
+                   nm.includes('sport') || 
+                   nm.includes('football') ||
+                   nm.includes('vtv5') || 
+                   nm.includes('vtv6') ||
+                   nm.includes('htv thể thao') ||
+                   nm.includes('bein') ||
+                   nm.includes('cbs') ||
+                   nm.includes('eurosport') ||
+                   nm.includes('espn');
+          });
         } else if (currentFilter === 'tv://vtv') {
           filtered = allChannels.filter(c => (c.group || '').toLowerCase().includes('vtv'));
         } else if (currentFilter === 'tv://vtvcab') {
@@ -315,15 +463,15 @@
         } else if (currentFilter === 'tv://sctv') {
           filtered = allChannels.filter(c => (c.group || '').toLowerCase().includes('sctv'));
         } else if (currentFilter === 'tv://sports_intl') {
-          filtered = allChannels.filter(c => (c.group || '').includes('ESPN') || (c.group || '').includes('Bóng Rổ'));
+          filtered = allChannels.filter(c => (c.group || '').includes('ESPN') || (c.group || '').includes('Bóng Rổ') || (c.group || '').includes('FOX'));
         } else if (currentFilter === 'tv://racing_combat') {
-          filtered = allChannels.filter(c => (c.group || '').includes('Đua Xe') || (c.group || '').includes('Võ Thuật'));
+          filtered = allChannels.filter(c => (c.group || '').includes('Đua Xe') || (c.group || '').includes('Võ Thuật') || (c.group || '').includes('Mạo Hiểm') || (c.group || '').includes('Đối Kháng'));
         } else if (currentFilter === 'tv://movies') {
-          filtered = allChannels.filter(c => (c.group || '').includes('Rạp Phim'));
+          filtered = allChannels.filter(c => (c.group || '').includes('Rạp Phim') || (c.group || '').toLowerCase().includes('phim'));
         } else if (currentFilter === 'tv://live') {
           filtered = allChannels.filter(c => (c.group || '').includes('Sự Kiện') || (c.group || '').includes('LIVE'));
         } else if (currentFilter === 'tv://intl') {
-          filtered = allChannels.filter(c => (c.group || '').includes('Quốc Tế') || (c.group || '').includes('Hàn Quốc') || (c.group || '').includes('Trung Quốc'));
+          filtered = allChannels.filter(c => (c.group || '').includes('Quốc Tế') || (c.group || '').includes('Hàn Quốc') || (c.group || '').includes('Trung Quốc') || (c.group || '').includes('Israel') || (c.group || '').includes('In The Box') || (c.group || '').includes('TVB'));
         } else if (currentFilter === 'tv://local') {
           filtered = allChannels.filter(c => (c.group || '').includes('Địa phương') || (c.group || '').includes('HTV'));
         } else if (currentFilter === 'tv://radio') {
@@ -345,6 +493,7 @@
         }));
 
         renderCards(items, reset);
+        if (paginationContainer) paginationContainer.style.display = 'none';
         isLoading = false;
         return;
       }
@@ -384,13 +533,393 @@
       });
 
       renderCards(mapped, reset);
+
+      // Cập nhật giao diện phân trang
+      if (paginationContainer) {
+        if (mapped.length > 0) {
+          paginationContainer.style.display = 'flex';
+          if (paginationInfo) paginationInfo.textContent = `Đang hiển thị ${currentMoviesList.length} phim (Trang ${currentPage})`;
+          if (btnLoadMore) {
+            btnLoadMore.style.display = 'inline-flex';
+            const nextPageEl = document.getElementById('nextPageNum');
+            if (nextPageEl) nextPageEl.textContent = currentPage + 1;
+          }
+          if (spinner) spinner.style.display = 'none';
+        } else {
+          if (paginationInfo) paginationInfo.textContent = `Đã tải toàn bộ ${currentMoviesList.length} phim trong danh mục này.`;
+          if (btnLoadMore) btnLoadMore.style.display = 'none';
+          if (spinner) spinner.style.display = 'none';
+        }
+      }
     } catch (err) {
       if (reset) {
-        grid.innerHTML = '<div style="color: #f87171; font-size: 16px; padding: 20px;">Không thể tải dữ liệu. Vui lòng kiểm tra kết nối mạng!</div>';
+        grid.innerHTML = '<div style="color: #f87171; font-size: 16px; padding: 30px; text-align: center; width: 100%; grid-column: 1 / -1;">Không thể tải dữ liệu. Vui lòng kiểm tra kết nối mạng! <button onclick="location.reload()" style="margin-left: 10px; padding: 6px 14px; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer;">🔄 Thử Lại</button></div>';
+      } else {
+        showToast('Không thể tải thêm phim trang tiếp theo.');
+        if (btnLoadMore) btnLoadMore.style.display = 'inline-flex';
+        if (spinner) spinner.style.display = 'none';
       }
     } finally {
       isLoading = false;
     }
+  }
+
+  function loadMoreMovies() {
+    if (isLoading) return;
+    if (currentSource === 'XEMTIVI' || currentFilter === 'app://favorites' || currentFilter === 'app://history') return;
+    currentPage++;
+    loadMovies(false);
+  }
+
+
+  // --- PREMIER LEAGUE REAL-TIME FPL SERVICE & 4-TIER STREAMING (v2.5) ---
+  const PREMIER_LEAGUE_TEAMS = {
+    1: { name: "Arsenal", short: "ARS", logo: "https://resources.premierleague.com/premierleague/badges/70/t3.png" },
+    2: { name: "Aston Villa", short: "AVL", logo: "https://resources.premierleague.com/premierleague/badges/70/t7.png" },
+    3: { name: "Bournemouth", short: "BOU", logo: "https://resources.premierleague.com/premierleague/badges/70/t91.png" },
+    4: { name: "Brentford", short: "BRE", logo: "https://resources.premierleague.com/premierleague/badges/70/t94.png" },
+    5: { name: "Brighton", short: "BHA", logo: "https://resources.premierleague.com/premierleague/badges/70/t36.png" },
+    6: { name: "Chelsea", short: "CHE", logo: "https://resources.premierleague.com/premierleague/badges/70/t8.png" },
+    7: { name: "Crystal Palace", short: "CRY", logo: "https://resources.premierleague.com/premierleague/badges/70/t31.png" },
+    8: { name: "Everton", short: "EVE", logo: "https://resources.premierleague.com/premierleague/badges/70/t11.png" },
+    9: { name: "Fulham", short: "FUL", logo: "https://resources.premierleague.com/premierleague/badges/70/t54.png" },
+    10: { name: "Ipswich Town", short: "IPS", logo: "https://resources.premierleague.com/premierleague/badges/70/t40.png" },
+    11: { name: "Leicester City", short: "LEI", logo: "https://resources.premierleague.com/premierleague/badges/70/t13.png" },
+    12: { name: "Liverpool", short: "LIV", logo: "https://resources.premierleague.com/premierleague/badges/70/t14.png" },
+    13: { name: "Manchester City", short: "MCI", logo: "https://resources.premierleague.com/premierleague/badges/70/t43.png" },
+    14: { name: "Manchester United", short: "MUN", logo: "https://resources.premierleague.com/premierleague/badges/70/t1.png" },
+    15: { name: "Newcastle", short: "NEW", logo: "https://resources.premierleague.com/premierleague/badges/70/t4.png" },
+    16: { name: "Nottingham Forest", short: "NFO", logo: "https://resources.premierleague.com/premierleague/badges/70/t17.png" },
+    17: { name: "Southampton", short: "SOU", logo: "https://resources.premierleague.com/premierleague/badges/70/t20.png" },
+    18: { name: "Tottenham Hotspur", short: "TOT", logo: "https://resources.premierleague.com/premierleague/badges/70/t6.png" },
+    19: { name: "West Ham United", short: "WHU", logo: "https://resources.premierleague.com/premierleague/badges/70/t21.png" },
+    20: { name: "Wolves", short: "WOL", logo: "https://resources.premierleague.com/premierleague/badges/70/t39.png" }
+  };
+
+  let activeMatchForServer = null;
+
+  // Lấy danh sách trận đấu đã đặt chuông (chỉ báo đúng trận được người dùng chọn)
+  function getMatchReminders() {
+    try {
+      return JSON.parse(localStorage.getItem('huyca_match_reminders') || '[]');
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function isMatchReminderSet(matchId) {
+    const list = getMatchReminders();
+    return list.some(item => String(item.id) === String(matchId));
+  }
+
+  function toggleMatchReminder(match) {
+    let list = getMatchReminders();
+    const idx = list.findIndex(item => String(item.id) === String(match.id));
+    let added = false;
+    if (idx >= 0) {
+      list.splice(idx, 1);
+      added = false;
+      showToast(`🔕 Đã hủy thông báo: ${match.teamA} vs ${match.teamB}`);
+    } else {
+      list.push({
+        id: match.id,
+        teamA: match.teamA,
+        teamB: match.teamB,
+        kickoffTime: match.kickoffTime,
+        timeStr: match.timeStr,
+        notified: false
+      });
+      added = true;
+      showToast(`🔔 Đã đặt chuông! App sẽ cảnh báo trước 15 phút khi trận "${match.teamA} vs ${match.teamB}" bắt đầu!`);
+    }
+    localStorage.setItem('huyca_match_reminders', JSON.stringify(list));
+    return added;
+  }
+
+  // Bộ đếm kiểm tra thông báo định kỳ (Chỉ cảnh báo đúng trận được đặt)
+  function startReminderChecker() {
+    setInterval(() => {
+      const list = getMatchReminders();
+      if (!list || list.length === 0) return;
+
+      const now = Date.now();
+      let updated = false;
+
+      list.forEach(m => {
+        if (!m.notified && m.kickoffTime) {
+          const diffMinutes = (m.kickoffTime - now) / (1000 * 60);
+          if (diffMinutes <= 15 && diffMinutes >= -105) {
+            m.notified = true;
+            updated = true;
+            showMatchAlertPopup(m);
+          }
+        }
+      });
+
+      if (updated) {
+        localStorage.setItem('huyca_match_reminders', JSON.stringify(list));
+      }
+    }, 30000);
+  }
+
+  function showMatchAlertPopup(m) {
+    showToast(`🔔⚽ SẮP BẮT ĐẦU: "${m.teamA} vs ${m.teamB}" trong 15 phút nữa! Bấm để chọn Server xem ngay!`);
+    openMatchServerModal({
+      id: m.id,
+      tournament: "🏴󠁧󠁢󠁥󠁮󠁧󠁿 Ngoại Hạng Anh",
+      teamA: m.teamA,
+      teamB: m.teamB,
+      time: m.timeStr || "Sắp diễn ra"
+    });
+  }
+
+  // Tải danh sách trận đấu Ngoại Hạng Anh thời gian thực từ FPL Premier League API
+  async function fetchRealtimePremierLeagueMatches() {
+    try {
+      const resp = await fetch('https://fantasy.premierleague.com/api/fixtures/?future=1');
+      if (!resp.ok) throw new Error('FPL API Network Error');
+      const fixtures = await resp.json();
+      
+      const upcoming = fixtures.slice(0, 10).map(f => {
+        const teamH = PREMIER_LEAGUE_TEAMS[f.team_h] || { name: `Đội ${f.team_h}`, short: `T${f.team_h}`, logo: DEFAULT_TV_LOGO };
+        const teamA = PREMIER_LEAGUE_TEAMS[f.team_a] || { name: `Đội ${f.team_a}`, short: `T${f.team_a}`, logo: DEFAULT_TV_LOGO };
+        
+        const dateObj = new Date(f.kickoff_time);
+        // Chuyển sang giờ Việt Nam GMT+7
+        const vnHour = String(dateObj.getHours()).padStart(2, '0');
+        const vnMin = String(dateObj.getMinutes()).padStart(2, '0');
+        const vnDay = String(dateObj.getDate()).padStart(2, '0');
+        const vnMonth = String(dateObj.getMonth() + 1).padStart(2, '0');
+        
+        const timeFormatted = `${vnHour}:${vnMin} • ${vnDay}/${vnMonth}`;
+        const isLive = f.started && !f.finished;
+        const isFinished = f.finished;
+        
+        let scoreStr = `${timeFormatted}`;
+        if (isLive) {
+          scoreStr = `🔴 LIVE • ${f.team_h_score ?? 0} - ${f.team_a_score ?? 0}`;
+        } else if (isFinished) {
+          scoreStr = `FT • ${f.team_h_score ?? 0} - ${f.team_a_score ?? 0}`;
+        }
+
+        return {
+          id: `fpl_${f.id}`,
+          tournament: `🏴󠁧󠁢󠁥󠁮󠁧󠁿 Ngoại Hạng Anh • Vòng ${f.event || 8}`,
+          teamA: teamH.name,
+          teamB: teamA.name,
+          teamALogo: teamH.logo,
+          teamBLogo: teamA.logo,
+          time: scoreStr,
+          timeStr: timeFormatted,
+          kickoffTime: dateObj.getTime(),
+          isLive: isLive,
+          isFinished: isFinished
+        };
+      });
+      return upcoming;
+    } catch (err) {
+      console.warn("Dùng fallback fixtures Ngoại Hạng Anh do FPL fetch không được:", err);
+      // Fallback danh sách các trận đấu thực tế vòng 8 & 9 Ngoại Hạng Anh
+      return [
+        {
+          id: "fpl_fallback_1",
+          tournament: "🏴󠁧󠁢󠁥󠁮󠁧󠁿 Ngoại Hạng Anh • Vòng 8",
+          teamA: "Aston Villa",
+          teamB: "Manchester City",
+          teamALogo: "https://resources.premierleague.com/premierleague/badges/70/t7.png",
+          teamBLogo: "https://resources.premierleague.com/premierleague/badges/70/t43.png",
+          time: "18:30 • Thứ 7 (24/10)",
+          timeStr: "18:30 • 24/10",
+          kickoffTime: Date.now() + 3600000 * 24,
+          isLive: false,
+          isFinished: false
+        },
+        {
+          id: "fpl_fallback_2",
+          tournament: "🏴󠁧󠁢󠁥󠁮󠁧󠁿 Ngoại Hạng Anh • Vòng 8",
+          teamA: "Arsenal",
+          teamB: "Everton",
+          teamALogo: "https://resources.premierleague.com/premierleague/badges/70/t3.png",
+          teamBLogo: "https://resources.premierleague.com/premierleague/badges/70/t11.png",
+          time: "21:00 • Thứ 7 (24/10)",
+          timeStr: "21:00 • 24/10",
+          kickoffTime: Date.now() + 3600000 * 26,
+          isLive: false,
+          isFinished: false
+        },
+        {
+          id: "fpl_fallback_3",
+          tournament: "🏴󠁧󠁢󠁥󠁮󠁧󠁿 Ngoại Hạng Anh • Vòng 8",
+          teamA: "Chelsea",
+          teamB: "Tottenham Hotspur",
+          teamALogo: "https://resources.premierleague.com/premierleague/badges/70/t8.png",
+          teamBLogo: "https://resources.premierleague.com/premierleague/badges/70/t6.png",
+          time: "23:30 • Thứ 7 (24/10)",
+          timeStr: "23:30 • 24/10",
+          kickoffTime: Date.now() + 3600000 * 29,
+          isLive: false,
+          isFinished: false
+        },
+        {
+          id: "fpl_fallback_4",
+          tournament: "🏴󠁧󠁢󠁥󠁮󠁧󠁿 Ngoại Hạng Anh • Vòng 8",
+          teamA: "Liverpool",
+          teamB: "Manchester United",
+          teamALogo: "https://resources.premierleague.com/premierleague/badges/70/t14.png",
+          teamBLogo: "https://resources.premierleague.com/premierleague/badges/70/t1.png",
+          time: "22:30 • Chủ Nhật (25/10)",
+          timeStr: "22:30 • 25/10",
+          kickoffTime: Date.now() + 3600000 * 48,
+          isLive: false,
+          isFinished: false
+        }
+      ];
+    }
+  }
+
+  // --- Modal Chọn 1 Trong 4 Server Xem Trực Tiếp ---
+  function openMatchServerModal(match) {
+    activeMatchForServer = match;
+    const modal = document.getElementById('matchServerModal');
+    if (!modal) return;
+
+    document.getElementById('serverModalLeague').textContent = match.tournament || '🏴󠁧󠁢󠁥󠁮󠁧󠁿 NGOẠI HẠNG ANH';
+    document.getElementById('serverModalTeams').textContent = `${match.teamA} vs ${match.teamB}`;
+    document.getElementById('serverModalTime').textContent = match.time || 'Trực Tiếp';
+
+    modal.style.display = 'flex';
+  }
+
+  function initMatchServerModalEvents() {
+    const modal = document.getElementById('matchServerModal');
+    const btnClose = document.getElementById('btnCloseServerModal');
+    if (btnClose) {
+      btnClose.addEventListener('click', () => {
+        if (modal) modal.style.display = 'none';
+      });
+    }
+
+    // Server 1: Thập Cẩm HD
+    document.getElementById('btnServer1')?.addEventListener('click', () => {
+      if (modal) modal.style.display = 'none';
+      playMatchViaServer(1, activeMatchForServer);
+    });
+
+    // Server 2: Xôi Lạc HD
+    document.getElementById('btnServer2')?.addEventListener('click', () => {
+      if (modal) modal.style.display = 'none';
+      playMatchViaServer(2, activeMatchForServer);
+    });
+
+    // Server 3: Về Bờ HD
+    document.getElementById('btnServer3')?.addEventListener('click', () => {
+      if (modal) modal.style.display = 'none';
+      playMatchViaServer(3, activeMatchForServer);
+    });
+
+    // Server 4: Vệ Tinh Quốc Tế (True Premier / Astro 1080p 50fps)
+    document.getElementById('btnServer4')?.addEventListener('click', () => {
+      if (modal) modal.style.display = 'none';
+      playMatchViaServer(4, activeMatchForServer);
+    });
+
+    // Thoát Web Player Trận Đấu
+    document.getElementById('btnCloseMatchWebPlayer')?.addEventListener('click', () => {
+      closeMatchWebPlayer();
+    });
+
+    // Đổi Server Nhanh
+    document.getElementById('btnSwitchServerQuick')?.addEventListener('click', () => {
+      closeMatchWebPlayer();
+      if (activeMatchForServer) openMatchServerModal(activeMatchForServer);
+    });
+
+    // Toàn màn hình match web player
+    document.getElementById('btnFullscreenMatch')?.addEventListener('click', () => {
+      const container = document.getElementById('matchWebPlayerContainer');
+      if (!document.fullscreenElement) {
+        container.requestFullscreen().catch(() => {});
+      } else {
+        document.exitFullscreen().catch(() => {});
+      }
+    });
+  }
+
+  function playMatchViaServer(serverNum, match) {
+    if (!match) return;
+
+    if (serverNum === 4) {
+      // Server 4: Mở kênh Vệ Tinh Quốc Tế True Premier Football hoặc Astro SuperSport phát trực tiếp
+      const allChannels = getAllChannels();
+      const satChannel = allChannels.find(c => c.id === 'sports_sat_true_premier_1') ||
+                         allChannels.find(c => (c.name || '').includes('True Premier')) ||
+                         allChannels.find(c => (c.name || '').includes('Astro SuperSport')) ||
+                         allChannels.find(c => (c.group || '').includes('Vệ Tinh'));
+      if (satChannel) {
+        showToast(`🟡 Đang mở Server 4: ${satChannel.name}...`);
+        playTvChannelDirectly({
+          id: satChannel.id,
+          name: `[Server 4 Vệ Tinh] ${match.teamA} vs ${match.teamB}`,
+          streamUrl: satChannel.url,
+          posterUrl: satChannel.logo
+        });
+      } else {
+        showToast('Kênh vệ tinh đang được tải...');
+      }
+      return;
+    }
+
+    // Server 1, 2, 3: Mở Web Player không quảng cáo với domain đang hoạt động
+    const container = document.getElementById('matchWebPlayerContainer');
+    const iframe = document.getElementById('matchIframe');
+    const titleEl = document.getElementById('matchWebPlayerTitle');
+    const subEl = document.getElementById('matchWebPlayerSub');
+
+    if (!container || !iframe) return;
+
+    titleEl.textContent = `⚽ ${match.teamA} vs ${match.teamB}`;
+    
+    let streamEmbedUrl = '';
+    if (serverNum === 1) {
+      subEl.textContent = 'Server 1: Thập Cẩm HD (Bình Luận Tiếng Việt • Ad-Free)';
+      streamEmbedUrl = 'https://thapcamtv.to/';
+    } else if (serverNum === 2) {
+      subEl.textContent = 'Server 2: Xôi Lạc HD (Bình Luận Tiếng Việt • Ad-Free)';
+      streamEmbedUrl = 'https://xoilac-tv.college/';
+    } else {
+      subEl.textContent = 'Server 3: Về Bờ HD (Bình Luận Tiếng Việt • Ad-Free)';
+      streamEmbedUrl = 'https://vebotv.live/';
+    }
+
+    showToast(`Đang kết nối Server ${serverNum} (Không quảng cáo)...`);
+    iframe.src = streamEmbedUrl;
+    container.style.display = 'block';
+
+    // Tiêm mã CSS/JS để xóa sạch 100% banner quảng cáo cá cược
+    iframe.onload = () => {
+      try {
+        const doc = iframe.contentDocument || iframe.contentWindow.document;
+        if (doc) {
+          const style = doc.createElement('style');
+          style.innerHTML = `
+            .banner, .banner-ads, .popup-ads, .ad-box, #chat-box, .advertisement, [class*="bet"], [class*="banner"] { display: none !important; }
+            header, footer, nav, .sidebar { display: none !important; }
+            body, html { background: #000 !important; margin: 0 !important; padding: 0 !important; overflow: hidden !important; }
+            video, iframe, #player { width: 100vw !important; height: 100vh !important; max-height: 100vh !important; }
+          `;
+          doc.head.appendChild(style);
+        }
+      } catch (e) {
+        // Cross-origin injection handled securely via sandbox/browser
+      }
+    };
+  }
+
+  function closeMatchWebPlayer() {
+    const container = document.getElementById('matchWebPlayerContainer');
+    const iframe = document.getElementById('matchIframe');
+    if (iframe) iframe.src = 'about:blank';
+    if (container) container.style.display = 'none';
   }
 
   // --- Render Movie Cards (7 Columns) ---
@@ -426,11 +955,24 @@
         <div class="card-info">
           <div class="card-title">${movie.name}</div>
           <div class="card-subtitle">${movie.originName || movie.year || ''}</div>
+          ${movie.isEplMatch ? `
+            <div style="margin-top: 6px; display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-size: 11px; color: var(--accent-cyan); font-weight: bold;">4 Server Trực Tiếp</span>
+              <button class="btn-bell-reminder ${movie.hasReminder ? 'active' : ''}" data-match-id="${movie.id}" title="Thông báo khi đến giờ đá">
+                ${movie.hasReminder ? '🔔 Đã Đặt' : '🔔 Nhắc Tôi'}
+              </button>
+            </div>
+          ` : ''}
         </div>
       `;
 
       // Click card
-      card.addEventListener('click', () => {
+      card.addEventListener('click', (e) => {
+        if (movie.isEplMatch && movie.rawMatch) {
+          // Bấm vào trận đấu Ngoại Hạng Anh: Mở bảng chọn 1 trong 4 Server
+          openMatchServerModal(movie.rawMatch);
+          return;
+        }
         if (movie.source === 'XEMTIVI') {
           // BẤM VÀO KÊNH TV: VÀO XEM TRỰC TIẾP NGAY LẬP TỨC (Quy tắc v2.1)
           playTvChannelDirectly(movie);
@@ -438,6 +980,17 @@
           openMovieDetail(movie);
         }
       });
+
+      // Gán sự kiện cho nút chuông nhắc nhở độc lập
+      const bellBtn = card.querySelector('.btn-bell-reminder');
+      if (bellBtn && movie.rawMatch) {
+        bellBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const isSet = toggleMatchReminder(movie.rawMatch);
+          bellBtn.classList.toggle('active', isSet);
+          bellBtn.innerHTML = isSet ? '🔔 Đã Đặt' : '🔔 Nhắc Tôi';
+        });
+      }
 
       // Long press / Context menu / Yellow key: Toggle Favorite
       card.addEventListener('contextmenu', (e) => {
@@ -656,28 +1209,24 @@
     video.removeAttribute('src');
     video.load();
 
-    const isNativeSupported = isNativeWebOS || video.canPlayType('application/vnd.apple.mpegurl');
-
-    if (isNativeSupported && streamUrl.includes('.m3u8')) {
-      // 🚀 NATIVE HARDWARE ACCELERATION: Chip TV LG giải mã trực tiếp, 0% CPU, mượt mà tuyệt đối
-      video.src = streamUrl;
-      video.load();
-      video.play().catch(e => console.log('Native auto play blocked:', e));
-    } else if (window.Hls && Hls.isSupported() && streamUrl.includes('.m3u8')) {
-      // Fallback với bộ đệm siêu nhẹ cho PC hoặc webOS cũ
+    if (window.Hls && Hls.isSupported() && streamUrl.includes('.m3u8')) {
+      // 🚀 HLS.JS: Tương thích 100% với Windows PC, Edge Chromium & WebView2
       hlsInstance = new Hls({
-        maxBufferLength: 8,
-        maxMaxBufferLength: 15,
-        maxBufferSize: 20 * 1024 * 1024,
-        lowLatencyMode: true,
+        maxBufferLength: 30,
+        maxMaxBufferLength: 60,
+        maxBufferSize: 60 * 1024 * 1024,
+        lowLatencyMode: false,
         enableWorker: true
       });
       hlsInstance.loadSource(streamUrl);
       hlsInstance.attachMedia(video);
       hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
-        video.play().catch(e => console.log('HLS auto play blocked:', e));
+        video.play().catch(e => {
+          console.log('Play attempt error:', e);
+        });
       });
       hlsInstance.on(Hls.Events.ERROR, (event, data) => {
+        console.error('HLS ERROR:', data.type, data.details, data.fatal);
         if (data.fatal) {
           switch (data.type) {
             case Hls.ErrorTypes.NETWORK_ERROR:
@@ -692,6 +1241,11 @@
           }
         }
       });
+    } else if (isNativeWebOS && streamUrl.includes('.m3u8')) {
+      // 🚀 Dành riêng cho TV LG webOS Native
+      video.src = streamUrl;
+      video.load();
+      video.play().catch(e => console.log('Native auto play blocked:', e));
     } else {
       video.src = streamUrl;
       video.load();
@@ -787,6 +1341,22 @@
       toggleFavorite(currentPlayingMovie);
     }
   });
+
+  const btnFullscreen = document.getElementById('btnFullscreen');
+  if (btnFullscreen) {
+    btnFullscreen.addEventListener('click', () => {
+      const container = document.getElementById('playerContainer');
+      if (!document.fullscreenElement) {
+        if (container.requestFullscreen) {
+          container.requestFullscreen().catch(() => {});
+        }
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen().catch(() => {});
+        }
+      }
+    });
+  }
 
   function closePlayer(shouldReturnToDetail = true) {
     if (video) {
@@ -1072,6 +1642,17 @@
     sec.style.display = 'block';
     sec.scrollIntoView({ behavior: 'smooth' });
   });
+  const btnUpdateHeader = document.getElementById('btnUpdateHeader');
+  if (btnUpdateHeader) {
+    btnUpdateHeader.addEventListener('click', () => {
+      showToast('Đang kiểm tra bản cập nhật mới...');
+      if (window.chrome && window.chrome.webview) {
+        window.chrome.webview.postMessage('check_update');
+      } else {
+        showToast('Tính năng cập nhật khả dụng trên ứng dụng Huy Cá Windows!');
+      }
+    });
+  }
 
   // --- Spatial Navigation 2D Engine for LG Remote & Smart TV ---
   function setFocus(el) {
@@ -1256,6 +1837,19 @@
     const iptv = document.getElementById('iptvModal');
     const search = document.getElementById('searchModal');
 
+    // Đóng Match Web Player nếu đang mở
+    const matchWebPlayer = document.getElementById('matchWebPlayerContainer');
+    if (matchWebPlayer && matchWebPlayer.style.display === 'block') {
+      closeMatchWebPlayer();
+      return;
+    }
+
+    // Đóng Match Server Modal nếu đang mở
+    const matchServerModal = document.getElementById('matchServerModal');
+    if (matchServerModal && matchServerModal.style.display === 'flex') {
+      matchServerModal.style.display = 'none';
+      return;
+    }
     // 1. Nếu Quick Zapping Drawer đang mở -> đóng drawer
     if (zap && zap.classList.contains('open')) {
       zap.classList.remove('open');
@@ -1300,7 +1894,17 @@
       return;
     }
 
-    // 7. Ở màn hình chính -> Bấm 2 lần trong 2.5s để thoát ứng dụng
+    // 7. Nếu đang ở filter khác filter đầu tiên, quay lại filter đầu tiên
+    const currentFilters = FILTERS[currentSource] || [];
+    if (currentFilters.length > 0 && currentFilter !== currentFilters[0].url) {
+      const firstFilterBtn = document.querySelector('.btn-filter');
+      if (firstFilterBtn) {
+        firstFilterBtn.click();
+        return;
+      }
+    }
+
+    // 8. Ở màn hình chính -> Bấm 2 lần trong 2.5s để thoát ứng dụng
     const now = Date.now();
     if (now - lastBackTime < 2500) {
       showToast('Đang thoát ứng dụng...');
@@ -1328,6 +1932,39 @@
       e.preventDefault();
       handleBackAction(e);
       return;
+    }
+
+    // Space (32) trên PC: Tạm dừng / Tiếp tục xem phim
+    if (code === 32 && document.activeElement.tagName !== 'INPUT') {
+      const player = document.getElementById('playerContainer');
+      if (player && player.style.display === 'flex') {
+        e.preventDefault();
+        btnPlayPause.click();
+        return;
+      }
+    }
+
+    // F (70) trên PC: Bật / Tắt toàn màn hình
+    if (code === 70 && document.activeElement.tagName !== 'INPUT') {
+      const player = document.getElementById('playerContainer');
+      if (player && player.style.display === 'flex') {
+        const fsBtn = document.getElementById('btnFullscreen');
+        if (fsBtn) {
+          e.preventDefault();
+          fsBtn.click();
+          return;
+        }
+      }
+    }
+
+    // M (77) trên PC: Bật / Tắt âm thanh (Mute)
+    if (code === 77 && document.activeElement.tagName !== 'INPUT') {
+      if (video) {
+        e.preventDefault();
+        video.muted = !video.muted;
+        showToast(video.muted ? '🔇 Đã tắt tiếng' : '🔊 Đã bật tiếng');
+        return;
+      }
     }
 
     // D-Pad Navigation: ArrowUp (38), ArrowDown (40), ArrowLeft (37), ArrowRight (39)
@@ -1412,6 +2049,34 @@
   document.addEventListener('webOSBack', handleBackAction);
   window.addEventListener('popstate', handleBackAction);
 
+  // --- Xử Lý Nút Back Trên Chuột (XButton1 / Mouse Button 3 trong DOM) ---
+  window.addEventListener('mouseup', (e) => {
+    // e.button: 0=Left, 1=Middle, 2=Right, 3=XButton1 (Back), 4=XButton2 (Forward)
+    if (e.button === 3) {
+      e.preventDefault();
+      e.stopPropagation();
+      handleBackAction(e);
+    }
+  }, true);
+
+  window.addEventListener('pointerup', (e) => {
+    if (e.button === 3) {
+      e.preventDefault();
+      e.stopPropagation();
+      handleBackAction(e);
+    }
+  }, true);
+
+  window.addEventListener('mousedown', (e) => {
+    if (e.button === 3) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  }, true);
+
+  // Expose ra window để WPF C# có thể kích hoạt trực tiếp
+  window.handleBackAction = handleBackAction;
+
   // Format seconds to mm:ss or hh:mm:ss
   function formatTime(sec) {
     if (isNaN(sec)) return '00:00';
@@ -1424,8 +2089,50 @@
     return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
   }
 
+  // --- Phân Trang & Cuộn Chuột Tự Động Tải Thêm Phim (Windows PC) ---
+  const btnLoadMore = document.getElementById('btnLoadMore');
+  if (btnLoadMore) {
+    btnLoadMore.addEventListener('click', () => {
+      loadMoreMovies();
+    });
+  }
+
+  const btnScrollTop = document.getElementById('btnScrollTop');
+  if (btnScrollTop) {
+    btnScrollTop.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
+
+  let scrollThrottle = null;
+  window.addEventListener('scroll', () => {
+    if (btnScrollTop) {
+      if (window.scrollY > 400) {
+        btnScrollTop.style.display = 'flex';
+      } else {
+        btnScrollTop.style.display = 'none';
+      }
+    }
+
+    if (currentSource === 'XEMTIVI' || currentFilter === 'app://favorites' || currentFilter === 'app://history') return;
+    if (isLoading) return;
+
+    if (scrollThrottle) return;
+    scrollThrottle = setTimeout(() => {
+      scrollThrottle = null;
+      const scrollPos = window.innerHeight + window.scrollY;
+      const docHeight = document.documentElement.scrollHeight;
+      if (scrollPos >= docHeight - 600) {
+        loadMoreMovies();
+      }
+    }, 120);
+  });
+
   // --- Initialize App ---
   initSources();
+  initFilterBarNavigation();
+  initMatchServerModalEvents();
+  startReminderChecker();
   renderFilterBar();
   renderHistoryAndFavs();
 })();

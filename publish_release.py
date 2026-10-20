@@ -25,8 +25,8 @@ def get_token():
 TOKEN = get_token()
 REPO_OWNER = "uhg031486-hub"
 REPO_NAME = "HuyCaBuonCa_Release"
-TAG = "v2.4"
-TITLE = "Huy Cá v2.4"
+TAG = "v2.5"
+TITLE = "Huy Cá v2.5 - Ngoại Hạng Anh & Kênh Vệ Tinh Quốc Tế"
 
 HEADERS = {
     "Authorization": f"token {TOKEN}",
@@ -58,7 +58,7 @@ def step2_update_version_json():
 
     b64_content = base64.b64encode(local_content.encode("utf-8")).decode("utf-8")
     payload = {
-        "message": "Nâng cấp version.json lên v2.4 (Huy Cá: Windows, Mobile, TV, LG webOS)",
+        "message": "Nâng cấp version.json lên v2.5 (Huy Cá: Ngoại Hạng Anh FPL, 4 Server, Chuông báo giờ đá, Vệ Tinh Quốc Tế)",
         "content": b64_content,
         "branch": "main"
     }
@@ -113,10 +113,13 @@ def step4_upload_assets(release):
     existing_assets = {a["name"]: a["id"] for a in release.get("assets", [])}
 
     files_to_upload = [
-        ("HuyCa_Windows_v2.4.zip", "application/zip"),
-        ("HuyCa_Mobile_v2.4.apk", "application/vnd.android.package-archive"),
-        ("HuyCa_TV_v2.4.apk", "application/vnd.android.package-archive"),
-        ("HuyCa_LG_webOS_v2.4.ipk", "application/octet-stream"),
+        ("HuyCa_Windows_v2.5.zip", "application/zip"),
+        ("HuyCaBuonCa_Mobile_v2.5.apk", "application/vnd.android.package-archive"),
+        ("HuyCa_Mobile_v2.5.apk", "application/vnd.android.package-archive"),
+        ("HuyCaBuonCa_TV_v2.5.apk", "application/vnd.android.package-archive"),
+        ("HuyCa_TV_v2.5.apk", "application/vnd.android.package-archive"),
+        ("HuyCaBuonCa_LG_webOS_v2.5.ipk", "application/octet-stream"),
+        ("HuyCa_LG_webOS_v2.5.ipk", "application/octet-stream"),
     ]
 
     for filename, content_type in files_to_upload:
@@ -152,4 +155,4 @@ if __name__ == "__main__":
     step2_update_version_json()
     release = step3_create_release()
     step4_upload_assets(release)
-    print("\n🎉 === TẤT CẢ ĐÃ HOÀN TẤT 100%! BẢN V2.4 ĐÃ ĐƯỢC XUẤT BẢN THÀNH CÔNG LÊN GITHUB! ===")
+    print("\n🎉 === TẤT CẢ ĐÃ HOÀN TẤT 100%! BẢN V2.5 ĐÃ ĐƯỢC XUẤT BẢN THÀNH CÔNG LÊN GITHUB! ===")

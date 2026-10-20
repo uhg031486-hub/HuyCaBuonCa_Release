@@ -2,8 +2,9 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=1920, height=1080, initial-scale=1.0, user-scalable=no">
-  <title>Huy Cá - LG Smart TV</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Huy Cá - Kho Phim & Truyền Hình Trực Tuyến Đẳng Cấp</title>
+  <link rel="icon" type="image/png" href="icon_256.png">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -11,14 +12,18 @@
   <!-- Header Bar -->
   <header class="header-bar">
     <div class="brand-section">
-      <div class="brand-badge">HUY CÁ</div>
-      <div class="brand-subtitle">Kho Phim & Truyền Hình Đẳng Cấp • Phiên Bản Huy Cá v2.4</div>
+      <div class="brand-badge">
+        <img src="icon_256.png" class="brand-logo" alt="Logo">
+        <span>HUY CÁ</span>
+      </div>
+      <div class="brand-subtitle">Kho Phim & Truyền Hình Đẳng Cấp • Phiên Bản Windows PC v2.5</div>
     </div>
     <div class="header-actions">
       <button id="btnSearch" class="btn-header focusable" tabindex="1">🔍 Tìm Kiếm</button>
       <button id="btnScheduleHeader" class="btn-header focusable" tabindex="2">⚽ Lịch Thi Đấu</button>
       <button id="btnFavHeader" class="btn-header focusable" tabindex="3">⭐ Yêu Thích</button>
       <button id="btnHistoryHeader" class="btn-header focusable" tabindex="4">🕒 Lịch Sử</button>
+      <button id="btnUpdateHeader" class="btn-header focusable" tabindex="5">🔄 Cập Nhật</button>
       <div id="clockDisplay" class="clock-display">00:00</div>
     </div>
   </header>
@@ -31,8 +36,12 @@
     <button id="srcPhimNgan" class="btn-source focusable" data-source="FREEREELS" tabindex="13">🎬 PHIM NGẮN</button>
   </section>
 
-  <!-- Thanh Thể Loại / Danh Mục (Filter Bar) -->
-  <nav id="filterBar" class="filter-bar"></nav>
+  <!-- Thanh Thể Loại / Danh Mục (Filter Bar Wrapper) -->
+  <div class="filter-wrapper">
+    <button id="btnFilterPrev" class="filter-nav-btn filter-nav-prev" title="Cuộn sang trái">◀</button>
+    <nav id="filterBar" class="filter-bar"></nav>
+    <button id="btnFilterNext" class="filter-nav-btn filter-nav-next" title="Cuộn sang phải">▶</button>
+  </div>
 
   <!-- Hàng Tiếp Tục Xem (Lịch Sử) -->
   <section id="historySection" class="history-section" style="display: none;">
@@ -45,6 +54,22 @@
 
   <!-- Lưới Phim & TV 7 Cột -->
   <main id="mainGrid" class="grid-container"></main>
+
+  <!-- Thanh Tải Thêm Phim / Phân Trang -->
+  <div id="paginationContainer" class="pagination-container" style="display: none;">
+    <div id="paginationInfo" class="pagination-info">Đang hiển thị 24 phim</div>
+    <button id="btnLoadMore" class="btn-load-more focusable" tabindex="30">
+      <span>📥 TẢI THÊM PHIM (Trang <span id="nextPageNum">2</span>)</span>
+    </button>
+    <div id="loadingMoreSpinner" class="loading-more-spinner" style="display: none;">
+      ⏳ Đang tải thêm dữ liệu phim...
+    </div>
+  </div>
+
+  <!-- Nút Bay Lên Đầu Trang -->
+  <button id="btnScrollTop" class="btn-scroll-top focusable" style="display: none;" title="Về đầu trang">
+    ⬆️
+  </button>
 
   <!-- Màn Hình Chi Tiết Phim (Detail Modal) -->
   <div id="detailModal" class="modal-overlay" style="display: none;">
@@ -99,6 +124,7 @@
           <button id="btnRewind" class="btn-player focusable">⏪ -10s</button>
           <button id="btnForward" class="btn-player focusable">⏩ +10s</button>
           <button id="btnNextEpisode" class="btn-player focusable" style="display: none;">⏭️ Tập Tiếp</button>
+          <button id="btnFullscreen" class="btn-player focusable">🗖 Toàn Màn Hình</button>
         </div>
       </div>
     </div>
@@ -110,6 +136,73 @@
         <button id="btnCloseZap" class="btn-header focusable" style="padding: 4px 10px;">Đóng</button>
       </div>
       <div id="zappingList" class="zapping-list"></div>
+    </div>
+  </div>
+
+  <!-- Khung Web Live Match Player Không Quảng Cáo (Ad-Free Player) -->
+  <div id="matchWebPlayerContainer" class="player-container" style="display: none; z-index: 2000; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000;">
+    <div class="player-top" style="position: absolute; top: 0; left: 0; width: 100%; z-index: 2005; background: linear-gradient(180deg, rgba(10,14,23,0.95), transparent); padding: 14px 28px; display: flex; justify-content: space-between; align-items: center;">
+      <div class="player-title-info" style="display: flex; align-items: center; gap: 16px;">
+        <button id="btnCloseMatchWebPlayer" class="btn-player focusable">↩️ Thoát Trận Đấu</button>
+        <div>
+          <div id="matchWebPlayerTitle" class="player-title" style="font-size: 18px; font-weight: 800; color: #fff;">Trực Tiếp Bóng Đá</div>
+          <div id="matchWebPlayerSub" class="player-subtitle" style="font-size: 13px; color: var(--primary-gold);">Server 1 - BLV Tiếng Việt (Ad-Free)</div>
+        </div>
+      </div>
+      <div style="display: flex; gap: 10px;">
+        <button id="btnSwitchServerQuick" class="btn-player focusable">🔄 Đổi Server</button>
+        <button id="btnFullscreenMatch" class="btn-player focusable">🗖 Toàn Màn Hình</button>
+      </div>
+    </div>
+    <iframe id="matchIframe" src="" style="width: 100%; height: 100%; border: none; background: #000;" allow="autoplay; fullscreen; encrypted-media"></iframe>
+  </div>
+
+  <!-- Modal Chọn Server Trực Tiếp Bóng Đá 4 Tầng -->
+  <div id="matchServerModal" class="modal-overlay" style="display: none; z-index: 2500;">
+    <div class="modal-content" style="max-width: 620px; text-align: center;">
+      <div id="serverModalHeader" style="margin-bottom: 20px;">
+        <div id="serverModalLeague" style="color: var(--primary-gold); font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">🏴󠁧󠁢󠁥󠁮󠁧󠁿 NGOẠI HẠNG ANH</div>
+        <h2 id="serverModalTeams" style="color: #ffffff; font-size: 24px; margin: 8px 0; font-weight: 900;">Arsenal vs Chelsea</h2>
+        <div id="serverModalTime" style="color: var(--accent-cyan); font-size: 14px; font-weight: 600;">Trực Tiếp • 22:30 Hôm Nay</div>
+      </div>
+      
+      <p style="color: #94a3b8; font-size: 14px; margin-bottom: 16px;">Vui lòng chọn 1 trong 4 Server trực tiếp (Miễn Phí 100%):</p>
+      
+      <div class="server-options-grid" style="display: grid; gap: 12px; margin-bottom: 20px; text-align: left;">
+        <button id="btnServer1" class="btn-server-option focusable" data-server="1">
+          <div class="server-badge badge-green">SERVER 1</div>
+          <div class="server-info">
+            <div class="server-title">🟢 Thập Cẩm HD (Bình Luận Tiếng Việt)</div>
+            <div class="server-desc">Tốc độ cao • Không quảng cáo cá cược • Nét căng</div>
+          </div>
+        </button>
+
+        <button id="btnServer2" class="btn-server-option focusable" data-server="2">
+          <div class="server-badge badge-blue">SERVER 2</div>
+          <div class="server-info">
+            <div class="server-title">🔵 Xôi Lạc HD (Bình Luận Tiếng Việt)</div>
+            <div class="server-desc">Máy chủ dự phòng 1 • Âm thanh sân vận động sôi động</div>
+          </div>
+        </button>
+
+        <button id="btnServer3" class="btn-server-option focusable" data-server="3">
+          <div class="server-badge badge-purple">SERVER 3</div>
+          <div class="server-info">
+            <div class="server-title">🟣 Về Bờ HD (Bình Luận Tiếng Việt)</div>
+            <div class="server-desc">Máy chủ dự phòng 2 • Ổn định giờ cao điểm</div>
+          </div>
+        </button>
+
+        <button id="btnServer4" class="btn-server-option focusable" data-server="4">
+          <div class="server-badge badge-yellow">SERVER 4</div>
+          <div class="server-info">
+            <div class="server-title">🟡 Kênh Vệ Tinh Quốc Tế (True Premier / Astro)</div>
+            <div class="server-desc">Bản quyền 1080p 50fps • Ổn định tuyệt đối 24/7 • Tiếng Anh</div>
+          </div>
+        </button>
+      </div>
+
+      <button id="btnCloseServerModal" class="btn-header focusable" style="width: 100%; justify-content: center; padding: 12px; font-size: 15px;">ĐÓNG</button>
     </div>
   </div>
 

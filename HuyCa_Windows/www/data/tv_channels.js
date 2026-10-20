@@ -1,1836 +1,1836 @@
-﻿window.INITIAL_TV_CHANNELS = [
-    {
-        "id":  "vtv1_0",
-        "name":  "VTV1",
-        "group":  "VTV",
-        "logo":  "data/logos/vtv1.png",
-        "url":  "https://vips-livecdn.fptplay.net/live/media/vtv1/live247-hls-avc/vtv1-avc1_5600000=10000-mp4a_131600=20000.m3u8"
-    },
-    {
-        "id":  "vtv10_1",
-        "name":  "VTV10",
-        "group":  "VTV",
-        "logo":  "data/logos/vtv_cantho.png",
-        "url":  "https://vips-livecdn.fptplay.net/live/media/vtv10/live247-hls-avc/vtv10-avc1_5600000=10000-mp4a_131600=20000.m3u8"
-    },
-    {
-        "id":  "vtv2_2",
-        "name":  "VTV2",
-        "group":  "VTV",
-        "logo":  "data/logos/vtv2.png",
-        "url":  "https://vips-livecdn.fptplay.net/live/media/vtv2/live247-hls-avc/vtv2-avc1_5600000=10000-mp4a_131600=20000.m3u8"
-    },
-    {
-        "id":  "vtv3_3",
-        "name":  "VTV3",
-        "group":  "VTV",
-        "logo":  "data/logos/vtv3.png",
-        "url":  "https://vips-livecdn.fptplay.net/live/media/vtv3/live247-hls-avc/vtv3-avc1_5600000=10000-mp4a_131600=20000.m3u8"
-    },
-    {
-        "id":  "vtv4_4",
-        "name":  "VTV4",
-        "group":  "VTV",
-        "logo":  "data/logos/vtv4.png",
-        "url":  "https://vips-livecdn.fptplay.net/live/media/vtv4/live247-hls-avc/vtv4-avc1_5600000=10000-mp4a_131600=20000.m3u8"
-    },
-    {
-        "id":  "vtv5_5",
-        "name":  "VTV5",
-        "group":  "VTV",
-        "logo":  "data/logos/vtv5.png",
-        "url":  "https://vips-livecdn.fptplay.net/live/media/vtv5/live247-hls-avc/vtv5-avc1_5600000=10000-mp4a_131600=20000.m3u8"
-    },
-    {
-        "id":  "vtv5_t_y_nam_b_6",
-        "name":  "VTV5 Tây Nam Bộ",
-        "group":  "VTV",
-        "logo":  "data/logos/vtv5.png",
-        "url":  "https://vips-livecdn.fptplay.net/live/media/vtv5tnb/live-hls-avc/vtv5tnb-avc1_4000000=10000-mp4a_131600=20000.m3u8"
-    },
-    {
-        "id":  "vtv5_t_y_nguy_n_7",
-        "name":  "VTV5 Tây Nguyên",
-        "group":  "VTV",
-        "logo":  "data/logos/vtv5.png",
-        "url":  "https://vips-livecdn.fptplay.net/live/media/vtv5tn/live-hls-avc/vtv5tn-avc1_4000000=10000-mp4a_131600=20000.m3u8"
-    },
-    {
-        "id":  "vtv6_8",
-        "name":  "VTV6",
-        "group":  "VTV",
-        "logo":  "data/logos/vtv6.png",
-        "url":  "https://vips-livecdn.fptplay.net/live/media/vtv6/live247-hls-avc/vtv6-avc1_5600000=10000-mp4a_131600=20000.m3u8"
-    },
-    {
-        "id":  "vtv7_9",
-        "name":  "VTV7",
-        "group":  "VTV",
-        "logo":  "data/logos/vtv7.png",
-        "url":  "https://vips-livecdn.fptplay.net/live/media/vtv7/live247-hls-avc/vtv7-avc1_5600000=10000-mp4a_131600=20000.m3u8"
-    },
-    {
-        "id":  "vtv8_10",
-        "name":  "VTV8",
-        "group":  "VTV",
-        "logo":  "data/logos/vtv8.png",
-        "url":  "https://vips-livecdn.fptplay.net/live/media/vtv8/live-hls-avc/vtv8-avc1_4000000=10000-mp4a_131600=20000.m3u8"
-    },
-    {
-        "id":  "vtv9_11",
-        "name":  "VTV9",
-        "group":  "VTV",
-        "logo":  "data/logos/vtv9.png",
-        "url":  "https://vips-livecdn.fptplay.net/live/media/vtv9/live247-hls-avc/vtv9-avc1_5600000=10000-mp4a_131600=20000.m3u8"
-    },
-    {
-        "id":  "vietnam_today_12",
-        "name":  "Vietnam Today",
-        "group":  "VTV",
-        "logo":  "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/VietnamToday.jpg",
-        "url":  "https://vips-livecdn.fptplay.net/live/media/vietnamtoday/live-hls-avc/vietnamtoday-avc1_4000000=10000-mp4a_131600=20000.m3u8"
-    },
-    {
-        "id":  "sports_vn_vtv6",
-        "name":  "VTV6 Thể Thao HD (FPT)",
-        "group":  "⚽ Bóng Đá \u0026 Thể Thao VN",
-        "logo":  "data/logos/vtv6.png",
-        "url":  "https://vips-livecdn.fptplay.net/live/media/vtv6/live247-hls-avc/index.m3u8"
-    },
-    {
-        "id":  "sports_vn_htvc_thethao",
-        "name":  "HTVC Thể Thao HD (FPT)",
-        "group":  "⚽ Bóng Đá \u0026 Thể Thao VN",
-        "logo":  "https://raw.githubusercontent.com/iptv-org/tv-logos/master/countries/us/espn.png",
-        "url":  "https://vips-livecdn.fptplay.net/live/media/htvthethao/live247-hls-avc/index.m3u8"
-    },
-    {
-        "id":  "sports_vn_htv_thethao",
-        "name":  "HTV Thể Thao",
-        "group":  "⚽ Bóng Đá \u0026 Thể Thao VN",
-        "logo":  "data/logos/htv_thethao.png",
-        "url":  "https://dethich.pw/htvthethao/index.m3u8"
-    },
-    {
-        "id":  "sports_vn_dongnai2",
-        "name":  "Đồng Nai 2 (Thể Thao \u0026 Giải Trí)",
-        "group":  "⚽ Bóng Đá \u0026 Thể Thao VN",
-        "logo":  "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/%C4%90NNRTV2.png",
-        "url":  "https://vtvgolive-ott3.vtvdigital.vn/live/dongnai2tv/chunklist_2.m3u8"
-    },
-    {
-        "id":  "sports_vn_thvl4",
-        "name":  "Vĩnh Long 4 Thể Thao",
-        "group":  "⚽ Bóng Đá \u0026 Thể Thao VN",
-        "logo":  "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/THVL4.webp",
-        "url":  "https://dethich.pw/thvl4/index.m3u8"
-    },
-    {
-        "id":  "sports_intl_cbs_golazo",
-        "name":  "CBS Sports Golazo (Cúp C1 / Serie A)",
-        "group":  "⚽ Bóng Đá Quốc Tế \u0026 C1",
-        "logo":  "https://r2.thesportsdb.com/images/media/channel/logo/p5csyn1620551587.png",
-        "url":  "https://dai.google.com/linear/hls/event/7f3Wv6f7QEKfQna22jHqLQ/master.m3u8"
-    },
-    {
-        "id":  "sports_intl_bein_xtra",
-        "name":  "beIN SPORTS XTRA HD",
-        "group":  "⚽ Bóng Đá Quốc Tế \u0026 C1",
-        "logo":  "https://r2.thesportsdb.com/images/media/channel/logo/p5csyn1620551587.png",
-        "url":  "https://bein-xtra-bein.amagi.tv/playlist.m3u8"
-    },
-    {
-        "id":  "sports_intl_fifa_plus_live",
-        "name":  "FIFA+ Live HD (Trực Tiếp \u0026 World Cup)",
-        "group":  "⚽ Bóng Đá Quốc Tế \u0026 C1",
-        "logo":  "https://r2.thesportsdb.com/images/media/channel/logo/p5csyn1620551587.png",
-        "url":  "https://d2w9q46ikgrcwx.cloudfront.net/v1/master/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-of5cbk3sav3w5/v1/sysdata_s_p_a_fifa_7/samsungheadend_us/latest/main/hls/playlist.m3u8"
-    },
-    {
-        "id":  "sports_intl_fifa_plus_global",
-        "name":  "FIFA+ Global HD",
-        "group":  "⚽ Bóng Đá Quốc Tế \u0026 C1",
-        "logo":  "https://r2.thesportsdb.com/images/media/channel/logo/p5csyn1620551587.png",
-        "url":  "https://jmp2.uk/plu-660c29b5aec9680008f5b4a4.m3u8"
-    },
-    {
-        "id":  "sports_intl_eurosport_live",
-        "name":  "Eurosport Live HD",
-        "group":  "⚽ Bóng Đá Quốc Tế \u0026 C1",
-        "logo":  "https://r2.thesportsdb.com/images/media/channel/logo/p5csyn1620551587.png",
-        "url":  "https://drk6xq0vhn.gpcdn.net/live/euro_sports_hd_abr/index.m3u8"
-    },
-    {
-        "id":  "sports_intl_eurosport_1",
-        "name":  "Eurosport 1 HD (1080p)",
-        "group":  "⚽ Bóng Đá Quốc Tế \u0026 C1",
-        "logo":  "https://r2.thesportsdb.com/images/media/channel/logo/p5csyn1620551587.png",
-        "url":  "http://57.128.210.196:8080/264/index.m3u8"
-    },
-    {
-        "id":  "sports_intl_eurosport_2",
-        "name":  "Eurosport 2 HD (1080p)",
-        "group":  "⚽ Bóng Đá Quốc Tế \u0026 C1",
-        "logo":  "https://r2.thesportsdb.com/images/media/channel/logo/p5csyn1620551587.png",
-        "url":  "http://57.128.210.196:8080/263/index.m3u8"
-    },
-    {
-        "id":  "sports_intl_cctv_football",
-        "name":  "CCTV-Storm Football (Bóng Đá 24/7)",
-        "group":  "⚽ Bóng Đá Quốc Tế \u0026 C1",
-        "logo":  "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/fox-soccer-plus-us.png",
-        "url":  "http://38.75.136.137:98/gslb/dsdqpub/fyzq.m3u8?auth=testpub"
-    },
-    {
-        "id":  "sports_intl_tyc_sports",
-        "name":  "TyC Sports HD (Bóng Đá Nam Mỹ)",
-        "group":  "⚽ Bóng Đá Quốc Tế \u0026 C1",
-        "logo":  "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/argentina/tyc-sports-ar.png",
-        "url":  "https://amg26268-amg26268c14-freelivesports-emea-10267.playouts.now.amagi.tv/ts-us-e2-n2/playlist/amg26268-sportsstudio-tycsports-freelivesportsemea/playlist.m3u8"
-    },
-    {
-        "id":  "sports_intl_lequipe",
-        "name":  "L\u0027Equipe Live 1080p (Pháp)",
-        "group":  "⚽ Bóng Đá Quốc Tế \u0026 C1",
-        "logo":  "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/france/lequipe-fr.png",
-        "url":  "https://dq37unyetkpcz.cloudfront.net/v1/master/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-m04j89j7k5gtp/LEquipe_FR.m3u8"
-    },
-    {
-        "id":  "sports_espn_usa",
-        "name":  "ESPN HD (United States)",
-        "group":  "🏆 Kênh Thể Thao ESPN \u0026 FOX",
-        "logo":  "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/espn-us.png",
-        "url":  "http://85.237.89.160:9590/usa-s/ESPN-HD/index.m3u8"
-    },
-    {
-        "id":  "sports_espn_2_usa",
-        "name":  "ESPN 2 HD (United States)",
-        "group":  "🏆 Kênh Thể Thao ESPN \u0026 FOX",
-        "logo":  "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/espn-us.png",
-        "url":  "http://85.237.89.160:9590/usa-s/ESPN-2-HD/index.m3u8"
-    },
-    {
-        "id":  "sports_espn_u",
-        "name":  "ESPNU HD",
-        "group":  "🏆 Kênh Thể Thao ESPN \u0026 FOX",
-        "logo":  "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/espn-us.png",
-        "url":  "http://85.237.89.160:9590/usa-s/ESPN-U-HD/index.m3u8"
-    },
-    {
-        "id":  "sports_espn_latam_1",
-        "name":  "ESPN Latin America (1080p)",
-        "group":  "🏆 Kênh Thể Thao ESPN \u0026 FOX",
-        "logo":  "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/espn-us.png",
-        "url":  "https://barinaslive1.boldmss.com/ESPN/ESPN.isml/ESPN.m3u8"
-    },
-    {
-        "id":  "sports_espn_latam_2",
-        "name":  "ESPN 2 Latin America (1080p)",
-        "group":  "🏆 Kênh Thể Thao ESPN \u0026 FOX",
-        "logo":  "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/espn-us.png",
-        "url":  "https://barinaslive1.boldmss.com/ESPN_2/ESPN_2.isml/ESPN_2.m3u8"
-    },
-    {
-        "id":  "sports_espn_latam_3",
-        "name":  "ESPN 3 Latin America (1080p)",
-        "group":  "🏆 Kênh Thể Thao ESPN \u0026 FOX",
-        "logo":  "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/espn-us.png",
-        "url":  "https://barinaslive1.boldmss.com/ESPN_3/ESPN_3.isml/ESPN_3.m3u8"
-    },
-    {
-        "id":  "sports_espn_latam_4",
-        "name":  "ESPN 4 Latin America (1080p)",
-        "group":  "🏆 Kênh Thể Thao ESPN \u0026 FOX",
-        "logo":  "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/espn-us.png",
-        "url":  "https://barinaslive1.boldmss.com/ESPN_4/ESPN_4.isml/ESPN_4.m3u8"
-    },
-    {
-        "id":  "sports_espn_latam_5",
-        "name":  "ESPN 5 Latin America (1080p)",
-        "group":  "🏆 Kênh Thể Thao ESPN \u0026 FOX",
-        "logo":  "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/espn-us.png",
-        "url":  "https://barinaslive1.boldmss.com/ESPN_5/ESPN_5.isml/ESPN_5.m3u8"
-    },
-    {
-        "id":  "sports_espn_latam_6",
-        "name":  "ESPN 6 Latin America (1080p)",
-        "group":  "🏆 Kênh Thể Thao ESPN \u0026 FOX",
-        "logo":  "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/espn-us.png",
-        "url":  "https://barinaslive1.boldmss.com/ESPN_6/ESPN_6.isml/ESPN_6.m3u8"
-    },
-    {
-        "id":  "sports_espn_latam_7",
-        "name":  "ESPN 7 Latin America (1080p)",
-        "group":  "🏆 Kênh Thể Thao ESPN \u0026 FOX",
-        "logo":  "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/espn-us.png",
-        "url":  "https://barinaslive1.boldmss.com/ESPN_7/ESPN_7.isml/ESPN_7.m3u8"
-    },
-    {
-        "id":  "sports_fox_sports_1",
-        "name":  "Fox Sports 1 (720p)",
-        "group":  "🏆 Kênh Thể Thao ESPN \u0026 FOX",
-        "logo":  "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/fox-sports-1-us.png",
-        "url":  "http://85.237.89.160:9590/usa-s/FOX-SPORTS-1/index.m3u8"
-    },
-    {
-        "id":  "sports_fox_sports_news",
-        "name":  "Fox Sports News (1080p Akamai)",
-        "group":  "🏆 Kênh Thể Thao ESPN \u0026 FOX",
-        "logo":  "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/fox-sports-1-us.png",
-        "url":  "https://skynewsau-live-premium.akamaized.net/hls/live/2105307/foxsportsnews/live_1080p.m3u8"
-    },
-    {
-        "id":  "sports_fubo_sports",
-        "name":  "Fubo Sports Network (1080p)",
-        "group":  "🏆 Kênh Thể Thao ESPN \u0026 FOX",
-        "logo":  "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/fubo-sports-network-us.png",
-        "url":  "https://dnf08l6u6uxnz.cloudfront.net/master.m3u8"
-    },
-    {
-        "id":  "sports_eleven_1",
-        "name":  "Eleven Sports 1 HD",
-        "group":  "🏆 Kênh Thể Thao ESPN \u0026 FOX",
-        "logo":  "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/poland/polsat-sport-1-pl.png",
-        "url":  "http://92.114.85.87:8002/play/a00e/index.m3u8"
-    },
-    {
-        "id":  "sports_eleven_2",
-        "name":  "Eleven Sports 2 HD",
-        "group":  "🏆 Kênh Thể Thao ESPN \u0026 FOX",
-        "logo":  "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/poland/polsat-sport-2-pl.png",
-        "url":  "http://92.114.85.87:8002/play/a00f/index.m3u8"
-    },
-    {
-        "id":  "sports_eleven_3",
-        "name":  "Eleven Sports 3 HD",
-        "group":  "🏆 Kênh Thể Thao ESPN \u0026 FOX",
-        "logo":  "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/poland/polsat-sport-3-pl.png",
-        "url":  "http://92.114.85.87:8002/play/a00g/index.m3u8"
-    },
-    {
-        "id":  "sports_eleven_4",
-        "name":  "Eleven Sports 4 HD",
-        "group":  "🏆 Kênh Thể Thao ESPN \u0026 FOX",
-        "logo":  "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/poland/polsat-sport-pl.png",
-        "url":  "http://92.114.85.87:8002/play/a00h/index.m3u8"
-    },
-    {
-        "id":  "sports_redbull_tv",
-        "name":  "Red Bull TV HD (Akamai)",
-        "group":  "🏎️ Đua Xe \u0026 Mạo Hiểm",
-        "logo":  "https://images.pluto.tv/channels/5e7cb84a172a0f0007da69e4/colorLogoPNG.png",
-        "url":  "https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master.m3u8"
-    },
-    {
-        "id":  "sports_rally_tv",
-        "name":  "Rally TV 1080p (WRC Trực Tiếp)",
-        "group":  "🏎️ Đua Xe \u0026 Mạo Hiểm",
-        "logo":  "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/fox-sports-1-us.png",
-        "url":  "https://rally-tv-live.akamaized.net/hls/live/2117704/RallyTV-Pri/master.m3u8"
-    },
-    {
-        "id":  "sports_racer_select",
-        "name":  "RACER Select HD",
-        "group":  "🏎️ Đua Xe \u0026 Mạo Hiểm",
-        "logo":  "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/fox-sports-2-us.png",
-        "url":  "https://amg00378-amg00378c4-freelivesports-emea-5637.playouts.now.amagi.tv/playlist.m3u8"
-    },
-    {
-        "id":  "sports_nhra_tv",
-        "name":  "NHRA TV HD (Đua Xe Tốc Độ)",
-        "group":  "🏎️ Đua Xe \u0026 Mạo Hiểm",
-        "logo":  "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/fox-sports-1-us.png",
-        "url":  "https://d265y4sk8257lt.cloudfront.net/nh.m3u8"
-    },
-    {
-        "id":  "sports_swerve_combat",
-        "name":  "Swerve Combat HD (MMA \u0026 Boxing)",
-        "group":  "🥊 Võ Thuật \u0026 Đối Kháng",
-        "logo":  "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/poland/polsat-sport-fight-pl.png",
-        "url":  "https://linear-253.frequency.stream/mt/roku/253/hls/master/playlist.m3u8"
-    },
-    {
-        "id":  "sports_persiana_fight",
-        "name":  "Persiana Fight HD",
-        "group":  "🥊 Võ Thuật \u0026 Đối Kháng",
-        "logo":  "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/poland/polsat-sport-fight-pl.png",
-        "url":  "https://fighthls.persiana.live/hls/stream.m3u8"
-    },
-    {
-        "id":  "sports_polsat_sport_fight",
-        "name":  "Polsat Sport Fight (1080p)",
-        "group":  "🥊 Võ Thuật \u0026 Đối Kháng",
-        "logo":  "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/poland/polsat-sport-fight-pl.png",
-        "url":  "http://57.128.210.196:8080/194/index.m3u8"
-    },
-    {
-        "id":  "sports_nba_tv",
-        "name":  "NBA TV HD (Bóng Rổ)",
-        "group":  "🏀 Bóng Rổ \u0026 Quần Vợt",
-        "logo":  "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/nba-tv-us.png",
-        "url":  "http://23.237.104.106:8080/USA_NBA/index.m3u8"
-    },
-    {
-        "id":  "sports_nfl_network",
-        "name":  "NFL Network HD (Bóng Bầu Dục)",
-        "group":  "🏀 Bóng Rổ \u0026 Quần Vợt",
-        "logo":  "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/nfl-network-us.png",
-        "url":  "http://198.58.104.90:8989/nfl/index.m3u8"
-    },
-    {
-        "id":  "sports_tennis_channel_2",
-        "name":  "Tennis Channel 2 HD",
-        "group":  "🏀 Bóng Rổ \u0026 Quần Vợt",
-        "logo":  "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/tennis-channel-us.png",
-        "url":  "https://mumbai-edge.smartplaytv.in/Tennis2/index.m3u8"
-    },
-    {
-        "id":  "sports_pga_tour",
-        "name":  "PGA Tour HD (Golf)",
-        "group":  "🏀 Bóng Rổ \u0026 Quần Vợt",
-        "logo":  "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/nbc-golf-channel-us.png",
-        "url":  "https://d11k1mnrgfposz.cloudfront.net/playlist.m3u8"
-    },
-    {
-        "name":  "VTV6 Thể Thao HD (FPT)",
-        "group":  "⚽ Bóng Đá \u0026 Thể Thao VN",
-        "logo":  "data/logos/vtv6.png",
-        "url":  "https://vips-livecdn.fptplay.net/live/media/vtv6/live247-hls-avc/index.m3u8",
-        "id":  "tv_42aa576f9d"
-    },
-    {
-        "name":  "HTVC Thể Thao HD (FPT)",
-        "group":  "⚽ Bóng Đá \u0026 Thể Thao VN",
-        "logo":  "https://raw.githubusercontent.com/iptv-org/tv-logos/master/countries/us/espn.png",
-        "url":  "https://vips-livecdn.fptplay.net/live/media/htvthethao/live247-hls-avc/index.m3u8",
-        "id":  "tv_2d29e991cf"
-    },
-    {
-        "name":  "HTV Thể Thao",
-        "group":  "⚽ Bóng Đá \u0026 Thể Thao VN",
-        "logo":  "data/logos/htv_thethao.png",
-        "url":  "https://dethich.pw/htvthethao/index.m3u8",
-        "id":  "tv_ad49c3ca79"
-    },
-    {
-        "name":  "Đồng Nai 2 (Thể Thao \u0026 Giải Trí)",
-        "group":  "⚽ Bóng Đá \u0026 Thể Thao VN",
-        "logo":  "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/%C4%90NNRTV2.png",
-        "url":  "https://vtvgolive-ott3.vtvdigital.vn/live/dongnai2tv/chunklist_2.m3u8",
-        "id":  "tv_eba75970d2"
-    },
-    {
-        "name":  "Vĩnh Long 4 Thể Thao",
-        "group":  "⚽ Bóng Đá \u0026 Thể Thao VN",
-        "logo":  "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/THVL4.webp",
-        "url":  "https://dethich.pw/thvl4/index.m3u8",
-        "id":  "tv_1cc9c8e50b"
-    },
-    {
-        "name":  "CBS Sports Golazo (Cúp C1 / Serie A)",
-        "group":  "⚽ Bóng Đá Quốc Tế \u0026 C1",
-        "logo":  "https://r2.thesportsdb.com/images/media/channel/logo/p5csyn1620551587.png",
-        "url":  "https://dai.google.com/linear/hls/event/7f3Wv6f7QEKfQna22jHqLQ/master.m3u8",
-        "id":  "tv_51668397b4"
-    },
-    {
-        "name":  "beIN SPORTS XTRA HD",
-        "group":  "⚽ Bóng Đá Quốc Tế \u0026 C1",
-        "logo":  "https://r2.thesportsdb.com/images/media/channel/logo/p5csyn1620551587.png",
-        "url":  "https://bein-xtra-bein.amagi.tv/playlist.m3u8",
-        "id":  "tv_8d1941795e"
-    },
-    {
-        "name":  "FIFA+ Live HD (Trực Tiếp \u0026 World Cup)",
-        "group":  "⚽ Bóng Đá Quốc Tế \u0026 C1",
-        "logo":  "https://r2.thesportsdb.com/images/media/channel/logo/p5csyn1620551587.png",
-        "url":  "https://d2w9q46ikgrcwx.cloudfront.net/v1/master/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-of5cbk3sav3w5/v1/sysdata_s_p_a_fifa_7/samsungheadend_us/latest/main/hls/playlist.m3u8",
-        "id":  "tv_24f808718f"
-    },
-    {
-        "name":  "FIFA+ Global HD",
-        "group":  "⚽ Bóng Đá Quốc Tế \u0026 C1",
-        "logo":  "https://r2.thesportsdb.com/images/media/channel/logo/p5csyn1620551587.png",
-        "url":  "https://jmp2.uk/plu-660c29b5aec9680008f5b4a4.m3u8",
-        "id":  "tv_e58c48a4e3"
-    },
-    {
-        "name":  "Eurosport Live HD",
-        "group":  "⚽ Bóng Đá Quốc Tế \u0026 C1",
-        "logo":  "https://r2.thesportsdb.com/images/media/channel/logo/p5csyn1620551587.png",
-        "url":  "https://drk6xq0vhn.gpcdn.net/live/euro_sports_hd_abr/index.m3u8",
-        "id":  "tv_16399f85dd"
-    },
-    {
-        "name":  "Eurosport 1 HD (1080p)",
-        "group":  "⚽ Bóng Đá Quốc Tế \u0026 C1",
-        "logo":  "https://r2.thesportsdb.com/images/media/channel/logo/p5csyn1620551587.png",
-        "url":  "http://57.128.210.196:8080/264/index.m3u8",
-        "id":  "tv_b4af85a752"
-    },
-    {
-        "name":  "Eurosport 2 HD (1080p)",
-        "group":  "⚽ Bóng Đá Quốc Tế \u0026 C1",
-        "logo":  "https://r2.thesportsdb.com/images/media/channel/logo/p5csyn1620551587.png",
-        "url":  "http://57.128.210.196:8080/263/index.m3u8",
-        "id":  "tv_1099a13d77"
-    },
-    {
-        "name":  "CCTV-Storm Football (Bóng Đá 24/7)",
-        "group":  "⚽ Bóng Đá Quốc Tế \u0026 C1",
-        "logo":  "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/fox-soccer-plus-us.png",
-        "url":  "http://38.75.136.137:98/gslb/dsdqpub/fyzq.m3u8?auth=testpub",
-        "id":  "tv_3a40116567"
-    },
-    {
-        "name":  "TyC Sports HD (Bóng Đá Nam Mỹ)",
-        "group":  "⚽ Bóng Đá Quốc Tế \u0026 C1",
-        "logo":  "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/argentina/tyc-sports-ar.png",
-        "url":  "https://amg26268-amg26268c14-freelivesports-emea-10267.playouts.now.amagi.tv/ts-us-e2-n2/playlist/amg26268-sportsstudio-tycsports-freelivesportsemea/playlist.m3u8",
-        "id":  "tv_9884b0fc20"
-    },
-    {
-        "name":  "L\u0027Equipe Live 1080p (Pháp)",
-        "group":  "⚽ Bóng Đá Quốc Tế \u0026 C1",
-        "logo":  "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/france/lequipe-fr.png",
-        "url":  "https://dq37unyetkpcz.cloudfront.net/v1/master/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-m04j89j7k5gtp/LEquipe_FR.m3u8",
-        "id":  "tv_ead8a6b8dc"
-    },
-    {
-        "name":  "ESPN HD (United States)",
-        "group":  "🏆 Kênh Thể Thao ESPN \u0026 FOX",
-        "logo":  "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/espn-us.png",
-        "url":  "http://85.237.89.160:9590/usa-s/ESPN-HD/index.m3u8",
-        "id":  "tv_89467c791f"
-    },
-    {
-        "name":  "ESPN 2 HD (United States)",
-        "group":  "🏆 Kênh Thể Thao ESPN \u0026 FOX",
-        "logo":  "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/espn-us.png",
-        "url":  "http://85.237.89.160:9590/usa-s/ESPN-2-HD/index.m3u8",
-        "id":  "tv_1734ba7bb1"
-    },
-    {
-        "name":  "ESPNU HD",
-        "group":  "🏆 Kênh Thể Thao ESPN \u0026 FOX",
-        "logo":  "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/espn-us.png",
-        "url":  "http://85.237.89.160:9590/usa-s/ESPN-U-HD/index.m3u8",
-        "id":  "tv_0f5d8d0738"
-    },
-    {
-        "name":  "ESPN Latin America (1080p)",
-        "group":  "🏆 Kênh Thể Thao ESPN \u0026 FOX",
-        "logo":  "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/espn-us.png",
-        "url":  "https://barinaslive1.boldmss.com/ESPN/ESPN.isml/ESPN.m3u8",
-        "id":  "tv_3ee9f8f318"
-    },
-    {
-        "name":  "ESPN 2 Latin America (1080p)",
-        "group":  "🏆 Kênh Thể Thao ESPN \u0026 FOX",
-        "logo":  "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/espn-us.png",
-        "url":  "https://barinaslive1.boldmss.com/ESPN_2/ESPN_2.isml/ESPN_2.m3u8",
-        "id":  "tv_a32d1cb40d"
-    },
-    {
-        "name":  "ESPN 3 Latin America (1080p)",
-        "group":  "🏆 Kênh Thể Thao ESPN \u0026 FOX",
-        "logo":  "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/espn-us.png",
-        "url":  "https://barinaslive1.boldmss.com/ESPN_3/ESPN_3.isml/ESPN_3.m3u8",
-        "id":  "tv_b0d7139421"
-    },
-    {
-        "name":  "ESPN 4 Latin America (1080p)",
-        "group":  "🏆 Kênh Thể Thao ESPN \u0026 FOX",
-        "logo":  "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/espn-us.png",
-        "url":  "https://barinaslive1.boldmss.com/ESPN_4/ESPN_4.isml/ESPN_4.m3u8",
-        "id":  "tv_d6db82f59b"
-    },
-    {
-        "name":  "ESPN 5 Latin America (1080p)",
-        "group":  "🏆 Kênh Thể Thao ESPN \u0026 FOX",
-        "logo":  "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/espn-us.png",
-        "url":  "https://barinaslive1.boldmss.com/ESPN_5/ESPN_5.isml/ESPN_5.m3u8",
-        "id":  "tv_ec340317c9"
-    },
-    {
-        "name":  "ESPN 6 Latin America (1080p)",
-        "group":  "🏆 Kênh Thể Thao ESPN \u0026 FOX",
-        "logo":  "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/espn-us.png",
-        "url":  "https://barinaslive1.boldmss.com/ESPN_6/ESPN_6.isml/ESPN_6.m3u8",
-        "id":  "tv_693b64c79e"
-    },
-    {
-        "name":  "ESPN 7 Latin America (1080p)",
-        "group":  "🏆 Kênh Thể Thao ESPN \u0026 FOX",
-        "logo":  "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/espn-us.png",
-        "url":  "https://barinaslive1.boldmss.com/ESPN_7/ESPN_7.isml/ESPN_7.m3u8",
-        "id":  "tv_c36541e131"
-    },
-    {
-        "name":  "Fox Sports 1 (720p)",
-        "group":  "🏆 Kênh Thể Thao ESPN \u0026 FOX",
-        "logo":  "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/fox-sports-1-us.png",
-        "url":  "http://85.237.89.160:9590/usa-s/FOX-SPORTS-1/index.m3u8",
-        "id":  "tv_a7f4c04d5e"
-    },
-    {
-        "name":  "Fox Sports News (1080p Akamai)",
-        "group":  "🏆 Kênh Thể Thao ESPN \u0026 FOX",
-        "logo":  "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/fox-sports-1-us.png",
-        "url":  "https://skynewsau-live-premium.akamaized.net/hls/live/2105307/foxsportsnews/live_1080p.m3u8",
-        "id":  "tv_a4116153a7"
-    },
-    {
-        "name":  "Fubo Sports Network (1080p)",
-        "group":  "🏆 Kênh Thể Thao ESPN \u0026 FOX",
-        "logo":  "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/fubo-sports-network-us.png",
-        "url":  "https://dnf08l6u6uxnz.cloudfront.net/master.m3u8",
-        "id":  "tv_020954ffe8"
-    },
-    {
-        "name":  "Eleven Sports 1 HD",
-        "group":  "🏆 Kênh Thể Thao ESPN \u0026 FOX",
-        "logo":  "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/poland/polsat-sport-1-pl.png",
-        "url":  "http://92.114.85.87:8002/play/a00e/index.m3u8",
-        "id":  "tv_6763ba3260"
-    },
-    {
-        "name":  "Eleven Sports 2 HD",
-        "group":  "🏆 Kênh Thể Thao ESPN \u0026 FOX",
-        "logo":  "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/poland/polsat-sport-2-pl.png",
-        "url":  "http://92.114.85.87:8002/play/a00f/index.m3u8",
-        "id":  "tv_90026d4944"
-    },
-    {
-        "name":  "Eleven Sports 3 HD",
-        "group":  "🏆 Kênh Thể Thao ESPN \u0026 FOX",
-        "logo":  "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/poland/polsat-sport-3-pl.png",
-        "url":  "http://92.114.85.87:8002/play/a00g/index.m3u8",
-        "id":  "tv_9de0a70a28"
-    },
-    {
-        "name":  "Eleven Sports 4 HD",
-        "group":  "🏆 Kênh Thể Thao ESPN \u0026 FOX",
-        "logo":  "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/poland/polsat-sport-pl.png",
-        "url":  "http://92.114.85.87:8002/play/a00h/index.m3u8",
-        "id":  "tv_c29f3ec966"
-    },
-    {
-        "name":  "Red Bull TV HD (Akamai)",
-        "group":  "🏎️ Đua Xe \u0026 Mạo Hiểm",
-        "logo":  "https://images.pluto.tv/channels/5e7cb84a172a0f0007da69e4/colorLogoPNG.png",
-        "url":  "https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master.m3u8",
-        "id":  "tv_5ce6b2d7c3"
-    },
-    {
-        "name":  "Rally TV 1080p (WRC Trực Tiếp)",
-        "group":  "🏎️ Đua Xe \u0026 Mạo Hiểm",
-        "logo":  "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/fox-sports-1-us.png",
-        "url":  "https://rally-tv-live.akamaized.net/hls/live/2117704/RallyTV-Pri/master.m3u8",
-        "id":  "tv_372eb11bd8"
-    },
-    {
-        "name":  "RACER Select HD",
-        "group":  "🏎️ Đua Xe \u0026 Mạo Hiểm",
-        "logo":  "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/fox-sports-2-us.png",
-        "url":  "https://amg00378-amg00378c4-freelivesports-emea-5637.playouts.now.amagi.tv/playlist.m3u8",
-        "id":  "tv_263abbb38a"
-    },
-    {
-        "name":  "NHRA TV HD (Đua Xe Tốc Độ)",
-        "group":  "🏎️ Đua Xe \u0026 Mạo Hiểm",
-        "logo":  "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/fox-sports-1-us.png",
-        "url":  "https://d265y4sk8257lt.cloudfront.net/nh.m3u8",
-        "id":  "tv_4b0bdb4254"
-    },
-    {
-        "name":  "Swerve Combat HD (MMA \u0026 Boxing)",
-        "group":  "🥊 Võ Thuật \u0026 Đối Kháng",
-        "logo":  "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/poland/polsat-sport-fight-pl.png",
-        "url":  "https://linear-253.frequency.stream/mt/roku/253/hls/master/playlist.m3u8",
-        "id":  "tv_1ba14622e6"
-    },
-    {
-        "name":  "Persiana Fight HD",
-        "group":  "🥊 Võ Thuật \u0026 Đối Kháng",
-        "logo":  "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/poland/polsat-sport-fight-pl.png",
-        "url":  "https://fighthls.persiana.live/hls/stream.m3u8",
-        "id":  "tv_34f0efa569"
-    },
-    {
-        "name":  "Polsat Sport Fight (1080p)",
-        "group":  "🥊 Võ Thuật \u0026 Đối Kháng",
-        "logo":  "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/poland/polsat-sport-fight-pl.png",
-        "url":  "http://57.128.210.196:8080/194/index.m3u8",
-        "id":  "tv_60bc83a4e8"
-    },
-    {
-        "name":  "NBA TV HD (Bóng Rổ)",
-        "group":  "🏀 Bóng Rổ \u0026 Quần Vợt",
-        "logo":  "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/nba-tv-us.png",
-        "url":  "http://23.237.104.106:8080/USA_NBA/index.m3u8",
-        "id":  "tv_0891d405f5"
-    },
-    {
-        "name":  "NFL Network HD (Bóng Bầu Dục)",
-        "group":  "🏀 Bóng Rổ \u0026 Quần Vợt",
-        "logo":  "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/nfl-network-us.png",
-        "url":  "http://198.58.104.90:8989/nfl/index.m3u8",
-        "id":  "tv_c16c1c25dc"
-    },
-    {
-        "name":  "Tennis Channel 2 HD",
-        "group":  "🏀 Bóng Rổ \u0026 Quần Vợt",
-        "logo":  "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/tennis-channel-us.png",
-        "url":  "https://mumbai-edge.smartplaytv.in/Tennis2/index.m3u8",
-        "id":  "tv_7d9e87aa75"
-    },
-    {
-        "name":  "PGA Tour HD (Golf)",
-        "group":  "🏀 Bóng Rổ \u0026 Quần Vợt",
-        "logo":  "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/nbc-golf-channel-us.png",
-        "url":  "https://d11k1mnrgfposz.cloudfront.net/playlist.m3u8",
-        "id":  "tv_5d7099ed2b"
-    },
-    {
-        "id":  "on_cine_45",
-        "name":  "ON Cine",
-        "group":  "VTVcab",
-        "logo":  "data/logos/vtvcab.png",
-        "url":  "https://freem3u.xyz/api/live/play.m3u8?vid=176"
-    },
-    {
-        "id":  "on_e_channel_46",
-        "name":  "ON E- Channel",
-        "group":  "VTVcab",
-        "logo":  "https://raw.githubusercontent.com/vuminhthanh12/Logo/refs/heads/main/onechannel.png",
-        "url":  "https://freem3u.xyz/api/live/play.m3u8?vid=182"
-    },
-    {
-        "id":  "on_phim_vi_t_47",
-        "name":  "ON Phim Việt",
-        "group":  "VTVcab",
-        "logo":  "data/logos/vtvcab.png",
-        "url":  "https://vmttv.dpdns.org/tv360/?id=vtvcab-2-phim-viet-hd"
-    },
-    {
-        "id":  "on_style_tv_48",
-        "name":  "ON Style TV",
-        "group":  "VTVcab",
-        "logo":  "https://raw.githubusercontent.com/vuminhthanh12/Logo/refs/heads/main/onstyle.png",
-        "url":  "https://freem3u.xyz/api/live/play.m3u8?vid=184"
-    },
-    {
-        "id":  "on_v_family_49",
-        "name":  "ON V Family",
-        "group":  "VTVcab",
-        "logo":  "https://i.ibb.co/HHfL7Dq/cocab20.webp",
-        "url":  "https://freem3u.xyz/api/live/play.m3u8?vid=187"
-    },
-    {
-        "id":  "on_vie_dramas_50",
-        "name":  "ON Vie Dramas",
-        "group":  "VTVcab",
-        "logo":  "data/logos/vtvcab.png",
-        "url":  "https://freem3u.xyz/api/live/play.m3u8?vid=177"
-    },
-    {
-        "id":  "on_vie_gi_i_tr_51",
-        "name":  "ON Vie Giải Trí",
-        "group":  "VTVcab",
-        "logo":  "https://i.ytimg.com/vi/fyT_xa-g-Pk/hq720.jpg",
-        "url":  "https://freem3u.xyz/api/live/play.m3u8?vid=180"
-    },
-    {
-        "id":  "on_bibi_52",
-        "name":  "On BiBi",
-        "group":  "VTVcab",
-        "logo":  "https://raw.githubusercontent.com/vuminhthanh12/Logo/refs/heads/main/onbibi.png",
-        "url":  "https://freem3u.xyz/api/live/play.m3u8?vid=178"
-    },
-    {
-        "id":  "on_golf_53",
-        "name":  "On Golf",
-        "group":  "VTVcab",
-        "logo":  "data/logos/vtvcab.png",
-        "url":  "https://vmttv.dpdns.org/tv360/?id=vtvcab-23-golf-channel"
-    },
-    {
-        "id":  "on_kids_54",
-        "name":  "On Kids",
-        "group":  "VTVcab",
-        "logo":  "https://assets-vtvcab.gviet.vn/images/v2/channel/20220613/2022061306/onkids5_1675158859.webp",
-        "url":  "https://freem3u.xyz/api/live/play.m3u8?vid=179"
-    },
-    {
-        "id":  "on_life_55",
-        "name":  "On Life",
-        "group":  "VTVcab",
-        "logo":  "data/logos/vtvcab.png",
-        "url":  "https://freem3u.xyz/api/live/play.m3u8?vid=188"
-    },
-    {
-        "id":  "on_movies_you_tv_56",
-        "name":  "On Movies - You TV",
-        "group":  "VTVcab",
-        "logo":  "data/logos/vtvcab.png",
-        "url":  "https://freem3u.xyz/api/live/play.m3u8?vid=181"
-    },
-    {
-        "id":  "on_music_57",
-        "name":  "On Music",
-        "group":  "VTVcab",
-        "logo":  "data/logos/vtvcab.png",
-        "url":  "https://freem3u.xyz/api/live/play.m3u8?vid=185"
-    },
-    {
-        "id":  "sctv22_58",
-        "name":  ":SCTV22",
-        "group":  "SCTV",
-        "logo":  "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/SCTV22.png",
-        "url":  "https://liveatmvng.vtvprime.vn/live/data8/SCTV22/Live_DASHDRM/SCTV22.mpd"
-    },
-    {
-        "id":  "sctv_phim_t_ng_h_p_59",
-        "name":  "SCTV Phim Tổng Hợp",
-        "group":  "SCTV",
-        "logo":  "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/sctvpth.png",
-        "url":  "https://vmttv.dpdns.org/VTVGo/?sctvphim"
-    },
-    {
-        "id":  "sctv1_60",
-        "name":  "SCTV1",
-        "group":  "SCTV",
-        "logo":  "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/sctv1.png",
-        "url":  "https://vmttv.dpdns.org/VTVGo/?sctv1"
-    },
-    {
-        "id":  "sctv10_61",
-        "name":  "SCTV10",
-        "group":  "SCTV",
-        "logo":  "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/SCTV10.jpg",
-        "url":  "https://vmttv.dpdns.org/VTVGo/?sctv10"
-    },
-    {
-        "id":  "sctv11_62",
-        "name":  "SCTV11",
-        "group":  "SCTV",
-        "logo":  "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/sctv11.png",
-        "url":  "https://vmttv.dpdns.org/VTVGo/?sctv11"
-    },
-    {
-        "id":  "sctv12_63",
-        "name":  "SCTV12",
-        "group":  "SCTV",
-        "logo":  "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/sctv12.png",
-        "url":  "https://vmttv.dpdns.org/VTVGo/?sctv12"
-    },
-    {
-        "id":  "sctv13_64",
-        "name":  "SCTV13",
-        "group":  "SCTV",
-        "logo":  "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/sctv13.png",
-        "url":  "https://vmttv.dpdns.org/VTVGo/?sctv13"
-    },
-    {
-        "id":  "sctv14_65",
-        "name":  "SCTV14",
-        "group":  "SCTV",
-        "logo":  "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/sctv14.png",
-        "url":  "https://vmttv.dpdns.org/VTVGo/?sctv14"
-    },
-    {
-        "id":  "sctv15_66",
-        "name":  "SCTV15",
-        "group":  "SCTV",
-        "logo":  "https://raw.githubusercontent.com/vuminhthanh12/Logo/refs/heads/main/SCTV15.png",
-        "url":  "https://liveatmvng.vtvprime.vn/live/data8/SCTV15HD/Live_DASHDRM/SCTV15HD.mpd"
-    },
-    {
-        "id":  "sctv16_67",
-        "name":  "SCTV16",
-        "group":  "SCTV",
-        "logo":  "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/sctv16.png",
-        "url":  "https://vmttv.dpdns.org/VTVGo/?sctv16"
-    },
-    {
-        "id":  "sctv17_68",
-        "name":  "SCTV17",
-        "group":  "SCTV",
-        "logo":  "https://raw.githubusercontent.com/vuminhthanh12/Logo/refs/heads/main/SCTV17.png",
-        "url":  "https://liveatmvng.vtvprime.vn/live/data8/SCTV17/Live_DASHDRM/SCTV17.mpd"
-    },
-    {
-        "id":  "sctv18_69",
-        "name":  "SCTV18",
-        "group":  "SCTV",
-        "logo":  "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/sctv18.png",
-        "url":  "https://vmttv.dpdns.org/VTVGo/?sctv18"
-    },
-    {
-        "id":  "sctv19_70",
-        "name":  "SCTV19",
-        "group":  "SCTV",
-        "logo":  "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/sctv19.png",
-        "url":  "https://vmttv.dpdns.org/VTVGo/?sctv19"
-    },
-    {
-        "id":  "sctv2_today_tv_71",
-        "name":  "SCTV2 - TODAY TV",
-        "group":  "SCTV",
-        "logo":  "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/SCTV2TODAYTV.jpg",
-        "url":  "https://freem3u.xyz/api/live/play.m3u8?vid=201"
-    },
-    {
-        "id":  "sctv20_72",
-        "name":  "SCTV20",
-        "group":  "SCTV",
-        "logo":  "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/SCTV20.png",
-        "url":  "https://vmttv.dpdns.org/VTVGo/?sctv20"
-    },
-    {
-        "id":  "sctv21_vi_t_nam_k_c_73",
-        "name":  "SCTV21 - Việt Nam Ký Ức",
-        "group":  "SCTV",
-        "logo":  "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/SCTV21.png",
-        "url":  "https://vmttv.dpdns.org/VTVGo/?sctv21"
-    },
-    {
-        "id":  "sctv3_74",
-        "name":  "SCTV3",
-        "group":  "SCTV",
-        "logo":  "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/sctv3.png",
-        "url":  "https://vmttv.dpdns.org/VTVGo/?sctv3"
-    },
-    {
-        "id":  "sctv4_75",
-        "name":  "SCTV4",
-        "group":  "SCTV",
-        "logo":  "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/sctv4.png",
-        "url":  "https://vmttv.dpdns.org/VTVGo/?sctv4"
-    },
-    {
-        "id":  "sctv5_76",
-        "name":  "SCTV5",
-        "group":  "SCTV",
-        "logo":  "https://raw.githubusercontent.com/vuminhthanh12/Logo/refs/heads/main/SCTV5.jpg",
-        "url":  "https://vmttv.dpdns.org/VTVGo/?sctv5"
-    },
-    {
-        "id":  "sctv7_77",
-        "name":  "SCTV7",
-        "group":  "SCTV",
-        "logo":  "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/sctv7.webp",
-        "url":  "https://vmttv.dpdns.org/VTVGo/?sctv7"
-    },
-    {
-        "id":  "sctv8_78",
-        "name":  "SCTV8",
-        "group":  "SCTV",
-        "logo":  "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/sctv8.png",
-        "url":  "https://vmttv.dpdns.org/VTVGo/?sctv8"
-    },
-    {
-        "id":  "sctv9_79",
-        "name":  "SCTV9",
-        "group":  "SCTV",
-        "logo":  "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/SCTV9.png",
-        "url":  "https://vmttv.dpdns.org/VTVGo/?sctv9"
-    },
-    {
-        "id":  "360_ho_t_h_nh_80",
-        "name":  "360 Hoạt hình",
-        "group":  "Rạp Phim",
-        "logo":  "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
-        "url":  "https://vmttv.dpdns.org/tv360/?id=hoat-hinh"
-    },
-    {
-        "id":  "360_h_i_t_nh_c_m_81",
-        "name":  "360 Hài - Tình Cảm",
-        "group":  "Rạp Phim",
-        "logo":  "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
-        "url":  "https://vmttv.dpdns.org/tv360/?id=360-hai-tinh-cam"
-    },
-    {
-        "id":  "360_h_nh_ng_ch_u_82",
-        "name":  "360 Hành Động Châu Á",
-        "group":  "Rạp Phim",
-        "logo":  "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
-        "url":  "https://vmttv.dpdns.org/tv360/?id=360-hanh-dong-chau-a"
-    },
-    {
-        "id":  "360_k_drama_83",
-        "name":  "360 K-Drama",
-        "group":  "Rạp Phim",
-        "logo":  "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
-        "url":  "https://vmttv.dpdns.org/tv360/?id=360-k-drama"
-    },
-    {
-        "id":  "360_phim_hoa_ng_84",
-        "name":  "360 Phim Hoa Ngữ",
-        "group":  "Rạp Phim",
-        "logo":  "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
-        "url":  "https://vmttv.dpdns.org/tv360/?id=360-hoa-ngu"
-    },
-    {
-        "id":  "360_phim_kinh_i_n_85",
-        "name":  "360 Phim Kinh Điển",
-        "group":  "Rạp Phim",
-        "logo":  "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
-        "url":  "https://vmttv.dpdns.org/tv360/?id=360-phim-kinh-dien"
-    },
-    {
-        "id":  "360_phim_vi_t_86",
-        "name":  "360 Phim Việt",
-        "group":  "Rạp Phim",
-        "logo":  "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
-        "url":  "https://vmttv.dpdns.org/tv360/?id=phim-viet"
-    },
-    {
-        "id":  "360_phim_u_m_87",
-        "name":  "360 Phim Âu Mỹ",
-        "group":  "Rạp Phim",
-        "logo":  "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
-        "url":  "https://vmttv.dpdns.org/tv360/?id=phim-au-my"
-    },
-    {
-        "id":  "tv360_10_88",
-        "name":  "TV360+10",
-        "group":  "Sự Kiện TV360",
-        "logo":  "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
-        "url":  "https://vmttv.dpdns.org/tv360/?id=tv360-10"
-    },
-    {
-        "id":  "tv360_12_89",
-        "name":  "TV360+12",
-        "group":  "Sự Kiện TV360",
-        "logo":  "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
-        "url":  "https://vmttv.dpdns.org/tv360/?id=tv360-12"
-    },
-    {
-        "id":  "tv360_8_90",
-        "name":  "TV360+8",
-        "group":  "Sự Kiện TV360",
-        "logo":  "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
-        "url":  "https://vmttv.dpdns.org/tv360/?id=tv360-8"
-    },
-    {
-        "id":  "tv360_9_91",
-        "name":  "TV360+9",
-        "group":  "Sự Kiện TV360",
-        "logo":  "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
-        "url":  "https://vmttv.dpdns.org/tv360/?id=tv360-9"
-    },
-    {
-        "id":  "vtvprime_11_92",
-        "name":  "VTVPrime 11",
-        "group":  "Sự Kiện VTVPrime",
-        "logo":  "https://vtvprime.vn/sideLogoBig.png",
-        "url":  "https://livevliatmcdw.seenow.vn/live/data8/SKSS1/Live_DASHDRM/SKSS1.mpd"
-    },
-    {
-        "id":  "vtvprime_12_93",
-        "name":  "VTVPrime 12",
-        "group":  "Sự Kiện VTVPrime",
-        "logo":  "https://vtvprime.vn/sideLogoBig.png",
-        "url":  "https://livevliatmcdw.seenow.vn/live/data8/SKSS2/Live_DASHDRM/SKSS2.mpd"
-    },
-    {
-        "id":  "axn_hd_135",
-        "name":  "AXN HD",
-        "group":  "Quốc Tế",
-        "logo":  "https://raw.githubusercontent.com/vuminhthanh12/Logo/refs/heads/main/axn.png",
-        "url":  "https://s7771.cdn.mytvnet.vn/pkg20/live_dzones/axn.smil/manifest.mpd"
-    },
-    {
-        "id":  "animal_planet_136",
-        "name":  "Animal Planet",
-        "group":  "Quốc Tế",
-        "logo":  "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
-        "url":  "https://s2129134.cdn.mytvnet.vn/pkg20/live_dzones/ap.smil/manifest.mpd"
-    },
-    {
-        "id":  "bbc_cbeebies_137",
-        "name":  "BBC Cbeebies",
-        "group":  "Quốc Tế",
-        "logo":  "https://s72140.cdn.mytvnet.vn/vimages/7d/d5/58/8c/ce/ea/7d58c-pcbeebieshd-channel-unkn.png",
-        "url":  "https://s2129134.cdn.mytvnet.vn/pkg20/live_dzones/cbb.smil/manifest.mpd"
-    },
-    {
-        "id":  "bbc_earth_138",
-        "name":  "BBC Earth",
-        "group":  "Quốc Tế",
-        "logo":  "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-kingdom/bbc-earth-uk.png",
-        "url":  "https://s7771.cdn.mytvnet.vn/pkg20/live_dzones/bbcearth.smil/manifest.mpd"
-    },
-    {
-        "id":  "bbc_lifestyle_139",
-        "name":  "BBC Lifestyle",
-        "group":  "Quốc Tế",
-        "logo":  "https://images.now-tv.com/shares/channelPreview/img/en_hk/color/ch502_425_305",
-        "url":  "https://s7770.cdn.mytvnet.vn/pkg20/live_dzones/bbclifestyle.smil/manifest.mpd"
-    },
-    {
-        "id":  "bbc_world_news_140",
-        "name":  "BBC World News",
-        "group":  "Quốc Tế",
-        "logo":  "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-kingdom/bbc-world-news-uk.png",
-        "url":  "https://s7771.cdn.mytvnet.vn/pkg20/live_dzones/bbcworldnews.smil/manifest.mpd"
-    },
-    {
-        "id":  "bloomberg_142",
-        "name":  "Bloomberg",
-        "group":  "Quốc Tế",
-        "logo":  "https://i.imgur.com/rxFZgIK.png",
-        "url":  "https://s2129134.cdn.mytvnet.vn/pkg20/live_dzones/bloomberg.smil/manifest.mpd"
-    },
-    {
-        "id":  "cgtn_143",
-        "name":  "CGTN",
-        "group":  "Quốc Tế",
-        "logo":  "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-kingdom/bbc-news-uk.png",
-        "url":  "https://english-livebkali.cgtn.com/live/encgtn_0.m3u8"
-    },
-    {
-        "id":  "cgtn_documentary_144",
-        "name":  "CGTN Documentary",
-        "group":  "Quốc Tế",
-        "logo":  "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-kingdom/bbc-news-uk.png",
-        "url":  "https://english-livebkali.cgtn.com/live/doccgtn_0.m3u8"
-    },
-    {
-        "id":  "cnn_145",
-        "name":  "CNN",
-        "group":  "Quốc Tế",
-        "logo":  "https://deadline.com/wp-content/uploads/2020/09/CNN-Logo.jpg",
-        "url":  "https://s7771.cdn.mytvnet.vn/pkg20/live_dzones/cnn.smil/manifest.mpd"
-    },
-    {
-        "id":  "cartoon_network_hd_146",
-        "name":  "Cartoon Network HD",
-        "group":  "Quốc Tế",
-        "logo":  "https://freight.cargo.site/w/1200/i/3cf72163d993c4d87263e6d4990ec4ccdd1e14b09ce89e6e35dee1de83ef4985/CN.jpg",
-        "url":  "https://s2129134.cdn.mytvnet.vn/pkg20/live_dzones/cn.smil/manifest.mpd"
-    },
-    {
-        "id":  "cartoonito_147",
-        "name":  "Cartoonito",
-        "group":  "Quốc Tế",
-        "logo":  "https://1000logos.net/wp-content/uploads/2023/10/Cartoonito-Logo.jpg",
-        "url":  "https://s2129134.cdn.mytvnet.vn/pkg20/live_dzones/boomerang.smil/manifest.mpd"
-    },
-    {
-        "id":  "cinema_world_148",
-        "name":  "Cinema World",
-        "group":  "Quốc Tế",
-        "logo":  "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
-        "url":  "https://s2129134.cdn.mytvnet.vn/pkg20/live_dzones/cinemaworld.smil/manifest.mpd"
-    },
-    {
-        "id":  "cinemax_hd_149",
-        "name":  "Cinemax HD",
-        "group":  "Quốc Tế",
-        "logo":  "https://raw.githubusercontent.com/vuminhthanh12/Logo/refs/heads/main/cinemax.png",
-        "url":  "https://s2129134.cdn.mytvnet.vn/pkg20/live_dzones/max.smil/manifest.mpd"
-    },
-    {
-        "id":  "dmax_150",
-        "name":  "DMAX",
-        "group":  "Quốc Tế",
-        "logo":  "https://i.imgur.com/vHmt91V.png",
-        "url":  "https://s2129134.cdn.mytvnet.vn/pkg20/live_dzones/dmax.smil/manifest.mpd"
-    },
-    {
-        "id":  "dw_151",
-        "name":  "DW",
-        "group":  "Quốc Tế",
-        "logo":  "https://i.ytimg.com/vi/puzK9XqJ6-Y/hq720.jpg",
-        "url":  "https://freem3u.xyz/api/live/play.m3u8?vid=109"
-    },
-    {
-        "id":  "discovery_152",
-        "name":  "Discovery",
-        "group":  "Quốc Tế",
-        "logo":  "https://s72140.cdn.mytvnet.vn/vimages/c7/7f/fc/c6/69/9b/c7fc6-pdiscoveryhd-channel-unkn.png",
-        "url":  "https://s7770.cdn.mytvnet.vn/pkg20/live_dzones/dsc.smil/manifest.mpd"
-    },
-    {
-        "id":  "discovery_asia_153",
-        "name":  "Discovery Asia",
-        "group":  "Quốc Tế",
-        "logo":  "https://astromedia.com.my/wp-content/uploads/2024/01/Discovery-Asia.png",
-        "url":  "https://s2129134.cdn.mytvnet.vn/pkg20/live_dzones/dscasia.smil/manifest.mpd"
-    },
-    {
-        "id":  "dreamworks_154",
-        "name":  "Dreamworks",
-        "group":  "Quốc Tế",
-        "logo":  "https://s7266.cdn.mytvnet.vn/vimages/de/eb/ba/a7/7e/ee/deba7-pdreamworkshd-channel-unkn.png",
-        "url":  "https://s2129134.cdn.mytvnet.vn/pkg20/live_dzones/dreamwork.smil/manifest.mpd"
-    },
-    {
-        "id":  "fashion_tv_155",
-        "name":  "Fashion TV",
-        "group":  "Quốc Tế",
-        "logo":  "https://m.media-amazon.com/images/I/91B05VQC2kL.png",
-        "url":  "https://s2129134.cdn.mytvnet.vn/pkg20/live_dzones/ftv.smil/manifest.mpd"
-    },
-    {
-        "id":  "france_24_157",
-        "name":  "France 24",
-        "group":  "Quốc Tế",
-        "logo":  "https://m.media-amazon.com/images/I/81oryzEMf-L.png",
-        "url":  "https://live.france24.com/hls/live/2037218/F24_EN_HI_HLS/master_5000.m3u8"
-    },
-    {
-        "id":  "hbo_158",
-        "name":  "HBO",
-        "group":  "Quốc Tế",
-        "logo":  "https://i.pinimg.com/originals/8b/02/00/8b020050690f955ccb306cdf51324aea.png",
-        "url":  "https://s2129134.cdn.mytvnet.vn/pkg20/live_dzones/hbo.smil/manifest.mpd"
-    },
-    {
-        "id":  "history_hd_159",
-        "name":  "History HD",
-        "group":  "Quốc Tế",
-        "logo":  "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
-        "url":  "https://freem3u.xyz/api/live/play.m3u8?vid=9856"
-    },
-    {
-        "id":  "kbs_world_160",
-        "name":  "KBS World",
-        "group":  "Quốc Tế",
-        "logo":  "https://img.hplus.com.vn/728x409/banner/2018/06/05/654179-KBS.png",
-        "url":  "https://freem3u.xyz/api/live/play.m3u8?vid=213"
-    },
-    {
-        "id":  "tlc_161",
-        "name":  "TLC",
-        "group":  "Quốc Tế",
-        "logo":  "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
-        "url":  "https://s129135.cdn.mytvnet.vn/pkg20/live_dzones/tlc.smil/manifest.mpd"
-    },
-    {
-        "id":  "trt_world_162",
-        "name":  "TRT World",
-        "group":  "Quốc Tế",
-        "logo":  "https://mir-s3-cdn-cf.behance.net/project_modules/max_1200/425e1955860511.59ae62ac642ba.png",
-        "url":  "https://tv-trtworld.medya.trt.com.tr/master_1080.m3u8"
-    },
-    {
-        "id":  "warner_tv_163",
-        "name":  "Warner TV",
-        "group":  "Quốc Tế",
-        "logo":  "https://s7774.cdn.mytvnet.vn/vimages/6b/ba/a3/36/60/0a/6ba36-pwarnerhd-channel-unkn.png",
-        "url":  "https://s2129134.cdn.mytvnet.vn/pkg20/live_dzones/wtv.smil/manifest.mpd"
-    },
-    {
-        "id":  "cjb_sbs_164",
-        "name":  "CJB SBS",
-        "group":  "🇰🇷| Hàn Quốc",
-        "logo":  "https://static.wikia.nocookie.net/logos/images/3/3f/CJB.jpg/revision/latest?cb=20200224093248\u0026path-prefix=ko",
-        "url":  "http://1.222.207.80:1935/live/cjbtv/playlist.m3u8"
-    },
-    {
-        "id":  "ebs_e_165",
-        "name":  "EBS E",
-        "group":  "🇰🇷| Hàn Quốc",
-        "logo":  "https://cdn.aptoide.com/imgs/6/7/e/67edd0054bd79fb633b11710eeeba298_fgraphic.png",
-        "url":  "https://ebsonair.ebs.co.kr/plus3familypc/familypc1m/playlist.m3u8"
-    },
-    {
-        "id":  "ebs_kids_166",
-        "name":  "EBS Kids",
-        "group":  "🇰🇷| Hàn Quốc",
-        "logo":  "https://i.ytimg.com/vi/pra1kNRrxgc/hq720.jpg",
-        "url":  "https://ebsonair.ebs.co.kr/ebsufamilypc/familypc1m/playlist.m3u8"
-    },
-    {
-        "id":  "ebs_1_167",
-        "name":  "EBS+1",
-        "group":  "🇰🇷| Hàn Quốc",
-        "logo":  "https://static.wikia.nocookie.net/logopedia/images/7/70/Channels_IPTV_01.png/revision/latest?cb=20180627174859",
-        "url":  "https://ebsonair.ebs.co.kr/plus1familypc/familypc1m/playlist.m3u8"
-    },
-    {
-        "id":  "ebs_2_168",
-        "name":  "EBS+2",
-        "group":  "🇰🇷| Hàn Quốc",
-        "logo":  "https://static.wikia.nocookie.net/logopedia/images/5/5c/Channels_IPTV_02.png/revision/latest?cb=20180627175021",
-        "url":  "https://ebsonair.ebs.co.kr/plus2familypc/familypc1m/playlist.m3u8"
-    },
-    {
-        "id":  "ebs1_169",
-        "name":  "EBS1",
-        "group":  "🇰🇷| Hàn Quốc",
-        "logo":  "https://logowik.com/content/uploads/images/ebs1-20181732222724.logowik.com.webp",
-        "url":  "https://ebsonair.ebs.co.kr/ebs1familypc/familypc1m/playlist.m3u8"
-    },
-    {
-        "id":  "ebs2_170",
-        "name":  "EBS2",
-        "group":  "🇰🇷| Hàn Quốc",
-        "logo":  "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
-        "url":  "https://ebsonair.ebs.co.kr/ebs2familypc/familypc1m/playlist.m3u8"
-    },
-    {
-        "id":  "jtv_sbs_171",
-        "name":  "JTV SBS",
-        "group":  "🇰🇷| Hàn Quốc",
-        "logo":  "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
-        "url":  "http://61.85.197.53:1935/jtv_live/myStream/chunklist_w1542137203.m3u8"
-    },
-    {
-        "id":  "mbc_172",
-        "name":  "MBC",
-        "group":  "🇰🇷| Hàn Quốc",
-        "logo":  "https://img.imbc.com/commons/2018/image/comm2018noti/meta_mbc.png",
-        "url":  "https://ns1.tjmbc.co.kr/live/myStream.sdp/chunklist_w1392208922.m3u8"
-    },
-    {
-        "id":  "mbc_chuncheon_173",
-        "name":  "MBC Chuncheon",
-        "group":  "🇰🇷| Hàn Quốc",
-        "logo":  "https://raw.githubusercontent.com/iptv-org/tv-logos/master/countries/kr/mbc-tv.png",
-        "url":  "https://stream.chmbc.co.kr/TV/myStream/playlist.m3u8"
-    },
-    {
-        "id":  "mbc_chungbuk_174",
-        "name":  "MBC Chungbuk",
-        "group":  "🇰🇷| Hàn Quốc",
-        "logo":  "https://raw.githubusercontent.com/iptv-org/tv-logos/master/countries/kr/mbc-tv.png",
-        "url":  "http://211.33.246.4:32954/cj_live/myStream.sdp/playlist.m3u8"
-    },
-    {
-        "id":  "mbc_daegu_175",
-        "name":  "MBC Daegu",
-        "group":  "🇰🇷| Hàn Quốc",
-        "logo":  "https://raw.githubusercontent.com/iptv-org/tv-logos/master/countries/kr/mbc-tv.png",
-        "url":  "https://5ee1ec6f32118.streamlock.net/live/livetv/playlist.m3u8"
-    },
-    {
-        "id":  "mbc_jeju_176",
-        "name":  "MBC Jeju",
-        "group":  "🇰🇷| Hàn Quốc",
-        "logo":  "https://jejumbc.com/main/images/news/jj1.jpg",
-        "url":  "https://wowza.jejumbc.com/live/tv_jejumbc/playlist.m3u8"
-    },
-    {
-        "id":  "mbc_mokpo_177",
-        "name":  "MBC Mokpo",
-        "group":  "🇰🇷| Hàn Quốc",
-        "logo":  "https://raw.githubusercontent.com/iptv-org/tv-logos/master/countries/kr/mbc-tv.png",
-        "url":  "http://vod.mpmbc.co.kr:1935/live/encoder-tv/playlist.m3u8"
-    },
-    {
-        "id":  "mbc_yeosu_178",
-        "name":  "MBC Yeosu",
-        "group":  "🇰🇷| Hàn Quốc",
-        "logo":  "https://raw.githubusercontent.com/iptv-org/tv-logos/master/countries/kr/mbc-tv.png",
-        "url":  "https://5c3639aa99149.streamlock.net/live_TV/tv/playlist.m3u8"
-    },
-    {
-        "id":  "tv_chosun_179",
-        "name":  "TV Chosun",
-        "group":  "🇰🇷| Hàn Quốc",
-        "logo":  "https://raw.githubusercontent.com/iptv-org/tv-logos/master/countries/kr/tv-chosun.png",
-        "url":  "http://onair.cdn.tvchosun.com/origin1/_definst_/tvchosun_s1/playlist.m3u8"
-    },
-    {
-        "id":  "tvn_181",
-        "name":  "TVN",
-        "group":  "🇰🇷| Hàn Quốc",
-        "logo":  "https://raw.githubusercontent.com/iptv-org/tv-logos/master/countries/kr/tvn.png",
-        "url":  "http://onair2.cdn.tvchosun.com/origin2/_definst_/tvchosun_s3/playlist.m3u8"
-    },
-    {
-        "id":  "cctv2_182",
-        "name":  "CCTV2",
-        "group":  "🇨🇳| Trung Quốc",
-        "logo":  "https://raw.githubusercontent.com/iptv-org/tv-logos/master/countries/cn/cctv-5.png",
-        "url":  "http://74.91.26.218:82/live/cctv2hd.m3u8"
-    },
-    {
-        "id":  "cctv3_183",
-        "name":  "CCTV3",
-        "group":  "🇨🇳| Trung Quốc",
-        "logo":  "https://static.wikia.nocookie.net/logos/images/f/f2/CCTV3.png/revision/latest/scale-to-width-down/680?cb=20230514030148\u0026path-prefix=vi",
-        "url":  "http://74.91.26.218:82/live/cctv3hd.m3u8"
-    },
-    {
-        "id":  "cctv4_184",
-        "name":  "CCTV4",
-        "group":  "🇨🇳| Trung Quốc",
-        "logo":  "https://static.wikia.nocookie.net/logos/images/d/da/CCTV4.png/revision/latest?cb=20230520135601\u0026path-prefix=vi",
-        "url":  "http://74.91.26.218:82/live/cctv4hd.m3u8"
-    },
-    {
-        "id":  "cctv6_185",
-        "name":  "CCTV6",
-        "group":  "🇨🇳| Trung Quốc",
-        "logo":  "https://static.wikia.nocookie.net/logos/images/d/d9/CCTV6.png/revision/latest?cb=20230816063202\u0026path-prefix=vi",
-        "url":  "http://74.91.26.218:82/live/cctv6hd.m3u8"
-    },
-    {
-        "id":  "cctv7_186",
-        "name":  "CCTV7",
-        "group":  "🇨🇳| Trung Quốc",
-        "logo":  "https://static.wikia.nocookie.net/logos/images/a/a6/CCTV7_tr%C6%B0%E1%BB%9Bc_2019.png/revision/latest/scale-to-width-down/1547?cb=20230104111736\u0026path-prefix=vi",
-        "url":  "http://74.91.26.218:82/live/cctv7hd.m3u8"
-    },
-    {
-        "id":  "cctv8k_187",
-        "name":  "CCTV8K",
-        "group":  "🇨🇳| Trung Quốc",
-        "logo":  "https://pic2.zhimg.com/80/v2-01c9b1cdd4534f653e1bb8102b18a89d_1440w.webp",
-        "url":  "https://epg.pw/stream/51549059a33a0dc4ac8d112ebbe3b1df956d95319a9ee54b6ca449c464893da5.m3u8"
-    },
-    {
-        "id":  "atv1_b_o_v_ptth_an_giang_188",
-        "name":  "ATV1 - Báo và PTTH An Giang",
-        "group":  "Địa phương",
-        "logo":  "https://angiangtv.vn/wp-content/uploads/2025/06/H4.png",
-        "url":  "https://tv.angiangtv.vn/live/kgtv/kgtv.m3u8"
-    },
-    {
-        "id":  "atv3_b_o_v_ptth_an_giang_189",
-        "name":  "ATV3 - Báo và PTTH An Giang",
-        "group":  "Địa phương",
-        "logo":  "https://angiangtv.vn/wp-content/uploads/2025/06/H5.png",
-        "url":  "https://tv.angiangtv.vn/live/kgtv1/kgtv1.m3u8"
-    },
-    {
-        "id":  "bhttv_b_o_v_ptth_h_t_nh_190",
-        "name":  "BHTTV - Báo và PTTH Hà Tĩnh",
-        "group":  "Địa phương",
-        "logo":  "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/BHTTV.webp",
-        "url":  "https://freem3u.xyz/api/live/play.m3u8?vid=58"
-    },
-    {
-        "id":  "c_n_th_1_hd_b_o_v_ptth_th_nh_ph_c_n_th_191",
-        "name":  "Cần Thơ 1 HD - Báo và PTTH Thành Phố Cần Thơ",
-        "group":  "Địa phương",
-        "logo":  "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/CanTho1.png",
-        "url":  "https://live.canthotv.vn/live/tv/chunklist_w693005420.m3u8"
-    },
-    {
-        "id":  "c_n_th_2_hd_b_o_v_ptth_th_nh_ph_c_n_th_192",
-        "name":  "Cần Thơ 2 HD - Báo và PTTH Thành Phố Cần Thơ",
-        "group":  "Địa phương",
-        "logo":  "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/CanTho2.png",
-        "url":  "https://live.canthotv.vn/cs2/live.stream/chunklist_w1497265452.m3u8"
-    },
-    {
-        "id":  "c_n_th_3_hd_b_o_v_ptth_th_nh_ph_c_n_th_193",
-        "name":  "Cần Thơ 3 HD - Báo và PTTH Thành Phố Cần Thơ",
-        "group":  "Địa phương",
-        "logo":  "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/CanTho3.png",
-        "url":  "https://live.canthotv.vn/cs3/tv/chunklist_w1003748170.m3u8"
-    },
-    {
-        "id":  "drt_hd_b_o_v_ptth_k_l_k_194",
-        "name":  "DRT HD - Báo và PTTH Đắk Lắk",
-        "group":  "Địa phương",
-        "logo":  "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
-        "url":  "https://freem3u.xyz/api/live/play.m3u8?vid=51"
-    },
-    {
-        "id":  "gtv_b_o_v_ptth_gia_lai_195",
-        "name":  "GTV - Báo và PTTH Gia Lai",
-        "group":  "Địa phương",
-        "logo":  "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/GTVGIALAI.png",
-        "url":  "https://vmttv.dpdns.org/tv360/?id=gia-lai"
-    },
-    {
-        "id":  "hitv_196",
-        "name":  "HiTV",
-        "group":  "Địa phương",
-        "logo":  "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
-        "url":  "https://vmttv.dpdns.org/tv360/?id=hitv"
-    },
-    {
-        "id":  "hu_tv_b_o_v_ptth_hu_197",
-        "name":  "Huế TV - Báo và PTTH Huế",
-        "group":  "Địa phương",
-        "logo":  "https://i.imgur.com/q5MBibm.png",
-        "url":  "https://live.huetv.com.vn/TRT-Online/chunklist.m3u8"
-    },
-    {
-        "id":  "lstv_hd_b_o_v_ptth_l_ng_s_n_198",
-        "name":  "LSTV HD - Báo và PTTH Lạng Sơn",
-        "group":  "Địa phương",
-        "logo":  "https://langsontv.vn/templates/frontend/lstv/Assets/img/video_bg.png",
-        "url":  "https://stream.langsontv.vn/live/285c78da0c246524c90917842f8de03bd21/chunklist.m3u8"
-    },
-    {
-        "id":  "ltv_b_o_lai_ch_u_199",
-        "name":  "LTV - Báo Lai Châu",
-        "group":  "Địa phương",
-        "logo":  "https://images.fptplay53.net/media/channels/icon_channel_lai-chau_165649245279.png",
-        "url":  "https://freem3u.xyz/api/live/play.m3u8?vid=68"
-    },
-    {
-        "id":  "ltv1_hd_b_o_v_ptth_l_m_ng_200",
-        "name":  "LTV1 HD - Báo và PTTH Lâm Đồng",
-        "group":  "Địa phương",
-        "logo":  "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/LTV1.jpg",
-        "url":  "https://freem3u.xyz/api/live/play.m3u8?vid=69"
-    },
-    {
-        "id":  "nbtv_b_o_v_ptth_ninh_b_nh_201",
-        "name":  "NBTV - Báo và PTTH Ninh Bình",
-        "group":  "Địa phương",
-        "logo":  "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
-        "url":  "https://live.mediatech.vn/live/28597f8fd7ea5064d0f84ab00b3699dfd86/chunklist.m3u8"
-    },
-    {
-        "id":  "ntv_b_o_v_ptth_ngh_an_202",
-        "name":  "NTV - Báo và PTTH Nghệ An",
-        "group":  "Địa phương",
-        "logo":  "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
-        "url":  "https://freem3u.xyz/api/live/play.m3u8?vid=74"
-    },
-    {
-        "id":  "qngtv1_b_o_v_ptth_qu_ng_ng_i_203",
-        "name":  "QNgTV1 - Báo và PTTH Quảng Ngãi",
-        "group":  "Địa phương",
-        "logo":  "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/QNgTV1_QuangNgai.png",
-        "url":  "https://freem3u.xyz/api/live/play.m3u8?vid=81"
-    },
-    {
-        "id":  "qttv_b_o_v_ptth_qu_ng_tr_204",
-        "name":  "QTTV - Báo và PTTH Quảng Trị",
-        "group":  "Địa phương",
-        "logo":  "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/QTTV.jpg",
-        "url":  "https://freem3u.xyz/api/live/play.m3u8?vid=83"
-    },
-    {
-        "id":  "qtv3_hd_b_o_v_ptth_qu_ng_ninh_205",
-        "name":  "QTV3 HD - Báo và PTTH Quảng Ninh",
-        "group":  "Địa phương",
-        "logo":  "https://i.ytimg.com/vi/cTNt-U1akXw/hq720.jpg",
-        "url":  "https://live.baoquangninh.vn/qtvlive/tv3live.m3u8"
-    },
-    {
-        "id":  "stv_hd_b_o_v_ptth_s_n_la_206",
-        "name":  "STV HD - Báo và PTTH Sơn La",
-        "group":  "Địa phương",
-        "logo":  "https://media.sonlatv.vn/upload/files/image/Back-TH-1.jpg",
-        "url":  "https://cdn.sonlatv.vn/live/28595222e707a364251b8724717894baa46/chunklist.m3u8"
-    },
-    {
-        "id":  "thlc_hd_b_o_v_ptth_l_o_cai_207",
-        "name":  "THLC HD - Báo và PTTH Lào Cai",
-        "group":  "Địa phương",
-        "logo":  "https://lichphatsongtivi.com/storage/images/thumbnails/lich-phat-song-thlc.png",
-        "url":  "https://freem3u.xyz/api/live/play.m3u8?vid=71"
-    },
-    {
-        "id":  "thvl3_b_o_v_ptth_v_nh_long_208",
-        "name":  "THVL3 - Báo và PTTH Vĩnh Long",
-        "group":  "Địa phương",
-        "logo":  "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/THVL1.webp",
-        "url":  "https://vips-livecdn.fptplay.net/live/media/vinhlong3/live247-hls-avc/vinhlong3-avc1_5600000=10000-mp4a_131600=20000.m3u8"
-    },
-    {
-        "id":  "tn_b_o_v_ptth_th_i_nguy_n_209",
-        "name":  "TN - Báo và PTTH Thái Nguyên",
-        "group":  "Địa phương",
-        "logo":  "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
-        "url":  "https://freem3u.xyz/api/live/play.m3u8?vid=88"
-    },
-    {
-        "id":  "ttv_hd_b_o_v_ptth_thanh_h_a_210",
-        "name":  "TTV HD - Báo và PTTH Thanh Hóa",
-        "group":  "Địa phương",
-        "logo":  "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
-        "url":  "https://freem3u.xyz/api/live/play.m3u8?vid=89"
-    },
-    {
-        "id":  "t_y_ninh_tv_b_o_v_ptth_t_y_ninh_211",
-        "name":  "Tây Ninh TV - Báo và PTTH Tây Ninh",
-        "group":  "Địa phương",
-        "logo":  "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/TayNinhTV.jpg",
-        "url":  "https://freem3u.xyz/api/live/play.m3u8?vid=72"
-    },
-    {
-        "id":  "nrt1_b_o_v_ptth_n_ng_212",
-        "name":  "ĐNRT1 - Báo và PTTH Đà Nẵng",
-        "group":  "Địa phương",
-        "logo":  "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/ĐNRT1.png",
-        "url":  "https://freem3u.xyz/api/live/play.m3u8?vid=49"
-    },
-    {
-        "id":  "nrt2_b_o_v_ptth_n_ng_213",
-        "name":  "ĐNRT2 - Báo và PTTH Đà Nẵng",
-        "group":  "Địa phương",
-        "logo":  "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/DNRT2_logo.png",
-        "url":  "https://freem3u.xyz/api/live/play.m3u8?vid=80"
-    },
-    {
-        "id":  "tv_hd_b_o_i_n_bi_n_ph_214",
-        "name":  "ĐTV HD - Báo Điện Biên Phủ",
-        "group":  "Địa phương",
-        "logo":  "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
-        "url":  "https://freem3u.xyz/api/live/play.m3u8?vid=52"
-    },
-    {
-        "id":  "htv1_i_ptth_th_nh_ph_h_ch_minh_215",
-        "name":  "HTV1 - Đài PTTH Thành Phố Hồ Chí Minh",
-        "group":  "HTV",
-        "logo":  "https://s7771.cdn.mytvnet.vn/vimages/8c/ce/ee/e7/79/98/8cee7-phtv1hd-channel-unkn.png",
-        "url":  "https://freem3u.xyz/api/live/play.m3u8?vid=190"
-    },
-    {
-        "id":  "htv5_b_channel_216",
-        "name":  "HTV5 - B Channel",
-        "group":  "HTV",
-        "logo":  "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/HTV5.jpg",
-        "url":  "https://freem3u.xyz/api/live/play.m3u8?vid=151"
-    },
-    {
-        "id":  "an_giang_fm_93_1_mhz_217",
-        "name":  "An Giang FM 93.1 Mhz",
-        "group":  "Radio",
-        "logo":  "https://raw.githubusercontent.com/vuminhthanh12/Logo/refs/heads/main/ATVFM93.1%20MHZ.jpg",
-        "url":  "https://tv.angiangtv.vn/live/kgtv3/kgtv3.m3u8"
-    },
-    {
-        "id":  "an_giang_fm_99_4_mhz_218",
-        "name":  "An Giang FM 99,4 Mhz",
-        "group":  "Radio",
-        "logo":  "https://angiangtv.vn/wp-content/uploads/2025/06/H6.png",
-        "url":  "https://tv.angiangtv.vn/live/kgaudio/kgaudio.m3u8"
-    },
-    {
-        "id":  "b_c_ninh_219",
-        "name":  "Bắc Ninh",
-        "group":  "Radio",
-        "logo":  "https://bacninhtv.vn/templates/frontend/bgtv/Assets/img/v3/btv_bg_video.jpg",
-        "url":  "https://live.mediatech.vn/live/285acd5e43b501e4c21b0af4e55810625c8/chunklist.m3u8"
-    },
-    {
-        "id":  "c_mau_220",
-        "name":  "Cà Mau",
-        "group":  "Radio",
-        "logo":  "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
-        "url":  "http://tv.ctvcamau.vn/live/radio/radio.m3u8"
-    },
-    {
-        "id":  "c_i_l_ng_vi_t_nam_221",
-        "name":  "Cải Lương Việt Nam",
-        "group":  "Radio",
-        "logo":  "https://proxy.zeno.fm/content/stations/agxzfnplbm8tc3RhdHNyMgsSCkF1dGhDbGllbnQYgICQ2ciKiAoMCxIOU3RhdGlvblByb2ZpbGUYgIDQoL-YpAoMogEEemVubw/image/",
-        "url":  "https://stream.zeno.fm/0trm6wrnga0uv"
-    },
-    {
-        "id":  "c_n_th_radio_2_222",
-        "name":  "Cần Thơ Radio 2",
-        "group":  "Radio",
-        "logo":  "https://canthoplus.vn/storage/channels/d18742e3-5735-43ea-9001-77678b4ef751.png",
-        "url":  "https://live.canthotv.vn/live/radiocs2/chunklist_w790093430.m3u8"
-    },
-    {
-        "id":  "h_n_i_fm_90_223",
-        "name":  "Hà Nội FM 90",
-        "group":  "Radio",
-        "logo":  "https://image.voh.com.vn/voh/image/2024/03/08/dai-ha-noi-5_90mhz---3-01-111825.jpg",
-        "url":  "https://freem3u.xyz/api/live/play.m3u8?vid=9905"
-    },
-    {
-        "id":  "h_n_i_fm_96_224",
-        "name":  "Hà Nội FM 96",
-        "group":  "Radio",
-        "logo":  "https://image.voh.com.vn/voh/image/2024/03/08/dai-ha-noi-5_96mhz--3-01-111727.jpg?w=450\u0026h=270",
-        "url":  "https://freem3u.xyz/api/live/play.m3u8?vid=9906"
-    },
-    {
-        "id":  "h_ng_y_n_225",
-        "name":  "Hưng Yên",
-        "group":  "Radio",
-        "logo":  "http://hungyentv.vn//templates/frontend/hytv/Assets/img/backgroud-radio.jpg",
-        "url":  "https://live.mediatech.vn/live/285b6e443bc30734725a940da8b0629655b/chunklist.m3u8"
-    },
-    {
-        "id":  "l_ng_s_n_226",
-        "name":  "Lạng Sơn",
-        "group":  "Radio",
-        "logo":  "http://langsontv.vn/templates/frontend/lstv/Assets/img/radio_bg.png",
-        "url":  "https://stream.langsontv.vn/live/285dabcfc94f52b458688fe7f601524816e/chunklist.m3u8"
-    },
-    {
-        "id":  "m_radio_vi_t_nam_227",
-        "name":  "M Radio Việt Nam",
-        "group":  "Radio",
-        "logo":  "https://proxy.zeno.fm/content/stations/agxzfnplbm8tc3RhdHNyMgsSCkF1dGhDbGllbnQYgICQ2ciKiAoMCxIOU3RhdGlvblByb2ZpbGUYgICQucnHqwsMogEEemVubw/image/",
-        "url":  "https://stream.zeno.fm/4q7y9hvkp2zuv"
-    },
-    {
-        "id":  "ninh_b_nh_228",
-        "name":  "Ninh Bình",
-        "group":  "Radio",
-        "logo":  "https://nbtv.vn/templates/frontend/nbtv/Assets/img/audio_bg.jpg",
-        "url":  "https://live.mediatech.vn/live/285391a08f01f83458793b293c5e9517265/chunklist.m3u8"
-    },
-    {
-        "id":  "qnr1_qu_ng_ninh_229",
-        "name":  "QNR1 - Quảng Ninh",
-        "group":  "Radio",
-        "logo":  "https://media.baoquangninh.vn/upload/files/logo/logotrangchu4.png",
-        "url":  "http://103.90.220.236/qtvlive/qnr1.m3u8"
-    },
-    {
-        "id":  "qnr2_qu_ng_ninh_230",
-        "name":  "QNR2 - Quảng Ninh",
-        "group":  "Radio",
-        "logo":  "https://media.baoquangninh.vn/upload/files/logo/logotrangchu3.png",
-        "url":  "http://103.90.220.236/qtvlive/qnr2.m3u8"
-    },
-    {
-        "id":  "radio_dj_231",
-        "name":  "Radio DJ",
-        "group":  "Radio",
-        "logo":  "https://proxy.zeno.fm/content/stations/agxzfnplbm8tc3RhdHNyMgsSCkF1dGhDbGllbnQYgICQ2ciKiAoMCxIOU3RhdGlvblByb2ZpbGUYgIDQidjS_wkMogEEemVubw/image/",
-        "url":  "https://stream.zeno.fm/ehbutdfccm0uv"
-    },
-    {
-        "id":  "radio_nh_c_d_n_ca_232",
-        "name":  "Radio Nhạc Dân Ca",
-        "group":  "Radio",
-        "logo":  "https://proxy.zeno.fm/content/stations/agxzfnplbm8tc3RhdHNyMgsSCkF1dGhDbGllbnQYgICQ2ciKiAoMCxIOU3RhdGlvblByb2ZpbGUYgICw0ILTsQoMogEEemVubw/image/",
-        "url":  "https://stream.zeno.fm/a2dbs2tq1p8uv"
-    },
-    {
-        "id":  "radio_ph_t_gi_o_233",
-        "name":  "Radio Phật Giáo",
-        "group":  "Radio",
-        "logo":  "https://proxy.zeno.fm/content/stations/agxzfnplbm8tc3RhdHNyMgsSCkF1dGhDbGllbnQYgICQ2ciKiAoMCxIOU3RhdGlvblByb2ZpbGUYgIDQiavcsgsMogEEemVubw/image/",
-        "url":  "https://stream.zeno.fm/8456uy0bcm0uv"
-    },
-    {
-        "id":  "s_n_la_234",
-        "name":  "Sơn La",
-        "group":  "Radio",
-        "logo":  "https://media.sonlatv.vn/upload/files/image/Back-PT.jpg",
-        "url":  "https://cdn.sonlatv.vn/live/285bfb76d0d7a3c4615b853fe7a698e150c/chunklist.m3u8"
-    },
-    {
-        "id":  "th_i_nguy_n_235",
-        "name":  "Thái Nguyên",
-        "group":  "Radio",
-        "logo":  "http://esb.thainguyentv.vn/upload/group/news//hytvgo_5ff2dd1ed1b81.jpg",
-        "url":  "https://radio.thainguyentv.vn/hls/livestream.m3u8"
-    },
-    {
-        "id":  "t_y_ninh_236",
-        "name":  "Tây Ninh",
-        "group":  "Radio",
-        "logo":  "https://w.ladicdn.com/s450x400/5ec394fc3354ff26568e1124/logo-fm1031mhz-20211008162127.png",
-        "url":  "https://live-hq.evgcdn.net/live/2851dd3d9016ac74d84b0c4a7a659f76891/chunklist.m3u8"
-    },
-    {
-        "id":  "vov_giao_th_ng_h_n_i_237",
-        "name":  "VOV Giao thông Hà Nội",
-        "group":  "Radio",
-        "logo":  "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
-        "url":  "https://str.vov.gov.vn/vovlive/vovGTHN.sdp_aac/chunklist_w601606653.m3u8"
-    },
-    {
-        "id":  "vov_giao_th_ng_h_ch_minh_238",
-        "name":  "VOV Giao thông Hồ Chí Minh",
-        "group":  "Radio",
-        "logo":  "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
-        "url":  "https://str.vov.gov.vn/vovlive/vovGTHCM.sdp_aac/chunklist_w1213978008.m3u8"
-    },
-    {
-        "id":  "vov5_239",
-        "name":  "VOV5",
-        "group":  "Radio",
-        "logo":  "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
-        "url":  "https://str.vov.gov.vn/vovlive/vov5.sdp_aac/playlist.m3u8"
-    },
-    {
-        "id":  "n_ng_240",
-        "name":  "Đà Nẵng",
-        "group":  "Radio",
-        "logo":  "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
-        "url":  "https://live.mediatech.vn/live/2858a998b1c7fbf4522accd5554588ceae3/chunklist.m3u8"
-    },
-    {
-        "id":  "k_l_k_241",
-        "name":  "Đắk Lắk",
-        "group":  "Radio",
-        "logo":  "https://static.wikia.nocookie.net/logos/images/f/f3/Logo_DRT_FM_92%2C4MHz_%26_FM_94%2C7MHz.png/revision/latest/scale-to-width-down/1082?cb=20220613173357\u0026path-prefix=vi",
-        "url":  "https://cdn.drt.vn/live/285054c4567dea54b3fb14bfd60d61230b5/chunklist.m3u8"
-    },
-    {
-        "id":  "box_hits_243",
-        "name":  "Box Hits",
-        "group":  "📦| In The Box",
-        "logo":  "https://raw.githubusercontent.com/vuminhthanh12/Logo/refs/heads/main/boxhits.png",
-        "url":  "https://livevlisctcdnw.seenow.vn/mean/BOXHIT/manifest.mpd"
-    },
-    {
-        "id":  "capital_radio_uk_244",
-        "name":  "Capital Radio UK",
-        "group":  "🇬🇧 UK Radio",
-        "logo":  "https://www.globalplayer.com/assets/track-placeholders/capital.jpg",
-        "url":  "https://media-ssl.musicradio.com/CapitalUK"
-    },
-    {
-        "id":  "heart_fm_uk_245",
-        "name":  "Heart FM UK",
-        "group":  "🇬🇧 UK Radio",
-        "logo":  "https://ukradiolive.com/public/uploads/radio_img/heart-london/fb_cover.jpg",
-        "url":  "https://media-ssl.musicradio.com/HeartUK"
-    },
-    {
-        "id":  "hollywood_classics_246",
-        "name":  "Hollywood Classics",
-        "group":  "📦| In The Box",
-        "logo":  "https://raw.githubusercontent.com/vuminhthanh12/Logo/refs/heads/main/hollywoodclassic.png",
-        "url":  "https://livevlisctcdnw.seenow.vn/Live_DASHDRM1/HC/manifest.mpd"
-    },
-    {
-        "id":  "music_box_247",
-        "name":  "Music Box",
-        "group":  "📦| In The Box",
-        "logo":  "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
-        "url":  "https://livevlisctcdnw.seenow.vn/livesnv2/MUSICBOX/manifest.mpd"
-    },
-    {
-        "id":  "radio_nh_c_v_ng_x_a_248",
-        "name":  "Radio Nhạc Vàng Xưa",
-        "group":  "Unknown",
-        "logo":  "https://dongnhacvang.com/wp-content/uploads/2019/08/cropped-logo-nhac-vang-1-2.png",
-        "url":  "https://stream.zeno.fm/x2z45v7d84zuv"
-    },
-    {
-        "id":  "tvb_vi_t_nam_249",
-        "name":  "TVB VIỆT NAM",
-        "group":  "TVB",
-        "logo":  "https://tvbaw-na.s3.us-west-1.amazonaws.com/hb/TVB%20Vietnam%20Banner_Side.jpg",
-        "url":  "https://amg01868-amg01868c3-tvbanywhere-us-4491.playouts.now.amagi.tv/playlist1080p.m3u8"
-    },
-    {
-        "id":  "virgin_media_four_250",
-        "name":  "Virgin Media Four",
-        "group":  "Israel",
-        "logo":  "https://i.ytimg.com/vi/QZZijZXNeqo/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD\u0026rs=AOn4CLC-WbMQHFRNT0NZEmZ7Wngm4na2TQ",
-        "url":  "https://d1o5wc5bjvzqoa.cloudfront.net/out/v1/bb744b243afb44eabcc56d002c36cafd/index.mpd"
-    },
-    {
-        "id":  "virgin_media_three_251",
-        "name":  "Virgin Media Three",
-        "group":  "Israel",
-        "logo":  "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
-        "url":  "https://d3n2r2x6pixas4.cloudfront.net/out/v1/426d7a9e942b4f64917d66940bd3b147/index.mpd"
-    },
-    {
-        "id":  "woman_252",
-        "name":  "Woman",
-        "group":  "📦| In The Box",
-        "logo":  "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
-        "url":  "https://livevlisctcdnw.seenow.vn/Live_DASHDRM1/WO/manifest.mpd"
-    }
+window.INITIAL_TV_CHANNELS = [
+  {
+    "id": "sports_sat_true_premier_1",
+    "name": "True Premier Football 1 HD (EPL Trực Tiếp)",
+    "group": "📡 Kênh Vệ Tinh Quốc Tế",
+    "logo": "https://raw.githubusercontent.com/iptv-org/tv-logos/master/countries/th/true-premier-football-hd-1.png",
+    "url": "https://amg00378-amg00378c4-freelivesports-emea-5637.playouts.now.amagi.tv/playlist.m3u8"
+  },
+  {
+    "id": "sports_sat_true_premier_2",
+    "name": "True Premier Football 2 HD (EPL Trực Tiếp)",
+    "group": "📡 Kênh Vệ Tinh Quốc Tế",
+    "logo": "https://raw.githubusercontent.com/iptv-org/tv-logos/master/countries/th/true-premier-football-hd-2.png",
+    "url": "https://amg26268-amg26268c14-freelivesports-emea-10267.playouts.now.amagi.tv/playlist.m3u8"
+  },
+  {
+    "id": "sports_sat_astro_supersport_1",
+    "name": "Astro SuperSport 1 HD (Malaysia)",
+    "group": "📡 Kênh Vệ Tinh Quốc Tế",
+    "logo": "https://raw.githubusercontent.com/iptv-org/tv-logos/master/countries/my/astro-supersport.png",
+    "url": "https://barinaslive1.boldmss.com/ESPN/ESPN.isml/ESPN.m3u8"
+  },
+  {
+    "id": "sports_sat_astro_supersport_2",
+    "name": "Astro SuperSport 2 HD (Malaysia)",
+    "group": "📡 Kênh Vệ Tinh Quốc Tế",
+    "logo": "https://raw.githubusercontent.com/iptv-org/tv-logos/master/countries/my/astro-supersport-2.png",
+    "url": "https://barinaslive1.boldmss.com/ESPN_2/ESPN_2.isml/ESPN_2.m3u8"
+  },
+  {
+    "id": "sports_sat_sky_sports_epl",
+    "name": "Sky Sports Premier League HD (UK)",
+    "group": "📡 Kênh Vệ Tinh Quốc Tế",
+    "logo": "https://raw.githubusercontent.com/iptv-org/tv-logos/master/countries/uk/sky-sports-premier-league.png",
+    "url": "https://skynewsau-live-premium.akamaized.net/hls/live/2105307/foxsportsnews/master.m3u8"
+  },
+  {
+    "id": "sports_sat_tnt_sports_1",
+    "name": "TNT Sports 1 HD (Cúp C1 & EPL)",
+    "group": "📡 Kênh Vệ Tinh Quốc Tế",
+    "logo": "https://raw.githubusercontent.com/iptv-org/tv-logos/master/countries/uk/tnt-sports-1.png",
+    "url": "https://dai.google.com/linear/hls/event/7f3Wv6f7QEKfQna22jHqLQ/master.m3u8"
+  },
+  {
+    "id": "sports_sat_bein_sports_1",
+    "name": "beIN SPORTS 1 HD (Châu Âu & Ngoại Hạng)",
+    "group": "📡 Kênh Vệ Tinh Quốc Tế",
+    "logo": "https://raw.githubusercontent.com/iptv-org/tv-logos/master/countries/qa/bein-sports-hd.png",
+    "url": "https://bein-xtra-bein.amagi.tv/playlist.m3u8"
+  },
+  {
+    "id": "vtv1_0",
+    "name": "VTV1",
+    "group": "VTV",
+    "logo": "file:///android_asset/logos/vtv1.png",
+    "url": "https://vips-livecdn.fptplay.net/live/media/vtv1/live247-hls-avc/vtv1-avc1_5600000=10000-mp4a_131600=20000.m3u8"
+  },
+  {
+    "id": "vtv10_1",
+    "name": "VTV10",
+    "group": "VTV",
+    "logo": "file:///android_asset/logos/vtv_cantho.png",
+    "url": "https://vips-livecdn.fptplay.net/live/media/vtv10/live247-hls-avc/vtv10-avc1_5600000=10000-mp4a_131600=20000.m3u8"
+  },
+  {
+    "id": "vtv2_2",
+    "name": "VTV2",
+    "group": "VTV",
+    "logo": "file:///android_asset/logos/vtv2.png",
+    "url": "https://vips-livecdn.fptplay.net/live/media/vtv2/live247-hls-avc/vtv2-avc1_5600000=10000-mp4a_131600=20000.m3u8"
+  },
+  {
+    "id": "vtv3_3",
+    "name": "VTV3",
+    "group": "VTV",
+    "logo": "file:///android_asset/logos/vtv3.png",
+    "url": "https://vips-livecdn.fptplay.net/live/media/vtv3/live247-hls-avc/vtv3-avc1_5600000=10000-mp4a_131600=20000.m3u8"
+  },
+  {
+    "id": "vtv4_4",
+    "name": "VTV4",
+    "group": "VTV",
+    "logo": "file:///android_asset/logos/vtv4.png",
+    "url": "https://vips-livecdn.fptplay.net/live/media/vtv4/live247-hls-avc/vtv4-avc1_5600000=10000-mp4a_131600=20000.m3u8"
+  },
+  {
+    "id": "vtv5_5",
+    "name": "VTV5",
+    "group": "VTV",
+    "logo": "file:///android_asset/logos/vtv5.png",
+    "url": "https://vips-livecdn.fptplay.net/live/media/vtv5/live247-hls-avc/vtv5-avc1_5600000=10000-mp4a_131600=20000.m3u8"
+  },
+  {
+    "id": "vtv5_t_y_nam_b_6",
+    "name": "VTV5 Tây Nam Bộ",
+    "group": "VTV",
+    "logo": "file:///android_asset/logos/vtv5.png",
+    "url": "https://vips-livecdn.fptplay.net/live/media/vtv5tnb/live-hls-avc/vtv5tnb-avc1_4000000=10000-mp4a_131600=20000.m3u8"
+  },
+  {
+    "id": "vtv5_t_y_nguy_n_7",
+    "name": "VTV5 Tây Nguyên",
+    "group": "VTV",
+    "logo": "file:///android_asset/logos/vtv5.png",
+    "url": "https://vips-livecdn.fptplay.net/live/media/vtv5tn/live-hls-avc/vtv5tn-avc1_4000000=10000-mp4a_131600=20000.m3u8"
+  },
+  {
+    "id": "vtv6_8",
+    "name": "VTV6",
+    "group": "VTV",
+    "logo": "file:///android_asset/logos/vtv6.png",
+    "url": "https://vips-livecdn.fptplay.net/live/media/vtv6/live247-hls-avc/vtv6-avc1_5600000=10000-mp4a_131600=20000.m3u8"
+  },
+  {
+    "id": "vtv7_9",
+    "name": "VTV7",
+    "group": "VTV",
+    "logo": "file:///android_asset/logos/vtv7.png",
+    "url": "https://vips-livecdn.fptplay.net/live/media/vtv7/live247-hls-avc/vtv7-avc1_5600000=10000-mp4a_131600=20000.m3u8"
+  },
+  {
+    "id": "vtv8_10",
+    "name": "VTV8",
+    "group": "VTV",
+    "logo": "file:///android_asset/logos/vtv8.png",
+    "url": "https://vips-livecdn.fptplay.net/live/media/vtv8/live-hls-avc/vtv8-avc1_4000000=10000-mp4a_131600=20000.m3u8"
+  },
+  {
+    "id": "vtv9_11",
+    "name": "VTV9",
+    "group": "VTV",
+    "logo": "file:///android_asset/logos/vtv9.png",
+    "url": "https://vips-livecdn.fptplay.net/live/media/vtv9/live247-hls-avc/vtv9-avc1_5600000=10000-mp4a_131600=20000.m3u8"
+  },
+  {
+    "id": "vietnam_today_12",
+    "name": "Vietnam Today",
+    "group": "VTV",
+    "logo": "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/VietnamToday.jpg",
+    "url": "https://vips-livecdn.fptplay.net/live/media/vietnamtoday/live-hls-avc/vietnamtoday-avc1_4000000=10000-mp4a_131600=20000.m3u8"
+  },
+  {
+    "id": "sports_vn_vtv6",
+    "name": "VTV6 Thể Thao HD (FPT)",
+    "group": "⚽ Bóng Đá & Thể Thao VN",
+    "logo": "file:///android_asset/logos/vtv6.png",
+    "url": "https://vips-livecdn.fptplay.net/live/media/vtv6/live247-hls-avc/index.m3u8"
+  },
+  {
+    "id": "sports_vn_htvc_thethao",
+    "name": "HTVC Thể Thao HD (FPT)",
+    "group": "⚽ Bóng Đá & Thể Thao VN",
+    "logo": "https://raw.githubusercontent.com/iptv-org/tv-logos/master/countries/us/espn.png",
+    "url": "https://vips-livecdn.fptplay.net/live/media/htvthethao/live247-hls-avc/index.m3u8"
+  },
+  {
+    "id": "sports_vn_htv_thethao",
+    "name": "HTV Thể Thao",
+    "group": "⚽ Bóng Đá & Thể Thao VN",
+    "logo": "file:///android_asset/logos/htv_thethao.png",
+    "url": "https://dethich.pw/htvthethao/index.m3u8"
+  },
+  {
+    "id": "sports_vn_dongnai2",
+    "name": "Đồng Nai 2 (Thể Thao & Giải Trí)",
+    "group": "⚽ Bóng Đá & Thể Thao VN",
+    "logo": "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/%C4%90NNRTV2.png",
+    "url": "https://vtvgolive-ott3.vtvdigital.vn/live/dongnai2tv/chunklist_2.m3u8"
+  },
+  {
+    "id": "sports_vn_thvl4",
+    "name": "Vĩnh Long 4 Thể Thao",
+    "group": "⚽ Bóng Đá & Thể Thao VN",
+    "logo": "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/THVL4.webp",
+    "url": "https://dethich.pw/thvl4/index.m3u8"
+  },
+  {
+    "id": "sports_intl_cbs_golazo",
+    "name": "CBS Sports Golazo (Cúp C1 / Serie A)",
+    "group": "⚽ Bóng Đá Quốc Tế & C1",
+    "logo": "https://r2.thesportsdb.com/images/media/channel/logo/p5csyn1620551587.png",
+    "url": "https://dai.google.com/linear/hls/event/7f3Wv6f7QEKfQna22jHqLQ/master.m3u8"
+  },
+  {
+    "id": "sports_intl_bein_xtra",
+    "name": "beIN SPORTS XTRA HD",
+    "group": "⚽ Bóng Đá Quốc Tế & C1",
+    "logo": "https://r2.thesportsdb.com/images/media/channel/logo/p5csyn1620551587.png",
+    "url": "https://bein-xtra-bein.amagi.tv/playlist.m3u8"
+  },
+  {
+    "id": "sports_intl_fifa_plus_live",
+    "name": "FIFA+ Live HD (Trực Tiếp & World Cup)",
+    "group": "⚽ Bóng Đá Quốc Tế & C1",
+    "logo": "https://r2.thesportsdb.com/images/media/channel/logo/p5csyn1620551587.png",
+    "url": "https://d2w9q46ikgrcwx.cloudfront.net/v1/master/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-of5cbk3sav3w5/v1/sysdata_s_p_a_fifa_7/samsungheadend_us/latest/main/hls/playlist.m3u8"
+  },
+  {
+    "id": "sports_intl_fifa_plus_global",
+    "name": "FIFA+ Global HD",
+    "group": "⚽ Bóng Đá Quốc Tế & C1",
+    "logo": "https://r2.thesportsdb.com/images/media/channel/logo/p5csyn1620551587.png",
+    "url": "https://jmp2.uk/plu-660c29b5aec9680008f5b4a4.m3u8"
+  },
+  {
+    "id": "sports_intl_eurosport_live",
+    "name": "Eurosport Live HD",
+    "group": "⚽ Bóng Đá Quốc Tế & C1",
+    "logo": "https://r2.thesportsdb.com/images/media/channel/logo/p5csyn1620551587.png",
+    "url": "https://drk6xq0vhn.gpcdn.net/live/euro_sports_hd_abr/index.m3u8"
+  },
+  {
+    "id": "sports_intl_tyc_sports",
+    "name": "TyC Sports HD (Bóng Đá Nam Mỹ)",
+    "group": "⚽ Bóng Đá Quốc Tế & C1",
+    "logo": "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/argentina/tyc-sports-ar.png",
+    "url": "https://amg26268-amg26268c14-freelivesports-emea-10267.playouts.now.amagi.tv/ts-us-e2-n2/playlist/amg26268-sportsstudio-tycsports-freelivesportsemea/playlist.m3u8"
+  },
+  {
+    "id": "sports_intl_lequipe",
+    "name": "L'Equipe Live 1080p (Pháp)",
+    "group": "⚽ Bóng Đá Quốc Tế & C1",
+    "logo": "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/france/lequipe-fr.png",
+    "url": "https://dq37unyetkpcz.cloudfront.net/v1/master/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-m04j89j7k5gtp/LEquipe_FR.m3u8"
+  },
+  {
+    "id": "sports_espn_usa",
+    "name": "ESPN HD (United States)",
+    "group": "🏆 Kênh Thể Thao ESPN & FOX",
+    "logo": "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/espn-us.png",
+    "url": "http://85.237.89.160:9590/usa-s/ESPN-HD/index.m3u8"
+  },
+  {
+    "id": "sports_espn_2_usa",
+    "name": "ESPN 2 HD (United States)",
+    "group": "🏆 Kênh Thể Thao ESPN & FOX",
+    "logo": "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/espn-us.png",
+    "url": "http://85.237.89.160:9590/usa-s/ESPN-2-HD/index.m3u8"
+  },
+  {
+    "id": "sports_espn_u",
+    "name": "ESPNU HD",
+    "group": "🏆 Kênh Thể Thao ESPN & FOX",
+    "logo": "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/espn-us.png",
+    "url": "http://85.237.89.160:9590/usa-s/ESPN-U-HD/index.m3u8"
+  },
+  {
+    "id": "sports_espn_latam_1",
+    "name": "ESPN Latin America (1080p)",
+    "group": "🏆 Kênh Thể Thao ESPN & FOX",
+    "logo": "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/espn-us.png",
+    "url": "https://barinaslive1.boldmss.com/ESPN/ESPN.isml/ESPN.m3u8"
+  },
+  {
+    "id": "sports_espn_latam_2",
+    "name": "ESPN 2 Latin America (1080p)",
+    "group": "🏆 Kênh Thể Thao ESPN & FOX",
+    "logo": "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/espn-us.png",
+    "url": "https://barinaslive1.boldmss.com/ESPN_2/ESPN_2.isml/ESPN_2.m3u8"
+  },
+  {
+    "id": "sports_espn_latam_3",
+    "name": "ESPN 3 Latin America (1080p)",
+    "group": "🏆 Kênh Thể Thao ESPN & FOX",
+    "logo": "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/espn-us.png",
+    "url": "https://barinaslive1.boldmss.com/ESPN_3/ESPN_3.isml/ESPN_3.m3u8"
+  },
+  {
+    "id": "sports_espn_latam_4",
+    "name": "ESPN 4 Latin America (1080p)",
+    "group": "🏆 Kênh Thể Thao ESPN & FOX",
+    "logo": "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/espn-us.png",
+    "url": "https://barinaslive1.boldmss.com/ESPN_4/ESPN_4.isml/ESPN_4.m3u8"
+  },
+  {
+    "id": "sports_espn_latam_5",
+    "name": "ESPN 5 Latin America (1080p)",
+    "group": "🏆 Kênh Thể Thao ESPN & FOX",
+    "logo": "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/espn-us.png",
+    "url": "https://barinaslive1.boldmss.com/ESPN_5/ESPN_5.isml/ESPN_5.m3u8"
+  },
+  {
+    "id": "sports_espn_latam_6",
+    "name": "ESPN 6 Latin America (1080p)",
+    "group": "🏆 Kênh Thể Thao ESPN & FOX",
+    "logo": "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/espn-us.png",
+    "url": "https://barinaslive1.boldmss.com/ESPN_6/ESPN_6.isml/ESPN_6.m3u8"
+  },
+  {
+    "id": "sports_espn_latam_7",
+    "name": "ESPN 7 Latin America (1080p)",
+    "group": "🏆 Kênh Thể Thao ESPN & FOX",
+    "logo": "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/espn-us.png",
+    "url": "https://barinaslive1.boldmss.com/ESPN_7/ESPN_7.isml/ESPN_7.m3u8"
+  },
+  {
+    "id": "sports_fox_sports_1",
+    "name": "Fox Sports 1 (720p)",
+    "group": "🏆 Kênh Thể Thao ESPN & FOX",
+    "logo": "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/fox-sports-1-us.png",
+    "url": "http://85.237.89.160:9590/usa-s/FOX-SPORTS-1/index.m3u8"
+  },
+  {
+    "id": "sports_fox_sports_news",
+    "name": "Fox Sports News (1080p Akamai)",
+    "group": "🏆 Kênh Thể Thao ESPN & FOX",
+    "logo": "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/fox-sports-1-us.png",
+    "url": "https://skynewsau-live-premium.akamaized.net/hls/live/2105307/foxsportsnews/live_1080p.m3u8"
+  },
+  {
+    "id": "sports_fubo_sports",
+    "name": "Fubo Sports Network (1080p)",
+    "group": "🏆 Kênh Thể Thao ESPN & FOX",
+    "logo": "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/fubo-sports-network-us.png",
+    "url": "https://dnf08l6u6uxnz.cloudfront.net/master.m3u8"
+  },
+  {
+    "id": "sports_eleven_1",
+    "name": "Eleven Sports 1 HD",
+    "group": "🏆 Kênh Thể Thao ESPN & FOX",
+    "logo": "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/poland/polsat-sport-1-pl.png",
+    "url": "http://92.114.85.87:8002/play/a00e/index.m3u8"
+  },
+  {
+    "id": "sports_eleven_2",
+    "name": "Eleven Sports 2 HD",
+    "group": "🏆 Kênh Thể Thao ESPN & FOX",
+    "logo": "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/poland/polsat-sport-2-pl.png",
+    "url": "http://92.114.85.87:8002/play/a00f/index.m3u8"
+  },
+  {
+    "id": "sports_eleven_3",
+    "name": "Eleven Sports 3 HD",
+    "group": "🏆 Kênh Thể Thao ESPN & FOX",
+    "logo": "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/poland/polsat-sport-3-pl.png",
+    "url": "http://92.114.85.87:8002/play/a00g/index.m3u8"
+  },
+  {
+    "id": "sports_eleven_4",
+    "name": "Eleven Sports 4 HD",
+    "group": "🏆 Kênh Thể Thao ESPN & FOX",
+    "logo": "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/poland/polsat-sport-pl.png",
+    "url": "http://92.114.85.87:8002/play/a00h/index.m3u8"
+  },
+  {
+    "id": "sports_redbull_tv",
+    "name": "Red Bull TV HD (Akamai)",
+    "group": "🏎️ Đua Xe & Mạo Hiểm",
+    "logo": "https://images.pluto.tv/channels/5e7cb84a172a0f0007da69e4/colorLogoPNG.png",
+    "url": "https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master.m3u8"
+  },
+  {
+    "id": "sports_rally_tv",
+    "name": "Rally TV 1080p (WRC Trực Tiếp)",
+    "group": "🏎️ Đua Xe & Mạo Hiểm",
+    "logo": "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/fox-sports-1-us.png",
+    "url": "https://rally-tv-live.akamaized.net/hls/live/2117704/RallyTV-Pri/master.m3u8"
+  },
+  {
+    "id": "sports_racer_select",
+    "name": "RACER Select HD",
+    "group": "🏎️ Đua Xe & Mạo Hiểm",
+    "logo": "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/fox-sports-2-us.png",
+    "url": "https://amg00378-amg00378c4-freelivesports-emea-5637.playouts.now.amagi.tv/playlist.m3u8"
+  },
+  {
+    "id": "sports_nhra_tv",
+    "name": "NHRA TV HD (Đua Xe Tốc Độ)",
+    "group": "🏎️ Đua Xe & Mạo Hiểm",
+    "logo": "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/fox-sports-1-us.png",
+    "url": "https://d265y4sk8257lt.cloudfront.net/nh.m3u8"
+  },
+  {
+    "id": "sports_swerve_combat",
+    "name": "Swerve Combat HD (MMA & Boxing)",
+    "group": "🥊 Võ Thuật & Đối Kháng",
+    "logo": "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/poland/polsat-sport-fight-pl.png",
+    "url": "https://linear-253.frequency.stream/mt/roku/253/hls/master/playlist.m3u8"
+  },
+  {
+    "id": "sports_persiana_fight",
+    "name": "Persiana Fight HD",
+    "group": "🥊 Võ Thuật & Đối Kháng",
+    "logo": "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/poland/polsat-sport-fight-pl.png",
+    "url": "https://fighthls.persiana.live/hls/stream.m3u8"
+  },
+  {
+    "id": "sports_polsat_sport_fight",
+    "name": "Polsat Sport Fight (1080p)",
+    "group": "🥊 Võ Thuật & Đối Kháng",
+    "logo": "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/poland/polsat-sport-fight-pl.png",
+    "url": "http://57.128.210.196:8080/194/index.m3u8"
+  },
+  {
+    "id": "sports_nba_tv",
+    "name": "NBA TV HD (Bóng Rổ)",
+    "group": "🏀 Bóng Rổ & Quần Vợt",
+    "logo": "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/nba-tv-us.png",
+    "url": "http://23.237.104.106:8080/USA_NBA/index.m3u8"
+  },
+  {
+    "id": "sports_nfl_network",
+    "name": "NFL Network HD (Bóng Bầu Dục)",
+    "group": "🏀 Bóng Rổ & Quần Vợt",
+    "logo": "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/nfl-network-us.png",
+    "url": "http://198.58.104.90:8989/nfl/index.m3u8"
+  },
+  {
+    "id": "sports_tennis_channel_2",
+    "name": "Tennis Channel 2 HD",
+    "group": "🏀 Bóng Rổ & Quần Vợt",
+    "logo": "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/tennis-channel-us.png",
+    "url": "https://mumbai-edge.smartplaytv.in/Tennis2/index.m3u8"
+  },
+  {
+    "id": "sports_pga_tour",
+    "name": "PGA Tour HD (Golf)",
+    "group": "🏀 Bóng Rổ & Quần Vợt",
+    "logo": "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/nbc-golf-channel-us.png",
+    "url": "https://d11k1mnrgfposz.cloudfront.net/playlist.m3u8"
+  },
+  {
+    "name": "VTV6 Thể Thao HD (FPT)",
+    "group": "⚽ Bóng Đá & Thể Thao VN",
+    "logo": "file:///android_asset/logos/vtv6.png",
+    "url": "https://vips-livecdn.fptplay.net/live/media/vtv6/live247-hls-avc/index.m3u8",
+    "id": "tv_42aa576f9d"
+  },
+  {
+    "name": "HTVC Thể Thao HD (FPT)",
+    "group": "⚽ Bóng Đá & Thể Thao VN",
+    "logo": "https://raw.githubusercontent.com/iptv-org/tv-logos/master/countries/us/espn.png",
+    "url": "https://vips-livecdn.fptplay.net/live/media/htvthethao/live247-hls-avc/index.m3u8",
+    "id": "tv_2d29e991cf"
+  },
+  {
+    "name": "HTV Thể Thao",
+    "group": "⚽ Bóng Đá & Thể Thao VN",
+    "logo": "file:///android_asset/logos/htv_thethao.png",
+    "url": "https://dethich.pw/htvthethao/index.m3u8",
+    "id": "tv_ad49c3ca79"
+  },
+  {
+    "name": "Đồng Nai 2 (Thể Thao & Giải Trí)",
+    "group": "⚽ Bóng Đá & Thể Thao VN",
+    "logo": "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/%C4%90NNRTV2.png",
+    "url": "https://vtvgolive-ott3.vtvdigital.vn/live/dongnai2tv/chunklist_2.m3u8",
+    "id": "tv_eba75970d2"
+  },
+  {
+    "name": "Vĩnh Long 4 Thể Thao",
+    "group": "⚽ Bóng Đá & Thể Thao VN",
+    "logo": "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/THVL4.webp",
+    "url": "https://dethich.pw/thvl4/index.m3u8",
+    "id": "tv_1cc9c8e50b"
+  },
+  {
+    "name": "CBS Sports Golazo (Cúp C1 / Serie A)",
+    "group": "⚽ Bóng Đá Quốc Tế & C1",
+    "logo": "https://r2.thesportsdb.com/images/media/channel/logo/p5csyn1620551587.png",
+    "url": "https://dai.google.com/linear/hls/event/7f3Wv6f7QEKfQna22jHqLQ/master.m3u8",
+    "id": "tv_51668397b4"
+  },
+  {
+    "name": "beIN SPORTS XTRA HD",
+    "group": "⚽ Bóng Đá Quốc Tế & C1",
+    "logo": "https://r2.thesportsdb.com/images/media/channel/logo/p5csyn1620551587.png",
+    "url": "https://bein-xtra-bein.amagi.tv/playlist.m3u8",
+    "id": "tv_8d1941795e"
+  },
+  {
+    "name": "FIFA+ Live HD (Trực Tiếp & World Cup)",
+    "group": "⚽ Bóng Đá Quốc Tế & C1",
+    "logo": "https://r2.thesportsdb.com/images/media/channel/logo/p5csyn1620551587.png",
+    "url": "https://d2w9q46ikgrcwx.cloudfront.net/v1/master/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-of5cbk3sav3w5/v1/sysdata_s_p_a_fifa_7/samsungheadend_us/latest/main/hls/playlist.m3u8",
+    "id": "tv_24f808718f"
+  },
+  {
+    "name": "FIFA+ Global HD",
+    "group": "⚽ Bóng Đá Quốc Tế & C1",
+    "logo": "https://r2.thesportsdb.com/images/media/channel/logo/p5csyn1620551587.png",
+    "url": "https://jmp2.uk/plu-660c29b5aec9680008f5b4a4.m3u8",
+    "id": "tv_e58c48a4e3"
+  },
+  {
+    "name": "Eurosport Live HD",
+    "group": "⚽ Bóng Đá Quốc Tế & C1",
+    "logo": "https://r2.thesportsdb.com/images/media/channel/logo/p5csyn1620551587.png",
+    "url": "https://drk6xq0vhn.gpcdn.net/live/euro_sports_hd_abr/index.m3u8",
+    "id": "tv_16399f85dd"
+  },
+  {
+    "name": "TyC Sports HD (Bóng Đá Nam Mỹ)",
+    "group": "⚽ Bóng Đá Quốc Tế & C1",
+    "logo": "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/argentina/tyc-sports-ar.png",
+    "url": "https://amg26268-amg26268c14-freelivesports-emea-10267.playouts.now.amagi.tv/ts-us-e2-n2/playlist/amg26268-sportsstudio-tycsports-freelivesportsemea/playlist.m3u8",
+    "id": "tv_9884b0fc20"
+  },
+  {
+    "name": "L'Equipe Live 1080p (Pháp)",
+    "group": "⚽ Bóng Đá Quốc Tế & C1",
+    "logo": "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/france/lequipe-fr.png",
+    "url": "https://dq37unyetkpcz.cloudfront.net/v1/master/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-m04j89j7k5gtp/LEquipe_FR.m3u8",
+    "id": "tv_ead8a6b8dc"
+  },
+  {
+    "name": "ESPN HD (United States)",
+    "group": "🏆 Kênh Thể Thao ESPN & FOX",
+    "logo": "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/espn-us.png",
+    "url": "http://85.237.89.160:9590/usa-s/ESPN-HD/index.m3u8",
+    "id": "tv_89467c791f"
+  },
+  {
+    "name": "ESPN 2 HD (United States)",
+    "group": "🏆 Kênh Thể Thao ESPN & FOX",
+    "logo": "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/espn-us.png",
+    "url": "http://85.237.89.160:9590/usa-s/ESPN-2-HD/index.m3u8",
+    "id": "tv_1734ba7bb1"
+  },
+  {
+    "name": "ESPNU HD",
+    "group": "🏆 Kênh Thể Thao ESPN & FOX",
+    "logo": "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/espn-us.png",
+    "url": "http://85.237.89.160:9590/usa-s/ESPN-U-HD/index.m3u8",
+    "id": "tv_0f5d8d0738"
+  },
+  {
+    "name": "ESPN Latin America (1080p)",
+    "group": "🏆 Kênh Thể Thao ESPN & FOX",
+    "logo": "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/espn-us.png",
+    "url": "https://barinaslive1.boldmss.com/ESPN/ESPN.isml/ESPN.m3u8",
+    "id": "tv_3ee9f8f318"
+  },
+  {
+    "name": "ESPN 2 Latin America (1080p)",
+    "group": "🏆 Kênh Thể Thao ESPN & FOX",
+    "logo": "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/espn-us.png",
+    "url": "https://barinaslive1.boldmss.com/ESPN_2/ESPN_2.isml/ESPN_2.m3u8",
+    "id": "tv_a32d1cb40d"
+  },
+  {
+    "name": "ESPN 3 Latin America (1080p)",
+    "group": "🏆 Kênh Thể Thao ESPN & FOX",
+    "logo": "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/espn-us.png",
+    "url": "https://barinaslive1.boldmss.com/ESPN_3/ESPN_3.isml/ESPN_3.m3u8",
+    "id": "tv_b0d7139421"
+  },
+  {
+    "name": "ESPN 4 Latin America (1080p)",
+    "group": "🏆 Kênh Thể Thao ESPN & FOX",
+    "logo": "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/espn-us.png",
+    "url": "https://barinaslive1.boldmss.com/ESPN_4/ESPN_4.isml/ESPN_4.m3u8",
+    "id": "tv_d6db82f59b"
+  },
+  {
+    "name": "ESPN 5 Latin America (1080p)",
+    "group": "🏆 Kênh Thể Thao ESPN & FOX",
+    "logo": "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/espn-us.png",
+    "url": "https://barinaslive1.boldmss.com/ESPN_5/ESPN_5.isml/ESPN_5.m3u8",
+    "id": "tv_ec340317c9"
+  },
+  {
+    "name": "ESPN 6 Latin America (1080p)",
+    "group": "🏆 Kênh Thể Thao ESPN & FOX",
+    "logo": "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/espn-us.png",
+    "url": "https://barinaslive1.boldmss.com/ESPN_6/ESPN_6.isml/ESPN_6.m3u8",
+    "id": "tv_693b64c79e"
+  },
+  {
+    "name": "ESPN 7 Latin America (1080p)",
+    "group": "🏆 Kênh Thể Thao ESPN & FOX",
+    "logo": "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/espn-us.png",
+    "url": "https://barinaslive1.boldmss.com/ESPN_7/ESPN_7.isml/ESPN_7.m3u8",
+    "id": "tv_c36541e131"
+  },
+  {
+    "name": "Fox Sports 1 (720p)",
+    "group": "🏆 Kênh Thể Thao ESPN & FOX",
+    "logo": "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/fox-sports-1-us.png",
+    "url": "http://85.237.89.160:9590/usa-s/FOX-SPORTS-1/index.m3u8",
+    "id": "tv_a7f4c04d5e"
+  },
+  {
+    "name": "Fox Sports News (1080p Akamai)",
+    "group": "🏆 Kênh Thể Thao ESPN & FOX",
+    "logo": "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/fox-sports-1-us.png",
+    "url": "https://skynewsau-live-premium.akamaized.net/hls/live/2105307/foxsportsnews/live_1080p.m3u8",
+    "id": "tv_a4116153a7"
+  },
+  {
+    "name": "Fubo Sports Network (1080p)",
+    "group": "🏆 Kênh Thể Thao ESPN & FOX",
+    "logo": "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/fubo-sports-network-us.png",
+    "url": "https://dnf08l6u6uxnz.cloudfront.net/master.m3u8",
+    "id": "tv_020954ffe8"
+  },
+  {
+    "name": "Eleven Sports 1 HD",
+    "group": "🏆 Kênh Thể Thao ESPN & FOX",
+    "logo": "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/poland/polsat-sport-1-pl.png",
+    "url": "http://92.114.85.87:8002/play/a00e/index.m3u8",
+    "id": "tv_6763ba3260"
+  },
+  {
+    "name": "Eleven Sports 2 HD",
+    "group": "🏆 Kênh Thể Thao ESPN & FOX",
+    "logo": "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/poland/polsat-sport-2-pl.png",
+    "url": "http://92.114.85.87:8002/play/a00f/index.m3u8",
+    "id": "tv_90026d4944"
+  },
+  {
+    "name": "Eleven Sports 3 HD",
+    "group": "🏆 Kênh Thể Thao ESPN & FOX",
+    "logo": "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/poland/polsat-sport-3-pl.png",
+    "url": "http://92.114.85.87:8002/play/a00g/index.m3u8",
+    "id": "tv_9de0a70a28"
+  },
+  {
+    "name": "Eleven Sports 4 HD",
+    "group": "🏆 Kênh Thể Thao ESPN & FOX",
+    "logo": "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/poland/polsat-sport-pl.png",
+    "url": "http://92.114.85.87:8002/play/a00h/index.m3u8",
+    "id": "tv_c29f3ec966"
+  },
+  {
+    "name": "Red Bull TV HD (Akamai)",
+    "group": "🏎️ Đua Xe & Mạo Hiểm",
+    "logo": "https://images.pluto.tv/channels/5e7cb84a172a0f0007da69e4/colorLogoPNG.png",
+    "url": "https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master.m3u8",
+    "id": "tv_5ce6b2d7c3"
+  },
+  {
+    "name": "Rally TV 1080p (WRC Trực Tiếp)",
+    "group": "🏎️ Đua Xe & Mạo Hiểm",
+    "logo": "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/fox-sports-1-us.png",
+    "url": "https://rally-tv-live.akamaized.net/hls/live/2117704/RallyTV-Pri/master.m3u8",
+    "id": "tv_372eb11bd8"
+  },
+  {
+    "name": "RACER Select HD",
+    "group": "🏎️ Đua Xe & Mạo Hiểm",
+    "logo": "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/fox-sports-2-us.png",
+    "url": "https://amg00378-amg00378c4-freelivesports-emea-5637.playouts.now.amagi.tv/playlist.m3u8",
+    "id": "tv_263abbb38a"
+  },
+  {
+    "name": "NHRA TV HD (Đua Xe Tốc Độ)",
+    "group": "🏎️ Đua Xe & Mạo Hiểm",
+    "logo": "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/fox-sports-1-us.png",
+    "url": "https://d265y4sk8257lt.cloudfront.net/nh.m3u8",
+    "id": "tv_4b0bdb4254"
+  },
+  {
+    "name": "Swerve Combat HD (MMA & Boxing)",
+    "group": "🥊 Võ Thuật & Đối Kháng",
+    "logo": "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/poland/polsat-sport-fight-pl.png",
+    "url": "https://linear-253.frequency.stream/mt/roku/253/hls/master/playlist.m3u8",
+    "id": "tv_1ba14622e6"
+  },
+  {
+    "name": "Persiana Fight HD",
+    "group": "🥊 Võ Thuật & Đối Kháng",
+    "logo": "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/poland/polsat-sport-fight-pl.png",
+    "url": "https://fighthls.persiana.live/hls/stream.m3u8",
+    "id": "tv_34f0efa569"
+  },
+  {
+    "name": "NBA TV HD (Bóng Rổ)",
+    "group": "🏀 Bóng Rổ & Quần Vợt",
+    "logo": "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/nba-tv-us.png",
+    "url": "http://23.237.104.106:8080/USA_NBA/index.m3u8",
+    "id": "tv_0891d405f5"
+  },
+  {
+    "name": "NFL Network HD (Bóng Bầu Dục)",
+    "group": "🏀 Bóng Rổ & Quần Vợt",
+    "logo": "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/nfl-network-us.png",
+    "url": "http://198.58.104.90:8989/nfl/index.m3u8",
+    "id": "tv_c16c1c25dc"
+  },
+  {
+    "name": "Tennis Channel 2 HD",
+    "group": "🏀 Bóng Rổ & Quần Vợt",
+    "logo": "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/tennis-channel-us.png",
+    "url": "https://mumbai-edge.smartplaytv.in/Tennis2/index.m3u8",
+    "id": "tv_7d9e87aa75"
+  },
+  {
+    "name": "PGA Tour HD (Golf)",
+    "group": "🏀 Bóng Rổ & Quần Vợt",
+    "logo": "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-states/nbc-golf-channel-us.png",
+    "url": "https://d11k1mnrgfposz.cloudfront.net/playlist.m3u8",
+    "id": "tv_5d7099ed2b"
+  },
+  {
+    "id": "on_cine_45",
+    "name": "ON Cine",
+    "group": "VTVcab",
+    "logo": "file:///android_asset/logos/vtvcab.png",
+    "url": "https://freem3u.xyz/api/live/play.m3u8?vid=176"
+  },
+  {
+    "id": "on_e_channel_46",
+    "name": "ON E- Channel",
+    "group": "VTVcab",
+    "logo": "https://raw.githubusercontent.com/vuminhthanh12/Logo/refs/heads/main/onechannel.png",
+    "url": "https://freem3u.xyz/api/live/play.m3u8?vid=182"
+  },
+  {
+    "id": "on_phim_vi_t_47",
+    "name": "ON Phim Việt",
+    "group": "VTVcab",
+    "logo": "file:///android_asset/logos/vtvcab.png",
+    "url": "https://vmttv.dpdns.org/tv360/?id=vtvcab-2-phim-viet-hd"
+  },
+  {
+    "id": "on_style_tv_48",
+    "name": "ON Style TV",
+    "group": "VTVcab",
+    "logo": "https://raw.githubusercontent.com/vuminhthanh12/Logo/refs/heads/main/onstyle.png",
+    "url": "https://freem3u.xyz/api/live/play.m3u8?vid=184"
+  },
+  {
+    "id": "on_v_family_49",
+    "name": "ON V Family",
+    "group": "VTVcab",
+    "logo": "https://i.ibb.co/HHfL7Dq/cocab20.webp",
+    "url": "https://freem3u.xyz/api/live/play.m3u8?vid=187"
+  },
+  {
+    "id": "on_vie_dramas_50",
+    "name": "ON Vie Dramas",
+    "group": "VTVcab",
+    "logo": "file:///android_asset/logos/vtvcab.png",
+    "url": "https://freem3u.xyz/api/live/play.m3u8?vid=177"
+  },
+  {
+    "id": "on_vie_gi_i_tr_51",
+    "name": "ON Vie Giải Trí",
+    "group": "VTVcab",
+    "logo": "https://i.ytimg.com/vi/fyT_xa-g-Pk/hq720.jpg",
+    "url": "https://freem3u.xyz/api/live/play.m3u8?vid=180"
+  },
+  {
+    "id": "on_bibi_52",
+    "name": "On BiBi",
+    "group": "VTVcab",
+    "logo": "https://raw.githubusercontent.com/vuminhthanh12/Logo/refs/heads/main/onbibi.png",
+    "url": "https://freem3u.xyz/api/live/play.m3u8?vid=178"
+  },
+  {
+    "id": "on_golf_53",
+    "name": "On Golf",
+    "group": "VTVcab",
+    "logo": "file:///android_asset/logos/vtvcab.png",
+    "url": "https://vmttv.dpdns.org/tv360/?id=vtvcab-23-golf-channel"
+  },
+  {
+    "id": "on_kids_54",
+    "name": "On Kids",
+    "group": "VTVcab",
+    "logo": "https://assets-vtvcab.gviet.vn/images/v2/channel/20220613/2022061306/onkids5_1675158859.webp",
+    "url": "https://freem3u.xyz/api/live/play.m3u8?vid=179"
+  },
+  {
+    "id": "on_life_55",
+    "name": "On Life",
+    "group": "VTVcab",
+    "logo": "file:///android_asset/logos/vtvcab.png",
+    "url": "https://freem3u.xyz/api/live/play.m3u8?vid=188"
+  },
+  {
+    "id": "on_movies_you_tv_56",
+    "name": "On Movies - You TV",
+    "group": "VTVcab",
+    "logo": "file:///android_asset/logos/vtvcab.png",
+    "url": "https://freem3u.xyz/api/live/play.m3u8?vid=181"
+  },
+  {
+    "id": "on_music_57",
+    "name": "On Music",
+    "group": "VTVcab",
+    "logo": "file:///android_asset/logos/vtvcab.png",
+    "url": "https://freem3u.xyz/api/live/play.m3u8?vid=185"
+  },
+  {
+    "id": "sctv22_58",
+    "name": ":SCTV22",
+    "group": "SCTV",
+    "logo": "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/SCTV22.png",
+    "url": "https://liveatmvng.vtvprime.vn/live/data8/SCTV22/Live_DASHDRM/SCTV22.mpd"
+  },
+  {
+    "id": "sctv_phim_t_ng_h_p_59",
+    "name": "SCTV Phim Tổng Hợp",
+    "group": "SCTV",
+    "logo": "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/sctvpth.png",
+    "url": "https://vmttv.dpdns.org/VTVGo/?sctvphim"
+  },
+  {
+    "id": "sctv1_60",
+    "name": "SCTV1",
+    "group": "SCTV",
+    "logo": "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/sctv1.png",
+    "url": "https://vmttv.dpdns.org/VTVGo/?sctv1"
+  },
+  {
+    "id": "sctv10_61",
+    "name": "SCTV10",
+    "group": "SCTV",
+    "logo": "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/SCTV10.jpg",
+    "url": "https://vmttv.dpdns.org/VTVGo/?sctv10"
+  },
+  {
+    "id": "sctv11_62",
+    "name": "SCTV11",
+    "group": "SCTV",
+    "logo": "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/sctv11.png",
+    "url": "https://vmttv.dpdns.org/VTVGo/?sctv11"
+  },
+  {
+    "id": "sctv12_63",
+    "name": "SCTV12",
+    "group": "SCTV",
+    "logo": "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/sctv12.png",
+    "url": "https://vmttv.dpdns.org/VTVGo/?sctv12"
+  },
+  {
+    "id": "sctv13_64",
+    "name": "SCTV13",
+    "group": "SCTV",
+    "logo": "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/sctv13.png",
+    "url": "https://vmttv.dpdns.org/VTVGo/?sctv13"
+  },
+  {
+    "id": "sctv14_65",
+    "name": "SCTV14",
+    "group": "SCTV",
+    "logo": "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/sctv14.png",
+    "url": "https://vmttv.dpdns.org/VTVGo/?sctv14"
+  },
+  {
+    "id": "sctv15_66",
+    "name": "SCTV15",
+    "group": "SCTV",
+    "logo": "https://raw.githubusercontent.com/vuminhthanh12/Logo/refs/heads/main/SCTV15.png",
+    "url": "https://liveatmvng.vtvprime.vn/live/data8/SCTV15HD/Live_DASHDRM/SCTV15HD.mpd"
+  },
+  {
+    "id": "sctv16_67",
+    "name": "SCTV16",
+    "group": "SCTV",
+    "logo": "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/sctv16.png",
+    "url": "https://vmttv.dpdns.org/VTVGo/?sctv16"
+  },
+  {
+    "id": "sctv17_68",
+    "name": "SCTV17",
+    "group": "SCTV",
+    "logo": "https://raw.githubusercontent.com/vuminhthanh12/Logo/refs/heads/main/SCTV17.png",
+    "url": "https://liveatmvng.vtvprime.vn/live/data8/SCTV17/Live_DASHDRM/SCTV17.mpd"
+  },
+  {
+    "id": "sctv18_69",
+    "name": "SCTV18",
+    "group": "SCTV",
+    "logo": "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/sctv18.png",
+    "url": "https://vmttv.dpdns.org/VTVGo/?sctv18"
+  },
+  {
+    "id": "sctv19_70",
+    "name": "SCTV19",
+    "group": "SCTV",
+    "logo": "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/sctv19.png",
+    "url": "https://vmttv.dpdns.org/VTVGo/?sctv19"
+  },
+  {
+    "id": "sctv2_today_tv_71",
+    "name": "SCTV2 - TODAY TV",
+    "group": "SCTV",
+    "logo": "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/SCTV2TODAYTV.jpg",
+    "url": "https://freem3u.xyz/api/live/play.m3u8?vid=201"
+  },
+  {
+    "id": "sctv20_72",
+    "name": "SCTV20",
+    "group": "SCTV",
+    "logo": "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/SCTV20.png",
+    "url": "https://vmttv.dpdns.org/VTVGo/?sctv20"
+  },
+  {
+    "id": "sctv21_vi_t_nam_k_c_73",
+    "name": "SCTV21 - Việt Nam Ký Ức",
+    "group": "SCTV",
+    "logo": "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/SCTV21.png",
+    "url": "https://vmttv.dpdns.org/VTVGo/?sctv21"
+  },
+  {
+    "id": "sctv3_74",
+    "name": "SCTV3",
+    "group": "SCTV",
+    "logo": "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/sctv3.png",
+    "url": "https://vmttv.dpdns.org/VTVGo/?sctv3"
+  },
+  {
+    "id": "sctv4_75",
+    "name": "SCTV4",
+    "group": "SCTV",
+    "logo": "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/sctv4.png",
+    "url": "https://vmttv.dpdns.org/VTVGo/?sctv4"
+  },
+  {
+    "id": "sctv5_76",
+    "name": "SCTV5",
+    "group": "SCTV",
+    "logo": "https://raw.githubusercontent.com/vuminhthanh12/Logo/refs/heads/main/SCTV5.jpg",
+    "url": "https://vmttv.dpdns.org/VTVGo/?sctv5"
+  },
+  {
+    "id": "sctv7_77",
+    "name": "SCTV7",
+    "group": "SCTV",
+    "logo": "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/sctv7.webp",
+    "url": "https://vmttv.dpdns.org/VTVGo/?sctv7"
+  },
+  {
+    "id": "sctv8_78",
+    "name": "SCTV8",
+    "group": "SCTV",
+    "logo": "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/sctv8.png",
+    "url": "https://vmttv.dpdns.org/VTVGo/?sctv8"
+  },
+  {
+    "id": "sctv9_79",
+    "name": "SCTV9",
+    "group": "SCTV",
+    "logo": "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/SCTV9.png",
+    "url": "https://vmttv.dpdns.org/VTVGo/?sctv9"
+  },
+  {
+    "id": "360_ho_t_h_nh_80",
+    "name": "360 Hoạt hình",
+    "group": "Rạp Phim",
+    "logo": "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
+    "url": "https://vmttv.dpdns.org/tv360/?id=hoat-hinh"
+  },
+  {
+    "id": "360_h_i_t_nh_c_m_81",
+    "name": "360 Hài - Tình Cảm",
+    "group": "Rạp Phim",
+    "logo": "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
+    "url": "https://vmttv.dpdns.org/tv360/?id=360-hai-tinh-cam"
+  },
+  {
+    "id": "360_h_nh_ng_ch_u_82",
+    "name": "360 Hành Động Châu Á",
+    "group": "Rạp Phim",
+    "logo": "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
+    "url": "https://vmttv.dpdns.org/tv360/?id=360-hanh-dong-chau-a"
+  },
+  {
+    "id": "360_k_drama_83",
+    "name": "360 K-Drama",
+    "group": "Rạp Phim",
+    "logo": "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
+    "url": "https://vmttv.dpdns.org/tv360/?id=360-k-drama"
+  },
+  {
+    "id": "360_phim_hoa_ng_84",
+    "name": "360 Phim Hoa Ngữ",
+    "group": "Rạp Phim",
+    "logo": "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
+    "url": "https://vmttv.dpdns.org/tv360/?id=360-hoa-ngu"
+  },
+  {
+    "id": "360_phim_kinh_i_n_85",
+    "name": "360 Phim Kinh Điển",
+    "group": "Rạp Phim",
+    "logo": "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
+    "url": "https://vmttv.dpdns.org/tv360/?id=360-phim-kinh-dien"
+  },
+  {
+    "id": "360_phim_vi_t_86",
+    "name": "360 Phim Việt",
+    "group": "Rạp Phim",
+    "logo": "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
+    "url": "https://vmttv.dpdns.org/tv360/?id=phim-viet"
+  },
+  {
+    "id": "360_phim_u_m_87",
+    "name": "360 Phim Âu Mỹ",
+    "group": "Rạp Phim",
+    "logo": "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
+    "url": "https://vmttv.dpdns.org/tv360/?id=phim-au-my"
+  },
+  {
+    "id": "tv360_10_88",
+    "name": "TV360+10",
+    "group": "Sự Kiện TV360",
+    "logo": "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
+    "url": "https://vmttv.dpdns.org/tv360/?id=tv360-10"
+  },
+  {
+    "id": "tv360_12_89",
+    "name": "TV360+12",
+    "group": "Sự Kiện TV360",
+    "logo": "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
+    "url": "https://vmttv.dpdns.org/tv360/?id=tv360-12"
+  },
+  {
+    "id": "tv360_8_90",
+    "name": "TV360+8",
+    "group": "Sự Kiện TV360",
+    "logo": "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
+    "url": "https://vmttv.dpdns.org/tv360/?id=tv360-8"
+  },
+  {
+    "id": "tv360_9_91",
+    "name": "TV360+9",
+    "group": "Sự Kiện TV360",
+    "logo": "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
+    "url": "https://vmttv.dpdns.org/tv360/?id=tv360-9"
+  },
+  {
+    "id": "vtvprime_11_92",
+    "name": "VTVPrime 11",
+    "group": "Sự Kiện VTVPrime",
+    "logo": "https://vtvprime.vn/sideLogoBig.png",
+    "url": "https://livevliatmcdw.seenow.vn/live/data8/SKSS1/Live_DASHDRM/SKSS1.mpd"
+  },
+  {
+    "id": "vtvprime_12_93",
+    "name": "VTVPrime 12",
+    "group": "Sự Kiện VTVPrime",
+    "logo": "https://vtvprime.vn/sideLogoBig.png",
+    "url": "https://livevliatmcdw.seenow.vn/live/data8/SKSS2/Live_DASHDRM/SKSS2.mpd"
+  },
+  {
+    "id": "axn_hd_135",
+    "name": "AXN HD",
+    "group": "Quốc Tế",
+    "logo": "https://raw.githubusercontent.com/vuminhthanh12/Logo/refs/heads/main/axn.png",
+    "url": "https://s7771.cdn.mytvnet.vn/pkg20/live_dzones/axn.smil/manifest.mpd"
+  },
+  {
+    "id": "animal_planet_136",
+    "name": "Animal Planet",
+    "group": "Quốc Tế",
+    "logo": "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
+    "url": "https://s2129134.cdn.mytvnet.vn/pkg20/live_dzones/ap.smil/manifest.mpd"
+  },
+  {
+    "id": "bbc_cbeebies_137",
+    "name": "BBC Cbeebies",
+    "group": "Quốc Tế",
+    "logo": "https://s72140.cdn.mytvnet.vn/vimages/7d/d5/58/8c/ce/ea/7d58c-pcbeebieshd-channel-unkn.png",
+    "url": "https://s2129134.cdn.mytvnet.vn/pkg20/live_dzones/cbb.smil/manifest.mpd"
+  },
+  {
+    "id": "bbc_earth_138",
+    "name": "BBC Earth",
+    "group": "Quốc Tế",
+    "logo": "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-kingdom/bbc-earth-uk.png",
+    "url": "https://s7771.cdn.mytvnet.vn/pkg20/live_dzones/bbcearth.smil/manifest.mpd"
+  },
+  {
+    "id": "bbc_lifestyle_139",
+    "name": "BBC Lifestyle",
+    "group": "Quốc Tế",
+    "logo": "https://images.now-tv.com/shares/channelPreview/img/en_hk/color/ch502_425_305",
+    "url": "https://s7770.cdn.mytvnet.vn/pkg20/live_dzones/bbclifestyle.smil/manifest.mpd"
+  },
+  {
+    "id": "bbc_world_news_140",
+    "name": "BBC World News",
+    "group": "Quốc Tế",
+    "logo": "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-kingdom/bbc-world-news-uk.png",
+    "url": "https://s7771.cdn.mytvnet.vn/pkg20/live_dzones/bbcworldnews.smil/manifest.mpd"
+  },
+  {
+    "id": "bloomberg_142",
+    "name": "Bloomberg",
+    "group": "Quốc Tế",
+    "logo": "https://i.imgur.com/rxFZgIK.png",
+    "url": "https://s2129134.cdn.mytvnet.vn/pkg20/live_dzones/bloomberg.smil/manifest.mpd"
+  },
+  {
+    "id": "cgtn_143",
+    "name": "CGTN",
+    "group": "Quốc Tế",
+    "logo": "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-kingdom/bbc-news-uk.png",
+    "url": "https://english-livebkali.cgtn.com/live/encgtn_0.m3u8"
+  },
+  {
+    "id": "cgtn_documentary_144",
+    "name": "CGTN Documentary",
+    "group": "Quốc Tế",
+    "logo": "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/united-kingdom/bbc-news-uk.png",
+    "url": "https://english-livebkali.cgtn.com/live/doccgtn_0.m3u8"
+  },
+  {
+    "id": "cnn_145",
+    "name": "CNN",
+    "group": "Quốc Tế",
+    "logo": "https://deadline.com/wp-content/uploads/2020/09/CNN-Logo.jpg",
+    "url": "https://s7771.cdn.mytvnet.vn/pkg20/live_dzones/cnn.smil/manifest.mpd"
+  },
+  {
+    "id": "cartoon_network_hd_146",
+    "name": "Cartoon Network HD",
+    "group": "Quốc Tế",
+    "logo": "https://freight.cargo.site/w/1200/i/3cf72163d993c4d87263e6d4990ec4ccdd1e14b09ce89e6e35dee1de83ef4985/CN.jpg",
+    "url": "https://s2129134.cdn.mytvnet.vn/pkg20/live_dzones/cn.smil/manifest.mpd"
+  },
+  {
+    "id": "cartoonito_147",
+    "name": "Cartoonito",
+    "group": "Quốc Tế",
+    "logo": "https://1000logos.net/wp-content/uploads/2023/10/Cartoonito-Logo.jpg",
+    "url": "https://s2129134.cdn.mytvnet.vn/pkg20/live_dzones/boomerang.smil/manifest.mpd"
+  },
+  {
+    "id": "cinema_world_148",
+    "name": "Cinema World",
+    "group": "Quốc Tế",
+    "logo": "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
+    "url": "https://s2129134.cdn.mytvnet.vn/pkg20/live_dzones/cinemaworld.smil/manifest.mpd"
+  },
+  {
+    "id": "cinemax_hd_149",
+    "name": "Cinemax HD",
+    "group": "Quốc Tế",
+    "logo": "https://raw.githubusercontent.com/vuminhthanh12/Logo/refs/heads/main/cinemax.png",
+    "url": "https://s2129134.cdn.mytvnet.vn/pkg20/live_dzones/max.smil/manifest.mpd"
+  },
+  {
+    "id": "dmax_150",
+    "name": "DMAX",
+    "group": "Quốc Tế",
+    "logo": "https://i.imgur.com/vHmt91V.png",
+    "url": "https://s2129134.cdn.mytvnet.vn/pkg20/live_dzones/dmax.smil/manifest.mpd"
+  },
+  {
+    "id": "dw_151",
+    "name": "DW",
+    "group": "Quốc Tế",
+    "logo": "https://i.ytimg.com/vi/puzK9XqJ6-Y/hq720.jpg",
+    "url": "https://freem3u.xyz/api/live/play.m3u8?vid=109"
+  },
+  {
+    "id": "discovery_152",
+    "name": "Discovery",
+    "group": "Quốc Tế",
+    "logo": "https://s72140.cdn.mytvnet.vn/vimages/c7/7f/fc/c6/69/9b/c7fc6-pdiscoveryhd-channel-unkn.png",
+    "url": "https://s7770.cdn.mytvnet.vn/pkg20/live_dzones/dsc.smil/manifest.mpd"
+  },
+  {
+    "id": "discovery_asia_153",
+    "name": "Discovery Asia",
+    "group": "Quốc Tế",
+    "logo": "https://astromedia.com.my/wp-content/uploads/2024/01/Discovery-Asia.png",
+    "url": "https://s2129134.cdn.mytvnet.vn/pkg20/live_dzones/dscasia.smil/manifest.mpd"
+  },
+  {
+    "id": "dreamworks_154",
+    "name": "Dreamworks",
+    "group": "Quốc Tế",
+    "logo": "https://s7266.cdn.mytvnet.vn/vimages/de/eb/ba/a7/7e/ee/deba7-pdreamworkshd-channel-unkn.png",
+    "url": "https://s2129134.cdn.mytvnet.vn/pkg20/live_dzones/dreamwork.smil/manifest.mpd"
+  },
+  {
+    "id": "fashion_tv_155",
+    "name": "Fashion TV",
+    "group": "Quốc Tế",
+    "logo": "https://m.media-amazon.com/images/I/91B05VQC2kL.png",
+    "url": "https://s2129134.cdn.mytvnet.vn/pkg20/live_dzones/ftv.smil/manifest.mpd"
+  },
+  {
+    "id": "france_24_157",
+    "name": "France 24",
+    "group": "Quốc Tế",
+    "logo": "https://m.media-amazon.com/images/I/81oryzEMf-L.png",
+    "url": "https://live.france24.com/hls/live/2037218/F24_EN_HI_HLS/master_5000.m3u8"
+  },
+  {
+    "id": "hbo_158",
+    "name": "HBO",
+    "group": "Quốc Tế",
+    "logo": "https://i.pinimg.com/originals/8b/02/00/8b020050690f955ccb306cdf51324aea.png",
+    "url": "https://s2129134.cdn.mytvnet.vn/pkg20/live_dzones/hbo.smil/manifest.mpd"
+  },
+  {
+    "id": "history_hd_159",
+    "name": "History HD",
+    "group": "Quốc Tế",
+    "logo": "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
+    "url": "https://freem3u.xyz/api/live/play.m3u8?vid=9856"
+  },
+  {
+    "id": "kbs_world_160",
+    "name": "KBS World",
+    "group": "Quốc Tế",
+    "logo": "https://img.hplus.com.vn/728x409/banner/2018/06/05/654179-KBS.png",
+    "url": "https://freem3u.xyz/api/live/play.m3u8?vid=213"
+  },
+  {
+    "id": "tlc_161",
+    "name": "TLC",
+    "group": "Quốc Tế",
+    "logo": "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
+    "url": "https://s129135.cdn.mytvnet.vn/pkg20/live_dzones/tlc.smil/manifest.mpd"
+  },
+  {
+    "id": "trt_world_162",
+    "name": "TRT World",
+    "group": "Quốc Tế",
+    "logo": "https://mir-s3-cdn-cf.behance.net/project_modules/max_1200/425e1955860511.59ae62ac642ba.png",
+    "url": "https://tv-trtworld.medya.trt.com.tr/master_1080.m3u8"
+  },
+  {
+    "id": "warner_tv_163",
+    "name": "Warner TV",
+    "group": "Quốc Tế",
+    "logo": "https://s7774.cdn.mytvnet.vn/vimages/6b/ba/a3/36/60/0a/6ba36-pwarnerhd-channel-unkn.png",
+    "url": "https://s2129134.cdn.mytvnet.vn/pkg20/live_dzones/wtv.smil/manifest.mpd"
+  },
+  {
+    "id": "cjb_sbs_164",
+    "name": "CJB SBS",
+    "group": "🇰🇷| Hàn Quốc",
+    "logo": "https://static.wikia.nocookie.net/logos/images/3/3f/CJB.jpg/revision/latest?cb=20200224093248&path-prefix=ko",
+    "url": "http://1.222.207.80:1935/live/cjbtv/playlist.m3u8"
+  },
+  {
+    "id": "ebs_e_165",
+    "name": "EBS E",
+    "group": "🇰🇷| Hàn Quốc",
+    "logo": "https://cdn.aptoide.com/imgs/6/7/e/67edd0054bd79fb633b11710eeeba298_fgraphic.png",
+    "url": "https://ebsonair.ebs.co.kr/plus3familypc/familypc1m/playlist.m3u8"
+  },
+  {
+    "id": "ebs_kids_166",
+    "name": "EBS Kids",
+    "group": "🇰🇷| Hàn Quốc",
+    "logo": "https://i.ytimg.com/vi/pra1kNRrxgc/hq720.jpg",
+    "url": "https://ebsonair.ebs.co.kr/ebsufamilypc/familypc1m/playlist.m3u8"
+  },
+  {
+    "id": "ebs_1_167",
+    "name": "EBS+1",
+    "group": "🇰🇷| Hàn Quốc",
+    "logo": "https://static.wikia.nocookie.net/logopedia/images/7/70/Channels_IPTV_01.png/revision/latest?cb=20180627174859",
+    "url": "https://ebsonair.ebs.co.kr/plus1familypc/familypc1m/playlist.m3u8"
+  },
+  {
+    "id": "ebs_2_168",
+    "name": "EBS+2",
+    "group": "🇰🇷| Hàn Quốc",
+    "logo": "https://static.wikia.nocookie.net/logopedia/images/5/5c/Channels_IPTV_02.png/revision/latest?cb=20180627175021",
+    "url": "https://ebsonair.ebs.co.kr/plus2familypc/familypc1m/playlist.m3u8"
+  },
+  {
+    "id": "ebs1_169",
+    "name": "EBS1",
+    "group": "🇰🇷| Hàn Quốc",
+    "logo": "https://logowik.com/content/uploads/images/ebs1-20181732222724.logowik.com.webp",
+    "url": "https://ebsonair.ebs.co.kr/ebs1familypc/familypc1m/playlist.m3u8"
+  },
+  {
+    "id": "ebs2_170",
+    "name": "EBS2",
+    "group": "🇰🇷| Hàn Quốc",
+    "logo": "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
+    "url": "https://ebsonair.ebs.co.kr/ebs2familypc/familypc1m/playlist.m3u8"
+  },
+  {
+    "id": "jtv_sbs_171",
+    "name": "JTV SBS",
+    "group": "🇰🇷| Hàn Quốc",
+    "logo": "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
+    "url": "http://61.85.197.53:1935/jtv_live/myStream/chunklist_w1542137203.m3u8"
+  },
+  {
+    "id": "mbc_172",
+    "name": "MBC",
+    "group": "🇰🇷| Hàn Quốc",
+    "logo": "https://img.imbc.com/commons/2018/image/comm2018noti/meta_mbc.png",
+    "url": "https://ns1.tjmbc.co.kr/live/myStream.sdp/chunklist_w1392208922.m3u8"
+  },
+  {
+    "id": "mbc_chuncheon_173",
+    "name": "MBC Chuncheon",
+    "group": "🇰🇷| Hàn Quốc",
+    "logo": "https://raw.githubusercontent.com/iptv-org/tv-logos/master/countries/kr/mbc-tv.png",
+    "url": "https://stream.chmbc.co.kr/TV/myStream/playlist.m3u8"
+  },
+  {
+    "id": "mbc_chungbuk_174",
+    "name": "MBC Chungbuk",
+    "group": "🇰🇷| Hàn Quốc",
+    "logo": "https://raw.githubusercontent.com/iptv-org/tv-logos/master/countries/kr/mbc-tv.png",
+    "url": "http://211.33.246.4:32954/cj_live/myStream.sdp/playlist.m3u8"
+  },
+  {
+    "id": "mbc_daegu_175",
+    "name": "MBC Daegu",
+    "group": "🇰🇷| Hàn Quốc",
+    "logo": "https://raw.githubusercontent.com/iptv-org/tv-logos/master/countries/kr/mbc-tv.png",
+    "url": "https://5ee1ec6f32118.streamlock.net/live/livetv/playlist.m3u8"
+  },
+  {
+    "id": "mbc_jeju_176",
+    "name": "MBC Jeju",
+    "group": "🇰🇷| Hàn Quốc",
+    "logo": "https://jejumbc.com/main/images/news/jj1.jpg",
+    "url": "https://wowza.jejumbc.com/live/tv_jejumbc/playlist.m3u8"
+  },
+  {
+    "id": "mbc_mokpo_177",
+    "name": "MBC Mokpo",
+    "group": "🇰🇷| Hàn Quốc",
+    "logo": "https://raw.githubusercontent.com/iptv-org/tv-logos/master/countries/kr/mbc-tv.png",
+    "url": "http://vod.mpmbc.co.kr:1935/live/encoder-tv/playlist.m3u8"
+  },
+  {
+    "id": "mbc_yeosu_178",
+    "name": "MBC Yeosu",
+    "group": "🇰🇷| Hàn Quốc",
+    "logo": "https://raw.githubusercontent.com/iptv-org/tv-logos/master/countries/kr/mbc-tv.png",
+    "url": "https://5c3639aa99149.streamlock.net/live_TV/tv/playlist.m3u8"
+  },
+  {
+    "id": "tv_chosun_179",
+    "name": "TV Chosun",
+    "group": "🇰🇷| Hàn Quốc",
+    "logo": "https://raw.githubusercontent.com/iptv-org/tv-logos/master/countries/kr/tv-chosun.png",
+    "url": "http://onair.cdn.tvchosun.com/origin1/_definst_/tvchosun_s1/playlist.m3u8"
+  },
+  {
+    "id": "tvn_181",
+    "name": "TVN",
+    "group": "🇰🇷| Hàn Quốc",
+    "logo": "https://raw.githubusercontent.com/iptv-org/tv-logos/master/countries/kr/tvn.png",
+    "url": "http://onair2.cdn.tvchosun.com/origin2/_definst_/tvchosun_s3/playlist.m3u8"
+  },
+  {
+    "id": "cctv2_182",
+    "name": "CCTV2",
+    "group": "🇨🇳| Trung Quốc",
+    "logo": "https://raw.githubusercontent.com/iptv-org/tv-logos/master/countries/cn/cctv-5.png",
+    "url": "http://74.91.26.218:82/live/cctv2hd.m3u8"
+  },
+  {
+    "id": "cctv3_183",
+    "name": "CCTV3",
+    "group": "🇨🇳| Trung Quốc",
+    "logo": "https://static.wikia.nocookie.net/logos/images/f/f2/CCTV3.png/revision/latest/scale-to-width-down/680?cb=20230514030148&path-prefix=vi",
+    "url": "http://74.91.26.218:82/live/cctv3hd.m3u8"
+  },
+  {
+    "id": "cctv4_184",
+    "name": "CCTV4",
+    "group": "🇨🇳| Trung Quốc",
+    "logo": "https://static.wikia.nocookie.net/logos/images/d/da/CCTV4.png/revision/latest?cb=20230520135601&path-prefix=vi",
+    "url": "http://74.91.26.218:82/live/cctv4hd.m3u8"
+  },
+  {
+    "id": "cctv6_185",
+    "name": "CCTV6",
+    "group": "🇨🇳| Trung Quốc",
+    "logo": "https://static.wikia.nocookie.net/logos/images/d/d9/CCTV6.png/revision/latest?cb=20230816063202&path-prefix=vi",
+    "url": "http://74.91.26.218:82/live/cctv6hd.m3u8"
+  },
+  {
+    "id": "cctv7_186",
+    "name": "CCTV7",
+    "group": "🇨🇳| Trung Quốc",
+    "logo": "https://static.wikia.nocookie.net/logos/images/a/a6/CCTV7_tr%C6%B0%E1%BB%9Bc_2019.png/revision/latest/scale-to-width-down/1547?cb=20230104111736&path-prefix=vi",
+    "url": "http://74.91.26.218:82/live/cctv7hd.m3u8"
+  },
+  {
+    "id": "cctv8k_187",
+    "name": "CCTV8K",
+    "group": "🇨🇳| Trung Quốc",
+    "logo": "https://pic2.zhimg.com/80/v2-01c9b1cdd4534f653e1bb8102b18a89d_1440w.webp",
+    "url": "https://epg.pw/stream/51549059a33a0dc4ac8d112ebbe3b1df956d95319a9ee54b6ca449c464893da5.m3u8"
+  },
+  {
+    "id": "atv1_b_o_v_ptth_an_giang_188",
+    "name": "ATV1 - Báo và PTTH An Giang",
+    "group": "Địa phương",
+    "logo": "https://angiangtv.vn/wp-content/uploads/2025/06/H4.png",
+    "url": "https://tv.angiangtv.vn/live/kgtv/kgtv.m3u8"
+  },
+  {
+    "id": "atv3_b_o_v_ptth_an_giang_189",
+    "name": "ATV3 - Báo và PTTH An Giang",
+    "group": "Địa phương",
+    "logo": "https://angiangtv.vn/wp-content/uploads/2025/06/H5.png",
+    "url": "https://tv.angiangtv.vn/live/kgtv1/kgtv1.m3u8"
+  },
+  {
+    "id": "bhttv_b_o_v_ptth_h_t_nh_190",
+    "name": "BHTTV - Báo và PTTH Hà Tĩnh",
+    "group": "Địa phương",
+    "logo": "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/BHTTV.webp",
+    "url": "https://freem3u.xyz/api/live/play.m3u8?vid=58"
+  },
+  {
+    "id": "c_n_th_1_hd_b_o_v_ptth_th_nh_ph_c_n_th_191",
+    "name": "Cần Thơ 1 HD - Báo và PTTH Thành Phố Cần Thơ",
+    "group": "Địa phương",
+    "logo": "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/CanTho1.png",
+    "url": "https://live.canthotv.vn/live/tv/chunklist_w693005420.m3u8"
+  },
+  {
+    "id": "c_n_th_2_hd_b_o_v_ptth_th_nh_ph_c_n_th_192",
+    "name": "Cần Thơ 2 HD - Báo và PTTH Thành Phố Cần Thơ",
+    "group": "Địa phương",
+    "logo": "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/CanTho2.png",
+    "url": "https://live.canthotv.vn/cs2/live.stream/chunklist_w1497265452.m3u8"
+  },
+  {
+    "id": "c_n_th_3_hd_b_o_v_ptth_th_nh_ph_c_n_th_193",
+    "name": "Cần Thơ 3 HD - Báo và PTTH Thành Phố Cần Thơ",
+    "group": "Địa phương",
+    "logo": "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/CanTho3.png",
+    "url": "https://live.canthotv.vn/cs3/tv/chunklist_w1003748170.m3u8"
+  },
+  {
+    "id": "drt_hd_b_o_v_ptth_k_l_k_194",
+    "name": "DRT HD - Báo và PTTH Đắk Lắk",
+    "group": "Địa phương",
+    "logo": "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
+    "url": "https://freem3u.xyz/api/live/play.m3u8?vid=51"
+  },
+  {
+    "id": "gtv_b_o_v_ptth_gia_lai_195",
+    "name": "GTV - Báo và PTTH Gia Lai",
+    "group": "Địa phương",
+    "logo": "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/GTVGIALAI.png",
+    "url": "https://vmttv.dpdns.org/tv360/?id=gia-lai"
+  },
+  {
+    "id": "hitv_196",
+    "name": "HiTV",
+    "group": "Địa phương",
+    "logo": "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
+    "url": "https://vmttv.dpdns.org/tv360/?id=hitv"
+  },
+  {
+    "id": "hu_tv_b_o_v_ptth_hu_197",
+    "name": "Huế TV - Báo và PTTH Huế",
+    "group": "Địa phương",
+    "logo": "https://i.imgur.com/q5MBibm.png",
+    "url": "https://live.huetv.com.vn/TRT-Online/chunklist.m3u8"
+  },
+  {
+    "id": "lstv_hd_b_o_v_ptth_l_ng_s_n_198",
+    "name": "LSTV HD - Báo và PTTH Lạng Sơn",
+    "group": "Địa phương",
+    "logo": "https://langsontv.vn/templates/frontend/lstv/Assets/img/video_bg.png",
+    "url": "https://stream.langsontv.vn/live/285c78da0c246524c90917842f8de03bd21/chunklist.m3u8"
+  },
+  {
+    "id": "ltv_b_o_lai_ch_u_199",
+    "name": "LTV - Báo Lai Châu",
+    "group": "Địa phương",
+    "logo": "https://images.fptplay53.net/media/channels/icon_channel_lai-chau_165649245279.png",
+    "url": "https://freem3u.xyz/api/live/play.m3u8?vid=68"
+  },
+  {
+    "id": "ltv1_hd_b_o_v_ptth_l_m_ng_200",
+    "name": "LTV1 HD - Báo và PTTH Lâm Đồng",
+    "group": "Địa phương",
+    "logo": "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/LTV1.jpg",
+    "url": "https://freem3u.xyz/api/live/play.m3u8?vid=69"
+  },
+  {
+    "id": "nbtv_b_o_v_ptth_ninh_b_nh_201",
+    "name": "NBTV - Báo và PTTH Ninh Bình",
+    "group": "Địa phương",
+    "logo": "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
+    "url": "https://live.mediatech.vn/live/28597f8fd7ea5064d0f84ab00b3699dfd86/chunklist.m3u8"
+  },
+  {
+    "id": "ntv_b_o_v_ptth_ngh_an_202",
+    "name": "NTV - Báo và PTTH Nghệ An",
+    "group": "Địa phương",
+    "logo": "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
+    "url": "https://freem3u.xyz/api/live/play.m3u8?vid=74"
+  },
+  {
+    "id": "qngtv1_b_o_v_ptth_qu_ng_ng_i_203",
+    "name": "QNgTV1 - Báo và PTTH Quảng Ngãi",
+    "group": "Địa phương",
+    "logo": "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/QNgTV1_QuangNgai.png",
+    "url": "https://freem3u.xyz/api/live/play.m3u8?vid=81"
+  },
+  {
+    "id": "qttv_b_o_v_ptth_qu_ng_tr_204",
+    "name": "QTTV - Báo và PTTH Quảng Trị",
+    "group": "Địa phương",
+    "logo": "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/QTTV.jpg",
+    "url": "https://freem3u.xyz/api/live/play.m3u8?vid=83"
+  },
+  {
+    "id": "qtv3_hd_b_o_v_ptth_qu_ng_ninh_205",
+    "name": "QTV3 HD - Báo và PTTH Quảng Ninh",
+    "group": "Địa phương",
+    "logo": "https://i.ytimg.com/vi/cTNt-U1akXw/hq720.jpg",
+    "url": "https://live.baoquangninh.vn/qtvlive/tv3live.m3u8"
+  },
+  {
+    "id": "stv_hd_b_o_v_ptth_s_n_la_206",
+    "name": "STV HD - Báo và PTTH Sơn La",
+    "group": "Địa phương",
+    "logo": "https://media.sonlatv.vn/upload/files/image/Back-TH-1.jpg",
+    "url": "https://cdn.sonlatv.vn/live/28595222e707a364251b8724717894baa46/chunklist.m3u8"
+  },
+  {
+    "id": "thlc_hd_b_o_v_ptth_l_o_cai_207",
+    "name": "THLC HD - Báo và PTTH Lào Cai",
+    "group": "Địa phương",
+    "logo": "https://lichphatsongtivi.com/storage/images/thumbnails/lich-phat-song-thlc.png",
+    "url": "https://freem3u.xyz/api/live/play.m3u8?vid=71"
+  },
+  {
+    "id": "thvl3_b_o_v_ptth_v_nh_long_208",
+    "name": "THVL3 - Báo và PTTH Vĩnh Long",
+    "group": "Địa phương",
+    "logo": "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/THVL1.webp",
+    "url": "https://vips-livecdn.fptplay.net/live/media/vinhlong3/live247-hls-avc/vinhlong3-avc1_5600000=10000-mp4a_131600=20000.m3u8"
+  },
+  {
+    "id": "tn_b_o_v_ptth_th_i_nguy_n_209",
+    "name": "TN - Báo và PTTH Thái Nguyên",
+    "group": "Địa phương",
+    "logo": "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
+    "url": "https://freem3u.xyz/api/live/play.m3u8?vid=88"
+  },
+  {
+    "id": "ttv_hd_b_o_v_ptth_thanh_h_a_210",
+    "name": "TTV HD - Báo và PTTH Thanh Hóa",
+    "group": "Địa phương",
+    "logo": "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
+    "url": "https://freem3u.xyz/api/live/play.m3u8?vid=89"
+  },
+  {
+    "id": "t_y_ninh_tv_b_o_v_ptth_t_y_ninh_211",
+    "name": "Tây Ninh TV - Báo và PTTH Tây Ninh",
+    "group": "Địa phương",
+    "logo": "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/TayNinhTV.jpg",
+    "url": "https://freem3u.xyz/api/live/play.m3u8?vid=72"
+  },
+  {
+    "id": "nrt1_b_o_v_ptth_n_ng_212",
+    "name": "ĐNRT1 - Báo và PTTH Đà Nẵng",
+    "group": "Địa phương",
+    "logo": "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/ĐNRT1.png",
+    "url": "https://freem3u.xyz/api/live/play.m3u8?vid=49"
+  },
+  {
+    "id": "nrt2_b_o_v_ptth_n_ng_213",
+    "name": "ĐNRT2 - Báo và PTTH Đà Nẵng",
+    "group": "Địa phương",
+    "logo": "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/DNRT2_logo.png",
+    "url": "https://freem3u.xyz/api/live/play.m3u8?vid=80"
+  },
+  {
+    "id": "tv_hd_b_o_i_n_bi_n_ph_214",
+    "name": "ĐTV HD - Báo Điện Biên Phủ",
+    "group": "Địa phương",
+    "logo": "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
+    "url": "https://freem3u.xyz/api/live/play.m3u8?vid=52"
+  },
+  {
+    "id": "htv1_i_ptth_th_nh_ph_h_ch_minh_215",
+    "name": "HTV1 - Đài PTTH Thành Phố Hồ Chí Minh",
+    "group": "HTV",
+    "logo": "https://s7771.cdn.mytvnet.vn/vimages/8c/ce/ee/e7/79/98/8cee7-phtv1hd-channel-unkn.png",
+    "url": "https://freem3u.xyz/api/live/play.m3u8?vid=190"
+  },
+  {
+    "id": "htv5_b_channel_216",
+    "name": "HTV5 - B Channel",
+    "group": "HTV",
+    "logo": "https://raw.githubusercontent.com/vuminhthanh12/vuminhthanh12/refs/heads/main/HTV5.jpg",
+    "url": "https://freem3u.xyz/api/live/play.m3u8?vid=151"
+  },
+  {
+    "id": "an_giang_fm_93_1_mhz_217",
+    "name": "An Giang FM 93.1 Mhz",
+    "group": "Radio",
+    "logo": "https://raw.githubusercontent.com/vuminhthanh12/Logo/refs/heads/main/ATVFM93.1%20MHZ.jpg",
+    "url": "https://tv.angiangtv.vn/live/kgtv3/kgtv3.m3u8"
+  },
+  {
+    "id": "an_giang_fm_99_4_mhz_218",
+    "name": "An Giang FM 99,4 Mhz",
+    "group": "Radio",
+    "logo": "https://angiangtv.vn/wp-content/uploads/2025/06/H6.png",
+    "url": "https://tv.angiangtv.vn/live/kgaudio/kgaudio.m3u8"
+  },
+  {
+    "id": "b_c_ninh_219",
+    "name": "Bắc Ninh",
+    "group": "Radio",
+    "logo": "https://bacninhtv.vn/templates/frontend/bgtv/Assets/img/v3/btv_bg_video.jpg",
+    "url": "https://live.mediatech.vn/live/285acd5e43b501e4c21b0af4e55810625c8/chunklist.m3u8"
+  },
+  {
+    "id": "c_mau_220",
+    "name": "Cà Mau",
+    "group": "Radio",
+    "logo": "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
+    "url": "http://tv.ctvcamau.vn/live/radio/radio.m3u8"
+  },
+  {
+    "id": "c_i_l_ng_vi_t_nam_221",
+    "name": "Cải Lương Việt Nam",
+    "group": "Radio",
+    "logo": "https://proxy.zeno.fm/content/stations/agxzfnplbm8tc3RhdHNyMgsSCkF1dGhDbGllbnQYgICQ2ciKiAoMCxIOU3RhdGlvblByb2ZpbGUYgIDQoL-YpAoMogEEemVubw/image/",
+    "url": "https://stream.zeno.fm/0trm6wrnga0uv"
+  },
+  {
+    "id": "c_n_th_radio_2_222",
+    "name": "Cần Thơ Radio 2",
+    "group": "Radio",
+    "logo": "https://canthoplus.vn/storage/channels/d18742e3-5735-43ea-9001-77678b4ef751.png",
+    "url": "https://live.canthotv.vn/live/radiocs2/chunklist_w790093430.m3u8"
+  },
+  {
+    "id": "h_n_i_fm_90_223",
+    "name": "Hà Nội FM 90",
+    "group": "Radio",
+    "logo": "https://image.voh.com.vn/voh/image/2024/03/08/dai-ha-noi-5_90mhz---3-01-111825.jpg",
+    "url": "https://freem3u.xyz/api/live/play.m3u8?vid=9905"
+  },
+  {
+    "id": "h_n_i_fm_96_224",
+    "name": "Hà Nội FM 96",
+    "group": "Radio",
+    "logo": "https://image.voh.com.vn/voh/image/2024/03/08/dai-ha-noi-5_96mhz--3-01-111727.jpg?w=450&h=270",
+    "url": "https://freem3u.xyz/api/live/play.m3u8?vid=9906"
+  },
+  {
+    "id": "h_ng_y_n_225",
+    "name": "Hưng Yên",
+    "group": "Radio",
+    "logo": "http://hungyentv.vn//templates/frontend/hytv/Assets/img/backgroud-radio.jpg",
+    "url": "https://live.mediatech.vn/live/285b6e443bc30734725a940da8b0629655b/chunklist.m3u8"
+  },
+  {
+    "id": "l_ng_s_n_226",
+    "name": "Lạng Sơn",
+    "group": "Radio",
+    "logo": "http://langsontv.vn/templates/frontend/lstv/Assets/img/radio_bg.png",
+    "url": "https://stream.langsontv.vn/live/285dabcfc94f52b458688fe7f601524816e/chunklist.m3u8"
+  },
+  {
+    "id": "m_radio_vi_t_nam_227",
+    "name": "M Radio Việt Nam",
+    "group": "Radio",
+    "logo": "https://proxy.zeno.fm/content/stations/agxzfnplbm8tc3RhdHNyMgsSCkF1dGhDbGllbnQYgICQ2ciKiAoMCxIOU3RhdGlvblByb2ZpbGUYgICQucnHqwsMogEEemVubw/image/",
+    "url": "https://stream.zeno.fm/4q7y9hvkp2zuv"
+  },
+  {
+    "id": "ninh_b_nh_228",
+    "name": "Ninh Bình",
+    "group": "Radio",
+    "logo": "https://nbtv.vn/templates/frontend/nbtv/Assets/img/audio_bg.jpg",
+    "url": "https://live.mediatech.vn/live/285391a08f01f83458793b293c5e9517265/chunklist.m3u8"
+  },
+  {
+    "id": "qnr1_qu_ng_ninh_229",
+    "name": "QNR1 - Quảng Ninh",
+    "group": "Radio",
+    "logo": "https://media.baoquangninh.vn/upload/files/logo/logotrangchu4.png",
+    "url": "http://103.90.220.236/qtvlive/qnr1.m3u8"
+  },
+  {
+    "id": "qnr2_qu_ng_ninh_230",
+    "name": "QNR2 - Quảng Ninh",
+    "group": "Radio",
+    "logo": "https://media.baoquangninh.vn/upload/files/logo/logotrangchu3.png",
+    "url": "http://103.90.220.236/qtvlive/qnr2.m3u8"
+  },
+  {
+    "id": "radio_dj_231",
+    "name": "Radio DJ",
+    "group": "Radio",
+    "logo": "https://proxy.zeno.fm/content/stations/agxzfnplbm8tc3RhdHNyMgsSCkF1dGhDbGllbnQYgICQ2ciKiAoMCxIOU3RhdGlvblByb2ZpbGUYgIDQidjS_wkMogEEemVubw/image/",
+    "url": "https://stream.zeno.fm/ehbutdfccm0uv"
+  },
+  {
+    "id": "radio_nh_c_d_n_ca_232",
+    "name": "Radio Nhạc Dân Ca",
+    "group": "Radio",
+    "logo": "https://proxy.zeno.fm/content/stations/agxzfnplbm8tc3RhdHNyMgsSCkF1dGhDbGllbnQYgICQ2ciKiAoMCxIOU3RhdGlvblByb2ZpbGUYgICw0ILTsQoMogEEemVubw/image/",
+    "url": "https://stream.zeno.fm/a2dbs2tq1p8uv"
+  },
+  {
+    "id": "radio_ph_t_gi_o_233",
+    "name": "Radio Phật Giáo",
+    "group": "Radio",
+    "logo": "https://proxy.zeno.fm/content/stations/agxzfnplbm8tc3RhdHNyMgsSCkF1dGhDbGllbnQYgICQ2ciKiAoMCxIOU3RhdGlvblByb2ZpbGUYgIDQiavcsgsMogEEemVubw/image/",
+    "url": "https://stream.zeno.fm/8456uy0bcm0uv"
+  },
+  {
+    "id": "s_n_la_234",
+    "name": "Sơn La",
+    "group": "Radio",
+    "logo": "https://media.sonlatv.vn/upload/files/image/Back-PT.jpg",
+    "url": "https://cdn.sonlatv.vn/live/285bfb76d0d7a3c4615b853fe7a698e150c/chunklist.m3u8"
+  },
+  {
+    "id": "th_i_nguy_n_235",
+    "name": "Thái Nguyên",
+    "group": "Radio",
+    "logo": "http://esb.thainguyentv.vn/upload/group/news//hytvgo_5ff2dd1ed1b81.jpg",
+    "url": "https://radio.thainguyentv.vn/hls/livestream.m3u8"
+  },
+  {
+    "id": "t_y_ninh_236",
+    "name": "Tây Ninh",
+    "group": "Radio",
+    "logo": "https://w.ladicdn.com/s450x400/5ec394fc3354ff26568e1124/logo-fm1031mhz-20211008162127.png",
+    "url": "https://live-hq.evgcdn.net/live/2851dd3d9016ac74d84b0c4a7a659f76891/chunklist.m3u8"
+  },
+  {
+    "id": "vov_giao_th_ng_h_n_i_237",
+    "name": "VOV Giao thông Hà Nội",
+    "group": "Radio",
+    "logo": "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
+    "url": "https://str.vov.gov.vn/vovlive/vovGTHN.sdp_aac/chunklist_w601606653.m3u8"
+  },
+  {
+    "id": "vov_giao_th_ng_h_ch_minh_238",
+    "name": "VOV Giao thông Hồ Chí Minh",
+    "group": "Radio",
+    "logo": "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
+    "url": "https://str.vov.gov.vn/vovlive/vovGTHCM.sdp_aac/chunklist_w1213978008.m3u8"
+  },
+  {
+    "id": "vov5_239",
+    "name": "VOV5",
+    "group": "Radio",
+    "logo": "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
+    "url": "https://str.vov.gov.vn/vovlive/vov5.sdp_aac/playlist.m3u8"
+  },
+  {
+    "id": "n_ng_240",
+    "name": "Đà Nẵng",
+    "group": "Radio",
+    "logo": "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
+    "url": "https://live.mediatech.vn/live/2858a998b1c7fbf4522accd5554588ceae3/chunklist.m3u8"
+  },
+  {
+    "id": "k_l_k_241",
+    "name": "Đắk Lắk",
+    "group": "Radio",
+    "logo": "https://static.wikia.nocookie.net/logos/images/f/f3/Logo_DRT_FM_92%2C4MHz_%26_FM_94%2C7MHz.png/revision/latest/scale-to-width-down/1082?cb=20220613173357&path-prefix=vi",
+    "url": "https://cdn.drt.vn/live/285054c4567dea54b3fb14bfd60d61230b5/chunklist.m3u8"
+  },
+  {
+    "id": "box_hits_243",
+    "name": "Box Hits",
+    "group": "📦| In The Box",
+    "logo": "https://raw.githubusercontent.com/vuminhthanh12/Logo/refs/heads/main/boxhits.png",
+    "url": "https://livevlisctcdnw.seenow.vn/mean/BOXHIT/manifest.mpd"
+  },
+  {
+    "id": "capital_radio_uk_244",
+    "name": "Capital Radio UK",
+    "group": "🇬🇧 UK Radio",
+    "logo": "https://www.globalplayer.com/assets/track-placeholders/capital.jpg",
+    "url": "https://media-ssl.musicradio.com/CapitalUK"
+  },
+  {
+    "id": "heart_fm_uk_245",
+    "name": "Heart FM UK",
+    "group": "🇬🇧 UK Radio",
+    "logo": "https://ukradiolive.com/public/uploads/radio_img/heart-london/fb_cover.jpg",
+    "url": "https://media-ssl.musicradio.com/HeartUK"
+  },
+  {
+    "id": "hollywood_classics_246",
+    "name": "Hollywood Classics",
+    "group": "📦| In The Box",
+    "logo": "https://raw.githubusercontent.com/vuminhthanh12/Logo/refs/heads/main/hollywoodclassic.png",
+    "url": "https://livevlisctcdnw.seenow.vn/Live_DASHDRM1/HC/manifest.mpd"
+  },
+  {
+    "id": "music_box_247",
+    "name": "Music Box",
+    "group": "📦| In The Box",
+    "logo": "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
+    "url": "https://livevlisctcdnw.seenow.vn/livesnv2/MUSICBOX/manifest.mpd"
+  },
+  {
+    "id": "radio_nh_c_v_ng_x_a_248",
+    "name": "Radio Nhạc Vàng Xưa",
+    "group": "Unknown",
+    "logo": "https://dongnhacvang.com/wp-content/uploads/2019/08/cropped-logo-nhac-vang-1-2.png",
+    "url": "https://stream.zeno.fm/x2z45v7d84zuv"
+  },
+  {
+    "id": "tvb_vi_t_nam_249",
+    "name": "TVB VIỆT NAM",
+    "group": "TVB",
+    "logo": "https://tvbaw-na.s3.us-west-1.amazonaws.com/hb/TVB%20Vietnam%20Banner_Side.jpg",
+    "url": "https://amg01868-amg01868c3-tvbanywhere-us-4491.playouts.now.amagi.tv/playlist1080p.m3u8"
+  },
+  {
+    "id": "virgin_media_four_250",
+    "name": "Virgin Media Four",
+    "group": "Israel",
+    "logo": "https://i.ytimg.com/vi/QZZijZXNeqo/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLC-WbMQHFRNT0NZEmZ7Wngm4na2TQ",
+    "url": "https://d1o5wc5bjvzqoa.cloudfront.net/out/v1/bb744b243afb44eabcc56d002c36cafd/index.mpd"
+  },
+  {
+    "id": "virgin_media_three_251",
+    "name": "Virgin Media Three",
+    "group": "Israel",
+    "logo": "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
+    "url": "https://d3n2r2x6pixas4.cloudfront.net/out/v1/426d7a9e942b4f64917d66940bd3b147/index.mpd"
+  },
+  {
+    "id": "woman_252",
+    "name": "Woman",
+    "group": "📦| In The Box",
+    "logo": "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png",
+    "url": "https://livevlisctcdnw.seenow.vn/Live_DASHDRM1/WO/manifest.mpd"
+  }
 ];

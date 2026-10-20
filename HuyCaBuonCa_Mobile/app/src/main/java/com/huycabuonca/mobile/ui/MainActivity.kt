@@ -48,6 +48,22 @@ class MainActivity : AppCompatActivity() {
         setupSourceSelectors()
         updateDynamicFilters()
         loadMovies(reset = true)
+
+        // Kiểm tra nếu mở app từ thông báo chuông trận đấu
+        intent?.getStringExtra("OPEN_MATCH_ALERT")?.let { matchId ->
+            val teamA = intent.getStringExtra("ALERT_TEAM_A") ?: "Đội A"
+            val teamB = intent.getStringExtra("ALERT_TEAM_B") ?: "Đội B"
+            val dummyMatch = com.huycabuonca.mobile.model.FootballMatch(
+                id = matchId,
+                time = "Đang diễn ra",
+                tournament = "🏴󠁧󠁢󠁥󠁮󠁧󠁿 Ngoại Hạng Anh",
+                teamA = teamA,
+                teamB = teamB,
+                channelName = "True Premier Football",
+                channelSlug = "sports_sat_true_premier_1"
+            )
+            showMatchServerSelectionDialog(dummyMatch)
+        }
     }
 
     private fun setupUI() {
@@ -155,43 +171,87 @@ class MainActivity : AppCompatActivity() {
 
         val recycler = view.findViewById<RecyclerView>(R.id.recyclerMatches)
         recycler.layoutManager = LinearLayoutManager(this)
-        recycler.adapter = MatchAdapter(matches) { match ->
-            dialog.dismiss()
-            lifecycleScope.launch(Dispatchers.IO) {
-                val allTv = MovieRepository.getAllTvChannels(this@MainActivity)
-                val found = allTv.find { it.id == match.channelSlug }
-                    ?: allTv.find { it.name.contains(match.channelName, ignoreCase = true) }
-                    ?: allTv.find { it.name.contains("VTV6", ignoreCase = true) || it.name.contains("Bóng", ignoreCase = true) }
-
-                withContext(Dispatchers.Main) {
-                    if (found != null) {
-                        val defaultTvLogo = "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png"
-                        val finalLogo = if (found.logo.isNotEmpty()) found.logo else defaultTvLogo
-                        val movieItem = MovieItem(
-                            id = found.id,
-                            name = "${found.name} - ${match.teamA} vs ${match.teamB}",
-                            slug = found.id,
-                            originName = "[${match.tournament}]",
-                            thumbUrl = finalLogo,
-                            posterUrl = finalLogo,
-                            year = "2026",
-                            quality = "LIVE",
-                            episodeCurrent = "Trực Tiếp",
-                            source = MovieSource.XEMTIVI
-                        )
-                        playTvChannelDirectly(movieItem)
-                    } else {
-                        Toast.makeText(this@MainActivity, "Kênh trực tiếp cho trận này đang chuẩn bị phát sóng!", Toast.LENGTH_SHORT).show()
-                    }
+        recycler.adapter = MatchAdapter(
+            matches = matches,
+            onMatchClick = { match ->
+                dialog.dismiss()
+                showMatchServerSelectionDialog(match)
+            },
+            onReminderToggle = { match, enabled ->
+                MovieRepository.setMatchAlarm(this@MainActivity, match, enabled)
+                val msg = if (enabled) {
+                    "🔔 Đã bật chuông! App sẽ cảnh báo trước 15 phút khi trận ${match.teamA} vs ${match.teamB} bắt đầu!"
+                } else {
+                    "🔕 Đã hủy thông báo trận ${match.teamA} vs ${match.teamB}"
                 }
+                Toast.makeText(this@MainActivity, msg, Toast.LENGTH_SHORT).show()
             }
-        }
+        )
 
         view.findViewById<Button>(R.id.btnCloseSchedule).setOnClickListener {
             dialog.dismiss()
         }
 
         dialog.show()
+    }
+
+    private fun showMatchServerSelectionDialog(match: com.huycabuonca.mobile.model.FootballMatch) {
+        val servers = arrayOf(
+            "🟢 Server 1: Thập Cẩm HD (BLV Tiếng Việt)",
+            "🔵 Server 2: Xôi Lạc HD (BLV Tiếng Việt)",
+            "🟣 Server 3: Về Bờ HD (BLV Tiếng Việt)",
+            "🟡 Server 4: Vệ Tinh Quốc Tế (True Premier / Astro 1080p 50fps)"
+        )
+
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("⚽ ${match.teamA} vs ${match.teamB}")
+            .setItems(servers) { _, which ->
+                when (which) {
+                    0, 1, 2 -> {
+                        // Mở In-App MatchWebPlayerActivity không quảng cáo
+                        val intent = android.content.Intent(this, MatchWebPlayerActivity::class.java).apply {
+                            putExtra(MatchWebPlayerActivity.EXTRA_SERVER_NUM, which + 1)
+                            putExtra(MatchWebPlayerActivity.EXTRA_TEAM_A, match.teamA)
+                            putExtra(MatchWebPlayerActivity.EXTRA_TEAM_B, match.teamB)
+                        }
+                        startActivity(intent)
+                    }
+                    3 -> {
+                        // Server 4: Mở kênh Vệ Tinh Quốc Tế True Premier / Astro qua ExoPlayer
+                        lifecycleScope.launch(Dispatchers.IO) {
+                            val allTv = MovieRepository.getAllTvChannels(this@MainActivity)
+                            val found = allTv.find { it.id == match.channelSlug }
+                                ?: allTv.find { it.name.contains("True Premier", ignoreCase = true) }
+                                ?: allTv.find { it.name.contains("Astro", ignoreCase = true) }
+                                ?: allTv.find { it.group.contains("Vệ Tinh", ignoreCase = true) }
+
+                            withContext(Dispatchers.Main) {
+                                if (found != null) {
+                                    val defaultTvLogo = "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png"
+                                    val finalLogo = if (found.logo.isNotEmpty()) found.logo else defaultTvLogo
+                                    val movieItem = MovieItem(
+                                        id = found.id,
+                                        name = "[Vệ Tinh] ${match.teamA} vs ${match.teamB}",
+                                        slug = found.id,
+                                        originName = "[${match.tournament}]",
+                                        thumbUrl = finalLogo,
+                                        posterUrl = finalLogo,
+                                        year = "2026",
+                                        quality = "1080p",
+                                        episodeCurrent = "Trực Tiếp",
+                                        source = MovieSource.XEMTIVI
+                                    )
+                                    playTvChannelDirectly(movieItem)
+                                } else {
+                                    Toast.makeText(this@MainActivity, "Đang kết nối luồng vệ tinh quốc tế...", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            .setNegativeButton("Đóng", null)
+            .show()
     }
 
     private fun showAddCustomIptvDialog() {

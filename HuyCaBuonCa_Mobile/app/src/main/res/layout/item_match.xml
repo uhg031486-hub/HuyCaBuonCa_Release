@@ -78,13 +78,35 @@
             android:textStyle="bold" />
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/txtMatchChannel"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:text="📺 Kênh: VTV6 Thể Thao HD (FPT) • Bấm để xem"
-        android:textColor="#FFD700"
-        android:textSize="11sp" />
+        android:layout_marginTop="6dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/txtMatchChannel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="⚡ 4 Server Trực Tiếp (Thập Cẩm, Xôi Lạc, Về Bờ, Vệ Tinh)"
+            android:textColor="#FFD700"
+            android:textSize="11sp" />
+
+        <TextView
+            android:id="@+id/btnMatchReminder"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="#243048"
+            android:paddingStart="8dp"
+            android:paddingTop="3dp"
+            android:paddingEnd="8dp"
+            android:paddingBottom="3dp"
+            android:text="🔔 Báo Giờ Đá"
+            android:textColor="#CBD5E1"
+            android:textSize="10sp"
+            android:textStyle="bold" />
+    </LinearLayout>
 
 </LinearLayout>
