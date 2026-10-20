@@ -1,10 +1,10 @@
 {
-  "versionCode": 15,
-  "versionName": "2.4",
-  "title": "Huy Cá v2.4",
-  "changelog": "- Ra mắt chính thức ứng dụng Huy Cá cho máy tính Windows (HuyCa_Windows_v2.4.zip): Ứng dụng Desktop siêu nhẹ, khởi động tức thì, tối ưu card đồ họa rời và tăng tốc phần cứng DirectX/Media Foundation, hỗ trợ xem video 4K sắc nét và chế độ toàn màn hình mượt mà.\n- Đổi mới toàn diện bộ nhận diện thương hiệu thành \"Huy Cá\": Tinh gọn, hiện đại và đồng bộ 100% trên toàn bộ các nền tảng (Android Mobile, Android TV, LG webOS Smart TV, Windows Desktop).\n- Tối ưu trải nghiệm điều hướng: Đưa mục \"🕒 Lịch Sử Xem\" (hoặc Kênh Vừa Xem) và \"❤️ Phim Yêu Thích\" (hoặc Kênh Yêu Thích) lên ngay dòng thứ 2 và thứ 3 của menu danh mục, giúp người xem truy cập lại các nội dung đang theo dõi ngay khi mở ứng dụng mà không cần cuộn xuống cuối.\n- Nâng cấp phiên bản v2.4 đồng bộ trên toàn bộ hệ sinh thái.",
-  "windowsZipUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v2.4/HuyCa_Windows_v2.4.zip",
-  "mobileApkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v2.4/HuyCa_Mobile_v2.4.apk",
-  "tvApkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v2.4/HuyCa_TV_v2.4.apk",
-  "lgIpkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v2.4/HuyCa_LG_webOS_v2.4.ipk"
+  "versionCode": 16,
+  "versionName": "2.5",
+  "title": "Huy Cá v2.5 - Ngoại Hạng Anh & Kênh Vệ Tinh Quốc Tế",
+  "changelog": "- Tích hợp Ngoại Hạng Anh (EPL) & Kênh Vệ Tinh Quốc Tế: Bổ sung 2 bộ lọc chuyên biệt \"🏴󠁧󠁢󠁥󠁮󠁧󠁿 Ngoại Hạng Anh (EPL)\" và \"📡 Kênh Vệ Tinh Quốc Tế\" trong nguồn Xem Tivi với các kênh thể thao hàng đầu (True Premier Football 1-2, Astro SuperSport 1-2, Sky Sports EPL, TNT Sports 1, beIN SPORTS 1 HD).\n- Lịch thi đấu thực tế thời gian thực: Cập nhật dữ liệu từ Fantasy Premier League (FPL) API chính xác từng cặp đấu, giờ phát sóng và kênh tiếp sóng.\n- Tính năng chuông báo giờ đá độc lập (Alarm & Notification): Nhấn chuông 🔔 hẹn giờ cho từng trận yêu thích, hệ thống sẽ tự động phát âm thanh, rung và hiển thị Popup cảnh báo trước 15 phút - CHỈ CẢNH BÁO ĐÚNG TRẬN ĐÃ ĐẶT, tuyệt đối không làm phiền trận khác.\n- Hỗ trợ 4 Server phát trực tiếp: Người dùng có thể tùy chọn Server 1 (Thập Cẩm HD), Server 2 (Xôi Lạc HD), Server 3 (Về Bờ HD) hoặc Server 4 (Vệ Tinh Quốc Tế) để xem mượt mà, không lo bị chặn.\n- Trình phát Ad-Free In-App Player: Xem trực tiếp ngay trong ứng dụng với bộ lọc Script Injection tự động loại bỏ 100% banner quảng cáo cá cược phiền toái.\n- Rà soát & Thanh lọc kênh truyền hình: Loại bỏ toàn bộ các link kênh hỏng, đảm bảo tỷ lệ sống 100% trên toàn bộ 4 nền tảng (Mobile, TV, Windows, webOS).",
+  "windowsZipUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v2.5/HuyCa_Windows_v2.5.zip",
+  "mobileApkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v2.5/HuyCaBuonCa_Mobile_v2.5.apk",
+  "tvApkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v2.5/HuyCaBuonCa_TV_v2.5.apk",
+  "lgIpkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v2.5/HuyCaBuonCa_LG_webOS_v2.5.ipk"
 }
