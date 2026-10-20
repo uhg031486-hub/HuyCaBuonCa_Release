@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -84,6 +85,8 @@
             android:layout_weight="1"
             android:layout_marginEnd="4dp"
             android:background="@drawable/bg_btn_selector"
+            app:backgroundTint="@null"
+            android:stateListAnimator="@animator/elevation_3d"
             android:paddingStart="2dp"
             android:paddingEnd="2dp"
             android:singleLine="true"
@@ -100,11 +103,13 @@
             android:layout_weight="1"
             android:layout_marginEnd="4dp"
             android:background="@drawable/bg_btn_selector"
+            app:backgroundTint="@null"
+            android:stateListAnimator="@animator/elevation_3d"
             android:paddingStart="2dp"
             android:paddingEnd="2dp"
             android:singleLine="true"
             android:ellipsize="end"
-            android:text="⛩️ AnimeHay"
+            android:text="⛩️ Anime"
             android:textColor="@color/text_primary"
             android:textSize="11sp"
             android:textStyle="bold" />
@@ -116,6 +121,8 @@
             android:layout_weight="1"
             android:layout_marginEnd="4dp"
             android:background="@drawable/bg_btn_selector"
+            app:backgroundTint="@null"
+            android:stateListAnimator="@animator/elevation_3d"
             android:paddingStart="2dp"
             android:paddingEnd="2dp"
             android:singleLine="true"
@@ -131,6 +138,8 @@
             android:layout_height="36dp"
             android:layout_weight="1"
             android:background="@drawable/bg_btn_selector"
+            app:backgroundTint="@null"
+            android:stateListAnimator="@animator/elevation_3d"
             android:paddingStart="2dp"
             android:paddingEnd="2dp"
             android:singleLine="true"
@@ -141,6 +150,25 @@
             android:textStyle="bold" />
 
     </LinearLayout>
+
+    <!-- ANIME SUB-SOURCES BAR (Chỉ hiển thị khi chọn nguồn Anime) -->
+    <HorizontalScrollView
+        android:id="@+id/scrollAnimeSubSources"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:scrollbars="none"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:id="@+id/layoutAnimeSubSources"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" />
+
+    </HorizontalScrollView>
 
     <!-- DYNAMIC Filter Bar (Thay đổi tự động theo từng nguồn) -->
     <HorizontalScrollView

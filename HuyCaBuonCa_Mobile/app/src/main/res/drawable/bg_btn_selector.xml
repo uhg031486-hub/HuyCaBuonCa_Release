@@ -1,23 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_focused="true">
+    <!-- Khi bấm vào (Pressed) - Hiệu ứng 3D nảy nổi lên sáng bóng -->
+    <item android:state_pressed="true">
         <shape android:shape="rectangle">
-            <gradient android:startColor="#FFD700" android:endColor="#FF9100" android:angle="45" />
+            <gradient android:startColor="#FFF9C4" android:centerColor="#FFD700" android:endColor="#FFA000" android:angle="90" />
             <stroke android:width="2dp" android:color="#FFFFFF" />
             <corners android:radius="10dp" />
         </shape>
     </item>
+    <!-- Khi được chọn (Selected) - Nền vàng kim 3D rực rỡ -->
     <item android:state_selected="true">
         <shape android:shape="rectangle">
-            <solid android:color="#E50914" />
-            <stroke android:width="2dp" android:color="@color/brand_gold" />
+            <gradient android:startColor="#FFE082" android:centerColor="#FFD700" android:endColor="#FF9100" android:angle="90" />
+            <stroke android:width="1.5dp" android:color="#FFFFFF" />
             <corners android:radius="10dp" />
         </shape>
     </item>
+    <!-- Khi focus (D-Pad trên TV hoặc Remote) -->
+    <item android:state_focused="true">
+        <shape android:shape="rectangle">
+            <gradient android:startColor="#FFD700" android:endColor="#FF6F00" android:angle="90" />
+            <stroke android:width="2dp" android:color="#FFFFFF" />
+            <corners android:radius="10dp" />
+        </shape>
+    </item>
+    <!-- Trạng thái mặc định - Nền tối dập nổi 3D với viền vi mô -->
     <item>
         <shape android:shape="rectangle">
-            <solid android:color="#1A2438" />
-            <stroke android:width="1dp" android:color="#2E3C56" />
+            <gradient android:startColor="#222C3E" android:endColor="#151D2C" android:angle="90" />
+            <stroke android:width="1dp" android:color="#3A4A68" />
             <corners android:radius="10dp" />
         </shape>
     </item>

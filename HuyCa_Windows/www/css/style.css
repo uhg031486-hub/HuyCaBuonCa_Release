@@ -1006,3 +1006,94 @@ body {
   100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
 }
 
+
+
+/* --- 3D Depth & Embossed Styling (v2.5 Enhanced) --- */
+.sub-sources-bar {
+  display: flex;
+  gap: 10px;
+  padding: 6px 36px 10px 36px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.sub-sources-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.btn-sub-source {
+  background: linear-gradient(180deg, #222d42 0%, #151d2c 100%);
+  color: #cbd5e1;
+  border: 1px solid #334460;
+  padding: 7px 18px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  flex-shrink: 0;
+  cursor: pointer;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.15);
+  transition: all 0.15s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.btn-sub-source:hover, .btn-sub-source:focus {
+  border-color: #ffd700;
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.btn-sub-source.active {
+  background: linear-gradient(135deg, #ffd700 0%, #ffa000 100%) !important;
+  color: #0b0e14 !important;
+  font-weight: 800 !important;
+  border-color: #ffffff !important;
+  box-shadow: 0 4px 16px rgba(255, 215, 0, 0.45), inset 0 1px 1px rgba(255,255,255,0.4) !important;
+}
+
+/* Tương phản cao: Chữ đen tuyền trên nền vàng */
+.btn-source.active {
+  background: linear-gradient(135deg, #ffd700 0%, #ff9100 100%) !important;
+  color: #0b0e14 !important;
+  font-weight: 800 !important;
+  border-color: #ffffff !important;
+  box-shadow: 0 6px 18px rgba(255, 215, 0, 0.45), inset 0 1px 1px rgba(255,255,255,0.4) !important;
+}
+
+.btn-filter.active {
+  background: linear-gradient(135deg, #ffd700 0%, #ffa000 100%) !important;
+  color: #0b0e14 !important;
+  font-weight: 800 !important;
+  border-color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(255, 215, 0, 0.4) !important;
+}
+
+/* Hiệu ứng 3D nảy nổi lên khi bấm (Active / Click / Tap) */
+.btn-source:active,
+.btn-filter:active,
+.btn-sub-source:active,
+.movie-card:active,
+.btn-player:active,
+.btn-header:active {
+  transform: translateY(-2px) scale(1.02) !important;
+  box-shadow: 0 8px 25px rgba(255, 215, 0, 0.5) !important;
+  filter: brightness(1.15) !important;
+  transition: transform 0.08s ease, box-shadow 0.08s ease !important;
+}
+
+/* Banner tiêu đề hiệu ứng 3D */
+.header-title, .logo-text, .brand-title {
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9), 0 0 14px rgba(255, 215, 0, 0.45) !important;
+  letter-spacing: 0.5px;
+}
+
+/* Card phim hiệu ứng 3D dập nổi */
+.movie-card {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.08), 0 1px 0 rgba(255, 215, 0, 0.15) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 12px !important;
+  transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.2s ease !important;
+}
+
+.movie-card:hover, .movie-card:focus {
+  transform: translateY(-4px) scale(1.03) !important;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.8), 0 0 16px rgba(255, 215, 0, 0.4) !important;
+  border-color: #ffd700 !important;
+}

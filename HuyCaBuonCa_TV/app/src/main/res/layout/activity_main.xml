@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -62,9 +63,11 @@
                     android:layout_height="34dp"
                     android:layout_marginEnd="6dp"
                     android:background="@drawable/bg_btn_selector"
+                    app:backgroundTint="@null"
+                    android:stateListAnimator="@animator/elevation_3d"
                     android:focusable="true"
                     android:text="⭐ KKPHIM (HLS VIP)"
-                    android:textColor="@color/text_primary"
+                    android:textColor="@color/selector_btn_text"
                     android:textSize="11sp"
                     android:textStyle="bold" />
 
@@ -74,9 +77,11 @@
                     android:layout_height="34dp"
                     android:layout_marginEnd="6dp"
                     android:background="@drawable/bg_btn_selector"
+                    app:backgroundTint="@null"
+                    android:stateListAnimator="@animator/elevation_3d"
                     android:focusable="true"
-                    android:text="⛩️ ANIMEHAY"
-                    android:textColor="@color/text_primary"
+                    android:text="⛩️ ANIME"
+                    android:textColor="@color/selector_btn_text"
                     android:textSize="11sp"
                     android:textStyle="bold" />
 
@@ -86,9 +91,11 @@
                     android:layout_height="34dp"
                     android:layout_marginEnd="6dp"
                     android:background="@drawable/bg_btn_selector"
+                    app:backgroundTint="@null"
+                    android:stateListAnimator="@animator/elevation_3d"
                     android:focusable="true"
                     android:text="📺 XEM TIVI"
-                    android:textColor="@color/text_primary"
+                    android:textColor="@color/selector_btn_text"
                     android:textSize="11sp"
                     android:textStyle="bold" />
 
@@ -97,9 +104,11 @@
                     android:layout_width="wrap_content"
                     android:layout_height="34dp"
                     android:background="@drawable/bg_btn_selector"
+                    app:backgroundTint="@null"
+                    android:stateListAnimator="@animator/elevation_3d"
                     android:focusable="true"
                     android:text="🎬 PHIM NGẮN (FREEREELS)"
-                    android:textColor="@color/text_primary"
+                    android:textColor="@color/selector_btn_text"
                     android:textSize="11sp"
                     android:textStyle="bold" />
 
@@ -121,6 +130,23 @@
             android:textStyle="bold" />
 
     </LinearLayout>
+
+    <!-- ANIME SUB-SOURCES BAR (Chỉ hiển thị khi chọn nguồn Anime) -->
+    <HorizontalScrollView
+        android:id="@+id/scrollAnimeSubSources"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:scrollbars="none"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:id="@+id/layoutAnimeSubSources"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" />
+
+    </HorizontalScrollView>
 
     <!-- DYNAMIC Category / Genre Filter Bar (Thay đổi tự động theo từng nguồn) -->
     <HorizontalScrollView

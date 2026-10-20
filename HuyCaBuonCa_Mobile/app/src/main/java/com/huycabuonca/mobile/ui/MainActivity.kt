@@ -349,6 +349,12 @@ class MainActivity : AppCompatActivity() {
             switchSource(MovieSource.FREEREELS)
         }
 
+        val textColors = androidx.core.content.ContextCompat.getColorStateList(this, R.color.selector_btn_text)
+        binding.btnSourceKKPhim.setTextColor(textColors)
+        binding.btnSourceAnimeHay.setTextColor(textColors)
+        binding.btnSourceXemTiVi.setTextColor(textColors)
+        binding.btnSourceFreeReels.setTextColor(textColors)
+
         binding.btnSourceKKPhim.isSelected = true
         binding.btnSourceAnimeHay.isSelected = false
         binding.btnSourceXemTiVi.isSelected = false
@@ -378,7 +384,88 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        updateDynamicFilters()
+        if (source == MovieSource.ANIMEHAY) {
+            binding.scrollAnimeSubSources.visibility = android.view.View.VISIBLE
+            setupAnimeSubSources()
+        } else {
+            binding.scrollAnimeSubSources.visibility = android.view.View.GONE
+            updateDynamicFilters()
+            loadMovies(reset = true)
+        }
+    }
+
+    private var currentAnimeSubSource = "anime_sub://vietsub"
+
+    private fun setupAnimeSubSources() {
+        binding.layoutAnimeSubSources.removeAllViews()
+        val subSources = MovieRepository.getAnimeSubSources()
+        val textColors = androidx.core.content.ContextCompat.getColorStateList(this, R.color.selector_btn_text)
+
+        subSources.forEachIndexed { index, sub ->
+            val subBtn = Button(this).apply {
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    resources.getDimensionPixelSize(android.R.dimen.app_icon_size).coerceAtMost(90)
+                ).apply {
+                    setMargins(0, 0, 16, 0)
+                }
+                setBackgroundResource(R.drawable.bg_btn_selector)
+                stateListAnimator = android.animation.AnimatorInflater.loadStateListAnimator(this@MainActivity, R.animator.elevation_3d)
+                text = sub.title
+                setTextColor(textColors)
+                textSize = 11f
+                typeface = android.graphics.Typeface.DEFAULT_BOLD
+                isSelected = (sub.endpointUrl == currentAnimeSubSource)
+
+                setOnClickListener {
+                    for (i in 0 until binding.layoutAnimeSubSources.childCount) {
+                        binding.layoutAnimeSubSources.getChildAt(i).isSelected = false
+                    }
+                    isSelected = true
+                    currentAnimeSubSource = sub.endpointUrl
+                    updateAnimeDynamicFilters(currentAnimeSubSource)
+                }
+            }
+            binding.layoutAnimeSubSources.addView(subBtn)
+        }
+        updateAnimeDynamicFilters(currentAnimeSubSource)
+    }
+
+    private fun updateAnimeDynamicFilters(subSourceUrl: String) {
+        binding.layoutDynamicFilters.removeAllViews()
+        val filters = MovieRepository.getAnimeFilters(subSourceUrl)
+        if (filters.isEmpty()) return
+
+        currentFilterUrl = filters.first().endpointUrl
+        val textColors = androidx.core.content.ContextCompat.getColorStateList(this, R.color.selector_btn_text)
+
+        filters.forEachIndexed { index, filter ->
+            val filterBtn = Button(this).apply {
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    resources.getDimensionPixelSize(android.R.dimen.app_icon_size).coerceAtMost(90)
+                ).apply {
+                    setMargins(0, 0, 16, 0)
+                }
+                setBackgroundResource(R.drawable.bg_btn_selector)
+                stateListAnimator = android.animation.AnimatorInflater.loadStateListAnimator(this@MainActivity, R.animator.elevation_3d)
+                text = filter.title
+                setTextColor(textColors)
+                textSize = 11f
+                typeface = android.graphics.Typeface.DEFAULT_BOLD
+                isSelected = (index == 0)
+
+                setOnClickListener {
+                    for (i in 0 until binding.layoutDynamicFilters.childCount) {
+                        binding.layoutDynamicFilters.getChildAt(i).isSelected = false
+                    }
+                    isSelected = true
+                    currentFilterUrl = filter.endpointUrl
+                    loadMovies(reset = true)
+                }
+            }
+            binding.layoutDynamicFilters.addView(filterBtn)
+        }
         loadMovies(reset = true)
     }
 
@@ -399,8 +486,11 @@ class MainActivity : AppCompatActivity() {
                     setMargins(0, 0, 16, 0)
                 }
                 setBackgroundResource(R.drawable.bg_btn_selector)
+                stateListAnimator = android.animation.AnimatorInflater.loadStateListAnimator(this@MainActivity, R.animator.elevation_3d)
                 text = filter.title
-                setTextColor(Color.WHITE)
+                val textColors = androidx.core.content.ContextCompat.getColorStateList(this@MainActivity, R.color.selector_btn_text)
+                setTextColor(textColors)
+                typeface = android.graphics.Typeface.DEFAULT_BOLD
                 textSize = 11f
                 isSelected = (index == 0)
 

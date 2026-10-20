@@ -74,6 +74,44 @@
   ];
 
   // --- Filters per Source ---
+  // --- Anime Sub-Sources Data ---
+  let currentAnimeSubSource = 'anime_sub://vietsub';
+  const ANIME_SUB_FILTERS = {
+    'anime_sub://vietsub': [
+      { name: "Anime Mới Cập Nhật", url: "https://phimapi.com/v1/api/quoc-gia/nhat-ban" },
+      { name: "🕒 Lịch Sử Xem", url: "app://history" },
+      { name: "❤️ Anime Yêu Thích", url: "app://favorites" },
+      { name: "Hành Động", url: "https://phimapi.com/v1/api/the-loai/hanh-dong" },
+      { name: "Thần Thoại", url: "https://phimapi.com/v1/api/the-loai/than-thoai" },
+      { name: "Học Đường", url: "https://phimapi.com/v1/api/the-loai/hoc-duong" },
+      { name: "Viễn Tưởng", url: "https://phimapi.com/v1/api/the-loai/vien-tuong" }
+    ],
+    'anime_sub://hh3d': [
+      { name: "3D Mới Cập Nhật", url: "https://phimapi.com/v1/api/quoc-gia/trung-quoc" },
+      { name: "🕒 Lịch Sử Xem", url: "app://history" },
+      { name: "❤️ Hoạt Hình Yêu Thích", url: "app://favorites" },
+      { name: "Tu Tiên & Huyền Huyễn", url: "https://phimapi.com/v1/api/the-loai/than-thoai" },
+      { name: "Kiếm Hiệp & Võ Thuật", url: "https://phimapi.com/v1/api/the-loai/kiem-hiep" },
+      { name: "Hành Động 3D", url: "https://phimapi.com/v1/api/the-loai/hanh-dong" },
+      { name: "Cổ Trang 3D", url: "https://phimapi.com/v1/api/the-loai/co-trang" }
+    ],
+    'anime_sub://movies': [
+      { name: "Hoạt Hình Chiếu Rạp", url: "https://phimapi.com/v1/api/danh-sach/hoat-hinh" },
+      { name: "🕒 Lịch Sử Xem", url: "app://history" },
+      { name: "❤️ Yêu Thích", url: "app://favorites" },
+      { name: "Ghibli & Cổ Điển", url: "https://phimapi.com/v1/api/the-loai/gia-dinh" },
+      { name: "Phiêu Lưu", url: "https://phimapi.com/v1/api/the-loai/phieu-luu" },
+      { name: "Hài Hước", url: "https://phimapi.com/v1/api/the-loai/hai-huoc" }
+    ],
+    'anime_sub://dubbed': [
+      { name: "🎙️ Tất Cả Thuyết Minh", url: "anime_dubbed://all" },
+      { name: "🕒 Lịch Sử Xem", url: "app://history" },
+      { name: "❤️ Yêu Thích", url: "app://favorites" },
+      { name: "Thuyết Minh Tiếng Việt", url: "https://phimapi.com/v1/api/danh-sach/phim-thuyet-minh" },
+      { name: "Lồng Tiếng Chuẩn", url: "https://phimapi.com/v1/api/danh-sach/phim-long-tieng" }
+    ]
+  };
+
   const FILTERS = {
     KKPHIM: [
       { name: "Mới Cập Nhật", url: "https://phimapi.com/danh-sach/phim-moi-cap-nhat" },
@@ -104,6 +142,7 @@
     ],
     XEMTIVI: [
       { name: "Tất Cả Kênh", url: "tv://all" },
+      { name: "⚽ Lịch Thi Đấu & Bóng Đá", url: "tv://schedule" },
       { name: "🕒 Kênh Vừa Xem", url: "app://history" },
       { name: "⭐ Kênh Yêu Thích", url: "tv://favorites" },
       { name: "🏴󠁧󠁢󠁥󠁮󠁧󠁿 Ngoại Hạng Anh (EPL)", url: "tv://epl" },
@@ -242,9 +281,31 @@
   // --- Render Filter Bar ---
   function renderFilterBar() {
     const bar = document.getElementById('filterBar');
+    const animeSubBar = document.getElementById('animeSubSourcesBar');
     bar.innerHTML = '';
     bar.scrollLeft = 0;
-    const filters = FILTERS[currentSource] || [];
+
+    if (currentSource === 'ANIMEHAY') {
+      if (animeSubBar) {
+        animeSubBar.style.display = 'flex';
+        // Setup sub sources buttons
+        animeSubBar.querySelectorAll('.btn-sub-source').forEach(btn => {
+          btn.classList.toggle('active', btn.dataset.sub === currentAnimeSubSource);
+          btn.onclick = () => {
+            animeSubBar.querySelectorAll('.btn-sub-source').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentAnimeSubSource = btn.dataset.sub;
+            renderFilterBar();
+          };
+        });
+      }
+    } else {
+      if (animeSubBar) animeSubBar.style.display = 'none';
+    }
+
+    const filters = (currentSource === 'ANIMEHAY' && ANIME_SUB_FILTERS[currentAnimeSubSource]) 
+      ? ANIME_SUB_FILTERS[currentAnimeSubSource] 
+      : (FILTERS[currentSource] || []);
     if (filters.length === 0) return;
 
     filters.forEach((f, idx) => {

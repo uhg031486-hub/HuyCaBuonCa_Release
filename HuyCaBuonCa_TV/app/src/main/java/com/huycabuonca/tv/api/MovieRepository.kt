@@ -339,6 +339,53 @@ object MovieRepository {
         }
     }
 
+    fun getAnimeSubSources(): List<FilterItem> {
+        return listOf(
+            FilterItem("⛩️ Anime Vietsub", "anime_sub://vietsub"),
+            FilterItem("🐉 Hoạt Hình 3D Trung Quốc", "anime_sub://hh3d"),
+            FilterItem("🏰 Hoạt Hình Chiếu Rạp", "anime_sub://movies"),
+            FilterItem("🎙️ Anime Thuyết Minh (Tổng Hợp)", "anime_sub://dubbed")
+        )
+    }
+
+    fun getAnimeFilters(subSourceUrl: String): List<FilterItem> {
+        return when (subSourceUrl) {
+            "anime_sub://hh3d" -> listOf(
+                FilterItem("3D Mới Cập Nhật", "https://phimapi.com/v1/api/quoc-gia/trung-quoc"),
+                FilterItem("🕒 Lịch Sử Xem", "app://history"),
+                FilterItem("❤️ Hoạt Hình Yêu Thích", "app://favorites"),
+                FilterItem("Tu Tiên & Huyền Huyễn", "https://phimapi.com/v1/api/the-loai/than-thoai"),
+                FilterItem("Kiếm Hiệp & Võ Thuật", "https://phimapi.com/v1/api/the-loai/kiem-hiep"),
+                FilterItem("Hành Động 3D", "https://phimapi.com/v1/api/the-loai/hanh-dong"),
+                FilterItem("Cổ Trang 3D", "https://phimapi.com/v1/api/the-loai/co-trang")
+            )
+            "anime_sub://movies" -> listOf(
+                FilterItem("Hoạt Hình Chiếu Rạp", "https://phimapi.com/v1/api/danh-sach/hoat-hinh"),
+                FilterItem("🕒 Lịch Sử Xem", "app://history"),
+                FilterItem("❤️ Yêu Thích", "app://favorites"),
+                FilterItem("Ghibli & Cổ Điển", "https://phimapi.com/v1/api/the-loai/gia-dinh"),
+                FilterItem("Phiêu Lưu", "https://phimapi.com/v1/api/the-loai/phieu-luu"),
+                FilterItem("Hài Hước", "https://phimapi.com/v1/api/the-loai/hai-huoc")
+            )
+            "anime_sub://dubbed" -> listOf(
+                FilterItem("🎙️ Tất Cả Thuyết Minh", "anime_dubbed://all"),
+                FilterItem("🕒 Lịch Sử Xem", "app://history"),
+                FilterItem("❤️ Yêu Thích", "app://favorites"),
+                FilterItem("Thuyết Minh Tiếng Việt", "https://phimapi.com/v1/api/danh-sach/phim-thuyet-minh"),
+                FilterItem("Lồng Tiếng Chuẩn", "https://phimapi.com/v1/api/danh-sach/phim-long-tieng")
+            )
+            else -> listOf(
+                FilterItem("Anime Mới Cập Nhật", "https://phimapi.com/v1/api/quoc-gia/nhat-ban"),
+                FilterItem("🕒 Lịch Sử Xem", "app://history"),
+                FilterItem("❤️ Anime Yêu Thích", "app://favorites"),
+                FilterItem("Hành Động", "https://phimapi.com/v1/api/the-loai/hanh-dong"),
+                FilterItem("Thần Thoại", "https://phimapi.com/v1/api/the-loai/than-thoai"),
+                FilterItem("Học Đường", "https://phimapi.com/v1/api/the-loai/hoc-duong"),
+                FilterItem("Viễn Tưởng", "https://phimapi.com/v1/api/the-loai/vien-tuong")
+            )
+        }
+    }
+
     fun getFiltersForSource(source: MovieSource): List<FilterItem> {
         return when (source) {
             MovieSource.KKPHIM -> listOf(
@@ -370,9 +417,9 @@ object MovieRepository {
             )
             MovieSource.XEMTIVI -> listOf(
                 FilterItem("Tất Cả Kênh", "tv://all"),
+                FilterItem("⚽ Lịch Thi Đấu & Bóng Đá", "tv://football"),
                 FilterItem("🕒 Kênh Vừa Xem", "app://history"),
                 FilterItem("⭐ Kênh Yêu Thích", "tv://favorites"),
-                FilterItem("⚽ Lịch Thi Đấu & Bóng Đá", "tv://football"),
                 FilterItem("🏴󠁧󠁢󠁥󠁮󠁧󠁿 Ngoại Hạng Anh (EPL)", "tv://epl"),
                 FilterItem("📡 Kênh Vệ Tinh Quốc Tế", "tv://satellite"),
                 FilterItem("🏆 Thể Thao ESPN & FOX", "tv://sports_intl"),
@@ -484,6 +531,13 @@ object MovieRepository {
                     } else emptyList()
                 } else if (source == MovieSource.FREEREELS) {
                     FreeReelsClient.getDramaList(client, gson, filterUrl, page)
+                } else if (filterUrl == "anime_dubbed://all") {
+                    val listThuyetMinh = fetchKKPhimList("https://phimapi.com/v1/api/danh-sach/phim-thuyet-minh", page, source)
+                    val listLongTieng = fetchKKPhimList("https://phimapi.com/v1/api/danh-sach/phim-long-tieng", page, source)
+                    val combined = mutableListOf<MovieItem>()
+                    combined.addAll(listThuyetMinh)
+                    combined.addAll(listLongTieng)
+                    combined.distinctBy { it.name.trim().lowercase() }
                 } else {
                     fetchKKPhimList(filterUrl, page, source)
                 }

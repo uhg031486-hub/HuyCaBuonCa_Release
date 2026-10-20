@@ -2,12 +2,14 @@ package com.huycabuonca.tv.ui
 
 import android.content.Intent
 import android.graphics.Color
+import android.graphics.Typeface
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -184,6 +186,8 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private var currentAnimeSubSource = "anime_sub://vietsub"
+
     private fun setupSourceSelectors() {
         binding.btnSourceKKPhim.setOnClickListener {
             switchSource(MovieSource.KKPHIM)
@@ -200,6 +204,12 @@ class MainActivity : AppCompatActivity() {
         binding.btnSourceFreeReels.setOnClickListener {
             switchSource(MovieSource.FREEREELS)
         }
+
+        val textColors = ContextCompat.getColorStateList(this, R.color.selector_btn_text)
+        binding.btnSourceKKPhim.setTextColor(textColors)
+        binding.btnSourceAnimeHay.setTextColor(textColors)
+        binding.btnSourceXemTiVi.setTextColor(textColors)
+        binding.btnSourceFreeReels.setTextColor(textColors)
 
         binding.btnSourceKKPhim.isSelected = true
         binding.btnSourceAnimeHay.isSelected = false
@@ -229,16 +239,59 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        updateDynamicFilters()
-        loadMovies(reset = true)
+        if (source == MovieSource.ANIMEHAY) {
+            binding.scrollAnimeSubSources.visibility = View.VISIBLE
+            setupAnimeSubSources()
+        } else {
+            binding.scrollAnimeSubSources.visibility = View.GONE
+            updateDynamicFilters()
+            loadMovies(reset = true)
+        }
     }
 
-    private fun updateDynamicFilters() {
+    private fun setupAnimeSubSources() {
+        binding.layoutAnimeSubSources.removeAllViews()
+        val subSources = MovieRepository.getAnimeSubSources()
+        val textColors = ContextCompat.getColorStateList(this, R.color.selector_btn_text)
+
+        subSources.forEachIndexed { index, sub ->
+            val subBtn = Button(this).apply {
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    resources.getDimensionPixelSize(android.R.dimen.app_icon_size).coerceAtMost(90)
+                ).apply {
+                    setMargins(0, 0, 16, 0)
+                }
+                setBackgroundResource(R.drawable.bg_btn_selector)
+                isFocusable = true
+                TvFocusUtil.setupFocusScale(this)
+                text = sub.title
+                setTextColor(textColors)
+                textSize = 11f
+                typeface = Typeface.DEFAULT_BOLD
+                isSelected = (sub.endpointUrl == currentAnimeSubSource)
+
+                setOnClickListener {
+                    for (i in 0 until binding.layoutAnimeSubSources.childCount) {
+                        binding.layoutAnimeSubSources.getChildAt(i).isSelected = false
+                    }
+                    isSelected = true
+                    currentAnimeSubSource = sub.endpointUrl
+                    updateAnimeDynamicFilters(currentAnimeSubSource)
+                }
+            }
+            binding.layoutAnimeSubSources.addView(subBtn)
+        }
+        updateAnimeDynamicFilters(currentAnimeSubSource)
+    }
+
+    private fun updateAnimeDynamicFilters(subSourceUrl: String) {
         binding.layoutDynamicFilters.removeAllViews()
-        val filters = MovieRepository.getFiltersForSource(currentSource)
+        val filters = MovieRepository.getAnimeFilters(subSourceUrl)
         if (filters.isEmpty()) return
 
         currentFilterUrl = filters.first().endpointUrl
+        val textColors = ContextCompat.getColorStateList(this, R.color.selector_btn_text)
 
         filters.forEachIndexed { index, filter ->
             val filterBtn = Button(this).apply {
@@ -252,8 +305,48 @@ class MainActivity : AppCompatActivity() {
                 isFocusable = true
                 TvFocusUtil.setupFocusScale(this)
                 text = filter.title
-                setTextColor(Color.WHITE)
+                setTextColor(textColors)
                 textSize = 12f
+                typeface = Typeface.DEFAULT_BOLD
+                isSelected = (index == 0)
+
+                setOnClickListener {
+                    for (i in 0 until binding.layoutDynamicFilters.childCount) {
+                        binding.layoutDynamicFilters.getChildAt(i).isSelected = false
+                    }
+                    isSelected = true
+                    currentFilterUrl = filter.endpointUrl
+                    loadMovies(reset = true)
+                }
+            }
+            binding.layoutDynamicFilters.addView(filterBtn)
+        }
+        loadMovies(reset = true)
+    }
+
+    private fun updateDynamicFilters() {
+        binding.layoutDynamicFilters.removeAllViews()
+        val filters = MovieRepository.getFiltersForSource(currentSource)
+        if (filters.isEmpty()) return
+
+        currentFilterUrl = filters.first().endpointUrl
+        val textColors = ContextCompat.getColorStateList(this, R.color.selector_btn_text)
+
+        filters.forEachIndexed { index, filter ->
+            val filterBtn = Button(this).apply {
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    resources.getDimensionPixelSize(android.R.dimen.app_icon_size).coerceAtMost(90)
+                ).apply {
+                    setMargins(0, 0, 16, 0)
+                }
+                setBackgroundResource(R.drawable.bg_btn_selector)
+                isFocusable = true
+                TvFocusUtil.setupFocusScale(this)
+                text = filter.title
+                setTextColor(textColors)
+                textSize = 12f
+                typeface = Typeface.DEFAULT_BOLD
                 isSelected = (index == 0)
 
                 setOnClickListener {
