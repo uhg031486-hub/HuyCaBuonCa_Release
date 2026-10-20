@@ -118,6 +118,16 @@
                     tools:text="Tên Phim • Tập 01" />
 
                 <ImageButton
+                    android:id="@+id/btnPlayerFav"
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:layout_marginEnd="6dp"
+                    android:background="@drawable/bg_btn_secondary"
+                    android:contentDescription="Yêu thích phim này"
+                    android:padding="7dp"
+                    android:src="@android:drawable/btn_star" />
+
+                <ImageButton
                     android:id="@+id/btnPip"
                     android:layout_width="34dp"
                     android:layout_height="34dp"
@@ -367,24 +377,69 @@
             android:orientation="vertical"
             android:padding="12dp">
 
-            <!-- Title & Metadata -->
-            <TextView
-                android:id="@+id/txtDetailTitle"
+            <!-- Title, Metadata & Favorite Button -->
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="@color/brand_gold"
-                android:textSize="17sp"
-                android:textStyle="bold"
-                tools:text="Tên phim mẫu ở đây" />
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/txtDetailMeta"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:textColor="@color/brand_cyan"
-                android:textSize="11sp"
-                tools:text="Năm: 2026 • Đang phát: Tập 12" />
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/txtDetailTitle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/brand_gold"
+                        android:textSize="17sp"
+                        android:textStyle="bold"
+                        tools:text="Tên phim mẫu ở đây" />
+
+                    <TextView
+                        android:id="@+id/txtDetailMeta"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:textColor="@color/brand_cyan"
+                        android:textSize="11sp"
+                        tools:text="Năm: 2026 • Đang phát: Tập 12" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/btnDetailFavorite"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:layout_marginStart="8dp"
+                    android:background="@drawable/bg_btn_secondary"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingStart="10dp"
+                    android:paddingEnd="12dp">
+
+                    <ImageView
+                        android:id="@+id/imgDetailFav"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:contentDescription="Biểu tượng dấu sao"
+                        android:src="@android:drawable/btn_star" />
+
+                    <TextView
+                        android:id="@+id/txtDetailFav"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="6dp"
+                        android:text="Yêu Thích"
+                        android:textColor="#FFFFFF"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </LinearLayout>
 
             <!-- Quick Player Actions (Prev / Next episode) -->
             <LinearLayout

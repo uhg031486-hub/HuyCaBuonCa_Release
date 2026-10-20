@@ -135,7 +135,11 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        adapter.notifyDataSetChanged()
+        if (currentFilterUrl == "app://favorites" || currentFilterUrl == "tv://favorites" || currentFilterUrl == "app://history") {
+            loadMovies(reset = true)
+        } else {
+            adapter.notifyDataSetChanged()
+        }
     }
 
     private fun playTvChannelDirectly(movie: MovieItem) {

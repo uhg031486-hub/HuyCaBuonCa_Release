@@ -11,8 +11,8 @@ namespace HuyCa_Windows;
 public static class UpdateManager
 {
     private const string UPDATE_CONFIG_URL = "https://raw.githubusercontent.com/uhg031486-hub/HuyCaBuonCa_Release/main/version.json";
-    public const int CURRENT_VERSION_CODE = 15;
-    public const string CURRENT_VERSION_NAME = "2.4";
+    public const int CURRENT_VERSION_CODE = 16;
+    public const string CURRENT_VERSION_NAME = "2.5";
 
     public static async Task CheckForUpdateAsync(Window owner, bool silent = false)
     {
@@ -20,12 +20,31 @@ public static class UpdateManager
         {
             using var client = new HttpClient();
             client.Timeout = TimeSpan.FromSeconds(10);
-            client.DefaultRequestHeaders.Add("User-Agent", "HuyCa-Windows/2.4");
+            client.DefaultRequestHeaders.Add("User-Agent", "HuyCa-Windows/2.5");
             client.DefaultRequestHeaders.Add("Cache-Control", "no-cache");
 
             var response = await client.GetStringAsync(UPDATE_CONFIG_URL);
             using var doc = JsonDocument.Parse(response);
             var root = doc.RootElement;
+
+            bool isMaintenanceLocked = root.TryGetProperty("isMaintenanceLocked", out var lockProp) && lockProp.GetBoolean();
+            string maintenanceMessage = root.TryGetProperty("maintenanceMessage", out var msgProp) ? msgProp.GetString() ?? "" : "Hệ thống đang bảo trì nội bộ. Vui lòng quay lại sau!";
+
+            if (isMaintenanceLocked)
+            {
+                owner.Dispatcher.Invoke(() =>
+                {
+                    MessageBox.Show(
+                        owner,
+                        $"🔒 THÔNG BÁO BẢO TRÌ NỘI BỘ\n\n{maintenanceMessage}",
+                        "Bảo Trì Nội Bộ - Huy Cá",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning
+                    );
+                    Application.Current.Shutdown();
+                });
+                return;
+            }
 
             int remoteCode = root.TryGetProperty("versionCode", out var codeProp) ? codeProp.GetInt32() : 0;
             string remoteName = root.TryGetProperty("versionName", out var nameProp) ? nameProp.GetString() ?? "" : "";

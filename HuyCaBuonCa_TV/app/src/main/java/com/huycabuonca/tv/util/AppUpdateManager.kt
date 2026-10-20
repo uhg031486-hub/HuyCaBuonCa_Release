@@ -79,12 +79,18 @@ object AppUpdateManager {
                     val title = json.optString("title", "Phiên bản mới")
                     val changelog = json.optString("changelog", "Cải tiến hiệu năng và cập nhật tính năng mới.")
                     val apkUrl = json.optString("tvApkUrl", "")
+                    val isMaintenanceLocked = json.optBoolean("isMaintenanceLocked", false)
+                    val maintenanceMessage = json.optString("maintenanceMessage", "Hệ thống đang bảo trì nội bộ. Vui lòng quay lại sau!")
 
                     val currentVersionCode = getCurrentVersionCode(activity)
                     val currentVersionName = getCurrentVersionName(activity)
 
                     withContext(Dispatchers.Main) {
                         if (!activity.isFinishing && !activity.isDestroyed) {
+                            if (isMaintenanceLocked) {
+                                showMaintenanceDialog(activity, maintenanceMessage)
+                                return@withContext
+                            }
                             if (remoteVersionCode.toLong() > currentVersionCode && apkUrl.isNotEmpty()) {
                                 showUpdateDialog(
                                     activity,
@@ -115,6 +121,17 @@ object AppUpdateManager {
                 }
             }
         }
+    }
+
+    private fun showMaintenanceDialog(activity: Activity, message: String) {
+        AlertDialog.Builder(activity)
+            .setTitle("🔒 THÔNG BÁO BẢO TRÌ NỘI BỘ")
+            .setMessage(message)
+            .setCancelable(false)
+            .setPositiveButton("Thoát Ứng Dụng") { _, _ ->
+                activity.finishAffinity()
+            }
+            .show()
     }
 
     private fun showUpdateDialog(activity: Activity, info: UpdateInfo) {

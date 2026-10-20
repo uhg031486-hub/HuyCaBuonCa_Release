@@ -53,6 +53,7 @@ import com.huycabuonca.mobile.model.MovieItem
 import com.huycabuonca.mobile.model.MovieSource
 import com.huycabuonca.mobile.model.ServerGroup
 import com.huycabuonca.mobile.ui.adapter.EpisodeAdapter
+import com.huycabuonca.mobile.util.FavoriteMovieManager
 import com.huycabuonca.mobile.ui.adapter.QuickChannelAdapter
 import com.huycabuonca.mobile.util.PlayerGestureHelper
 import kotlinx.coroutines.launch
@@ -207,9 +208,60 @@ class DetailActivity : AppCompatActivity() {
             binding.btnPrevEpisode.setOnClickListener { playPreviousEpisode() }
             binding.btnNextEpisode.setOnClickListener { playNextEpisode() }
         }
+
+        binding.btnDetailFavorite.setOnClickListener { toggleFavorite() }
+        updateFavoriteStatus()
+    }
+
+    private fun updateFavoriteStatus() {
+        val movie = movieItem ?: return
+        val isTv = movie.source == MovieSource.XEMTIVI
+        val isFav = if (isTv && currentTvChannel != null) {
+            MovieRepository.isChannelFavorite(this, currentTvChannel!!.id)
+        } else {
+            FavoriteMovieManager.isFavorite(this, movie.slug)
+        }
+
+        val goldColor = Color.parseColor("#FFD700")
+        val whiteColor = Color.WHITE
+        val grayColor = Color.parseColor("#8A99AD")
+
+        // Cập nhật nút trên Player bar
+        binding.btnPlayerFav.setColorFilter(if (isFav) goldColor else whiteColor)
+
+        // Cập nhật nút dưới Thông tin chi tiết
+        binding.imgDetailFav.setColorFilter(if (isFav) goldColor else grayColor)
+        binding.txtDetailFav.text = if (isFav) "Đã Thích ⭐" else "Yêu Thích ☆"
+        binding.txtDetailFav.setTextColor(if (isFav) goldColor else whiteColor)
+    }
+
+    private fun toggleFavorite() {
+        val movie = movieItem ?: return
+        val isTv = movie.source == MovieSource.XEMTIVI
+        if (isTv && currentTvChannel != null) {
+            val isFav = MovieRepository.toggleChannelFavorite(this, currentTvChannel!!.id)
+            updateFavoriteStatus()
+            val msg = if (isFav) "⭐ Đã thêm [${movie.name}] vào Kênh Yêu Thích!" else "Đã xóa [${movie.name}] khỏi Kênh Yêu Thích"
+            Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+        } else {
+            val isFav = FavoriteMovieManager.toggleFavorite(this, movie)
+            updateFavoriteStatus()
+            val typeName = when (movie.source) {
+                MovieSource.ANIMEHAY -> "Anime"
+                MovieSource.FREEREELS -> "Phim Ngắn"
+                else -> "Phim"
+            }
+            val msg = if (isFav) "⭐ Đã thêm [${movie.name}] vào $typeName Yêu Thích!" else "Đã xóa [${movie.name}] khỏi $typeName Yêu Thích"
+            Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun setupPlayerControls() {
+        // 0. Nút Dấu Sao Yêu Thích trên Player Bar
+        binding.btnPlayerFav.setOnClickListener {
+            toggleFavorite()
+        }
+
         // 1. Nút Back
         binding.btnPlayerBack.setOnClickListener {
             if (isVerticalFullscreen) {
@@ -1389,6 +1441,7 @@ class DetailActivity : AppCompatActivity() {
         val groupName = channel.group
         binding.btnSameGroupChannels.text = "📋 Nhóm [${groupName}]: ${sameGroupChannels.size} Kênh (Chạm để chọn)"
 
+        updateFavoriteStatus()
         initExoPlayer(channel.url)
         Toast.makeText(this, "📺 Đang phát: ${channel.name} (${channel.group})", Toast.LENGTH_SHORT).show()
     }

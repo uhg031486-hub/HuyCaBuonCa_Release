@@ -2128,7 +2128,25 @@
     }, 120);
   });
 
+  // --- Remote Security & Maintenance Check ---
+  function checkRemoteSecurityLock() {
+    fetch('https://raw.githubusercontent.com/uhg031486-hub/HuyCaBuonCa_Release/main/version.json?t=' + Date.now())
+      .then(function(r) { return r.json(); })
+      .then(function(cfg) {
+        if (cfg && cfg.isMaintenanceLocked) {
+          document.body.innerHTML = 
+            '<div style="position:fixed;inset:0;background:#0b0e14;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;z-index:999999;font-family:sans-serif;">' +
+              '<div style="font-size:64px;margin-bottom:16px;">🔒</div>' +
+              '<h1 style="color:#ffd700;font-size:26px;margin-bottom:12px;font-weight:bold;">THÔNG BÁO BẢO TRÌ NỘI BỘ</h1>' +
+              '<p style="font-size:16px;color:#8a99ad;max-width:540px;line-height:1.6;margin:0 auto 20px;">' + (cfg.maintenanceMessage || 'Hệ thống đang bảo trì nội bộ. Vui lòng quay lại sau!') + '</p>' +
+            '</div>';
+        }
+      })
+      .catch(function() {});
+  }
+
   // --- Initialize App ---
+  checkRemoteSecurityLock();
   initSources();
   initFilterBarNavigation();
   initMatchServerModalEvents();
