@@ -10,6 +10,7 @@ namespace HuyCa_Windows;
 
 public partial class MainWindow : Window
 {
+    private LocalDohProxy? _localProxy;
     private bool _isFullscreen = false;
     private WindowStyle _previousStyle = WindowStyle.SingleBorderWindow;
     private WindowState _previousState = WindowState.Normal;
@@ -42,11 +43,16 @@ public partial class MainWindow : Window
             );
             Directory.CreateDirectory(userDataFolder);
 
-            // Bật cờ trình duyệt tối ưu: Tắt CORS cho HLS, cho phép phát luồng mixed HTTP/HTTPS, tự động autoplay video
-            // Tích hợp DNS mã hóa DoH (Cloudflare 1.1.1.1 & Google 8.8.8.8) tự động vượt qua tường lửa/DNS chặn của mạng công ty
+            // Khởi động Local DoH Tunneling Proxy:
+            // Toàn bộ request mạng từ WebView2 được chuyển tiếp qua proxy nội bộ này,
+            // phân giải độc lập bằng Cloudflare/Google DoH, bỏ qua 100% DNS công ty (10.21.16.1) và DNS Sinkhole (0.0.0.0).
+            _localProxy = new LocalDohProxy();
+            _localProxy.Start();
+            int proxyPort = _localProxy.Port;
+
             var options = new CoreWebView2EnvironmentOptions
             {
-                AdditionalBrowserArguments = "--disable-web-security --allow-running-insecure-content --autoplay-policy=no-user-gesture-required --ignore-certificate-errors --enable-features=DnsOverHttps --dns-over-https-templates=\"https://1.1.1.1/dns-query https://dns.google/dns-query\" --host-resolver-rules=\"MAP cloudflare-dns.com 1.1.1.1, MAP dns.google 8.8.8.8\""
+                AdditionalBrowserArguments = $"--disable-web-security --allow-running-insecure-content --autoplay-policy=no-user-gesture-required --ignore-certificate-errors --proxy-server=\"http://127.0.0.1:{proxyPort}\" --proxy-bypass-list=\"<local>;huyca.local\""
             };
 
             var env = await CoreWebView2Environment.CreateAsync(null, userDataFolder, options);
@@ -243,5 +249,11 @@ public partial class MainWindow : Window
             WindowState = _previousState;
             _isFullscreen = false;
         }
+    }
+
+    protected override void OnClosed(EventArgs e)
+    {
+        base.OnClosed(e);
+        _localProxy?.Stop();
     }
 }

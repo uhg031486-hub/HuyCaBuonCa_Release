@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -274,12 +275,25 @@ public static class UpdateManager
         return client;
     }
 
+    private static readonly ConcurrentDictionary<string, (IPAddress[] ips, DateTime expiry)> _dnsCache = new(StringComparer.OrdinalIgnoreCase);
+
     /// <summary>
     /// Phân giải tên miền qua Cloudflare (1.1.1.1) và Google (8.8.8.8) bằng HTTPS
     /// Hoàn toàn không phụ thuộc vào máy chủ DNS của công ty.
+    /// Có bộ đệm DNS lưu tạm 10 phút giúp video HLS/M3U8 tải tức thì không có độ trễ.
     /// </summary>
     public static async Task<IPAddress[]> ResolveViaDoHAsync(string host, CancellationToken ct)
     {
+        if (IPAddress.TryParse(host, out var directIp))
+        {
+            return new[] { directIp };
+        }
+
+        if (_dnsCache.TryGetValue(host, out var cached) && DateTime.UtcNow < cached.expiry)
+        {
+            return cached.ips;
+        }
+
         var dohEndpoints = new[]
         {
             $"https://1.1.1.1/dns-query?name={Uri.EscapeDataString(host)}&type=A",
@@ -321,7 +335,9 @@ public static class UpdateManager
                     }
                     if (ipList.Count > 0)
                     {
-                        return ipList.ToArray();
+                        var res = ipList.ToArray();
+                        _dnsCache[host] = (res, DateTime.UtcNow.AddMinutes(10));
+                        return res;
                     }
                 }
             }
