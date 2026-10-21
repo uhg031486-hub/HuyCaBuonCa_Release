@@ -2428,7 +2428,13 @@
 
   // --- Remote Security & Maintenance Check ---
   function checkRemoteSecurityLock() {
-    fetch('https://raw.githubusercontent.com/uhg031486-hub/HuyCaBuonCa_Release/main/version.json?t=' + Date.now())
+    (function() {
+      var urls = [
+        'https://raw.githubusercontent.com/uhg031486-hub/HuyCaBuonCa_Release/main/version.json?t=' + Date.now(),
+        'https://cdn.jsdelivr.net/gh/uhg031486-hub/HuyCaBuonCa_Release@main/version.json?t=' + Date.now()
+      ];
+      return fetch(urls[0]).catch(function() { return fetch(urls[1]); });
+    })()
       .then(function(r) { return r.json(); })
       .then(function(cfg) {
         if (cfg && cfg.isMaintenanceLocked) {

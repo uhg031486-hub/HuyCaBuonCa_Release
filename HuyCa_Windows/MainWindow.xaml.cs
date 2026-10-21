@@ -43,9 +43,10 @@ public partial class MainWindow : Window
             Directory.CreateDirectory(userDataFolder);
 
             // Bật cờ trình duyệt tối ưu: Tắt CORS cho HLS, cho phép phát luồng mixed HTTP/HTTPS, tự động autoplay video
+            // Tích hợp DNS mã hóa DoH (Cloudflare 1.1.1.1 & Google 8.8.8.8) tự động vượt qua tường lửa/DNS chặn của mạng công ty
             var options = new CoreWebView2EnvironmentOptions
             {
-                AdditionalBrowserArguments = "--disable-web-security --allow-running-insecure-content --autoplay-policy=no-user-gesture-required --ignore-certificate-errors"
+                AdditionalBrowserArguments = "--disable-web-security --allow-running-insecure-content --autoplay-policy=no-user-gesture-required --ignore-certificate-errors --enable-features=DnsOverHttps --dns-over-https-templates=\"https://1.1.1.1/dns-query https://dns.google/dns-query\" --host-resolver-rules=\"MAP cloudflare-dns.com 1.1.1.1, MAP dns.google 8.8.8.8\""
             };
 
             var env = await CoreWebView2Environment.CreateAsync(null, userDataFolder, options);
