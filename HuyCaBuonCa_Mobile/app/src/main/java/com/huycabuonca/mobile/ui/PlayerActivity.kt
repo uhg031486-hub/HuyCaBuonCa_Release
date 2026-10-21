@@ -400,8 +400,14 @@ class PlayerActivity : AppCompatActivity() {
 
         player?.release()
 
+        val reqHeaders = mutableMapOf<String, String>()
+        if (url.contains("phimapi.com") || url.contains("phimimg.com") || url.contains("phim1280.tv")) {
+            reqHeaders["Referer"] = "https://player.phimapi.com/"
+            reqHeaders["Origin"] = "https://player.phimapi.com"
+        }
         val dataSourceFactory = DefaultHttpDataSource.Factory()
             .setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
+            .setDefaultRequestProperties(reqHeaders)
             .setAllowCrossProtocolRedirects(true)
 
         val mediaItemBuilder = MediaItem.Builder().setUri(url)

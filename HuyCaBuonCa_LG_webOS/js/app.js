@@ -75,7 +75,7 @@
 
   // --- Filters per Source ---
   // --- Anime Sub-Sources Data ---
-  let currentSubSource = 'anime_sub://vietsub';
+  let currentSubSource = 'movie_sub://kkphim';
   const SUB_SOURCES = {
     ANIMEHAY: [
       { name: "⛩️ Anime Vietsub", key: "anime_sub://vietsub" },
@@ -91,6 +91,31 @@
   };
 
   const SUB_FILTERS = {
+    'movie_sub://kkphim': [
+      { name: "Mới Cập Nhật", url: "https://phimapi.com/danh-sach/phim-moi-cap-nhat" },
+      { name: "🕒 Lịch Sử Xem", url: "app://history" },
+      { name: "❤️ Phim Yêu Thích", url: "app://favorites" },
+      { name: "Phim Bộ", url: "https://phimapi.com/v1/api/danh-sach/phim-bo" },
+      { name: "Phim Lẻ", url: "https://phimapi.com/v1/api/danh-sach/phim-le" },
+      { name: "TV Shows", url: "https://phimapi.com/v1/api/danh-sach/tv-shows" },
+      { name: "Hành Động", url: "https://phimapi.com/v1/api/the-loai/hanh-dong" },
+      { name: "Cổ Trang", url: "https://phimapi.com/v1/api/the-loai/co-trang" },
+      { name: "Kinh Dị", url: "https://phimapi.com/v1/api/the-loai/kinh-di" },
+      { name: "Hài Hước", url: "https://phimapi.com/v1/api/the-loai/hai-huoc" }
+    ],
+    'movie_sub://nguonc': [
+      { name: "NguonC Mới Cập Nhật", url: "https://phim.nguonc.com/api/films/phim-moi-cap-nhat" },
+      { name: "NguonC Phim Bộ", url: "https://phim.nguonc.com/api/films/danh-sach/phim-bo" },
+      { name: "NguonC Phim Lẻ", url: "https://phim.nguonc.com/api/films/danh-sach/phim-le" },
+      { name: "NguonC TV Shows", url: "https://phim.nguonc.com/api/films/danh-sach/tv-shows" }
+    ],
+    'movie_sub://dubbed': [
+      { name: "KKPhim Thuyết Minh", url: "https://phimapi.com/v1/api/danh-sach/phim-thuyet-minh" },
+      { name: "KKPhim Lồng Tiếng", url: "https://phimapi.com/v1/api/danh-sach/phim-long-tieng" }
+    ],
+    'movie_sub://cinema': [
+      { name: "Phim Chiếu Rạp", url: "https://phimapi.com/v1/api/the-loai/phim-chieu-rap" }
+    ],
     'anime_sub://vietsub': [
       { name: "Anime Mới Cập Nhật", url: "https://phimapi.com/v1/api/quoc-gia/nhat-ban" },
       { name: "🕒 Lịch Sử Xem", url: "app://history" },
@@ -706,22 +731,25 @@
         items = data.data.items;
       }
 
+      const isNguonC = fetchUrl.includes('phim.nguonc.com');
       const mapped = items.map(o => {
         let thumb = o.thumb_url || '';
         let poster = o.poster_url || thumb;
         if (thumb && !thumb.startsWith('http')) thumb = KKPHIM_IMG_BASE + thumb.replace(/^\//, '');
         if (poster && !poster.startsWith('http')) poster = KKPHIM_IMG_BASE + poster.replace(/^\//, '');
 
+        const slugId = isNguonC ? `nguonc:${o.slug}` : (o.slug || o._id);
+
         return {
-          id: o._id || o.slug,
+          id: o._id || slugId,
           name: o.name,
-          slug: o.slug,
-          originName: o.origin_name || '',
+          slug: slugId,
+          originName: o.original_name || o.origin_name || '',
           thumbUrl: thumb,
           posterUrl: poster || thumb,
           year: o.year || '2026',
-          quality: o.quality || 'HD',
-          episodeCurrent: o.episode_current || '',
+          quality: (o.quality || 'HD') + (o.language ? ` ${o.language}` : ''),
+          episodeCurrent: o.current_episode || o.episode_current || '',
           source: currentSource
         };
       });
@@ -1272,47 +1300,94 @@
     updateDetailFavButton(movie);
 
     try {
-      const resp = await fetch(`https://phimapi.com/phim/${movie.slug}`);
-      if (!resp.ok) throw new Error('Detail error');
-      const data = await resp.json();
-      const m = data.movie;
-      currentPlayingDetail = data;
+      if (movie.slug && movie.slug.startsWith('nguonc:')) {
+        const realSlug = movie.slug.replace('nguonc:', '');
+        const resp = await fetch(`https://phim.nguonc.com/api/film/${realSlug}`);
+        if (!resp.ok) throw new Error('NguonC detail error');
+        const data = await resp.json();
+        const m = data.movie;
+        currentPlayingDetail = data;
 
-      document.getElementById('detailDesc').textContent = (m.content || '').replace(/<[^>]*>?/gm, '') || 'Không có mô tả chi tiết.';
+        document.getElementById('detailDesc').textContent = (m.description || '').replace(/<[^>]*>?/gm, '') || 'Không có mô tả chi tiết.';
 
-      const tags = document.getElementById('detailTags');
-      tags.innerHTML = `
-        <span class="tag-badge">Chất lượng: ${m.quality || 'HD'}</span>
-        <span class="tag-badge">Thời lượng: ${m.time || 'Trọn bộ'}</span>
-        <span class="tag-badge">Ngôn ngữ: ${m.lang || 'Vietsub'}</span>
-        <span class="tag-badge">Tập: ${m.episode_current || 'Đang cập nhật'}</span>
-      `;
+        const tags = document.getElementById('detailTags');
+        tags.innerHTML = `
+          <span class="tag-badge">Chất lượng: ${m.quality || 'HD'}</span>
+          <span class="tag-badge">Thời lượng: ${m.time || 'Trọn bộ'}</span>
+          <span class="tag-badge">Ngôn ngữ: ${m.language || 'Vietsub'}</span>
+          <span class="tag-badge">Tập: ${m.current_episode || 'Đang cập nhật'}</span>
+        `;
 
-      // Danh sách tập
-      const epGrid = document.getElementById('episodesGrid');
-      epGrid.innerHTML = '';
+        const epGrid = document.getElementById('episodesGrid');
+        epGrid.innerHTML = '';
 
-      if (data.episodes && data.episodes.length > 0) {
-        const s = data.episodes[0];
-        (s.server_data || []).forEach((ep, idx) => {
-          const btn = document.createElement('button');
-          btn.className = 'btn-episode focusable';
-          btn.textContent = ep.name || `Tập ${idx + 1}`;
-          btn.addEventListener('click', () => {
-            modal.style.display = 'none';
-            playVideo(ep.link_m3u8, movie.name, ep.name, movie, data, idx, 0);
+        if (m.episodes && m.episodes.length > 0) {
+          const s = m.episodes[0];
+          const items = s.items || [];
+          items.forEach((ep, idx) => {
+            const btn = document.createElement('button');
+            btn.className = 'btn-episode focusable';
+            const epTitle = (ep.name && /^\d+$/.test(ep.name)) ? `Tập ${ep.name}` : (ep.name || `Tập ${idx + 1}`);
+            btn.textContent = epTitle;
+            btn.addEventListener('click', () => {
+              modal.style.display = 'none';
+              playVideo(ep.m3u8 || ep.embed, movie.name, epTitle, movie, data, idx, 0);
+            });
+            epGrid.appendChild(btn);
           });
-          epGrid.appendChild(btn);
-        });
 
-        // Nút Xem Tập Đầu
-        document.getElementById('btnPlayFirst').onclick = () => {
-          modal.style.display = 'none';
-          const firstEp = s.server_data[0];
-          if (firstEp) {
-            playVideo(firstEp.link_m3u8, movie.name, firstEp.name, movie, data, 0, 0);
-          }
-        };
+          document.getElementById('btnPlayFirst').onclick = () => {
+            modal.style.display = 'none';
+            const firstEp = items[0];
+            if (firstEp) {
+              const epTitle = (firstEp.name && /^\d+$/.test(firstEp.name)) ? `Tập ${firstEp.name}` : (firstEp.name || 'Tập 1');
+              playVideo(firstEp.m3u8 || firstEp.embed, movie.name, epTitle, movie, data, 0, 0);
+            }
+          };
+        }
+      } else {
+        const resp = await fetch(`https://phimapi.com/phim/${movie.slug}`);
+        if (!resp.ok) throw new Error('Detail error');
+        const data = await resp.json();
+        const m = data.movie;
+        currentPlayingDetail = data;
+
+        document.getElementById('detailDesc').textContent = (m.content || '').replace(/<[^>]*>?/gm, '') || 'Không có mô tả chi tiết.';
+
+        const tags = document.getElementById('detailTags');
+        tags.innerHTML = `
+          <span class="tag-badge">Chất lượng: ${m.quality || 'HD'}</span>
+          <span class="tag-badge">Thời lượng: ${m.time || 'Trọn bộ'}</span>
+          <span class="tag-badge">Ngôn ngữ: ${m.lang || 'Vietsub'}</span>
+          <span class="tag-badge">Tập: ${m.episode_current || 'Đang cập nhật'}</span>
+        `;
+
+        // Danh sách tập
+        const epGrid = document.getElementById('episodesGrid');
+        epGrid.innerHTML = '';
+
+        if (data.episodes && data.episodes.length > 0) {
+          const s = data.episodes[0];
+          (s.server_data || []).forEach((ep, idx) => {
+            const btn = document.createElement('button');
+            btn.className = 'btn-episode focusable';
+            btn.textContent = ep.name || `Tập ${idx + 1}`;
+            btn.addEventListener('click', () => {
+              modal.style.display = 'none';
+              playVideo(ep.link_m3u8, movie.name, ep.name, movie, data, idx, 0);
+            });
+            epGrid.appendChild(btn);
+          });
+
+          // Nút Xem Tập Đầu
+          document.getElementById('btnPlayFirst').onclick = () => {
+            modal.style.display = 'none';
+            const firstEp = s.server_data[0];
+            if (firstEp) {
+              playVideo(firstEp.link_m3u8, movie.name, firstEp.name, movie, data, 0, 0);
+            }
+          };
+        }
       }
     } catch (e) {
       document.getElementById('detailDesc').textContent = 'Không thể tải thông tin phim. Vui lòng thử lại sau!';
@@ -1383,6 +1458,8 @@
     const zapBtn = document.getElementById('btnQuickZap');
     const nextBtn = document.getElementById('btnNextEpisode');
     const progress = document.getElementById('progressContainer');
+    const iframe = document.getElementById('playerIframe');
+    const isEmbed = !streamUrl.includes('.m3u8') && !streamUrl.includes('.mp4');
 
     if (isTv) {
       zapBtn.style.display = 'block';
@@ -1403,6 +1480,22 @@
     video.removeAttribute('src');
     video.querySelectorAll('track').forEach(t => t.remove());
     video.load();
+
+    if (isEmbed) {
+      video.style.display = 'none';
+      if (iframe) {
+        iframe.style.display = 'block';
+        iframe.src = streamUrl;
+      }
+      if (progress) progress.style.display = 'none';
+      return;
+    } else {
+      if (iframe) {
+        iframe.src = '';
+        iframe.style.display = 'none';
+      }
+      video.style.display = 'block';
+    }
 
     if (ep && ep.subtitleUrl) {
       const track = document.createElement('track');

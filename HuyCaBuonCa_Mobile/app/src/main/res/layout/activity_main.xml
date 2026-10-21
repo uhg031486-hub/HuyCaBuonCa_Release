@@ -91,7 +91,7 @@
             android:paddingEnd="2dp"
             android:singleLine="true"
             android:ellipsize="end"
-            android:text="⭐ KKPhim"
+            android:text="🎬 PHIM"
             android:textColor="@color/text_primary"
             android:textSize="11sp"
             android:textStyle="bold" />

@@ -170,12 +170,14 @@ class PlayerActivity : AppCompatActivity() {
         binding.webViewPlayer.visibility = View.GONE
         binding.playerProgress.visibility = View.VISIBLE
 
+        val reqHeaders = mutableMapOf<String, String>()
+        if (url.contains("phimapi.com") || url.contains("phimimg.com") || url.contains("phim1280.tv")) {
+            reqHeaders["Referer"] = "https://player.phimapi.com/"
+            reqHeaders["Origin"] = "https://player.phimapi.com"
+        }
         val dataSourceFactory = DefaultHttpDataSource.Factory()
             .setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36")
-            .setDefaultRequestProperties(mapOf(
-                "Referer" to "https://player.phimapi.com/",
-                "Origin" to "https://player.phimapi.com"
-            ))
+            .setDefaultRequestProperties(reqHeaders)
             .setAllowCrossProtocolRedirects(true)
 
         val mediaItemBuilder = MediaItem.Builder().setUri(url)

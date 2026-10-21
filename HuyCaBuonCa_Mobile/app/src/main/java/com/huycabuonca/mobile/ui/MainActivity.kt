@@ -46,8 +46,7 @@ class MainActivity : AppCompatActivity() {
 
         setupUI()
         setupSourceSelectors()
-        updateDynamicFilters()
-        loadMovies(reset = true)
+        switchSource(MovieSource.KKPHIM, force = true)
 
         // Kiểm tra nếu mở app từ thông báo chuông trận đấu
         intent?.getStringExtra("OPEN_MATCH_ALERT")?.let { matchId ->
@@ -361,8 +360,8 @@ class MainActivity : AppCompatActivity() {
         binding.btnSourceFreeReels.isSelected = false
     }
 
-    private fun switchSource(source: MovieSource) {
-        if (currentSource == source) return
+    private fun switchSource(source: MovieSource, force: Boolean = false) {
+        if (!force && currentSource == source) return
         currentSource = source
         binding.btnSourceKKPhim.isSelected = (source == MovieSource.KKPHIM)
         binding.btnSourceAnimeHay.isSelected = (source == MovieSource.ANIMEHAY)
@@ -384,7 +383,10 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        if (source == MovieSource.ANIMEHAY) {
+        if (source == MovieSource.KKPHIM) {
+            binding.scrollAnimeSubSources.visibility = android.view.View.VISIBLE
+            setupSubSources(MovieRepository.getMovieSubSources())
+        } else if (source == MovieSource.ANIMEHAY) {
             binding.scrollAnimeSubSources.visibility = android.view.View.VISIBLE
             setupSubSources(MovieRepository.getAnimeSubSources())
         } else if (source == MovieSource.FREEREELS) {
@@ -437,10 +439,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun updateSubSourceFilters(subSourceUrl: String) {
         binding.layoutDynamicFilters.removeAllViews()
-        val filters = if (currentSource == MovieSource.ANIMEHAY) {
-            MovieRepository.getAnimeFilters(subSourceUrl)
-        } else {
-            MovieRepository.getShortDramaFilters(subSourceUrl)
+        val filters = when (currentSource) {
+            MovieSource.KKPHIM -> MovieRepository.getMovieFilters(subSourceUrl)
+            MovieSource.ANIMEHAY -> MovieRepository.getAnimeFilters(subSourceUrl)
+            else -> MovieRepository.getShortDramaFilters(subSourceUrl)
         }
         if (filters.isEmpty()) return
 

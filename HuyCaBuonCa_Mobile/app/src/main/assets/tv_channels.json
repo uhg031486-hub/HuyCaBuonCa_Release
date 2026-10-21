@@ -11,7 +11,7 @@
     "name": "True Premier Football 2 HD (EPL Trực Tiếp)",
     "group": "📡 Kênh Vệ Tinh Quốc Tế",
     "logo": "https://raw.githubusercontent.com/iptv-org/tv-logos/master/countries/th/true-premier-football-hd-2.png",
-    "url": "https://amg26268-amg26268c14-freelivesports-emea-10267.playouts.now.amagi.tv/playlist.m3u8"
+    "url": "https://amg26268-amg26268c1-freelivesports-emea-10267.playouts.now.amagi.tv/playlist.m3u8"
   },
   {
     "id": "sports_sat_astro_supersport_1",
@@ -32,7 +32,7 @@
     "name": "Sky Sports Premier League HD (UK)",
     "group": "📡 Kênh Vệ Tinh Quốc Tế",
     "logo": "https://raw.githubusercontent.com/iptv-org/tv-logos/master/countries/uk/sky-sports-premier-league.png",
-    "url": "https://skynewsau-live-premium.akamaized.net/hls/live/2105307/foxsportsnews/master.m3u8"
+    "url": "https://skynewsau-live.akamaized.net/hls/live/2002689/skynewsau-extra1/master.m3u8"
   },
   {
     "id": "sports_sat_tnt_sports_1",
@@ -1145,7 +1145,7 @@
     "name": "DW",
     "group": "Quốc Tế",
     "logo": "https://i.ytimg.com/vi/puzK9XqJ6-Y/hq720.jpg",
-    "url": "https://freem3u.xyz/api/live/play.m3u8?vid=109"
+    "url": "https://dwamdstream102.akamaized.net/hls/live/2015525/dwstream102/index.m3u8"
   },
   {
     "id": "discovery_152",

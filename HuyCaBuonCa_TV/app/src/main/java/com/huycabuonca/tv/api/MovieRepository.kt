@@ -387,6 +387,56 @@ object MovieRepository {
         }
     }
 
+    fun getMovieSubSources(): List<FilterItem> {
+        return listOf(
+            FilterItem("⚡ KKPhim VIP (HLS 1080p)", "movie_sub://kkphim"),
+            FilterItem("🔥 NguonC Cinema (Phim Rạp & Mới)", "movie_sub://nguonc"),
+            FilterItem("🎙️ Thuyết Minh & Lồng Tiếng", "movie_sub://dubbed"),
+            FilterItem("🍿 Phim Chiếu Rạp Bom Tấn", "movie_sub://cinema")
+        )
+    }
+
+    fun getMovieFilters(subSourceUrl: String): List<FilterItem> {
+        return when (subSourceUrl) {
+            "movie_sub://nguonc" -> listOf(
+                FilterItem("🔥 Mới Cập Nhật", "https://phim.nguonc.com/api/films/phim-moi-cap-nhat"),
+                FilterItem("🎬 Phim Bộ Mới", "https://phim.nguonc.com/api/films/danh-sach/phim-bo"),
+                FilterItem("🍿 Phim Lẻ / Chiếu Rạp", "https://phim.nguonc.com/api/films/danh-sach/phim-le"),
+                FilterItem("📺 TV Shows", "https://phim.nguonc.com/api/films/danh-sach/tv-shows"),
+                FilterItem("🕒 Lịch Sử Xem", "app://history"),
+                FilterItem("❤️ Phim Yêu Thích", "app://favorites")
+            )
+            "movie_sub://dubbed" -> listOf(
+                FilterItem("🎙️ Thuyết Minh Chuẩn", "https://phimapi.com/v1/api/danh-sach/phim-thuyet-minh"),
+                FilterItem("🗣️ Lồng Tiếng", "https://phimapi.com/v1/api/danh-sach/phim-long-tieng"),
+                FilterItem("🕒 Lịch Sử Xem", "app://history"),
+                FilterItem("❤️ Phim Yêu Thích", "app://favorites")
+            )
+            "movie_sub://cinema" -> listOf(
+                FilterItem("🍿 Chiếu Rạp Mới Nhất", "https://phimapi.com/v1/api/danh-sach/phim-le"),
+                FilterItem("🇺🇸 Bom Tấn Âu Mỹ", "https://phimapi.com/v1/api/quoc-gia/au-my"),
+                FilterItem("🇰🇷 Chiếu Rạp Hàn Quốc", "https://phimapi.com/v1/api/quoc-gia/han-quoc"),
+                FilterItem("🕒 Lịch Sử Xem", "app://history"),
+                FilterItem("❤️ Phim Yêu Thích", "app://favorites")
+            )
+            else -> listOf(
+                FilterItem("Mới Cập Nhật", "https://phimapi.com/danh-sach/phim-moi-cap-nhat"),
+                FilterItem("🕒 Lịch Sử Xem", "app://history"),
+                FilterItem("❤️ Phim Yêu Thích", "app://favorites"),
+                FilterItem("Phim Bộ", "https://phimapi.com/v1/api/danh-sach/phim-bo"),
+                FilterItem("Phim Lẻ", "https://phimapi.com/v1/api/danh-sach/phim-le"),
+                FilterItem("TV Shows", "https://phimapi.com/v1/api/danh-sach/tv-shows"),
+                FilterItem("Hành Động", "https://phimapi.com/v1/api/the-loai/hanh-dong"),
+                FilterItem("Cổ Trang", "https://phimapi.com/v1/api/the-loai/co-trang"),
+                FilterItem("Tình Cảm", "https://phimapi.com/v1/api/the-loai/tinh-cam"),
+                FilterItem("Kinh Dị", "https://phimapi.com/v1/api/the-loai/kinh-di"),
+                FilterItem("Hàn Quốc", "https://phimapi.com/v1/api/quoc-gia/han-quoc"),
+                FilterItem("Trung Quốc", "https://phimapi.com/v1/api/quoc-gia/trung-quoc"),
+                FilterItem("Âu Mỹ", "https://phimapi.com/v1/api/quoc-gia/au-my")
+            )
+        }
+    }
+
     fun getShortDramaSubSources(): List<FilterItem> {
         return listOf(
             FilterItem("📱 FreeReels Dọc (Phụ Đề & Lồng Tiếng)", "freereels_sub://freereels"),
@@ -571,6 +621,7 @@ object MovieRepository {
                     if (page == 1) {
                         filtered.map { it.toMovieItem() }
                     } else emptyList()
+
                 } else if (source == MovieSource.FREEREELS) {
                     when {
                         filterUrl.startsWith("short_filter://") || filterUrl.startsWith("short_dramabox://") -> {
@@ -586,7 +637,11 @@ object MovieRepository {
                 } else if (filterUrl.startsWith("anime_dubbed://")) {
                     fetchPureAnimeDubbedList(filterUrl, page, source)
                 } else {
+                    if (filterUrl.startsWith("https://phim.nguonc.com") || filterUrl.startsWith("nguonc://")) {
+                    NguonCClient.getFilmList(client, gson, filterUrl, page)
+                } else {
                     fetchKKPhimList(filterUrl, page, source)
+                }
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -598,7 +653,10 @@ object MovieRepository {
     suspend fun getMovieDetail(source: MovieSource, slug: String): MovieDetail? {
         return withContext(Dispatchers.IO) {
             try {
-                if (source == MovieSource.FREEREELS) {
+                if (slug.startsWith("nguonc:")) {
+                    val realSlug = slug.removePrefix("nguonc:")
+                    NguonCClient.getFilmDetail(client, gson, realSlug)
+                } else if (source == MovieSource.FREEREELS) {
                     FreeReelsClient.getDramaDetail(client, gson, slug)
                 } else if (source == MovieSource.XEMTIVI) {
                     val channel = cachedTvChannels?.find { it.id == slug }
@@ -946,6 +1004,134 @@ object MovieRepository {
                 source = source,
                 servers = serverGroups
             )
+        }
+    }
+}
+
+
+object NguonCClient {
+    private const val API_BASE = "https://phim.nguonc.com/api"
+
+    private fun JsonObject.getSafeString(key: String, default: String = ""): String {
+        if (!has(key)) return default
+        val el = get(key)
+        if (el == null || el.isJsonNull) return default
+        return try { el.asString } catch (e: Exception) { default }
+    }
+
+    fun getFilmList(client: OkHttpClient, gson: Gson, filterUrl: String, page: Int): List<MovieItem> {
+        val sep = if (filterUrl.contains("?")) "&" else "?"
+        val url = "$filterUrl${sep}page=$page"
+        val req = Request.Builder().url(url).header("User-Agent", "Mozilla/5.0").build()
+        return try {
+            client.newCall(req).execute().use { resp ->
+                if (!resp.isSuccessful) return emptyList()
+                val body = resp.body?.string() ?: return emptyList()
+                val root = gson.fromJson(body, JsonObject::class.java)
+                val items = root.getAsJsonArray("items") ?: return emptyList()
+                val list = mutableListOf<MovieItem>()
+                items.forEach { el ->
+                    if (el.isJsonObject) {
+                        val o = el.asJsonObject
+                        val slug = o.getSafeString("slug")
+                        val thumb = o.getSafeString("thumb_url")
+                        val poster = o.getSafeString("poster_url").ifEmpty { thumb }
+                        val epCurrent = o.getSafeString("current_episode")
+                        val quality = o.getSafeString("quality", "HD")
+                        val lang = o.getSafeString("language", "Vietsub")
+                        val badge = if (lang.isNotEmpty()) "$quality $lang" else quality
+
+                        list.add(
+                            MovieItem(
+                                id = "nguonc:$slug",
+                                name = o.getSafeString("name"),
+                                slug = "nguonc:$slug",
+                                originName = o.getSafeString("original_name"),
+                                thumbUrl = thumb,
+                                posterUrl = poster,
+                                year = o.getSafeString("year", "2026"),
+                                quality = badge,
+                                episodeCurrent = epCurrent,
+                                source = MovieSource.KKPHIM
+                            )
+                        )
+                    }
+                }
+                list
+            }
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
+    fun getFilmDetail(client: OkHttpClient, gson: Gson, realSlug: String): MovieDetail? {
+        val url = "$API_BASE/film/$realSlug"
+        val req = Request.Builder().url(url).header("User-Agent", "Mozilla/5.0").build()
+        return try {
+            client.newCall(req).execute().use { resp ->
+                if (!resp.isSuccessful) return null
+                val body = resp.body?.string() ?: return null
+                val root = gson.fromJson(body, JsonObject::class.java)
+                val movie = root.getAsJsonObject("movie") ?: return null
+
+                val title = movie.getSafeString("name")
+                val thumb = movie.getSafeString("thumb_url")
+                val poster = movie.getSafeString("poster_url").ifEmpty { thumb }
+                val desc = movie.getSafeString("description")
+                val epArray = movie.getAsJsonArray("episodes")
+
+                val serverGroups = mutableListOf<ServerGroup>()
+                epArray?.forEach { sEl ->
+                    if (sEl.isJsonObject) {
+                        val sObj = sEl.asJsonObject
+                        val sName = sObj.getSafeString("server_name", "NguonC VIP")
+                        val itemsArr = sObj.getAsJsonArray("items")
+                        val epList = mutableListOf<EpisodeItem>()
+
+                        itemsArr?.forEach { epEl ->
+                            if (epEl.isJsonObject) {
+                                val epObj = epEl.asJsonObject
+                                val epName = epObj.getSafeString("name")
+                                val epSlug = epObj.getSafeString("slug")
+                                val embed = epObj.getSafeString("embed")
+                                val m3u8 = epObj.getSafeString("m3u8")
+
+                                val dispName = if (epName.all { it.isDigit() }) "Tập $epName" else epName
+                                epList.add(
+                                    EpisodeItem(
+                                        name = dispName,
+                                        slug = epSlug,
+                                        filename = dispName,
+                                        linkM3u8 = if (m3u8.isNotEmpty()) m3u8 else null,
+                                        linkEmbed = if (embed.isNotEmpty()) embed else null
+                                    )
+                                )
+                            }
+                        }
+                        if (epList.isNotEmpty()) {
+                            serverGroups.add(ServerGroup(serverName = sName, episodes = epList))
+                        }
+                    }
+                }
+
+                MovieDetail(
+                    id = "nguonc:$realSlug",
+                    name = title,
+                    slug = "nguonc:$realSlug",
+                    originName = movie.getSafeString("original_name"),
+                    content = desc,
+                    thumbUrl = thumb,
+                    posterUrl = poster,
+                    year = movie.getSafeString("year", "2026"),
+                    time = movie.getSafeString("time"),
+                    quality = movie.getSafeString("quality", "HD"),
+                    lang = movie.getSafeString("language", "Vietsub"),
+                    source = MovieSource.KKPHIM,
+                    servers = serverGroups
+                )
+            }
+        } catch (e: Exception) {
+            null
         }
     }
 }
