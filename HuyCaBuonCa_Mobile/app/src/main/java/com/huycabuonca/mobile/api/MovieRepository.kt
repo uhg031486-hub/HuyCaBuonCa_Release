@@ -368,11 +368,12 @@ object MovieRepository {
                 FilterItem("Hài Hước", "https://phimapi.com/v1/api/the-loai/hai-huoc")
             )
             "anime_sub://dubbed" -> listOf(
-                FilterItem("🎙️ Tất Cả Thuyết Minh", "anime_dubbed://all"),
+                FilterItem("🎙️ Tất Cả Anime Thuyết Minh", "anime_dubbed://all"),
+                FilterItem("⛩️ Anime Nhật Lồng Tiếng", "anime_dubbed://japan"),
+                FilterItem("🐉 Hoạt Hình 3D Trung Quốc", "anime_dubbed://china"),
+                FilterItem("🏰 Hoạt Hình Chiếu Rạp", "anime_dubbed://cinema"),
                 FilterItem("🕒 Lịch Sử Xem", "app://history"),
-                FilterItem("❤️ Yêu Thích", "app://favorites"),
-                FilterItem("Thuyết Minh Tiếng Việt", "https://phimapi.com/v1/api/danh-sach/phim-thuyet-minh"),
-                FilterItem("Lồng Tiếng Chuẩn", "https://phimapi.com/v1/api/danh-sach/phim-long-tieng")
+                FilterItem("❤️ Yêu Thích", "app://favorites")
             )
             else -> listOf(
                 FilterItem("Anime Mới Cập Nhật", "https://phimapi.com/v1/api/quoc-gia/nhat-ban"),
@@ -382,6 +383,47 @@ object MovieRepository {
                 FilterItem("Thần Thoại", "https://phimapi.com/v1/api/the-loai/than-thoai"),
                 FilterItem("Học Đường", "https://phimapi.com/v1/api/the-loai/hoc-duong"),
                 FilterItem("Viễn Tưởng", "https://phimapi.com/v1/api/the-loai/vien-tuong")
+            )
+        }
+    }
+
+    fun getShortDramaSubSources(): List<FilterItem> {
+        return listOf(
+            FilterItem("📱 FreeReels Dọc (Phụ Đề & Lồng Tiếng)", "freereels_sub://freereels"),
+            FilterItem("🇻🇳 Tiểu Kịch Vietsub (KKPhim HD)", "freereels_sub://kkphim"),
+            FilterItem("💎 DramaBox Hot (Tuyển Chọn Hay Nhất)", "freereels_sub://dramabox")
+        )
+    }
+
+    fun getShortDramaFilters(subSourceUrl: String): List<FilterItem> {
+        return when (subSourceUrl) {
+            "freereels_sub://kkphim" -> listOf(
+                FilterItem("🔥 Tất Cả Tiểu Kịch Vietsub", "https://phimapi.com/v1/api/the-loai/phim-ngan"),
+                FilterItem("👑 Tổng Tài & Bá Đạo", "short_filter://tong-tai"),
+                FilterItem("🐉 Trọng Sinh & Nghịch Tập", "short_filter://trong-sinh"),
+                FilterItem("💖 Ngôn Tình & Hôn Nhân", "short_filter://ngon-tinh"),
+                FilterItem("🎭 Hài Hước & Đời Sống", "short_filter://hai-huoc"),
+                FilterItem("🕒 Lịch Sử Xem", "app://history"),
+                FilterItem("❤️ Yêu Thích", "app://favorites")
+            )
+            "freereels_sub://dramabox" -> listOf(
+                FilterItem("🌟 Tuyển Chọn Phim Ngắn Hot", "short_dramabox://hot"),
+                FilterItem("⚔️ Chiến Thần & Tu Tiên", "short_dramabox://chienthan"),
+                FilterItem("👑 Thiếu Gia Ẩn Danh", "short_dramabox://thieugia"),
+                FilterItem("🏰 Cung Đấu & Cổ Trang", "short_dramabox://cotrang"),
+                FilterItem("🕒 Lịch Sử Xem", "app://history"),
+                FilterItem("❤️ Yêu Thích", "app://favorites")
+            )
+            else -> listOf(
+                FilterItem("🔥 Thịnh Hành", "freereels://foryou"),
+                FilterItem("🎙️ Phim Lồng Tiếng Việt", "freereels://dubbed_vi"),
+                FilterItem("⚡ Mới Nhất", "freereels://tab_505"),
+                FilterItem("🎀 Dành Cho Nữ", "freereels://tab_504"),
+                FilterItem("👑 Dành Cho Nam", "freereels://tab_506"),
+                FilterItem("🎭 Hoạt Hình Ngắn", "freereels://tab_547"),
+                FilterItem("⏰ Sắp Chiếu", "freereels://coming"),
+                FilterItem("🕒 Lịch Sử Xem", "app://history"),
+                FilterItem("❤️ Yêu Thích", "app://favorites")
             )
         }
     }
@@ -531,14 +573,19 @@ object MovieRepository {
                         filtered.map { it.toMovieItem() }
                     } else emptyList()
                 } else if (source == MovieSource.FREEREELS) {
-                    FreeReelsClient.getDramaList(client, gson, filterUrl, page)
-                } else if (filterUrl == "anime_dubbed://all") {
-                    val listThuyetMinh = fetchKKPhimList("https://phimapi.com/v1/api/danh-sach/phim-thuyet-minh", page, source)
-                    val listLongTieng = fetchKKPhimList("https://phimapi.com/v1/api/danh-sach/phim-long-tieng", page, source)
-                    val combined = mutableListOf<MovieItem>()
-                    combined.addAll(listThuyetMinh)
-                    combined.addAll(listLongTieng)
-                    combined.distinctBy { it.name.trim().lowercase() }
+                    when {
+                        filterUrl.startsWith("short_filter://") || filterUrl.startsWith("short_dramabox://") -> {
+                            fetchShortDramaList(filterUrl, page)
+                        }
+                        filterUrl.startsWith("https://phimapi.com") -> {
+                            fetchKKPhimList(filterUrl, page, MovieSource.KKPHIM)
+                        }
+                        else -> {
+                            FreeReelsClient.getDramaList(client, gson, filterUrl, page)
+                        }
+                    }
+                } else if (filterUrl.startsWith("anime_dubbed://")) {
+                    fetchPureAnimeDubbedList(filterUrl, page, source)
                 } else {
                     fetchKKPhimList(filterUrl, page, source)
                 }
@@ -655,6 +702,147 @@ object MovieRepository {
     }
 
     // --- API Handlers (HLS VIP) ---
+    private fun fetchPureAnimeDubbedList(filterUrl: String, page: Int, source: MovieSource): List<MovieItem> {
+        val filterType = filterUrl.removePrefix("anime_dubbed://")
+        val p1 = (page - 1) * 2 + 1
+        val p2 = page * 2
+        val items = mutableListOf<MovieItem>()
+
+        for (p in listOf(p1, p2)) {
+            val apiEndpoints = listOf(
+                "https://phimapi.com/v1/api/danh-sach/phim-thuyet-minh?page=$p",
+                "https://phimapi.com/v1/api/danh-sach/phim-long-tieng?page=$p",
+                "https://phimapi.com/v1/api/the-loai/hoat-hinh?page=$p"
+            )
+            for (endpoint in apiEndpoints) {
+                try {
+                    val req = Request.Builder().url(endpoint).header("User-Agent", "Mozilla/5.0").build()
+                    client.newCall(req).execute().use { resp ->
+                        if (!resp.isSuccessful) return@use
+                        val body = resp.body?.string() ?: return@use
+                        val root = gson.fromJson(body, JsonObject::class.java)
+                        val itemsArray = if (root.has("items") && !root.get("items").isJsonNull) {
+                            root.getAsJsonArray("items")
+                        } else if (root.has("data") && !root.get("data").isJsonNull && root.getAsJsonObject("data").has("items")) {
+                            root.getAsJsonObject("data").getAsJsonArray("items")
+                        } else null
+
+                        itemsArray?.forEach { el ->
+                            if (el.isJsonObject) {
+                                val o = el.asJsonObject
+                                val type = o.getSafeString("type")
+                                val lang = o.getSafeString("lang").lowercase()
+                                val categoryArray = o.getAsJsonArray("category")
+                                val isCategoryAnim = categoryArray?.any { catEl ->
+                                    val catSlug = catEl.asJsonObject.getSafeString("slug")
+                                    catSlug == "hoat-hinh" || catSlug.contains("hoat-hinh")
+                                } ?: false
+
+                                val isAnimation = (type == "hoathinh" || isCategoryAnim)
+                                val isDubbed = (lang.contains("thuyết minh") || lang.contains("lồng tiếng") || lang.contains("tm") || lang.contains("lt"))
+
+                                if (isAnimation && isDubbed) {
+                                    val countryArray = o.getAsJsonArray("country")
+                                    val countrySlugs = mutableListOf<String>()
+                                    countryArray?.forEach { cEl ->
+                                        if (cEl.isJsonObject) countrySlugs.add(cEl.asJsonObject.getSafeString("slug"))
+                                    }
+
+                                    var matched = true
+                                    if (filterType == "japan" && !countrySlugs.contains("nhat-ban")) matched = false
+                                    if (filterType == "china" && !countrySlugs.contains("trung-quoc")) matched = false
+                                    if (filterType == "cinema" && !countrySlugs.any { it in listOf("au-my", "my", "phap", "anh", "canada", "uc", "duc") }) matched = false
+
+                                    if (matched) {
+                                        val thumb = o.getSafeString("thumb_url")
+                                        val poster = o.getSafeString("poster_url").ifEmpty { thumb }
+                                        val fullThumb = if (thumb.startsWith("http")) thumb else if (thumb.isNotEmpty()) KKPHIM_IMG_BASE + thumb.removePrefix("/") else ""
+                                        val fullPoster = if (poster.startsWith("http")) poster else if (poster.isNotEmpty()) KKPHIM_IMG_BASE + poster.removePrefix("/") else fullThumb
+
+                                        items.add(
+                                            MovieItem(
+                                                id = o.getSafeString("_id"),
+                                                name = o.getSafeString("name"),
+                                                slug = o.getSafeString("slug"),
+                                                originName = o.getSafeString("origin_name"),
+                                                thumbUrl = fullThumb,
+                                                posterUrl = fullPoster,
+                                                year = o.getSafeString("year"),
+                                                quality = o.getSafeString("quality", "FHD"),
+                                                episodeCurrent = o.getSafeString("episode_current"),
+                                                source = source
+                                            )
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } catch (e: Exception) {
+                }
+            }
+        }
+        return items.distinctBy { it.name.trim().lowercase() }
+    }
+
+
+    private fun fetchShortDramaList(filterUrl: String, page: Int): List<MovieItem> {
+        val keyword = when (filterUrl) {
+            "short_filter://tong-tai" -> "tổng tài"
+            "short_filter://trong-sinh" -> "trọng sinh"
+            "short_filter://ngon-tinh" -> "hôn nhân"
+            "short_filter://hai-huoc" -> "hài hước"
+            "short_dramabox://chienthan" -> "chiến thần"
+            "short_dramabox://thieugia" -> "thiếu gia"
+            "short_dramabox://cotrang" -> "cung đấu"
+            else -> ""
+        }
+
+        if (keyword.isNotEmpty()) {
+            return try {
+                val url = "https://phimapi.com/v1/api/tim-kiem?keyword=${java.net.URLEncoder.encode(keyword, "UTF-8")}&page=$page"
+                val req = Request.Builder().url(url).header("User-Agent", "Mozilla/5.0").build()
+                client.newCall(req).execute().use { resp ->
+                    if (!resp.isSuccessful) return emptyList()
+                    val body = resp.body?.string() ?: return emptyList()
+                    val root = gson.fromJson(body, JsonObject::class.java)
+                    val data = root.getAsJsonObject("data") ?: return emptyList()
+                    val items = data.getAsJsonArray("items") ?: return emptyList()
+                    val result = mutableListOf<MovieItem>()
+                    items.forEach { el ->
+                        if (el.isJsonObject) {
+                            val o = el.asJsonObject
+                            val thumb = o.getSafeString("thumb_url")
+                            val poster = o.getSafeString("poster_url").ifEmpty { thumb }
+                            val fullThumb = if (thumb.startsWith("http")) thumb else if (thumb.isNotEmpty()) KKPHIM_IMG_BASE + thumb.removePrefix("/") else ""
+                            val fullPoster = if (poster.startsWith("http")) poster else if (poster.isNotEmpty()) KKPHIM_IMG_BASE + poster.removePrefix("/") else fullThumb
+
+                            result.add(
+                                MovieItem(
+                                    id = o.getSafeString("_id"),
+                                    name = o.getSafeString("name"),
+                                    slug = o.getSafeString("slug"),
+                                    originName = o.getSafeString("origin_name"),
+                                    thumbUrl = fullThumb,
+                                    posterUrl = fullPoster,
+                                    year = o.getSafeString("year", "2026"),
+                                    quality = "1080p Vietsub",
+                                    episodeCurrent = o.getSafeString("episode_current"),
+                                    source = MovieSource.KKPHIM
+                                )
+                            )
+                        }
+                    }
+                    result
+                }
+            } catch (e: Exception) {
+                emptyList()
+            }
+        } else {
+            return fetchKKPhimList("https://phimapi.com/v1/api/the-loai/phim-ngan", page, MovieSource.KKPHIM)
+        }
+    }
+
     private fun fetchKKPhimList(baseFilterUrl: String, page: Int, source: MovieSource): List<MovieItem> {
         val sep = if (baseFilterUrl.contains("?")) "&" else "?"
         val url = "$baseFilterUrl${sep}page=$page"
@@ -935,16 +1123,18 @@ object FreeReelsClient {
                         val epCount = series.getSafeString("episode_count")
 
                         if (id.isNotEmpty() && title.isNotEmpty()) {
+                            val isDubbed = title.contains("lồng tiếng", ignoreCase = true) || title.contains("thuyết minh", ignoreCase = true)
+                            val qualityBadge = if (isDubbed) "🎙️ Lồng Tiếng" else "🇻🇳 Phụ Đề"
                             list.add(
                                 MovieItem(
                                     id = id,
                                     name = title,
                                     slug = id,
-                                    originName = if (epCount.isNotEmpty()) "$epCount tập • FreeReels Dọc" else "Phim Ngắn Dọc 9:16",
+                                    originName = if (isDubbed) "$epCount tập • Lồng Tiếng Việt" else "$epCount tập • Phụ Đề Tiếng Việt",
                                     thumbUrl = cover,
                                     posterUrl = cover,
                                     year = "2026",
-                                    quality = "9:16 Dọc",
+                                    quality = qualityBadge,
                                     episodeCurrent = if (epCount.isNotEmpty()) "$epCount tập" else "Trọn bộ",
                                     source = MovieSource.FREEREELS
                                 )
@@ -955,6 +1145,10 @@ object FreeReelsClient {
             }
         } catch (e: Exception) {
             e.printStackTrace()
+        }
+        if (filterUrl == "freereels://dubbed_vi") {
+            val dubbedList = list.filter { it.name.contains("lồng tiếng", ignoreCase = true) || it.name.contains("thuyết minh", ignoreCase = true) }
+            if (dubbedList.isNotEmpty()) return dubbedList
         }
         return list
     }
@@ -1155,16 +1349,18 @@ object FreeReelsClient {
                         val epCount = series.getSafeString("episode_count")
 
                         if (id.isNotEmpty() && title.isNotEmpty()) {
+                            val isDubbed = title.contains("lồng tiếng", ignoreCase = true) || title.contains("thuyết minh", ignoreCase = true)
+                            val qualityBadge = if (isDubbed) "🎙️ Lồng Tiếng" else "🇻🇳 Phụ Đề"
                             list.add(
                                 MovieItem(
                                     id = id,
                                     name = title,
                                     slug = id,
-                                    originName = if (epCount.isNotEmpty()) "$epCount tập • FreeReels Dọc" else "Phim Ngắn Dọc 9:16",
+                                    originName = if (isDubbed) "$epCount tập • Lồng Tiếng Việt" else "$epCount tập • Phụ Đề Tiếng Việt",
                                     thumbUrl = cover,
                                     posterUrl = cover,
                                     year = "2026",
-                                    quality = "9:16 Dọc",
+                                    quality = qualityBadge,
                                     episodeCurrent = if (epCount.isNotEmpty()) "$epCount tập" else "Trọn bộ",
                                     source = MovieSource.FREEREELS
                                 )

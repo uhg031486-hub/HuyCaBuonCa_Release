@@ -75,8 +75,22 @@
 
   // --- Filters per Source ---
   // --- Anime Sub-Sources Data ---
-  let currentAnimeSubSource = 'anime_sub://vietsub';
-  const ANIME_SUB_FILTERS = {
+  let currentSubSource = 'anime_sub://vietsub';
+  const SUB_SOURCES = {
+    ANIMEHAY: [
+      { name: "⛩️ Anime Vietsub", key: "anime_sub://vietsub" },
+      { name: "🐉 Hoạt Hình 3D Trung Quốc", key: "anime_sub://hh3d" },
+      { name: "🏰 Hoạt Hình Chiếu Rạp", key: "anime_sub://movies" },
+      { name: "🎙️ Anime Thuyết Minh (Tổng Hợp)", key: "anime_sub://dubbed" }
+    ],
+    FREEREELS: [
+      { name: "📱 FreeReels Dọc (Phụ Đề & Lồng Tiếng)", key: "freereels_sub://freereels" },
+      { name: "🇻🇳 Tiểu Kịch Vietsub (KKPhim HD)", key: "freereels_sub://kkphim" },
+      { name: "💎 DramaBox Hot (Tuyển Chọn Hay Nhất)", key: "freereels_sub://dramabox" }
+    ]
+  };
+
+  const SUB_FILTERS = {
     'anime_sub://vietsub': [
       { name: "Anime Mới Cập Nhật", url: "https://phimapi.com/v1/api/quoc-gia/nhat-ban" },
       { name: "🕒 Lịch Sử Xem", url: "app://history" },
@@ -104,11 +118,40 @@
       { name: "Hài Hước", url: "https://phimapi.com/v1/api/the-loai/hai-huoc" }
     ],
     'anime_sub://dubbed': [
-      { name: "🎙️ Tất Cả Thuyết Minh", url: "anime_dubbed://all" },
+      { name: "🎙️ Tất Cả Anime Thuyết Minh", url: "anime_dubbed://all" },
+      { name: "⛩️ Anime Nhật Lồng Tiếng", url: "anime_dubbed://japan" },
+      { name: "🐉 Hoạt Hình 3D Trung Quốc", url: "anime_dubbed://china" },
+      { name: "🏰 Hoạt Hình Chiếu Rạp", url: "anime_dubbed://cinema" },
       { name: "🕒 Lịch Sử Xem", url: "app://history" },
-      { name: "❤️ Yêu Thích", url: "app://favorites" },
-      { name: "Thuyết Minh Tiếng Việt", url: "https://phimapi.com/v1/api/danh-sach/phim-thuyet-minh" },
-      { name: "Lồng Tiếng Chuẩn", url: "https://phimapi.com/v1/api/danh-sach/phim-long-tieng" }
+      { name: "❤️ Yêu Thích", url: "app://favorites" }
+    ],
+    'freereels_sub://freereels': [
+      { name: "🔥 Thịnh Hành", url: "freereels://foryou" },
+      { name: "🎙️ Phim Lồng Tiếng Việt", url: "freereels://dubbed_vi" },
+      { name: "⚡ Mới Nhất", url: "freereels://tab_505" },
+      { name: "🎀 Dành Cho Nữ", url: "freereels://tab_504" },
+      { name: "👑 Dành Cho Nam", url: "freereels://tab_506" },
+      { name: "🎭 Hoạt Hình Ngắn", url: "freereels://tab_547" },
+      { name: "⏰ Sắp Chiếu", url: "freereels://coming" },
+      { name: "🕒 Lịch Sử Xem", url: "app://history" },
+      { name: "❤️ Yêu Thích", url: "app://favorites" }
+    ],
+    'freereels_sub://kkphim': [
+      { name: "🔥 Tất Cả Tiểu Kịch Vietsub", url: "https://phimapi.com/v1/api/the-loai/phim-ngan" },
+      { name: "👑 Tổng Tài & Bá Đạo", url: "short_filter://tong-tai" },
+      { name: "🐉 Trọng Sinh & Nghịch Tập", url: "short_filter://trong-sinh" },
+      { name: "💖 Ngôn Tình & Hôn Nhân", url: "short_filter://ngon-tinh" },
+      { name: "🎭 Hài Hước & Đời Sống", url: "short_filter://hai-huoc" },
+      { name: "🕒 Lịch Sử Xem", url: "app://history" },
+      { name: "❤️ Yêu Thích", url: "app://favorites" }
+    ],
+    'freereels_sub://dramabox': [
+      { name: "🌟 Tuyển Chọn Phim Ngắn Hot", url: "short_dramabox://hot" },
+      { name: "⚔️ Chiến Thần & Tu Tiên", url: "short_dramabox://chienthan" },
+      { name: "👑 Thiếu Gia Ẩn Danh", url: "short_dramabox://thieugia" },
+      { name: "🏰 Cung Đấu & Cổ Trang", url: "short_dramabox://cotrang" },
+      { name: "🕒 Lịch Sử Xem", url: "app://history" },
+      { name: "❤️ Yêu Thích", url: "app://favorites" }
     ]
   };
 
@@ -285,27 +328,31 @@
     bar.innerHTML = '';
     bar.scrollLeft = 0;
 
-    if (currentSource === 'ANIMEHAY') {
+    const currentSubList = SUB_SOURCES[currentSource];
+    if (currentSubList && currentSubList.length > 0) {
       if (animeSubBar) {
         animeSubBar.style.display = 'flex';
-        // Setup sub sources buttons
-        animeSubBar.querySelectorAll('.btn-sub-source').forEach(btn => {
-          btn.classList.toggle('active', btn.dataset.sub === currentAnimeSubSource);
+        animeSubBar.innerHTML = '';
+        if (!currentSubList.some(s => s.key === currentSubSource)) {
+          currentSubSource = currentSubList[0].key;
+        }
+        currentSubList.forEach(s => {
+          const btn = document.createElement('button');
+          btn.className = `btn-sub-source focusable ${s.key === currentSubSource ? 'active' : ''}`;
+          btn.dataset.sub = s.key;
+          btn.textContent = s.name;
           btn.onclick = () => {
-            animeSubBar.querySelectorAll('.btn-sub-source').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            currentAnimeSubSource = btn.dataset.sub;
+            currentSubSource = s.key;
             renderFilterBar();
           };
+          animeSubBar.appendChild(btn);
         });
       }
     } else {
       if (animeSubBar) animeSubBar.style.display = 'none';
     }
 
-    const filters = (currentSource === 'ANIMEHAY' && ANIME_SUB_FILTERS[currentAnimeSubSource]) 
-      ? ANIME_SUB_FILTERS[currentAnimeSubSource] 
-      : (FILTERS[currentSource] || []);
+    const filters = SUB_FILTERS[currentSubSource] || FILTERS[currentSource] || [];
     if (filters.length === 0) return;
 
     filters.forEach((f, idx) => {
@@ -559,9 +606,95 @@
         return;
       }
 
-      // API KKPhim / AnimeHay
-      const sep = currentFilter.includes('?') ? '&' : '?';
-      const fetchUrl = `${currentFilter}${sep}page=${currentPage}`;
+      // Xử lý Anime Thuyết Minh (100% Hoạt Hình, Lọc Sạch Phim Người Đóng)
+      if (currentFilter.startsWith('anime_dubbed://')) {
+        const filterType = currentFilter.replace('anime_dubbed://', '');
+        const p1 = (currentPage - 1) * 2 + 1;
+        const p2 = currentPage * 2;
+        const collectedItems = [];
+        
+        for (const p of [p1, p2]) {
+          const endpoints = [
+            `https://phimapi.com/v1/api/danh-sach/phim-thuyet-minh?page=${p}`,
+            `https://phimapi.com/v1/api/danh-sach/phim-long-tieng?page=${p}`,
+            `https://phimapi.com/v1/api/the-loai/hoat-hinh?page=${p}`
+          ];
+          for (const ep of endpoints) {
+            try {
+              const r = await fetch(ep);
+              if (!r.ok) continue;
+              const j = await r.json();
+              const arr = (j.items || (j.data && j.data.items)) || [];
+              arr.forEach(o => {
+                const type = o.type || '';
+                const lang = (o.lang || '').toLowerCase();
+                const cats = o.category || [];
+                const isCatAnim = cats.some(c => (c.slug || '').includes('hoat-hinh'));
+                const isAnim = (type === 'hoathinh' || isCatAnim);
+                const isDub = (lang.includes('thuyết minh') || lang.includes('lồng tiếng') || lang.includes('tm') || lang.includes('lt'));
+
+                if (isAnim && isDub) {
+                  const countries = (o.country || []).map(c => c.slug || '');
+                  let matched = true;
+                  if (filterType === 'japan' && !countries.includes('nhat-ban')) matched = false;
+                  if (filterType === 'china' && !countries.includes('trung-quoc')) matched = false;
+                  if (filterType === 'cinema' && !countries.some(c => ['au-my', 'my', 'phap', 'anh', 'canada', 'uc', 'duc'].includes(c))) matched = false;
+
+                  if (matched) {
+                    let thumb = o.thumb_url || '';
+                    let poster = o.poster_url || thumb;
+                    if (thumb && !thumb.startsWith('http')) thumb = KKPHIM_IMG_BASE + thumb.replace(/^\//, '');
+                    if (poster && !poster.startsWith('http')) poster = KKPHIM_IMG_BASE + poster.replace(/^\//, '');
+                    collectedItems.push({
+                      id: o._id || o.slug,
+                      name: o.name,
+                      slug: o.slug,
+                      originName: o.origin_name || '',
+                      thumbUrl: thumb,
+                      posterUrl: poster,
+                      year: o.year || '',
+                      quality: o.quality || 'FHD',
+                      episodeCurrent: o.episode_current || '',
+                      source: 'KKPHIM'
+                    });
+                  }
+                }
+              });
+            } catch(e) {}
+          }
+        }
+        // Loại bỏ trùng lặp
+        const seen = new Set();
+        const distinct = collectedItems.filter(item => {
+          const k = item.name.trim().toLowerCase();
+          if (seen.has(k)) return false;
+          seen.add(k);
+          return true;
+        });
+        renderCards(distinct, reset);
+        if (paginationContainer) paginationContainer.style.display = 'flex';
+        isLoading = false;
+        return;
+      }
+
+      // Xử lý Phim Ngắn (Tiểu Kịch & FreeReels & DramaBox)
+      let fetchUrl = '';
+      if (currentFilter.startsWith('short_filter://') || currentFilter.startsWith('short_dramabox://')) {
+        let kw = 'tổng tài';
+        if (currentFilter.includes('trong-sinh')) kw = 'trọng sinh';
+        if (currentFilter.includes('ngon-tinh')) kw = 'hôn nhân';
+        if (currentFilter.includes('hai-huoc')) kw = 'hài hước';
+        if (currentFilter.includes('chienthan')) kw = 'chiến thần';
+        if (currentFilter.includes('thieugia')) kw = 'thiếu gia';
+        if (currentFilter.includes('cotrang')) kw = 'cung đấu';
+        fetchUrl = `https://phimapi.com/v1/api/tim-kiem?keyword=${encodeURIComponent(kw)}&page=${currentPage}`;
+      } else if (currentFilter.startsWith('freereels://')) {
+        fetchUrl = `https://phimapi.com/v1/api/the-loai/phim-ngan?page=${currentPage}`;
+      } else {
+        const sep = currentFilter.includes('?') ? '&' : '?';
+        fetchUrl = `${currentFilter}${sep}page=${currentPage}`;
+      }
+
       const resp = await fetch(fetchUrl);
       if (!resp.ok) throw new Error('Network error');
       const data = await resp.json();
@@ -1261,14 +1394,25 @@
       progress.style.display = 'flex';
     }
 
-    // Reset video & HLS
+    // Reset video & HLS & Subtitles
     if (hlsInstance) {
       hlsInstance.destroy();
       hlsInstance = null;
     }
     video.pause();
     video.removeAttribute('src');
+    video.querySelectorAll('track').forEach(t => t.remove());
     video.load();
+
+    if (ep && ep.subtitleUrl) {
+      const track = document.createElement('track');
+      track.kind = 'subtitles';
+      track.srclang = 'vi';
+      track.label = 'Tiếng Việt';
+      track.src = ep.subtitleUrl;
+      track.default = true;
+      video.appendChild(track);
+    }
 
     if (window.Hls && Hls.isSupported() && streamUrl.includes('.m3u8')) {
       // 🚀 HLS.JS: Tương thích 100% với Windows PC, Edge Chromium & WebView2

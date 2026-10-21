@@ -1151,14 +1151,16 @@ class DetailActivity : AppCompatActivity() {
         }
 
         val mediaItem = mediaItemBuilder.build()
-        val mediaSource = HlsMediaSource.Factory(dataSourceFactory)
-            .createMediaSource(mediaItem)
+        val mediaSourceFactory = androidx.media3.exoplayer.source.DefaultMediaSourceFactory(this)
+            .setDataSourceFactory(dataSourceFactory)
+        val mediaSource = mediaSourceFactory.createMediaSource(mediaItem)
 
         val trackSelector = androidx.media3.exoplayer.trackselection.DefaultTrackSelector(this).apply {
             setParameters(
                 buildUponParameters()
                     .setPreferredTextLanguage("vi")
                     .setSelectUndeterminedTextLanguage(true)
+                    .setIgnoredTextSelectionFlags(0)
             )
         }
 

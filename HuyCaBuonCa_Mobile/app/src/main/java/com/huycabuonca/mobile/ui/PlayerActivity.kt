@@ -69,6 +69,7 @@ class PlayerActivity : AppCompatActivity() {
         MovieRepository.initTvChannels(this)
 
         val streamUrl = intent.getStringExtra("EXTRA_STREAM_URL") ?: ""
+        val subtitleUrl = intent.getStringExtra("EXTRA_SUBTITLE_URL")
         val isM3u8 = intent.getBooleanExtra("EXTRA_IS_M3U8", true) || streamUrl.contains(".m3u8")
         val title = intent.getStringExtra("EXTRA_TITLE") ?: ""
         val episode = intent.getStringExtra("EXTRA_EPISODE") ?: ""
@@ -105,7 +106,7 @@ class PlayerActivity : AppCompatActivity() {
         if (isTvMode) {
             setupTvMode(matchedChannel, streamUrl, title, episode)
         } else {
-            setupMovieMode(streamUrl, isM3u8, title, episode)
+            setupMovieMode(streamUrl, isM3u8, title, episode, subtitleUrl)
         }
 
         updateFavIcon()
@@ -158,7 +159,7 @@ class PlayerActivity : AppCompatActivity() {
         }
     }
 
-    private fun setupMovieMode(streamUrl: String, isM3u8: Boolean, title: String, episode: String) {
+    private fun setupMovieMode(streamUrl: String, isM3u8: Boolean, title: String, episode: String, subtitleUrl: String? = null) {
         binding.btnOpenChannelList.visibility = View.GONE
         binding.btnPrevChannel.visibility = View.GONE
         binding.btnNextChannel.visibility = View.GONE
@@ -166,7 +167,7 @@ class PlayerActivity : AppCompatActivity() {
         binding.txtPlayerTitle.text = if (episode.isNotEmpty()) "$title - $episode" else title
 
         if (isM3u8) {
-            initExoPlayer(streamUrl)
+            initExoPlayer(streamUrl, subtitleUrl)
         } else {
             initWebViewPlayer(streamUrl)
         }
@@ -392,7 +393,7 @@ class PlayerActivity : AppCompatActivity() {
         hideHandler.postDelayed(hideOverlayRunnable, 4000)
     }
 
-    private fun initExoPlayer(url: String) {
+    private fun initExoPlayer(url: String, subtitleUrl: String? = null) {
         binding.playerView.visibility = View.VISIBLE
         binding.webViewPlayer.visibility = View.GONE
         binding.playerProgress.visibility = View.VISIBLE
@@ -403,10 +404,37 @@ class PlayerActivity : AppCompatActivity() {
             .setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
             .setAllowCrossProtocolRedirects(true)
 
-        val mediaSource = HlsMediaSource.Factory(dataSourceFactory)
-            .createMediaSource(MediaItem.fromUri(url))
+        val mediaItemBuilder = MediaItem.Builder().setUri(url)
+        if (!subtitleUrl.isNullOrEmpty()) {
+            val mimeType = if (subtitleUrl.contains(".vtt", ignoreCase = true)) {
+                androidx.media3.common.MimeTypes.TEXT_VTT
+            } else {
+                androidx.media3.common.MimeTypes.APPLICATION_SUBRIP
+            }
+            val subConfig = MediaItem.SubtitleConfiguration.Builder(android.net.Uri.parse(subtitleUrl))
+                .setMimeType(mimeType)
+                .setLanguage("vi")
+                .setLabel("Tiếng Việt")
+                .setSelectionFlags(androidx.media3.common.C.SELECTION_FLAG_DEFAULT or androidx.media3.common.C.SELECTION_FLAG_FORCED)
+                .build()
+            mediaItemBuilder.setSubtitleConfigurations(listOf(subConfig))
+        }
 
-        player = ExoPlayer.Builder(this).build().apply {
+        val mediaItem = mediaItemBuilder.build()
+        val mediaSource = androidx.media3.exoplayer.source.DefaultMediaSourceFactory(this)
+            .setDataSourceFactory(dataSourceFactory)
+            .createMediaSource(mediaItem)
+
+        val trackSelector = androidx.media3.exoplayer.trackselection.DefaultTrackSelector(this).apply {
+            setParameters(
+                buildUponParameters()
+                    .setPreferredTextLanguage("vi")
+                    .setSelectUndeterminedTextLanguage(true)
+                    .setIgnoredTextSelectionFlags(0)
+            )
+        }
+
+        player = ExoPlayer.Builder(this).setTrackSelector(trackSelector).build().apply {
             setMediaSource(mediaSource)
             prepare()
             playWhenReady = true
@@ -426,6 +454,20 @@ class PlayerActivity : AppCompatActivity() {
             })
         }
         binding.playerView.player = player
+        binding.playerView.subtitleView?.apply {
+            visibility = android.view.View.VISIBLE
+            setStyle(
+                androidx.media3.ui.CaptionStyleCompat(
+                    android.graphics.Color.WHITE,
+                    android.graphics.Color.argb(160, 0, 0, 0),
+                    android.graphics.Color.TRANSPARENT,
+                    androidx.media3.ui.CaptionStyleCompat.EDGE_TYPE_OUTLINE,
+                    android.graphics.Color.BLACK,
+                    null
+                )
+            )
+            setFractionalTextSize(0.052f)
+        }
     }
 
     @SuppressLint("SetJavaScriptEnabled")

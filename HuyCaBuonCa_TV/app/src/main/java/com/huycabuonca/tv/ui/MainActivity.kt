@@ -241,7 +241,10 @@ class MainActivity : AppCompatActivity() {
 
         if (source == MovieSource.ANIMEHAY) {
             binding.scrollAnimeSubSources.visibility = View.VISIBLE
-            setupAnimeSubSources()
+            setupSubSources(MovieRepository.getAnimeSubSources())
+        } else if (source == MovieSource.FREEREELS) {
+            binding.scrollAnimeSubSources.visibility = View.VISIBLE
+            setupSubSources(MovieRepository.getShortDramaSubSources())
         } else {
             binding.scrollAnimeSubSources.visibility = View.GONE
             updateDynamicFilters()
@@ -249,9 +252,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun setupAnimeSubSources() {
+    private var currentSubSource: String = ""
+
+    private fun setupSubSources(subSources: List<FilterItem>) {
         binding.layoutAnimeSubSources.removeAllViews()
-        val subSources = MovieRepository.getAnimeSubSources()
+        if (subSources.isEmpty()) return
+        currentSubSource = subSources.first().endpointUrl
         val textColors = ContextCompat.getColorStateList(this, R.color.selector_btn_text)
 
         subSources.forEachIndexed { index, sub ->
@@ -269,25 +275,29 @@ class MainActivity : AppCompatActivity() {
                 setTextColor(textColors)
                 textSize = 11f
                 typeface = Typeface.DEFAULT_BOLD
-                isSelected = (sub.endpointUrl == currentAnimeSubSource)
+                isSelected = (index == 0)
 
                 setOnClickListener {
                     for (i in 0 until binding.layoutAnimeSubSources.childCount) {
                         binding.layoutAnimeSubSources.getChildAt(i).isSelected = false
                     }
                     isSelected = true
-                    currentAnimeSubSource = sub.endpointUrl
-                    updateAnimeDynamicFilters(currentAnimeSubSource)
+                    currentSubSource = sub.endpointUrl
+                    updateSubSourceFilters(currentSubSource)
                 }
             }
             binding.layoutAnimeSubSources.addView(subBtn)
         }
-        updateAnimeDynamicFilters(currentAnimeSubSource)
+        updateSubSourceFilters(currentSubSource)
     }
 
-    private fun updateAnimeDynamicFilters(subSourceUrl: String) {
+    private fun updateSubSourceFilters(subSourceUrl: String) {
         binding.layoutDynamicFilters.removeAllViews()
-        val filters = MovieRepository.getAnimeFilters(subSourceUrl)
+        val filters = if (currentSource == MovieSource.ANIMEHAY) {
+            MovieRepository.getAnimeFilters(subSourceUrl)
+        } else {
+            MovieRepository.getShortDramaFilters(subSourceUrl)
+        }
         if (filters.isEmpty()) return
 
         currentFilterUrl = filters.first().endpointUrl

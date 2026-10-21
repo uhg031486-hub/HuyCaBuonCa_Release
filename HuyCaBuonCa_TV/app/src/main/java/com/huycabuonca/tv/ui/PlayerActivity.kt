@@ -196,14 +196,16 @@ class PlayerActivity : AppCompatActivity() {
         }
 
         val mediaItem = mediaItemBuilder.build()
-        val mediaSource = HlsMediaSource.Factory(dataSourceFactory)
-            .createMediaSource(mediaItem)
+        val mediaSourceFactory = androidx.media3.exoplayer.source.DefaultMediaSourceFactory(this)
+            .setDataSourceFactory(dataSourceFactory)
+        val mediaSource = mediaSourceFactory.createMediaSource(mediaItem)
 
         val trackSelector = androidx.media3.exoplayer.trackselection.DefaultTrackSelector(this).apply {
             setParameters(
                 buildUponParameters()
                     .setPreferredTextLanguage("vi")
                     .setSelectUndeterminedTextLanguage(true)
+                    .setIgnoredTextSelectionFlags(0)
             )
         }
 
@@ -264,6 +266,20 @@ class PlayerActivity : AppCompatActivity() {
             })
         }
         binding.playerView.player = player
+        binding.playerView.subtitleView?.apply {
+            visibility = android.view.View.VISIBLE
+            setStyle(
+                androidx.media3.ui.CaptionStyleCompat(
+                    android.graphics.Color.WHITE,
+                    android.graphics.Color.argb(160, 0, 0, 0),
+                    android.graphics.Color.TRANSPARENT,
+                    androidx.media3.ui.CaptionStyleCompat.EDGE_TYPE_OUTLINE,
+                    android.graphics.Color.BLACK,
+                    null
+                )
+            )
+            setFractionalTextSize(0.058f)
+        }
     }
 
     private fun triggerAutoNextCountdown() {
