@@ -26,7 +26,7 @@ TOKEN = get_token()
 REPO_OWNER = "uhg031486-hub"
 REPO_NAME = "HuyCaBuonCa_Release"
 TAG = "v2.5"
-TITLE = "Huy Cá v2.5 - Đa Nguồn Phim Chính (KKPhim + NguonC), Sửa Kênh Quốc Tế & DNS DoH Windows"
+TITLE = "Huy Cá v2.5 - Đa Nguồn Phim Chính (KKPhim + NguonC), Sửa Lỗi Phát Player Windows & Kênh Quốc Tế"
 
 HEADERS = {
     "Authorization": f"token {TOKEN}",

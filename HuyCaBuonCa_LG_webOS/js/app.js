@@ -1497,14 +1497,27 @@
       video.style.display = 'block';
     }
 
-    if (ep && ep.subtitleUrl) {
-      const track = document.createElement('track');
-      track.kind = 'subtitles';
-      track.srclang = 'vi';
-      track.label = 'Tiếng Việt';
-      track.src = ep.subtitleUrl;
-      track.default = true;
-      video.appendChild(track);
+    // Kiểm tra và đính kèm phụ đề nếu có
+    try {
+      let currentEp = null;
+      if (detail) {
+        if (detail.episodes && detail.episodes[serverIndex] && detail.episodes[serverIndex].server_data) {
+          currentEp = detail.episodes[serverIndex].server_data[epIndex];
+        } else if (detail.items && detail.items[epIndex]) {
+          currentEp = detail.items[epIndex];
+        }
+      }
+      if (currentEp && currentEp.subtitleUrl) {
+        const track = document.createElement('track');
+        track.kind = 'subtitles';
+        track.srclang = 'vi';
+        track.label = 'Tiếng Việt';
+        track.src = currentEp.subtitleUrl;
+        track.default = true;
+        video.appendChild(track);
+      }
+    } catch (e) {
+      console.warn('Subtitle attach warning:', e);
     }
 
     if (window.Hls && Hls.isSupported() && streamUrl.includes('.m3u8')) {
@@ -1668,6 +1681,11 @@
     if (hlsInstance) {
       hlsInstance.destroy();
       hlsInstance = null;
+    }
+    const iframe = document.getElementById('playerIframe');
+    if (iframe) {
+      iframe.src = '';
+      iframe.style.display = 'none';
     }
     document.getElementById('playerContainer').style.display = 'none';
     document.getElementById('zappingPanel').classList.remove('open');
@@ -2428,7 +2446,13 @@
 
   // --- Remote Security & Maintenance Check ---
   function checkRemoteSecurityLock() {
-    fetch('https://raw.githubusercontent.com/uhg031486-hub/HuyCaBuonCa_Release/main/version.json?t=' + Date.now())
+    (function() {
+      var urls = [
+        'https://raw.githubusercontent.com/uhg031486-hub/HuyCaBuonCa_Release/main/version.json?t=' + Date.now(),
+        'https://cdn.jsdelivr.net/gh/uhg031486-hub/HuyCaBuonCa_Release@main/version.json?t=' + Date.now()
+      ];
+      return fetch(urls[0]).catch(function() { return fetch(urls[1]); });
+    })()
       .then(function(r) { return r.json(); })
       .then(function(cfg) {
         if (cfg && cfg.isMaintenanceLocked) {
