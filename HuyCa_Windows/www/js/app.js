@@ -75,8 +75,498 @@
 
   // --- Filters per Source ---
   // --- Anime Sub-Sources Data ---
+
+  // --- MD5 Implementation for FreeReels HMAC Signing ---
+  function md5(string) {
+    function rotateLeft(lValue, iShiftBits) {
+      return (lValue << iShiftBits) | (lValue >>> (32 - iShiftBits));
+    }
+    function addUnsigned(lX, lY) {
+      var lX4 = lX & 0x40000000, lY4 = lX & 0x40000000;
+      var lX8 = lX & 0x80000000, lY8 = lY & 0x80000000;
+      var lResult = (lX & 0x3FFFFFFF) + (lY & 0x3FFFFFFF);
+      if (lX4 & lY4) return lResult ^ 0x80000000 ^ lX8 ^ lY8;
+      if (lX4 | lY4) {
+        if (lResult & 0x40000000) return lResult ^ 0xC0000000 ^ lX8 ^ lY8;
+        return lResult ^ 0x40000000 ^ lX8 ^ lY8;
+      }
+      return lResult ^ lX8 ^ lY8;
+    }
+    function F(x, y, z) { return (x & y) | ((~x) & z); }
+    function G(x, y, z) { return (x & z) | (y & (~z)); }
+    function H(x, y, z) { return x ^ y ^ z; }
+    function I(x, y, z) { return y ^ (x | (~z)); }
+    function FF(a, b, c, d, x, s, ac) {
+      a = addUnsigned(a, addUnsigned(addUnsigned(F(b, c, d), x), ac));
+      return addUnsigned(rotateLeft(a, s), b);
+    }
+    function GG(a, b, c, d, x, s, ac) {
+      a = addUnsigned(a, addUnsigned(addUnsigned(G(b, c, d), x), ac));
+      return addUnsigned(rotateLeft(a, s), b);
+    }
+    function HH(a, b, c, d, x, s, ac) {
+      a = addUnsigned(a, addUnsigned(addUnsigned(H(b, c, d), x), ac));
+      return addUnsigned(rotateLeft(a, s), b);
+    }
+    function II(a, b, c, d, x, s, ac) {
+      a = addUnsigned(a, addUnsigned(addUnsigned(I(b, c, d), x), ac));
+      return addUnsigned(rotateLeft(a, s), b);
+    }
+    function convertToWordArray(str) {
+      var lWordCount;
+      var lMessageLength = str.length;
+      var lNumberOfWords_temp1 = lMessageLength + 8;
+      var lNumberOfWords_temp2 = (lNumberOfWords_temp1 - (lNumberOfWords_temp1 % 64)) / 64;
+      var lNumberOfWords = (lNumberOfWords_temp2 + 1) * 16;
+      var lWordArray = Array(lNumberOfWords - 1);
+      var lBytePosition = 0;
+      var lByteCount = 0;
+      while (lByteCount < lMessageLength) {
+        lWordCount = (lByteCount - (lByteCount % 4)) / 4;
+        lBytePosition = (lByteCount % 4) * 8;
+        lWordArray[lWordCount] = (lWordArray[lWordCount] | (str.charCodeAt(lByteCount) << lBytePosition));
+        lByteCount++;
+      }
+      lWordCount = (lByteCount - (lByteCount % 4)) / 4;
+      lBytePosition = (lByteCount % 4) * 8;
+      lWordArray[lWordCount] = lWordArray[lWordCount] | (0x80 << lBytePosition);
+      lWordArray[lNumberOfWords - 2] = lMessageLength << 3;
+      lWordArray[lNumberOfWords - 1] = lMessageLength >>> 29;
+      return lWordArray;
+    }
+    function wordToHex(lValue) {
+      var WordToHexValue = '', WordToHexValue_temp = '', lByte, lCount;
+      for (lCount = 0; lCount <= 3; lCount++) {
+        lByte = (lValue >>> (lCount * 8)) & 255;
+        WordToHexValue_temp = '0' + lByte.toString(16);
+        WordToHexValue = WordToHexValue + WordToHexValue_temp.substr(WordToHexValue_temp.length - 2, 2);
+      }
+      return WordToHexValue;
+    }
+    function utf8Encode(str) {
+      str = str.replace(/\r\n/g, '\n');
+      var utftext = '';
+      for (var n = 0; n < str.length; n++) {
+        var c = str.charCodeAt(n);
+        if (c < 128) {
+          utftext += String.fromCharCode(c);
+        } else if ((c > 127) && (c < 2048)) {
+          utftext += String.fromCharCode((c >> 6) | 192);
+          utftext += String.fromCharCode((c & 63) | 128);
+        } else {
+          utftext += String.fromCharCode((c >> 12) | 224);
+          utftext += String.fromCharCode(((c >> 6) & 63) | 128);
+          utftext += String.fromCharCode((c & 63) | 128);
+        }
+      }
+      return utftext;
+    }
+    var x = Array();
+    var k, AA, BB, CC, DD, a, b, c, d;
+    var S11 = 7, S12 = 12, S13 = 17, S14 = 22;
+    var S21 = 5, S22 = 9, S23 = 14, S24 = 20;
+    var S31 = 4, S32 = 11, S33 = 16, S34 = 23;
+    var S41 = 6, S42 = 10, S43 = 15, S44 = 21;
+    str = utf8Encode(string);
+    x = convertToWordArray(str);
+    a = 0x67452301; b = 0xEFCDAB89; c = 0x98BADCFE; d = 0x10325476;
+    for (k = 0; k < x.length; k += 16) {
+      AA = a; BB = b; CC = c; DD = d;
+      a = FF(a, b, c, d, x[k + 0], S11, 0xD76AA478);
+      d = FF(d, a, b, c, x[k + 1], S12, 0xE8C7B756);
+      c = FF(c, d, a, b, x[k + 2], S13, 0x242070DB);
+      b = FF(b, c, d, a, x[k + 3], S14, 0xC1BDCEEE);
+      a = FF(a, b, c, d, x[k + 4], S11, 0xF57C0FAF);
+      d = FF(d, a, b, c, x[k + 5], S12, 0x4787C62A);
+      c = FF(c, d, a, b, x[k + 6], S13, 0xA8304613);
+      b = FF(b, c, d, a, x[k + 7], S14, 0xFD469501);
+      a = FF(a, b, c, d, x[k + 8], S11, 0x698098D8);
+      d = FF(d, a, b, c, x[k + 9], S12, 0x8B44F7AF);
+      c = FF(c, d, a, b, x[k + 10], S13, 0xFFFF5BB1);
+      b = FF(b, c, d, a, x[k + 11], S14, 0x895CD7BE);
+      a = FF(a, b, c, d, x[k + 12], S11, 0x6B901122);
+      d = FF(d, a, b, c, x[k + 13], S12, 0xFD987193);
+      c = FF(c, d, a, b, x[k + 14], S13, 0xA679438E);
+      b = FF(b, c, d, a, x[k + 15], S14, 0x49B40821);
+      a = GG(a, b, c, d, x[k + 1], S21, 0xF61E2562);
+      d = GG(d, a, b, c, x[k + 6], S22, 0xC040B340);
+      c = GG(c, d, a, b, x[k + 11], S23, 0x265E5A51);
+      b = GG(b, c, d, a, x[k + 0], S24, 0xE9B6C7AA);
+      a = GG(a, b, c, d, x[k + 5], S21, 0xD62F105D);
+      d = GG(d, a, b, c, x[k + 10], S22, 0x2441453);
+      c = GG(c, d, a, b, x[k + 15], S23, 0xD8A1E681);
+      b = GG(b, c, d, a, x[k + 4], S24, 0xE7D3FBC8);
+      a = GG(a, b, c, d, x[k + 9], S21, 0x21E1CDE6);
+      d = GG(d, a, b, c, x[k + 14], S22, 0xC33707D6);
+      c = GG(c, d, a, b, x[k + 3], S23, 0xF4D50D87);
+      b = GG(b, c, d, a, x[k + 8], S24, 0x455A14ED);
+      a = GG(a, b, c, d, x[k + 13], S21, 0xA9E3E905);
+      d = GG(d, a, b, c, x[k + 2], S22, 0xFCEFA3F8);
+      c = GG(c, d, a, b, x[k + 7], S23, 0x676F02D9);
+      b = GG(b, c, d, a, x[k + 12], S24, 0x8D2A4C8A);
+      a = HH(a, b, c, d, x[k + 5], S31, 0xFFFA3942);
+      d = HH(d, a, b, c, x[k + 8], S32, 0x8771F681);
+      c = HH(c, d, a, b, x[k + 11], S33, 0x6D9D6122);
+      b = HH(b, c, d, a, x[k + 14], S34, 0xFDE5380C);
+      a = HH(a, b, c, d, x[k + 1], S31, 0xA4BEEA44);
+      d = HH(d, a, b, c, x[k + 4], S32, 0x4BDECFA9);
+      c = HH(c, d, a, b, x[k + 7], S33, 0xF6BB4B60);
+      b = HH(b, c, d, a, x[k + 10], S34, 0xBEBFBC70);
+      a = HH(a, b, c, d, x[k + 13], S31, 0x289B7EC6);
+      d = HH(d, a, b, c, x[k + 0], S32, 0xEAA127FA);
+      c = HH(c, d, a, b, x[k + 3], S33, 0xD4EF3085);
+      b = HH(b, c, d, a, x[k + 6], S34, 0x4881D05);
+      a = HH(a, b, c, d, x[k + 9], S31, 0xD9D4D039);
+      d = HH(d, a, b, c, x[k + 12], S32, 0xE6DB99E5);
+      c = HH(c, d, a, b, x[k + 15], S33, 0x1FA27CF8);
+      b = HH(b, c, d, a, x[k + 2], S34, 0xC4AC5665);
+      a = II(a, b, c, d, x[k + 0], S41, 0xF4292244);
+      d = II(d, a, b, c, x[k + 7], S42, 0x432AFF97);
+      c = II(c, d, a, b, x[k + 14], S43, 0xAB9423A7);
+      b = II(b, c, d, a, x[k + 5], S44, 0xFC93A039);
+      a = II(a, b, c, d, x[k + 12], S41, 0x655B59C3);
+      d = II(d, a, b, c, x[k + 3], S42, 0x8F0CCC92);
+      c = II(c, d, a, b, x[k + 10], S43, 0xFFEFF47D);
+      b = II(b, c, d, a, x[k + 1], S44, 0x85845DD1);
+      a = II(a, b, c, d, x[k + 8], S41, 0x6FA87E4F);
+      d = II(d, a, b, c, x[k + 15], S42, 0xFE2CE6E0);
+      c = II(c, d, a, b, x[k + 6], S43, 0xA3014314);
+      b = II(b, c, d, a, x[k + 13], S44, 0x4E0811A1);
+      a = II(a, b, c, d, x[k + 4], S41, 0xF7537E82);
+      d = II(d, a, b, c, x[k + 11], S42, 0xBD3AF235);
+      c = II(c, d, a, b, x[k + 2], S43, 0x2AD7D2BB);
+      b = II(b, c, d, a, x[k + 9], S44, 0xEB86D391);
+      a = addUnsigned(a, AA);
+      b = addUnsigned(b, BB);
+      c = addUnsigned(c, CC);
+      d = addUnsigned(d, DD);
+    }
+    var temp = wordToHex(a) + wordToHex(b) + wordToHex(c) + wordToHex(d);
+    return temp.toLowerCase();
+  }
+
+  // --- FreeReels Native API Client (v2.5) ---
+  const FreeReelsClient = {
+    API_BASE: 'https://apiv2.free-reels.com/frv2-api',
+    APP_SECRET: '8IAcbWyCsVhYv82S2eofRqK1DF3nNDAv',
+    APP_NAME: 'com.freereels.app',
+    APP_VERSION: '2.2.81',
+    deviceId: '',
+    sessionId: '',
+    oauthToken: '',
+    oauthSecret: '',
+
+    async ensureLogin() {
+      if (this.oauthToken && this.oauthSecret) return true;
+      try {
+        if (!this.deviceId) {
+          try {
+            this.deviceId = localStorage.getItem('huyca_fr_device_id') || '';
+          } catch(e) {}
+          if (!this.deviceId) {
+            this.deviceId = 'fr_' + Math.random().toString(36).substring(2) + Date.now().toString(36);
+            try { localStorage.setItem('huyca_fr_device_id', this.deviceId); } catch(e) {}
+          }
+        }
+        if (!this.sessionId) {
+          this.sessionId = 'sess_' + Math.random().toString(36).substring(2) + Date.now().toString(36);
+        }
+
+        const sign = md5(this.APP_SECRET + this.deviceId);
+        const loginData = {
+          device_id: this.deviceId,
+          device_name: 'samsung SM-A536E',
+          sign: sign
+        };
+
+        const resp = await fetch(`${this.API_BASE}/anonymous/login`, {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'app-name': this.APP_NAME,
+            'app-version': this.APP_VERSION,
+            'device': 'android',
+            'device-version': '33',
+            'device-id': this.deviceId,
+            'session-id': this.sessionId,
+            'language': 'vi-VN',
+            'country': 'VN'
+          },
+          body: JSON.stringify(loginData)
+        });
+
+        if (!resp.ok) return false;
+        const resJson = await resp.json();
+        if (resJson && resJson.data) {
+          this.oauthToken = resJson.data.auth_key || '';
+          this.oauthSecret = resJson.data.auth_secret || '';
+          return !!(this.oauthToken && this.oauthSecret);
+        }
+        return false;
+      } catch (e) {
+        console.warn('FreeReels login error:', e);
+        return false;
+      }
+    },
+
+    async getAuthorizedHeaders() {
+      const ok = await this.ensureLogin();
+      if (!ok) return null;
+      const ts = String(Date.now());
+      const sig = md5(`${this.APP_SECRET}&${this.oauthSecret}`);
+      return {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'User-Agent': 'Mozilla/5.0',
+        'app-name': this.APP_NAME,
+        'app-version': this.APP_VERSION,
+        'device': 'android',
+        'device-version': '33',
+        'device-id': this.deviceId,
+        'session-id': this.sessionId,
+        'language': 'vi-VN',
+        'country': 'VN',
+        'Authorization': `oauth_signature=${sig},oauth_token=${this.oauthToken},ts=${ts}`
+      };
+    },
+
+    async getDramaList(filterUrl, page) {
+      const headers = await this.getAuthorizedHeaders();
+      if (!headers) return [];
+
+      let url = '';
+      if (filterUrl.startsWith('freereels://tab_')) {
+        const tabKey = filterUrl.replace('freereels://tab_', '');
+        if (page <= 1) {
+          url = `${this.API_BASE}/homepage/v2/tab/index?tab_key=${tabKey}&position_index=10000&rec_trigger=0`;
+        } else {
+          const cursor = `offset=${(page - 1) * 10}`;
+          url = `${this.API_BASE}/foryou/feed?next=${encodeURIComponent(cursor)}`;
+        }
+      } else if (filterUrl === 'freereels://coming') {
+        if (page <= 1) {
+          url = `${this.API_BASE}/homepage/v2/tab/index?tab_key=622&position_index=10000&rec_trigger=0`;
+        } else {
+          const cursor = `offset=${(page - 1) * 10}`;
+          url = `${this.API_BASE}/foryou/feed?next=${encodeURIComponent(cursor)}`;
+        }
+      } else {
+        const cursor = page <= 1 ? '' : `offset=${(page - 1) * 10}`;
+        url = `${this.API_BASE}/foryou/feed?next=${encodeURIComponent(cursor)}`;
+      }
+
+      try {
+        const resp = await fetch(url, { headers });
+        if (!resp.ok) return [];
+        const res = await resp.json();
+        const data = res.data || {};
+        let itemsArr = [];
+
+        if (data.items && Array.isArray(data.items)) {
+          if (data.items.length > 0 && data.items[0].items && Array.isArray(data.items[0].items)) {
+            itemsArr = data.items[0].items;
+          } else {
+            itemsArr = data.items;
+          }
+        } else if (data.list && Array.isArray(data.list)) {
+          itemsArr = data.list;
+        }
+
+        const list = [];
+        itemsArr.forEach(el => {
+          if (!el || typeof el !== 'object') return;
+          const series = el.series || el.info || el;
+          const id = series.id || series.key || series.series_id || '';
+          const title = series.title || series.name || '';
+          const cover = series.cover || series.poster || '';
+          const epCount = series.episode_count || '';
+
+          if (id && title) {
+            const isDubbed = title.toLowerCase().includes('lồng tiếng') || title.toLowerCase().includes('thuyết minh');
+            list.push({
+              id: `freereels:${id}`,
+              name: title,
+              slug: `freereels:${id}`,
+              originName: isDubbed ? `${epCount} tập • Lồng Tiếng Việt` : `${epCount} tập • Phụ Đề Tiếng Việt`,
+              thumbUrl: cover,
+              posterUrl: cover,
+              year: '2026',
+              quality: isDubbed ? '🎙️ Lồng Tiếng' : '🇻🇳 Phụ Đề',
+              episodeCurrent: epCount ? `${epCount} tập` : 'Trọn bộ',
+              source: 'FREEREELS'
+            });
+          }
+        });
+
+        if (filterUrl === 'freereels://dubbed_vi') {
+          const dubbed = list.filter(m => m.name.toLowerCase().includes('lồng tiếng') || m.name.toLowerCase().includes('thuyết minh'));
+          if (dubbed.length > 0) return dubbed;
+        }
+        return list;
+      } catch (e) {
+        console.warn('FreeReels getDramaList err:', e);
+        return [];
+      }
+    },
+
+    async getDramaDetail(seriesId) {
+      const headers = await this.getAuthorizedHeaders();
+      if (!headers) return null;
+
+      const url = `${this.API_BASE}/drama/info_v2?series_id=${encodeURIComponent(seriesId)}&scene=search`;
+      try {
+        const resp = await fetch(url, { headers });
+        if (!resp.ok) return null;
+        const res = await resp.json();
+        const data = res.data || {};
+        const info = (data.info && typeof data.info === 'object') ? data.info : data;
+
+        const title = info.name || info.title || '';
+        const cover = info.cover || info.poster || '';
+        const desc = info.desc || 'Phim ngắn màn hình dọc FreeReels chất lượng cao (9:16) kèm phụ đề/thuyết minh Tiếng Việt.';
+        const epCount = info.episode_count || 'Nhiều';
+        const epArray = info.episode_list || [];
+
+        const epList = [];
+        epArray.forEach((el, idx) => {
+          const epId = el.id || el.key || '';
+          let rawName = (el.name || '').trim();
+          let epName = `Tập ${idx + 1}`;
+          if (rawName && !rawName.toLowerCase().includes(title.toLowerCase()) && rawName.length <= 20) {
+            epName = /^\d+$/.test(rawName) ? `Tập ${rawName}` : rawName;
+          }
+
+          let viSubUrl = null;
+          if (Array.isArray(el.subtitle_list)) {
+            el.subtitle_list.forEach(s => {
+              const lang = (s.language || '').toLowerCase();
+              const disp = (s.display_name || '').toLowerCase();
+              if (lang.includes('vi') || disp.includes('việt')) {
+                viSubUrl = s.vtt || s.subtitle || null;
+              }
+            });
+          }
+
+          epList.push({
+            name: epName,
+            slug: epId,
+            filename: epName,
+            link_m3u8: `freereels_unlock:${seriesId}:${epId}`,
+            subtitleUrl: viSubUrl
+          });
+        });
+
+        // Mở khóa trước tập 1 để bấm xem ngay tức thì
+        if (epList.length > 0) {
+          const unlockRes = await this.unlockEpisode(seriesId, epList[0].slug);
+          if (unlockRes && unlockRes.streamUrl) {
+            epList[0].link_m3u8 = unlockRes.streamUrl;
+            if (unlockRes.subtitleUrl) epList[0].subtitleUrl = unlockRes.subtitleUrl;
+          }
+        }
+
+        return {
+          movie: {
+            id: `freereels:${seriesId}`,
+            name: title,
+            slug: `freereels:${seriesId}`,
+            content: desc,
+            thumb_url: cover,
+            poster_url: cover,
+            year: '2026',
+            time: `${epCount} tập`,
+            quality: '9:16 Dọc HD',
+            lang: 'Vietsub / Thuyết Minh Tiếng Việt'
+          },
+          episodes: [
+            {
+              server_name: 'FreeReels VIP (Phụ Đề / Lồng Tiếng Việt)',
+              server_data: epList
+            }
+          ]
+        };
+      } catch (e) {
+        console.warn('FreeReels getDramaDetail err:', e);
+        return null;
+      }
+    },
+
+    async unlockEpisode(seriesId, episodeId) {
+      const headers = await this.getAuthorizedHeaders();
+      if (!headers) return null;
+
+      const url = `${this.API_BASE}/drama/unlock_episode`;
+      const body = JSON.stringify({ series_id: seriesId, episode_id: episodeId, lang: 'vi' });
+      try {
+        const resp = await fetch(url, { method: 'POST', headers, body });
+        if (!resp.ok) return null;
+        const res = await resp.json();
+        const data = res.data || {};
+        const stream = data.external_audio_h264_m3u8 || data.m3u8_url || data.video_url || null;
+        let viSubUrl = null;
+        if (Array.isArray(data.subtitle_list)) {
+          data.subtitle_list.forEach(s => {
+            const lang = (s.language || '').toLowerCase();
+            const disp = (s.display_name || '').toLowerCase();
+            if (lang.includes('vi') || disp.includes('việt')) {
+              viSubUrl = s.vtt || s.subtitle || null;
+            }
+          });
+        }
+        return { streamUrl: stream, subtitleUrl: viSubUrl };
+      } catch (e) {
+        console.warn('FreeReels unlockEpisode err:', e);
+        return null;
+      }
+    },
+
+    async search(keyword) {
+      const headers = await this.getAuthorizedHeaders();
+      if (!headers) return [];
+      try {
+        const url = `${this.API_BASE}/search/feed?keyword=${encodeURIComponent(keyword)}&page=1`;
+        const resp = await fetch(url, { headers });
+        if (!resp.ok) return [];
+        const res = await resp.json();
+        const items = res.data?.items || res.data?.list || [];
+        const list = [];
+        items.forEach(el => {
+          const series = el.series || el.info || el;
+          const id = series.id || series.key || '';
+          const title = series.title || series.name || '';
+          const cover = series.cover || series.poster || '';
+          const epCount = series.episode_count || '';
+          if (id && title) {
+            list.push({
+              id: `freereels:${id}`,
+              name: title,
+              slug: `freereels:${id}`,
+              originName: `${epCount} tập • Phim Ngắn FreeReels`,
+              thumbUrl: cover,
+              posterUrl: cover,
+              year: '2026',
+              quality: '9:16 HD',
+              episodeCurrent: `${epCount} tập`,
+              source: 'FREEREELS'
+            });
+          }
+        });
+        return list;
+      } catch (e) {
+        return [];
+      }
+    }
+  };
+
   let currentSubSource = 'movie_sub://kkphim';
   const SUB_SOURCES = {
+    KKPHIM: [
+      { name: "⚡ KKPhim VIP (HLS 1080p)", key: "movie_sub://kkphim" },
+      { name: "🔥 NguonC Cinema (Phim Rạp & Mới)", key: "movie_sub://nguonc" },
+      { name: "🎙️ Thuyết Minh & Lồng Tiếng", key: "movie_sub://dubbed" },
+      { name: "🍿 Phim Chiếu Rạp Bom Tấn", key: "movie_sub://cinema" }
+    ],
     ANIMEHAY: [
       { name: "⛩️ Anime Vietsub", key: "anime_sub://vietsub" },
       { name: "🐉 Hoạt Hình 3D Trung Quốc", key: "anime_sub://hh3d" },
@@ -100,21 +590,32 @@
       { name: "TV Shows", url: "https://phimapi.com/v1/api/danh-sach/tv-shows" },
       { name: "Hành Động", url: "https://phimapi.com/v1/api/the-loai/hanh-dong" },
       { name: "Cổ Trang", url: "https://phimapi.com/v1/api/the-loai/co-trang" },
+      { name: "Tình Cảm", url: "https://phimapi.com/v1/api/the-loai/tinh-cam" },
       { name: "Kinh Dị", url: "https://phimapi.com/v1/api/the-loai/kinh-di" },
-      { name: "Hài Hước", url: "https://phimapi.com/v1/api/the-loai/hai-huoc" }
+      { name: "Hàn Quốc", url: "https://phimapi.com/v1/api/quoc-gia/han-quoc" },
+      { name: "Trung Quốc", url: "https://phimapi.com/v1/api/quoc-gia/trung-quoc" },
+      { name: "Âu Mỹ", url: "https://phimapi.com/v1/api/quoc-gia/au-my" }
     ],
     'movie_sub://nguonc': [
-      { name: "NguonC Mới Cập Nhật", url: "https://phim.nguonc.com/api/films/phim-moi-cap-nhat" },
-      { name: "NguonC Phim Bộ", url: "https://phim.nguonc.com/api/films/danh-sach/phim-bo" },
-      { name: "NguonC Phim Lẻ", url: "https://phim.nguonc.com/api/films/danh-sach/phim-le" },
-      { name: "NguonC TV Shows", url: "https://phim.nguonc.com/api/films/danh-sach/tv-shows" }
+      { name: "🔥 Mới Cập Nhật", url: "https://phim.nguonc.com/api/films/phim-moi-cap-nhat" },
+      { name: "🎬 Phim Bộ Mới", url: "https://phim.nguonc.com/api/films/danh-sach/phim-bo" },
+      { name: "🍿 Phim Lẻ / Chiếu Rạp", url: "https://phim.nguonc.com/api/films/danh-sach/phim-le" },
+      { name: "📺 TV Shows", url: "https://phim.nguonc.com/api/films/danh-sach/tv-shows" },
+      { name: "🕒 Lịch Sử Xem", url: "app://history" },
+      { name: "❤️ Phim Yêu Thích", url: "app://favorites" }
     ],
     'movie_sub://dubbed': [
-      { name: "KKPhim Thuyết Minh", url: "https://phimapi.com/v1/api/danh-sach/phim-thuyet-minh" },
-      { name: "KKPhim Lồng Tiếng", url: "https://phimapi.com/v1/api/danh-sach/phim-long-tieng" }
+      { name: "🎙️ Thuyết Minh Chuẩn", url: "https://phimapi.com/v1/api/danh-sach/phim-thuyet-minh" },
+      { name: "🗣️ Lồng Tiếng", url: "https://phimapi.com/v1/api/danh-sach/phim-long-tieng" },
+      { name: "🕒 Lịch Sử Xem", url: "app://history" },
+      { name: "❤️ Phim Yêu Thích", url: "app://favorites" }
     ],
     'movie_sub://cinema': [
-      { name: "Phim Chiếu Rạp", url: "https://phimapi.com/v1/api/the-loai/phim-chieu-rap" }
+      { name: "🍿 Chiếu Rạp Mới Nhất", url: "https://phimapi.com/v1/api/danh-sach/phim-le" },
+      { name: "🇺🇸 Bom Tấn Âu Mỹ", url: "https://phimapi.com/v1/api/quoc-gia/au-my" },
+      { name: "🇰🇷 Chiếu Rạp Hàn Quốc", url: "https://phimapi.com/v1/api/quoc-gia/han-quoc" },
+      { name: "🕒 Lịch Sử Xem", url: "app://history" },
+      { name: "❤️ Phim Yêu Thích", url: "app://favorites" }
     ],
     'anime_sub://vietsub': [
       { name: "Anime Mới Cập Nhật", url: "https://phimapi.com/v1/api/quoc-gia/nhat-ban" },
@@ -354,6 +855,8 @@
     bar.scrollLeft = 0;
 
     const currentSubList = SUB_SOURCES[currentSource];
+    let filters = [];
+
     if (currentSubList && currentSubList.length > 0) {
       if (animeSubBar) {
         animeSubBar.style.display = 'flex';
@@ -373,11 +876,11 @@
           animeSubBar.appendChild(btn);
         });
       }
+      filters = SUB_FILTERS[currentSubSource] || [];
     } else {
       if (animeSubBar) animeSubBar.style.display = 'none';
+      filters = FILTERS[currentSource] || [];
     }
-
-    const filters = SUB_FILTERS[currentSubSource] || FILTERS[currentSource] || [];
     if (filters.length === 0) return;
 
     filters.forEach((f, idx) => {
@@ -476,6 +979,10 @@
       showIptvModal();
       return;
     }
+    if (filterItem.url === 'tv://schedule') {
+      showScheduleModal();
+      return;
+    }
     currentFilter = filterItem.url;
     currentPage = 1;
     loadMovies(true);
@@ -522,7 +1029,44 @@
         const allChannels = getAllChannels();
         let filtered = allChannels;
 
-                if (currentFilter === 'tv://epl') {
+                if (currentFilter === 'tv://schedule') {
+          const eplMatches = await fetchRealtimePremierLeagueMatches();
+          const matchCards = eplMatches.map(m => ({
+            id: m.id,
+            name: `${m.teamA} vs ${m.teamB}`,
+            slug: m.id,
+            originName: m.tournament,
+            thumbUrl: m.teamALogo || DEFAULT_TV_LOGO,
+            posterUrl: m.teamALogo || DEFAULT_TV_LOGO,
+            quality: m.isLive ? 'LIVE' : 'EPL',
+            episodeCurrent: m.time,
+            source: 'XEMTIVI',
+            isEplMatch: true,
+            rawMatch: m,
+            hasReminder: isMatchReminderSet(m.id)
+          }));
+          const sportsChannels = allChannels.filter(c => {
+            const grp = (c.group || '').toLowerCase();
+            const nm = (c.name || '').toLowerCase();
+            return grp.includes('bóng đá') || grp.includes('thể thao') || nm.includes('k+') || nm.includes('sport');
+          }).map(c => ({
+            id: c.id,
+            name: c.name,
+            slug: c.id,
+            originName: `[${c.group || 'Thể Thao'}]`,
+            thumbUrl: c.logo || DEFAULT_TV_LOGO,
+            posterUrl: c.logo || DEFAULT_TV_LOGO,
+            quality: '1080p',
+            episodeCurrent: 'Trực Tiếp',
+            source: 'XEMTIVI',
+            streamUrl: c.url,
+            group: c.group
+          }));
+          renderCards([...matchCards, ...sportsChannels], reset);
+          if (paginationContainer) paginationContainer.style.display = 'none';
+          isLoading = false;
+          return;
+        } else if (currentFilter === 'tv://epl') {
           // 1. Tải danh sách trận đấu Ngoại Hạng Anh FPL thời gian thực
           const eplMatches = await fetchRealtimePremierLeagueMatches();
           
@@ -702,7 +1246,60 @@
         return;
       }
 
-      // Xử lý Phim Ngắn (Tiểu Kịch & FreeReels & DramaBox)
+      // Xử lý Phim Ngắn FreeReels Bản Quyền Dọc
+      if (currentFilter.startsWith('freereels://')) {
+        let frItems = await FreeReelsClient.getDramaList(currentFilter, currentPage);
+        if (frItems.length === 0 && currentPage === 1) {
+          const kwFallback = currentFilter.includes('dubbed') ? 'lồng tiếng' : 'tổng tài';
+          try {
+            const r = await fetch(`https://phimapi.com/v1/api/tim-kiem?keyword=${encodeURIComponent(kwFallback)}&page=1`);
+            if (r.ok) {
+              const dj = await r.json();
+              const arr = (dj.data && dj.data.items) || [];
+              frItems = arr.map(o => {
+                let thumb = o.thumb_url || '';
+                if (thumb && !thumb.startsWith('http')) thumb = KKPHIM_IMG_BASE + thumb.replace(/^\//, '');
+                return {
+                  id: o._id || o.slug,
+                  name: o.name,
+                  slug: o.slug,
+                  originName: o.origin_name || '',
+                  thumbUrl: thumb,
+                  posterUrl: thumb,
+                  year: o.year || '2026',
+                  quality: 'HD Vietsub',
+                  episodeCurrent: o.episode_current || 'Trọn bộ',
+                  source: 'FREEREELS'
+                };
+              });
+            }
+          } catch(e) {}
+        }
+        renderCards(frItems, reset);
+        if (paginationContainer) {
+          if (frItems.length > 0) {
+            paginationContainer.style.display = 'flex';
+            if (paginationInfo) paginationInfo.textContent = `Đang hiển thị ${currentMoviesList.length} phim ngắn (Trang ${currentPage})`;
+            if (btnLoadMore) {
+              btnLoadMore.style.display = 'inline-flex';
+              const nextPageEl = document.getElementById('nextPageNum');
+              if (nextPageEl) nextPageEl.textContent = currentPage + 1;
+            }
+            if (spinner) spinner.style.display = 'none';
+            if (reset && currentPage === 1 && frItems.length >= 8) {
+              setTimeout(() => { if (!isLoading) loadMoreMovies(); }, 250);
+            }
+          } else {
+            if (paginationInfo) paginationInfo.textContent = `Đã tải toàn bộ ${currentMoviesList.length} phim ngắn trong danh mục này.`;
+            if (btnLoadMore) btnLoadMore.style.display = 'none';
+            if (spinner) spinner.style.display = 'none';
+          }
+        }
+        isLoading = false;
+        return;
+      }
+
+      // Xử lý Tiểu Kịch Vietsub & DramaBox
       let fetchUrl = '';
       if (currentFilter.startsWith('short_filter://') || currentFilter.startsWith('short_dramabox://')) {
         let kw = 'tổng tài';
@@ -713,8 +1310,6 @@
         if (currentFilter.includes('thieugia')) kw = 'thiếu gia';
         if (currentFilter.includes('cotrang')) kw = 'cung đấu';
         fetchUrl = `https://phimapi.com/v1/api/tim-kiem?keyword=${encodeURIComponent(kw)}&page=${currentPage}`;
-      } else if (currentFilter.startsWith('freereels://')) {
-        fetchUrl = `https://phimapi.com/v1/api/the-loai/phim-ngan?page=${currentPage}`;
       } else {
         const sep = currentFilter.includes('?') ? '&' : '?';
         fetchUrl = `${currentFilter}${sep}page=${currentPage}`;
@@ -767,6 +1362,13 @@
             if (nextPageEl) nextPageEl.textContent = currentPage + 1;
           }
           if (spinner) spinner.style.display = 'none';
+
+          // Đồng bộ với Android TV: Tải trước trang 2 ở lần đầu để có sẵn nhiều phim cuộn mượt
+          if (reset && currentPage === 1 && mapped.length >= 10 && currentSource !== 'XEMTIVI' && !currentFilter.startsWith('app://')) {
+            setTimeout(() => {
+              if (!isLoading) loadMoreMovies();
+            }, 300);
+          }
         } else {
           if (paginationInfo) paginationInfo.textContent = `Đã tải toàn bộ ${currentMoviesList.length} phim trong danh mục này.`;
           if (btnLoadMore) btnLoadMore.style.display = 'none';
@@ -1300,7 +1902,66 @@
     updateDetailFavButton(movie);
 
     try {
-      if (movie.slug && movie.slug.startsWith('nguonc:')) {
+      if (movie.slug && movie.slug.startsWith('freereels:')) {
+        const realId = movie.slug.replace('freereels:', '');
+        const data = await FreeReelsClient.getDramaDetail(realId);
+        if (!data) throw new Error('FreeReels detail error');
+        const m = data.movie;
+        currentPlayingDetail = data;
+
+        document.getElementById('detailDesc').textContent = m.content || 'Phim ngắn dọc FreeReels HD kèm phụ đề tiếng Việt.';
+        const tags = document.getElementById('detailTags');
+        tags.innerHTML = `
+          <span class="tag-badge">Chất lượng: ${m.quality || '9:16 HD'}</span>
+          <span class="tag-badge">Thời lượng: ${m.time || 'Nhiều tập'}</span>
+          <span class="tag-badge">Ngôn ngữ: ${m.lang || 'Vietsub'}</span>
+          <span class="tag-badge">Thể loại: Phim Ngắn Dọc</span>
+        `;
+
+        const epGrid = document.getElementById('episodesGrid');
+        epGrid.innerHTML = '';
+
+        const server = data.episodes[0];
+        const items = server.server_data || [];
+        items.forEach((ep, idx) => {
+          const btn = document.createElement('button');
+          btn.className = 'btn-episode focusable';
+          btn.textContent = ep.name;
+          btn.addEventListener('click', async () => {
+            modal.style.display = 'none';
+            let stream = ep.link_m3u8;
+            let sub = ep.subtitleUrl;
+            if (stream && stream.startsWith('freereels_unlock:')) {
+              showToast('🔓 Đang mở khóa tập...');
+              const unl = await FreeReelsClient.unlockEpisode(realId, ep.slug);
+              if (unl && unl.streamUrl) {
+                stream = unl.streamUrl;
+                if (unl.subtitleUrl) sub = unl.subtitleUrl;
+              }
+            }
+            playVideo(stream, movie.name, ep.name, movie, data, idx, 0, sub);
+          });
+          epGrid.appendChild(btn);
+        });
+
+        document.getElementById('btnPlayFirst').onclick = async () => {
+          modal.style.display = 'none';
+          const firstEp = items[0];
+          if (firstEp) {
+            let stream = firstEp.link_m3u8;
+            let sub = firstEp.subtitleUrl;
+            if (stream && stream.startsWith('freereels_unlock:')) {
+              showToast('🔓 Đang mở khóa tập 1...');
+              const unl = await FreeReelsClient.unlockEpisode(realId, firstEp.slug);
+              if (unl && unl.streamUrl) {
+                stream = unl.streamUrl;
+                if (unl.subtitleUrl) sub = unl.subtitleUrl;
+              }
+            }
+            playVideo(stream, movie.name, firstEp.name, movie, data, 0, 0, sub);
+          }
+        };
+      } else if (movie.slug && movie.slug.startsWith('nguonc:')) {
         const realSlug = movie.slug.replace('nguonc:', '');
         const resp = await fetch(`https://phim.nguonc.com/api/film/${realSlug}`);
         if (!resp.ok) throw new Error('NguonC detail error');
@@ -1437,7 +2098,11 @@
   }
 
   // --- Video Player (Native WebOS Hardware Decoding & HLS Fallback) ---
-  function playVideo(streamUrl, title, subtitle, movie, detail, epIndex, serverIndex, isTv = false) {
+  function playVideo(streamUrl, title, subtitle, movie, detail, epIndex, serverIndex, isTv = false, customSubtitleUrl = null) {
+    if (typeof isTv === 'string') {
+      customSubtitleUrl = isTv;
+      isTv = false;
+    }
     if (!streamUrl) {
       showToast('Không tìm thấy link luồng phát video!');
       return;
@@ -1507,12 +2172,13 @@
           currentEp = detail.items[epIndex];
         }
       }
-      if (currentEp && currentEp.subtitleUrl) {
+      const subUrl = customSubtitleUrl || (currentEp && currentEp.subtitleUrl);
+      if (subUrl) {
         const track = document.createElement('track');
         track.kind = 'subtitles';
         track.srclang = 'vi';
         track.label = 'Tiếng Việt';
-        track.src = currentEp.subtitleUrl;
+        track.src = subUrl;
         track.default = true;
         video.appendChild(track);
       }
@@ -1637,6 +2303,32 @@
     video.currentTime = Math.max(0, video.currentTime - 10);
     resetOverlayTimer();
   });
+
+  const btnNextEpisode = document.getElementById('btnNextEpisode');
+  if (btnNextEpisode) {
+    btnNextEpisode.addEventListener('click', async () => {
+      if (currentPlayingDetail && currentPlayingDetail.episodes) {
+        const eps = currentPlayingDetail.episodes[currentServerIndex || 0].server_data;
+        if (currentEpisodeIndex + 1 < eps.length) {
+          const nextEp = eps[currentEpisodeIndex + 1];
+          let stream = nextEp.link_m3u8;
+          let sub = nextEp.subtitleUrl;
+          if (stream && stream.startsWith('freereels_unlock:')) {
+            showToast('🔓 Đang mở khóa tập tiếp...');
+            const seriesId = (currentPlayingMovie.id || '').replace('freereels:', '');
+            const unl = await FreeReelsClient.unlockEpisode(seriesId, nextEp.slug);
+            if (unl && unl.streamUrl) {
+              stream = unl.streamUrl;
+              if (unl.subtitleUrl) sub = unl.subtitleUrl;
+            }
+          }
+          playVideo(stream, currentPlayingMovie.name, nextEp.name, currentPlayingMovie, currentPlayingDetail, currentEpisodeIndex + 1, currentServerIndex, false, sub);
+        } else {
+          showToast('Đây là tập cuối cùng!');
+        }
+      }
+    });
+  }
 
   document.getElementById('btnForward').addEventListener('click', () => {
     video.currentTime = Math.min(video.duration || 0, video.currentTime + 10);
@@ -1892,7 +2584,37 @@
       });
     });
 
-    // 2. Search in KKPhim
+    // 2. Search in FreeReels
+    try {
+      const frResults = await FreeReelsClient.search(kw);
+      frResults.forEach(item => results.push(item));
+    } catch(e) {}
+
+    // 3. Search in NguonC
+    try {
+      const respNc = await fetch(`https://phim.nguonc.com/api/films/search?keyword=${encodeURIComponent(kw)}`);
+      if (respNc.ok) {
+        const dNc = await respNc.json();
+        const itemsNc = dNc.items || [];
+        itemsNc.forEach(o => {
+          let thumb = o.thumb_url || '';
+          let poster = o.poster_url || thumb;
+          results.push({
+            id: `nguonc:${o.slug}`,
+            name: o.name,
+            slug: `nguonc:${o.slug}`,
+            originName: o.original_name || o.origin_name || '',
+            thumbUrl: thumb,
+            posterUrl: poster || thumb,
+            year: o.year || '2026',
+            quality: (o.quality || 'HD') + (o.language ? ` ${o.language}` : ''),
+            source: 'KKPHIM'
+          });
+        });
+      }
+    } catch(e) {}
+
+    // 4. Search in KKPhim
     try {
       const resp = await fetch(`https://phimapi.com/v1/api/tim-kiem?keyword=${encodeURIComponent(kw)}`);
       if (resp.ok) {
