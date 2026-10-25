@@ -1,12 +1,12 @@
 {
-  "versionCode": 16,
-  "versionName": "2.5",
-  "title": "Huy Cá v2.5 - Đồng Bộ Toàn Diện Windows & Android, Phục Hồi Bộ Lọc Tivi & Đa Nguồn Phim Ngắn",
-  "changelog": "- Đồng bộ toàn diện Windows PC & LG webOS với Android (Mobile & TV): Khắc phục 100% các khác biệt tính năng giữa các nền tảng.\n- Phục hồi hoàn toàn thanh lọc thể loại cho mục XEM TIVI: Tách bạch tuyệt đối cơ chế phân nhóm Sub-sources và Filters, hiển thị đầy đủ 17 chuyên mục truyền hình (VTV, VTVcab, SCTV, Ngoại Hạng Anh EPL, Cúp C1, Thể thao ESPN, Đua xe Võ thuật, Kênh Quốc tế, Rạp phim...).\n- Khắc phục triệt để lỗi trang chỉ tải được 36 phim: Tích hợp đầy đủ 4 Nguồn Con Phim (⚡ KKPhim VIP HLS 1080p, 🔥 NguonC Cinema Đa Dạng, 🎙️ Thuyết Minh & Lồng Tiếng, 🍿 Phim Chiếu Rạp Bom Tấn), sửa lỗi link 404 phim chiếu rạp.\n- Tích hợp FreeReels Native API với mã hóa chữ ký HMAC MD5 chuẩn xác trên Web: Tải trực tiếp hàng ngàn bộ phim ngắn màn hình dọc (9:16) từ máy chủ FreeReels, hỗ trợ đầy đủ các tab (Thịnh Hành, Lồng Tiếng Việt, Mới Nhất, Dành Cho Nữ, Dành Cho Nam, Hoạt Hình, Sắp Chiếu).\n- Tự động mở khóa tập và đính kèm Phụ đề Tiếng Việt rõ nét trên Player: Hỗ trợ chuyển tập kế tiếp mượt mà, giải mã m3u8 HLS trực tiếp.\n- Cơ chế Tải Trước Trang 2 (Auto Pre-load) khi chọn danh mục: Tự động tải sẵn 48+ phim ngay lần mở đầu tiên, giúp màn hình máy tính luôn tràn đầy nội dung và cuộn mượt mà không bị khựng.\n- Nâng cấp Tìm Kiếm Đa Nguồn đồng thời: Quét toàn diện trên cả Kênh TV, Phim Ngắn FreeReels, NguonC Cinema và KKPhim.",
+  "versionCode": 17,
+  "versionName": "2.6",
+  "title": "Huy Cá v2.6 - Icon 3D Khủng Long Mới, Tự Động Tiếp Tục Xem Đúng Tập & Vị Trí Dở Dang, Nút Xóa Lịch Sử Chữ Đen Nền Vàng",
+  "changelog": "- Cập nhật biểu tượng ứng dụng 3D Khủng Long Bạo Chúa xé toạc màn hình mới trên toàn bộ 4 nền tảng (Android TV, Android Mobile, Windows PC, LG webOS).\n- Tự động khôi phục đúng tập và đúng vị trí đang xem dở (Resume Playback): Tự động lưu tiến trình xem và khi mở lại phim, lập tức phát đúng tập dở dang và tua đến đúng phút/giây đã dừng lại, không cần phải tua thủ công hay bị ép về tập 1.\n- Nâng cấp nút 'Xóa Lịch Sử' trên Android TV: Thiết kế chữ đen tuyền trên nền vàng kim nổi bật, độ tương phản cao, dễ nhìn từ xa.\n- Tinh gọn các thanh banner và danh mục trên TV, hiển thị nhiều hàng phim hơn.\n- Xóa sạch toàn bộ quảng cáo chèn trong luồng phát video trên tất cả các nguồn phim.",
   "isMaintenanceLocked": false,
   "maintenanceMessage": "Hệ thống đang bảo trì nội bộ định kỳ. Vui lòng quay lại sau hoặc liên hệ Quản trị viên Huy Cá để biết thêm chi tiết!",
-  "windowsZipUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v2.5/HuyCa_Windows_v2.5.zip",
-  "mobileApkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v2.5/HuyCaBuonCa_Mobile_v2.5.apk",
-  "tvApkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v2.5/HuyCaBuonCa_TV_v2.5.apk",
-  "lgIpkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v2.5/HuyCaBuonCa_LG_webOS_v2.5.ipk"
+  "windowsZipUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v2.6/HuyCa_Windows_v2.6.zip",
+  "mobileApkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v2.6/HuyCaBuonCa_Mobile_v2.6.apk",
+  "tvApkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v2.6/HuyCaBuonCa_TV_v2.6.apk",
+  "lgIpkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v2.6/HuyCaBuonCa_LG_webOS_v2.6.ipk"
 }
