@@ -1,35 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- Khi bấm vào (Pressed) - Hiệu ứng 3D nảy nổi lên sáng bóng -->
+    <!-- Khi bấm vào (Pressed) - Hiệu ứng 3D sáng bóng -->
     <item android:state_pressed="true">
         <shape android:shape="rectangle">
             <gradient android:startColor="#FFF9C4" android:centerColor="#FFD700" android:endColor="#FFA000" android:angle="90" />
-            <stroke android:width="2dp" android:color="#FFFFFF" />
-            <corners android:radius="10dp" />
+            <stroke android:width="1.5dp" android:color="#FFFFFF" />
+            <corners android:radius="6dp" />
         </shape>
     </item>
     <!-- Khi được chọn (Selected) - Nền vàng kim 3D rực rỡ -->
     <item android:state_selected="true">
         <shape android:shape="rectangle">
             <gradient android:startColor="#FFE082" android:centerColor="#FFD700" android:endColor="#FF9100" android:angle="90" />
-            <stroke android:width="1.5dp" android:color="#FFFFFF" />
-            <corners android:radius="10dp" />
+            <stroke android:width="1.2dp" android:color="#FFFFFF" />
+            <corners android:radius="6dp" />
         </shape>
     </item>
     <!-- Khi focus (D-Pad trên TV hoặc Remote) -->
     <item android:state_focused="true">
         <shape android:shape="rectangle">
             <gradient android:startColor="#FFD700" android:endColor="#FF6F00" android:angle="90" />
-            <stroke android:width="2.5dp" android:color="#FFFFFF" />
-            <corners android:radius="10dp" />
+            <stroke android:width="2dp" android:color="#FFFFFF" />
+            <corners android:radius="6dp" />
         </shape>
     </item>
-    <!-- Trạng thái mặc định - Nền tối dập nổi 3D với viền vi mô -->
+    <!-- Trạng thái mặc định - Nền tối dập nổi 3D gọn gàng -->
     <item>
         <shape android:shape="rectangle">
             <gradient android:startColor="#222C3E" android:endColor="#151D2C" android:angle="90" />
             <stroke android:width="1dp" android:color="#3A4A68" />
-            <corners android:radius="10dp" />
+            <corners android:radius="6dp" />
         </shape>
     </item>
 </selector>

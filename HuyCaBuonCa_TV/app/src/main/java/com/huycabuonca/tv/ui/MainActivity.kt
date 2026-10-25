@@ -254,6 +254,8 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+        private fun dpToPx(dp: Int): Int = (dp * resources.displayMetrics.density).toInt()
+
     private var currentSubSource: String = ""
 
     private fun setupSubSources(subSources: List<FilterItem>) {
@@ -266,16 +268,21 @@ class MainActivity : AppCompatActivity() {
             val subBtn = Button(this).apply {
                 layoutParams = LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.WRAP_CONTENT,
-                    resources.getDimensionPixelSize(android.R.dimen.app_icon_size).coerceAtMost(90)
+                    dpToPx(24)
                 ).apply {
-                    setMargins(0, 0, 16, 0)
+                    setMargins(0, 0, dpToPx(5), 0)
                 }
+                minHeight = 0
+                minimumHeight = 0
+                minWidth = 0
+                minimumWidth = 0
+                setPadding(dpToPx(8), dpToPx(1), dpToPx(8), dpToPx(1))
                 setBackgroundResource(R.drawable.bg_btn_selector)
                 isFocusable = true
                 TvFocusUtil.setupFocusScale(this)
                 text = sub.title
                 setTextColor(textColors)
-                textSize = 11f
+                textSize = 9.5f
                 typeface = Typeface.DEFAULT_BOLD
                 isSelected = (index == 0)
 
@@ -309,16 +316,21 @@ class MainActivity : AppCompatActivity() {
             val filterBtn = Button(this).apply {
                 layoutParams = LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.WRAP_CONTENT,
-                    resources.getDimensionPixelSize(android.R.dimen.app_icon_size).coerceAtMost(90)
+                    dpToPx(24)
                 ).apply {
-                    setMargins(0, 0, 16, 0)
+                    setMargins(0, 0, dpToPx(5), 0)
                 }
+                minHeight = 0
+                minimumHeight = 0
+                minWidth = 0
+                minimumWidth = 0
+                setPadding(dpToPx(8), dpToPx(1), dpToPx(8), dpToPx(1))
                 setBackgroundResource(R.drawable.bg_btn_selector)
                 isFocusable = true
                 TvFocusUtil.setupFocusScale(this)
                 text = filter.title
                 setTextColor(textColors)
-                textSize = 12f
+                textSize = 9.5f
                 typeface = Typeface.DEFAULT_BOLD
                 isSelected = (index == 0)
 
@@ -348,16 +360,21 @@ class MainActivity : AppCompatActivity() {
             val filterBtn = Button(this).apply {
                 layoutParams = LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.WRAP_CONTENT,
-                    resources.getDimensionPixelSize(android.R.dimen.app_icon_size).coerceAtMost(90)
+                    dpToPx(24)
                 ).apply {
-                    setMargins(0, 0, 16, 0)
+                    setMargins(0, 0, dpToPx(5), 0)
                 }
+                minHeight = 0
+                minimumHeight = 0
+                minWidth = 0
+                minimumWidth = 0
+                setPadding(dpToPx(8), dpToPx(1), dpToPx(8), dpToPx(1))
                 setBackgroundResource(R.drawable.bg_btn_selector)
                 isFocusable = true
                 TvFocusUtil.setupFocusScale(this)
                 text = filter.title
                 setTextColor(textColors)
-                textSize = 12f
+                textSize = 9.5f
                 typeface = Typeface.DEFAULT_BOLD
                 isSelected = (index == 0)
 
