@@ -230,18 +230,21 @@
             <Button
                 android:id="@+id/btnClearHistory"
                 android:layout_width="wrap_content"
-                android:layout_height="18dp"
+                android:layout_height="20dp"
                 android:minHeight="0dp"
                 android:minWidth="0dp"
-                android:paddingStart="6dp"
-                android:paddingEnd="6dp"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
                 android:paddingTop="0dp"
                 android:paddingBottom="0dp"
-                android:background="@drawable/bg_btn_secondary"
+                android:background="@drawable/bg_btn_clear_history"
+                app:backgroundTint="@null"
+                android:stateListAnimator="@animator/elevation_3d"
                 android:focusable="true"
-                android:text="Xóa Lịch Sử"
-                android:textColor="@color/text_secondary"
-                android:textSize="8sp" />
+                android:text="🗑️ XÓA LỊCH SỬ"
+                android:textColor="#000000"
+                android:textSize="9sp"
+                android:textStyle="bold" />
         </LinearLayout>
 
         <androidx.recyclerview.widget.RecyclerView

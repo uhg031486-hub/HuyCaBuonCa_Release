@@ -9,7 +9,7 @@ def build_ar_header(name, size, mtime=None, mode="100644", uid="0", gid="0"):
     header = f"{name:<16}{str(mtime):<12}{uid:<6}{gid:<6}{mode:<8}{str(size):<10}`\n"
     return header.encode('ascii')
 
-def package_webos_ipk(source_dir, output_ipk, version="2.5.0", app_id="com.huycabuonca.tv.lg"):
+def package_webos_ipk(source_dir, output_ipk, version="2.6.0", app_id="com.huycabuonca.tv.lg"):
     # 1. debian-binary
     debian_binary = b"2.0\n"
 
@@ -96,8 +96,8 @@ webOS-Packager-Version: x.y.x
     print(f"Created {output_ipk} ({round(os.path.getsize(output_ipk)/1024, 2)} KB)")
 
 if __name__ == "__main__":
-    package_webos_ipk("HuyCaBuonCa_LG_webOS", "com.huycabuonca.tv.lg_2.5.0_all.ipk", "2.5.0")
+    package_webos_ipk("HuyCaBuonCa_LG_webOS", "com.huycabuonca.tv.lg_2.6.0_all.ipk", "2.6.0")
     import shutil
-    shutil.copyfile("com.huycabuonca.tv.lg_2.5.0_all.ipk", "HuyCaBuonCa_LG_webOS_v2.5.ipk")
-    shutil.copyfile("com.huycabuonca.tv.lg_2.5.0_all.ipk", "HuyCa_LG_webOS_v2.5.ipk")
+    shutil.copyfile("com.huycabuonca.tv.lg_2.6.0_all.ipk", "HuyCaBuonCa_LG_webOS_v2.6.ipk")
+    shutil.copyfile("com.huycabuonca.tv.lg_2.6.0_all.ipk", "HuyCa_LG_webOS_v2.6.ipk")
     print("WebOS packaging complete!")

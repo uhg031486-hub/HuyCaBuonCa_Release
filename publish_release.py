@@ -25,8 +25,8 @@ def get_token():
 TOKEN = get_token()
 REPO_OWNER = "uhg031486-hub"
 REPO_NAME = "HuyCaBuonCa_Release"
-TAG = "v2.5"
-TITLE = "Huy Cá v2.5 - Đồng Bộ Toàn Diện Windows & Android, Phục Hồi Bộ Lọc Tivi & Đa Nguồn Phim Ngắn"
+TAG = "v2.6"
+TITLE = "Huy Cá v2.6 - Icon 3D Khủng Long Mới, Tối Ưu Tương Phản & Giao Diện Tinh Gọn Trên Mọi Thiết Bị"
 
 HEADERS = {
     "Authorization": f"token {TOKEN}",
@@ -58,7 +58,7 @@ def step2_update_version_json():
 
     b64_content = base64.b64encode(local_content.encode("utf-8")).decode("utf-8")
     payload = {
-        "message": "Nâng cấp version.json lên v2.5 (Huy Cá: Ngoại Hạng Anh FPL, 4 Server, Chuông báo giờ đá, Vệ Tinh Quốc Tế)",
+        "message": "Nâng cấp version.json lên v2.6 (Huy Cá: Ngoại Hạng Anh FPL, 4 Server, Chuông báo giờ đá, Vệ Tinh Quốc Tế)",
         "content": b64_content,
         "branch": "main"
     }
@@ -113,13 +113,13 @@ def step4_upload_assets(release):
     existing_assets = {a["name"]: a["id"] for a in release.get("assets", [])}
 
     files_to_upload = [
-        ("HuyCa_Windows_v2.5.zip", "application/zip"),
-        ("HuyCaBuonCa_Mobile_v2.5.apk", "application/vnd.android.package-archive"),
-        ("HuyCa_Mobile_v2.5.apk", "application/vnd.android.package-archive"),
-        ("HuyCaBuonCa_TV_v2.5.apk", "application/vnd.android.package-archive"),
-        ("HuyCa_TV_v2.5.apk", "application/vnd.android.package-archive"),
-        ("HuyCaBuonCa_LG_webOS_v2.5.ipk", "application/octet-stream"),
-        ("HuyCa_LG_webOS_v2.5.ipk", "application/octet-stream"),
+        ("HuyCa_Windows_v2.6.zip", "application/zip"),
+        ("HuyCaBuonCa_Mobile_v2.6.apk", "application/vnd.android.package-archive"),
+        ("HuyCa_Mobile_v2.6.apk", "application/vnd.android.package-archive"),
+        ("HuyCaBuonCa_TV_v2.6.apk", "application/vnd.android.package-archive"),
+        ("HuyCa_TV_v2.6.apk", "application/vnd.android.package-archive"),
+        ("HuyCaBuonCa_LG_webOS_v2.6.ipk", "application/octet-stream"),
+        ("HuyCa_LG_webOS_v2.6.ipk", "application/octet-stream"),
     ]
 
     for filename, content_type in files_to_upload:
