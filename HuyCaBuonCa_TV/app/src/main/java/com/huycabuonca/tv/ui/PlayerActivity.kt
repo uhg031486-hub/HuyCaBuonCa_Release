@@ -198,9 +198,15 @@ class PlayerActivity : AppCompatActivity() {
         }
 
         val mediaItem = mediaItemBuilder.build()
-        val mediaSourceFactory = androidx.media3.exoplayer.source.DefaultMediaSourceFactory(this)
-            .setDataSourceFactory(dataSourceFactory)
-        val mediaSource = mediaSourceFactory.createMediaSource(mediaItem)
+        val mediaSource = if (url.contains(".m3u8", ignoreCase = true) || url.contains("m3u8", ignoreCase = true)) {
+            androidx.media3.exoplayer.hls.HlsMediaSource.Factory(dataSourceFactory)
+                .setPlaylistParserFactory(com.huycabuonca.tv.util.AdBlockPlaylistParserFactory())
+                .createMediaSource(mediaItem)
+        } else {
+            androidx.media3.exoplayer.source.DefaultMediaSourceFactory(this)
+                .setDataSourceFactory(dataSourceFactory)
+                .createMediaSource(mediaItem)
+        }
 
         val trackSelector = androidx.media3.exoplayer.trackselection.DefaultTrackSelector(this).apply {
             setParameters(

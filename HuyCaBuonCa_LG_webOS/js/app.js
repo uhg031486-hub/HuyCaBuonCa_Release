@@ -2097,6 +2097,97 @@
     setupQuickZapping(movie);
   }
 
+  // 🛡️ BỘ LỌC QUẢNG CÁO HLS M3U8 TỰ ĐỘNG (Xóa sạch 100% video quảng cáo cờ bạc, cá độ, 18+ chèn ngang)
+  function stripAdsFromM3U8(manifestText) {
+    if (!manifestText || typeof manifestText !== 'string') return manifestText;
+    if (!manifestText.includes('#EXT-X-DISCONTINUITY') && !manifestText.includes('convertv8') && !manifestText.includes('/v8/')) {
+      return manifestText;
+    }
+
+    const isAdUri = (uri) => {
+      if (!uri) return false;
+      const s = uri.toLowerCase();
+      return s.includes('convertv8') ||
+             s.includes('/v8/') ||
+             /segment_\d+\.ts/.test(s) ||
+             s.includes('/ads/') ||
+             s.includes('/ad/') ||
+             s.includes('/advert') ||
+             s.includes('/quangcao') ||
+             s.includes('/promo/') ||
+             s.includes('1xbet') ||
+             s.includes('kubet') ||
+             s.includes('shbet') ||
+             s.includes('hi88') ||
+             s.includes('789bet') ||
+             s.includes('okvip') ||
+             s.includes('jun88') ||
+             s.includes('new88') ||
+             s.includes('f8bet') ||
+             s.includes('fb88') ||
+             s.includes('sv388') ||
+             s.includes('gamebai') ||
+             s.includes('taixiu') ||
+             s.includes('nohu');
+    };
+
+    const lines = manifestText.split(/\r?\n/);
+    const out = [];
+    let pendingTags = [];
+    let adBlockActive = false;
+
+    for (let i = 0; i < lines.length; i++) {
+      const raw = lines[i];
+      const line = raw.trim();
+      if (!line) continue;
+
+      if (line.startsWith('#')) {
+        pendingTags.push(line);
+      } else {
+        if (isAdUri(line)) {
+          // Bỏ qua segment quảng cáo và các tag đi kèm
+          pendingTags = [];
+          adBlockActive = true;
+        } else {
+          if (adBlockActive) {
+            // Vừa thoát khỏi khối quảng cáo: loại bỏ tag ranh giới DISCONTINUITY và KEY:METHOD=NONE
+            pendingTags = pendingTags.filter(t => t !== '#EXT-X-DISCONTINUITY' && !t.startsWith('#EXT-X-KEY:METHOD=NONE'));
+            adBlockActive = false;
+          }
+          for (const t of pendingTags) {
+            out.push(t);
+          }
+          pendingTags = [];
+          out.push(line);
+        }
+      }
+    }
+
+    for (const t of pendingTags) {
+      if (t !== '#EXT-X-DISCONTINUITY' && !t.startsWith('#EXT-X-KEY:METHOD=NONE')) {
+        out.push(t);
+      }
+    }
+
+    return out.join('\n');
+  }
+
+  function getHlsPlaylistLoader() {
+    if (!window.Hls || !Hls.DefaultConfig || !Hls.DefaultConfig.loader) return undefined;
+    return class extends Hls.DefaultConfig.loader {
+      load(context, config, callbacks) {
+        const origSuccess = callbacks.onSuccess;
+        callbacks.onSuccess = function(response, stats, ctx, networkDetails) {
+          if (response && typeof response.data === 'string') {
+            response.data = stripAdsFromM3U8(response.data);
+          }
+          origSuccess.call(this, response, stats, ctx, networkDetails);
+        };
+        super.load(context, config, callbacks);
+      }
+    };
+  }
+
   // --- Video Player (Native WebOS Hardware Decoding & HLS Fallback) ---
   function playVideo(streamUrl, title, subtitle, movie, detail, epIndex, serverIndex, isTv = false, customSubtitleUrl = null) {
     if (typeof isTv === 'string') {
@@ -2188,12 +2279,14 @@
 
     if (window.Hls && Hls.isSupported() && streamUrl.includes('.m3u8')) {
       // 🚀 HLS.JS: Tương thích 100% với Windows PC, Edge Chromium & WebView2
+      const pLoaderClass = getHlsPlaylistLoader();
       hlsInstance = new Hls({
         maxBufferLength: 30,
         maxMaxBufferLength: 60,
         maxBufferSize: 60 * 1024 * 1024,
         lowLatencyMode: false,
-        enableWorker: true
+        enableWorker: true,
+        ...(pLoaderClass ? { pLoader: pLoaderClass } : {})
       });
       hlsInstance.loadSource(streamUrl);
       hlsInstance.attachMedia(video);
