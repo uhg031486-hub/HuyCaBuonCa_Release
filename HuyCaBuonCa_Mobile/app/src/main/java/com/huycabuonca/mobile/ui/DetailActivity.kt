@@ -1071,8 +1071,27 @@ class DetailActivity : AppCompatActivity() {
         binding.txtEpisodesHeader.text = "Danh sách tập (${currentEpisodes.size} tập):"
 
         if (currentEpisodes.isNotEmpty()) {
-            currentEpisodeIndex = 0
-            playEpisode(currentEpisodes[0])
+            val historyItem = com.huycabuonca.mobile.util.WatchHistoryManager.getHistoryForMovie(this, movieItem?.slug ?: "")
+                ?: com.huycabuonca.mobile.util.WatchHistoryManager.getHistoryForMovie(this, movieItem?.id ?: "")
+            
+            var targetIdx = 0
+            if (historyItem != null && historyItem.episodeName.isNotEmpty()) {
+                val foundIdx = currentEpisodes.indexOfFirst {
+                    it.name.equals(historyItem.episodeName, ignoreCase = true) ||
+                    it.slug.equals(historyItem.episodeName, ignoreCase = true)
+                }
+                if (foundIdx != -1) {
+                    targetIdx = foundIdx
+                } else {
+                    val epNum = Regex("""\d+""").find(historyItem.episodeName)?.value
+                    if (epNum != null) {
+                        val numIdx = currentEpisodes.indexOfFirst { Regex("""\d+""").find(it.name)?.value == epNum }
+                        if (numIdx != -1) targetIdx = numIdx
+                    }
+                }
+            }
+            currentEpisodeIndex = targetIdx
+            playEpisode(currentEpisodes[currentEpisodeIndex])
         }
     }
 
@@ -1365,7 +1384,14 @@ class DetailActivity : AppCompatActivity() {
         val movie = movieItem ?: return 0L
         val ep = currentEpisodes.getOrNull(currentEpisodeIndex) ?: return 0L
         val sp = getSharedPreferences("vbook_playback_prefs", Context.MODE_PRIVATE)
-        return sp.getLong("resume_${movie.slug}_ep_${ep.slug}", 0L)
+        val pos = sp.getLong("resume_${movie.slug}_ep_${ep.slug}", 0L)
+        if (pos > 5000L) return pos
+
+        val hist = com.huycabuonca.mobile.util.WatchHistoryManager.getHistoryForMovie(this, movie.slug.ifEmpty { movie.id })
+        if (hist != null && (hist.episodeName.equals(ep.name, ignoreCase = true) || hist.episodeName.isEmpty())) {
+            return hist.positionMs
+        }
+        return 0L
     }
 
     private fun formatTime(millis: Long): String {

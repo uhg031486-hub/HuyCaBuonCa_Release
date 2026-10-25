@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Huy Cá - Kho Phim & Truyền Hình Trực Tuyến Đẳng Cấp</title>
+  <link rel="icon" type="image/png" href="icon_256.png">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Header Bar -->
+  <header class="header-bar">
+    <div class="brand-section">
+      <div class="brand-badge">
+        <img src="icon_256.png" class="brand-logo" alt="Logo">
+        <span>HUY CÁ</span>
+      </div>
+      <div class="brand-subtitle">Kho Phim & Truyền Hình Đẳng Cấp • Phiên Bản Windows PC v2.5</div>
+    </div>
+    <div class="header-actions">
+      <button id="btnSearch" class="btn-header focusable" tabindex="1">🔍 Tìm Kiếm</button>
+      <button id="btnScheduleHeader" class="btn-header focusable" tabindex="2">⚽ Lịch Thi Đấu</button>
+      <button id="btnFavHeader" class="btn-header focusable" tabindex="3">⭐ Yêu Thích</button>
+      <button id="btnHistoryHeader" class="btn-header focusable" tabindex="4">🕒 Lịch Sử</button>
+      <button id="btnUpdateHeader" class="btn-header focusable" tabindex="5">🔄 Cập Nhật</button>
+      <div id="clockDisplay" class="clock-display">00:00</div>
+    </div>
+  </header>
+
+  <!-- 4 Nguồn Lớn (Căn đều chuẩn TV) -->
+  <section class="sources-bar">
+    <button id="srcKKPhim" class="btn-source focusable active" data-source="KKPHIM" tabindex="10">🎬 PHIM</button>
+    <button id="srcAnimeHay" class="btn-source focusable" data-source="ANIMEHAY" tabindex="11">⛩️ ANIME</button>
+    <button id="srcXemTiVi" class="btn-source focusable" data-source="XEMTIVI" tabindex="12">📺 XEM TIVI</button>
+    <button id="srcPhimNgan" class="btn-source focusable" data-source="FREEREELS" tabindex="13">🎬 PHIM NGẮN</button>
+  </section>
+
+  <!-- Thanh Nguồn Con Anime (Sub-sources) -->
+  <section id="animeSubSourcesBar" class="sub-sources-bar" style="display: none;">
+    <button class="btn-sub-source focusable active" data-sub="anime_sub://vietsub">⛩️ Anime Vietsub</button>
+    <button class="btn-sub-source focusable" data-sub="anime_sub://hh3d">🐉 Hoạt Hình 3D Trung Quốc</button>
+    <button class="btn-sub-source focusable" data-sub="anime_sub://movies">🏰 Hoạt Hình Chiếu Rạp</button>
+    <button class="btn-sub-source focusable" data-sub="anime_sub://dubbed">🎙️ Anime Thuyết Minh (Tổng Hợp)</button>
+  </section>
+
+  <!-- Thanh Thể Loại / Danh Mục (Filter Bar Wrapper) -->
+  <div class="filter-wrapper">
+    <button id="btnFilterPrev" class="filter-nav-btn filter-nav-prev" title="Cuộn sang trái">◀</button>
+    <nav id="filterBar" class="filter-bar"></nav>
+    <button id="btnFilterNext" class="filter-nav-btn filter-nav-next" title="Cuộn sang phải">▶</button>
+  </div>
+
+  <!-- Hàng Tiếp Tục Xem (Lịch Sử) -->
+  <section id="historySection" class="history-section" style="display: none;">
+    <div class="history-title">
+      <span>🕒 TIẾP TỤC XEM (LỊCH SỬ)</span>
+      <button id="btnClearHistory" class="btn-header focusable" style="padding: 4px 12px; font-size: 12px;">Xóa Lịch Sử</button>
+    </div>
+    <div id="historyScroll" class="history-scroll"></div>
+  </section>
+
+  <!-- Lưới Phim & TV 7 Cột -->
+  <main id="mainGrid" class="grid-container"></main>
+
+  <!-- Thanh Tải Thêm Phim / Phân Trang -->
+  <div id="paginationContainer" class="pagination-container" style="display: none;">
+    <div id="paginationInfo" class="pagination-info">Đang hiển thị 24 phim</div>
+    <button id="btnLoadMore" class="btn-load-more focusable" tabindex="30">
+      <span>📥 TẢI THÊM PHIM (Trang <span id="nextPageNum">2</span>)</span>
+    </button>
+    <div id="loadingMoreSpinner" class="loading-more-spinner" style="display: none;">
+      ⏳ Đang tải thêm dữ liệu phim...
+    </div>
+  </div>
+
+  <!-- Nút Bay Lên Đầu Trang -->
+  <button id="btnScrollTop" class="btn-scroll-top focusable" style="display: none;" title="Về đầu trang">
+    ⬆️
+  </button>
+
+  <!-- Màn Hình Chi Tiết Phim (Detail Modal) -->
+  <div id="detailModal" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+      <div class="detail-layout">
+        <img id="detailPoster" class="detail-poster" src="" alt="Poster">
+        <div class="detail-info">
+          <h1 id="detailTitle" class="detail-title">Tên Phim</h1>
+          <div id="detailSub" class="detail-sub">Tên gốc • 2026</div>
+          <div id="detailTags" class="detail-tags"></div>
+          <p id="detailDesc" class="detail-desc">Mô tả phim...</p>
+          <div class="detail-buttons">
+            <button id="btnPlayFirst" class="btn-primary-yellow focusable">▶️ XEM TẬP ĐẦU</button>
+            <button id="btnToggleFavDetail" class="btn-back-style focusable">⭐ THÊM YÊU THÍCH</button>
+            <button id="btnCloseDetail" class="btn-back-style focusable">↩️ QUAY LẠI</button>
+          </div>
+        </div>
+      </div>
+      <div id="episodesContainer" class="episodes-section">
+        <div class="server-title">DANH SÁCH TẬP PHIM</div>
+        <div id="episodesGrid" class="episodes-grid"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Trình Phát Video Toàn Màn Hình (Player) -->
+  <div id="playerContainer" class="player-container" style="display: none;">
+    <video id="videoPlayer" playsinline></video>
+    <iframe id="playerIframe" style="display:none; width: 100%; height: 100%; border: none; background: #000;" allow="autoplay; fullscreen; encrypted-media"></iframe>
+    <div id="playerOverlay" class="player-overlay">
+      <div class="player-top">
+        <div class="player-title-info">
+          <button id="btnBackPlayer" class="btn-player focusable">↩️ Thoát</button>
+          <div>
+            <div id="playerTitle" class="player-title">Tên Kênh / Phim</div>
+            <div id="playerSub" class="player-subtitle">Tập 1</div>
+          </div>
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <button id="btnToggleFavPlayer" class="btn-player focusable">⭐ Yêu Thích</button>
+          <button id="btnQuickZap" class="btn-player focusable" style="display: none;">📺 Danh Sách Kênh</button>
+        </div>
+      </div>
+
+      <div class="player-controls">
+        <div id="progressContainer" class="progress-container">
+          <span id="currentTime" class="time-label">00:00</span>
+          <input type="range" id="seekBar" class="seek-bar focusable" min="0" max="100" value="0">
+          <span id="durationTime" class="time-label">00:00</span>
+        </div>
+        <div class="player-buttons-row">
+          <button id="btnPlayPause" class="btn-player focusable">⏸️ Tạm Dừng</button>
+          <button id="btnRewind" class="btn-player focusable">⏪ -10s</button>
+          <button id="btnForward" class="btn-player focusable">⏩ +10s</button>
+          <button id="btnNextEpisode" class="btn-player focusable" style="display: none;">⏭️ Tập Tiếp</button>
+          <button id="btnFullscreen" class="btn-player focusable">🗖 Toàn Màn Hình</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Zapping Sidebar for TV -->
+    <div id="zappingPanel" class="zapping-panel">
+      <div class="zapping-title">
+        <span>📺 KÊNH CÙNG NHÓM</span>
+        <button id="btnCloseZap" class="btn-header focusable" style="padding: 4px 10px;">Đóng</button>
+      </div>
+      <div id="zappingList" class="zapping-list"></div>
+    </div>
+  </div>
+
+  <!-- Khung Web Live Match Player Không Quảng Cáo (Ad-Free Player) -->
+  <div id="matchWebPlayerContainer" class="player-container" style="display: none; z-index: 2000; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000;">
+    <div class="player-top" style="position: absolute; top: 0; left: 0; width: 100%; z-index: 2005; background: linear-gradient(180deg, rgba(10,14,23,0.95), transparent); padding: 14px 28px; display: flex; justify-content: space-between; align-items: center;">
+      <div class="player-title-info" style="display: flex; align-items: center; gap: 16px;">
+        <button id="btnCloseMatchWebPlayer" class="btn-player focusable">↩️ Thoát Trận Đấu</button>
+        <div>
+          <div id="matchWebPlayerTitle" class="player-title" style="font-size: 18px; font-weight: 800; color: #fff;">Trực Tiếp Bóng Đá</div>
+          <div id="matchWebPlayerSub" class="player-subtitle" style="font-size: 13px; color: var(--primary-gold);">Server 1 - BLV Tiếng Việt (Ad-Free)</div>
+        </div>
+      </div>
+      <div style="display: flex; gap: 10px;">
+        <button id="btnSwitchServerQuick" class="btn-player focusable">🔄 Đổi Server</button>
+        <button id="btnFullscreenMatch" class="btn-player focusable">🗖 Toàn Màn Hình</button>
+      </div>
+    </div>
+    <iframe id="matchIframe" src="" style="width: 100%; height: 100%; border: none; background: #000;" allow="autoplay; fullscreen; encrypted-media"></iframe>
+  </div>
+
+  <!-- Modal Chọn Server Trực Tiếp Bóng Đá 4 Tầng -->
+  <div id="matchServerModal" class="modal-overlay" style="display: none; z-index: 2500;">
+    <div class="modal-content" style="max-width: 620px; text-align: center;">
+      <div id="serverModalHeader" style="margin-bottom: 20px;">
+        <div id="serverModalLeague" style="color: var(--primary-gold); font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">🏴󠁧󠁢󠁥󠁮󠁧󠁿 NGOẠI HẠNG ANH</div>
+        <h2 id="serverModalTeams" style="color: #ffffff; font-size: 24px; margin: 8px 0; font-weight: 900;">Arsenal vs Chelsea</h2>
+        <div id="serverModalTime" style="color: var(--accent-cyan); font-size: 14px; font-weight: 600;">Trực Tiếp • 22:30 Hôm Nay</div>
+      </div>
+      
+      <p style="color: #94a3b8; font-size: 14px; margin-bottom: 16px;">Vui lòng chọn 1 trong 4 Server trực tiếp (Miễn Phí 100%):</p>
+      
+      <div class="server-options-grid" style="display: grid; gap: 12px; margin-bottom: 20px; text-align: left;">
+        <button id="btnServer1" class="btn-server-option focusable" data-server="1">
+          <div class="server-badge badge-green">SERVER 1</div>
+          <div class="server-info">
+            <div class="server-title">🟢 Thập Cẩm HD (Bình Luận Tiếng Việt)</div>
+            <div class="server-desc">Tốc độ cao • Không quảng cáo cá cược • Nét căng</div>
+          </div>
+        </button>
+
+        <button id="btnServer2" class="btn-server-option focusable" data-server="2">
+          <div class="server-badge badge-blue">SERVER 2</div>
+          <div class="server-info">
+            <div class="server-title">🔵 Xôi Lạc HD (Bình Luận Tiếng Việt)</div>
+            <div class="server-desc">Máy chủ dự phòng 1 • Âm thanh sân vận động sôi động</div>
+          </div>
+        </button>
+
+        <button id="btnServer3" class="btn-server-option focusable" data-server="3">
+          <div class="server-badge badge-purple">SERVER 3</div>
+          <div class="server-info">
+            <div class="server-title">🟣 Về Bờ HD (Bình Luận Tiếng Việt)</div>
+            <div class="server-desc">Máy chủ dự phòng 2 • Ổn định giờ cao điểm</div>
+          </div>
+        </button>
+
+        <button id="btnServer4" class="btn-server-option focusable" data-server="4">
+          <div class="server-badge badge-yellow">SERVER 4</div>
+          <div class="server-info">
+            <div class="server-title">🟡 Kênh Vệ Tinh Quốc Tế (True Premier / Astro)</div>
+            <div class="server-desc">Bản quyền 1080p 50fps • Ổn định tuyệt đối 24/7 • Tiếng Anh</div>
+          </div>
+        </button>
+      </div>
+
+      <button id="btnCloseServerModal" class="btn-header focusable" style="width: 100%; justify-content: center; padding: 12px; font-size: 15px;">ĐÓNG</button>
+    </div>
+  </div>
+
+  <!-- Hộp Thoại Lịch Thi Đấu Bóng Đá -->
+  <div id="scheduleModal" class="modal-overlay" style="display: none;">
+    <div class="modal-content" style="max-width: 800px;">
+      <h2 style="color: var(--primary-gold); font-size: 24px; margin-bottom: 6px;">⚽ Lịch Thi Đấu Bóng Đá Trực Tiếp</h2>
+      <p style="color: #94a3b8; font-size: 14px; margin-bottom: 16px;">Bấm vào trận đấu để mở kênh truyền hình trực tiếp</p>
+      <div id="matchesList" class="matches-list"></div>
+      <div style="text-align: right; margin-top: 20px;">
+        <button id="btnCloseSchedule" class="btn-primary-yellow focusable" style="width: 100%; justify-content: center;">ĐÓNG</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hộp Thoại Thêm Kênh IPTV -->
+  <div id="iptvModal" class="modal-overlay" style="display: none;">
+    <div class="modal-content" style="max-width: 700px;">
+      <h2 style="color: var(--primary-gold); font-size: 22px; margin-bottom: 16px;">➕ Thêm Kênh IPTV Cá Nhân</h2>
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+        <label style="color: #cbd5e1; font-weight: bold;">Tên kênh:
+          <input type="text" id="iptvName" style="width: 100%; padding: 10px; background: #1e293b; border: 1px solid #334155; color: #fff; border-radius: 6px; margin-top: 4px;" placeholder="Ví dụ: Kênh Thể Thao Riêng">
+        </label>
+        <label style="color: #cbd5e1; font-weight: bold;">Link phát luồng (.m3u8):
+          <input type="text" id="iptvUrl" style="width: 100%; padding: 10px; background: #1e293b; border: 1px solid #334155; color: #fff; border-radius: 6px; margin-top: 4px;" placeholder="https://domain.com/live.m3u8">
+        </label>
+        <div style="display: flex; gap: 12px; margin-top: 10px;">
+          <button id="btnAddIptvConfirm" class="btn-primary-yellow focusable" style="flex: 1; justify-content: center;">THÊM KÊNH</button>
+          <button id="btnCloseIptv" class="btn-back-style focusable" style="flex: 1; justify-content: center;">HỦY</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hộp Thoại Tìm Kiếm -->
+  <div id="searchModal" class="modal-overlay" style="display: none;">
+    <div class="modal-content" style="max-width: 900px;">
+      <h2 style="color: var(--primary-gold); font-size: 22px; margin-bottom: 14px;">🔍 Tìm Kiếm Phim & Kênh TV</h2>
+      <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+        <input type="text" id="searchInput" style="flex: 1; padding: 12px 18px; font-size: 18px; background: #1e293b; border: 1px solid #334155; color: #fff; border-radius: 8px;" placeholder="Nhập tên phim, kênh VTV, bóng đá...">
+        <button id="btnDoSearch" class="btn-primary-yellow focusable">TÌM KIẾM</button>
+        <button id="btnCloseSearch" class="btn-back-style focusable">ĐÓNG</button>
+      </div>
+      <div id="searchResultsGrid" class="grid-container" style="grid-template-columns: repeat(4, 1fr); padding: 0; max-height: 500px; overflow-y: auto;"></div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toastBox" class="toast-box"></div>
+
+  <!-- Scripts -->
+  <script src="data/tv_channels.js"></script>
+  <script src="js/hls.min.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

@@ -60,6 +60,11 @@ object WatchHistoryManager {
         }
     }
 
+    fun getHistoryForMovie(context: Context, slugOrId: String): HistoryItem? {
+        if (slugOrId.isEmpty()) return null
+        return getHistory(context).find { it.movie.slug == slugOrId || it.movie.id == slugOrId }
+    }
+
     fun clearHistory(context: Context) {
         val sp = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         sp.edit().remove(KEY_HISTORY).apply()

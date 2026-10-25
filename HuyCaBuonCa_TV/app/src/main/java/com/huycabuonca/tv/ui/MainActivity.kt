@@ -71,6 +71,9 @@ class MainActivity : AppCompatActivity() {
                 } else {
                     val intent = Intent(this, DetailActivity::class.java).apply {
                         putExtra("EXTRA_MOVIE", item.movie)
+                        putExtra("EXTRA_RESUME_EPISODE", item.episodeName)
+                        putExtra("EXTRA_RESUME_POSITION", item.positionMs)
+                        putExtra("EXTRA_AUTO_PLAY", true)
                     }
                     startActivity(intent)
                 }

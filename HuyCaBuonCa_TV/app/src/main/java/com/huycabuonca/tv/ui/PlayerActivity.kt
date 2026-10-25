@@ -64,9 +64,23 @@ class PlayerActivity : AppCompatActivity() {
     private val zapRunnable = Runnable { executeNumberZapping() }
 
     // Quản lý tập phim và chuyển tập tự động (Auto-next)
+        // Quản lý tập phim và chuyển tập tự động (Auto-next)
     private var episodesList: ArrayList<EpisodeItem> = arrayListOf()
     private var currentEpisodeIndex = 0
     private var autoNextTimer: CountDownTimer? = null
+
+    // Quản lý tiếp tục xem đúng vị trí (Resume Playback)
+    private var initialStartPositionMs: Long = 0L
+    private var hasResumedPosition: Boolean = false
+    private val historySyncHandler = Handler(Looper.getMainLooper())
+    private val historySyncRunnable = object : Runnable {
+        override fun run() {
+            if (player?.isPlaying == true) {
+                savePlaybackHistory()
+            }
+            historySyncHandler.postDelayed(this, 10000)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -133,6 +147,18 @@ class PlayerActivity : AppCompatActivity() {
             autoNextTimer?.cancel()
             binding.layoutNextEpCountdown.visibility = View.GONE
         }
+
+                initialStartPositionMs = intent.getLongExtra("EXTRA_START_POSITION", 0L)
+        if (initialStartPositionMs == 0L && !isTvMode) {
+            val movie = intent.getSerializableExtra("EXTRA_MOVIE_ITEM") as? MovieItem
+            if (movie != null) {
+                val hist = WatchHistoryManager.getHistoryForMovie(this, movie.slug.ifEmpty { movie.id })
+                if (hist != null && (hist.episodeName == episode || hist.episodeName.isEmpty())) {
+                    initialStartPositionMs = hist.positionMs
+                }
+            }
+        }
+        historySyncHandler.postDelayed(historySyncRunnable, 10000)
 
         val subtitleUrl = intent.getStringExtra("EXTRA_SUBTITLE_URL")
 
@@ -232,6 +258,9 @@ class PlayerActivity : AppCompatActivity() {
             .setLoadControl(loadControl)
             .build().apply {
             setMediaSource(mediaSource)
+            if (initialStartPositionMs > 5_000L) {
+                seekTo(initialStartPositionMs)
+            }
             prepare()
             playWhenReady = true
             initLoudnessEnhancer(audioSessionId)
@@ -263,6 +292,17 @@ class PlayerActivity : AppCompatActivity() {
                         binding.playerProgress.visibility = View.VISIBLE
                     } else {
                         binding.playerProgress.visibility = View.GONE
+                    }
+
+                    if (playbackState == Player.STATE_READY) {
+                        if (!hasResumedPosition && initialStartPositionMs > 5_000L) {
+                            hasResumedPosition = true
+                            seekTo(initialStartPositionMs)
+                            val min = (initialStartPositionMs / 60000).toInt()
+                            val sec = ((initialStartPositionMs % 60000) / 1000).toInt()
+                            Toast.makeText(this@PlayerActivity, "▶ Tiếp tục xem từ %02d:%02d".format(min, sec), Toast.LENGTH_SHORT).show()
+                            initialStartPositionMs = 0L
+                        }
                     }
 
                     if (playbackState == Player.STATE_ENDED) {
@@ -311,6 +351,9 @@ class PlayerActivity : AppCompatActivity() {
 
     private fun playEpisodeAtIndex(index: Int) {
         if (index !in episodesList.indices) return
+        savePlaybackHistory()
+        initialStartPositionMs = 0L
+        hasResumedPosition = true
         currentEpisodeIndex = index
         val episode = episodesList[index]
         val title = intent.getStringExtra("EXTRA_TITLE") ?: "Xem Phim"
@@ -627,6 +670,11 @@ class PlayerActivity : AppCompatActivity() {
         }
     }
 
+    override fun onPause() {
+        super.onPause()
+        savePlaybackHistory()
+    }
+
     override fun onStop() {
         super.onStop()
         savePlaybackHistory()
@@ -636,6 +684,7 @@ class PlayerActivity : AppCompatActivity() {
     override fun onDestroy() {
         savePlaybackHistory()
         super.onDestroy()
+        historySyncHandler.removeCallbacks(historySyncRunnable)
         hideHandler.removeCallbacks(hideOverlayRunnable)
         hideHandler.removeCallbacks(hideBannerRunnable)
         zapHandler.removeCallbacks(zapRunnable)
