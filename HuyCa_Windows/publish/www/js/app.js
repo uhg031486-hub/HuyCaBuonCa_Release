@@ -729,27 +729,9 @@
       { name: "🎙️ Anime Thuyết Minh (Tổng Hợp)", key: "anime_sub://dubbed" }
     ],
     FREEREELS: [
-      { name: "📱 FreeReels Dọc (Phụ Đề & Lồng Tiếng)", key: "freereels_sub://freereels" },
-      { name: "🇻🇳 Tiểu Kịch Vietsub (KKPhim HD)", key: "freereels_sub://kkphim" },
-      { name: "💎 DramaBox Hot (Tuyển Chọn Hay Nhất)", key: "freereels_sub://dramabox" }
-    ]
-  };
-
-  const SUB_FILTERS = {
-    'movie_sub://kkphim': [
-      { name: "Mới Cập Nhật", url: "https://phimapi.com/danh-sach/phim-moi-cap-nhat" },
-      { name: "🕒 Lịch Sử Xem", url: "app://history" },
-      { name: "❤️ Phim Yêu Thích", url: "app://favorites" },
-      { name: "Phim Bộ", url: "https://phimapi.com/v1/api/danh-sach/phim-bo" },
-      { name: "Phim Lẻ", url: "https://phimapi.com/v1/api/danh-sach/phim-le" },
-      { name: "TV Shows", url: "https://phimapi.com/v1/api/danh-sach/tv-shows" },
-      { name: "Hành Động", url: "https://phimapi.com/v1/api/the-loai/hanh-dong" },
-      { name: "Cổ Trang", url: "https://phimapi.com/v1/api/the-loai/co-trang" },
-      { name: "Tình Cảm", url: "https://phimapi.com/v1/api/the-loai/tinh-cam" },
-      { name: "Kinh Dị", url: "https://phimapi.com/v1/api/the-loai/kinh-di" },
-      { name: "Hàn Quốc", url: "https://phimapi.com/v1/api/quoc-gia/han-quoc" },
-      { name: "Trung Quốc", url: "https://phimapi.com/v1/api/quoc-gia/trung-quoc" },
-      { name: "Âu Mỹ", url: "https://phimapi.com/v1/api/quoc-gia/au-my" }
+      { name: "🔥 Kho Tiểu Kịch Đa Nền Tảng (Full Vietsub/Lồng Tiếng)", key: "freereels_sub://multiplatform" },
+      { name: "🎙️ Kho Thuyết Minh Đặc Tuyển (Gà Mờ Mê Phim / Voice AI)", key: "freereels_sub://gamomephim" },
+      { name: "📱 Kho FreeReels Gốc (Xem Dọc 9:16 Full Mở Khóa)", key: "freereels_sub://freereels" }
     ],
     'movie_sub://nguonc': [
       { name: "🔥 Mới Cập Nhật", url: "https://phim.nguonc.com/api/films/phim-moi-cap-nhat" },
@@ -803,6 +785,16 @@
       { name: "⛩️ Anime Nhật Lồng Tiếng", url: "anime_dubbed://japan" },
       { name: "🐉 Hoạt Hình 3D Trung Quốc", url: "anime_dubbed://china" },
       { name: "🏰 Hoạt Hình Chiếu Rạp", url: "anime_dubbed://cinema" },
+      { name: "🕒 Lịch Sử Xem", url: "app://history" },
+      { name: "❤️ Yêu Thích", url: "app://favorites" }
+    ],
+    'freereels_sub://multiplatform': [
+      { name: "👑 Tổng Tài & Bá Đạo (DramaBox/ShortMax)", url: "multi_short://tong-tai" },
+      { name: "🐉 Trọng Sinh & Báo Thù Nghịch Tập", url: "multi_short://trong-sinh" },
+      { name: "⚔️ Chiến Thần & Tu Tiên Đô Thị", url: "multi_short://chien-than" },
+      { name: "💎 Thiếu Gia & Đại Gia Ẩn Danh", url: "multi_short://thieu-gia" },
+      { name: "🏰 Cổ Trang & Cung Đấu Ngược Tâm", url: "multi_short://co-trang" },
+      { name: "💖 Hào Môn Thế Gia & Hôn Nhân", url: "multi_short://hao-mon" },
       { name: "🕒 Lịch Sử Xem", url: "app://history" },
       { name: "❤️ Yêu Thích", url: "app://favorites" }
     ],
@@ -1408,6 +1400,25 @@
         renderCards(distinct, reset);
         if (paginationContainer) paginationContainer.style.display = 'flex';
         isLoading = false;
+        return;
+      }
+
+      // Xử lý Kho Tiểu Kịch Đa Nền Tảng (KKPhim/NguonC Short)
+      if (currentFilter.startsWith('multi_short://')) {
+        const kwMap = {
+          'multi_short://tong-tai': 'tổng tài',
+          'multi_short://trong-sinh': 'trọng sinh',
+          'multi_short://chien-than': 'chiến thần',
+          'multi_short://thieu-gia': 'thiếu gia',
+          'multi_short://co-trang': 'cổ trang',
+          'multi_short://hao-mon': 'hào môn'
+        };
+        const searchKw = kwMap[currentFilter] || 'tổng tài';
+        let searchResults = await searchKKPhim(searchKw);
+        currentMoviesList = searchResults;
+        renderMovieGrid(currentMoviesList, false);
+        if (paginationInfo) paginationInfo.textContent = `Đang hiển thị ${currentMoviesList.length} phim ngắn theo chủ đề (Trang ${currentPage})`;
+        hideLoading();
         return;
       }
 

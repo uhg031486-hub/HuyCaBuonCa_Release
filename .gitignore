@@ -15,5 +15,8 @@ local.properties
 Mo_SillyCodex.cmd
 MoHinh3D_TrungTamDieuKhien/
 
+# CodeGraph
+.codegraph/
+
 # OS
 Thumbs.db
