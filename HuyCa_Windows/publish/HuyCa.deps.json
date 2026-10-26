@@ -6,7 +6,7 @@
   "compilationOptions": {},
   "targets": {
     ".NETCoreApp,Version=v8.0": {
-      "HuyCa/2.7.0": {
+      "HuyCa/2.8.0": {
         "dependencies": {
           "Microsoft.Web.WebView2": "1.0.4258.31",
           "Microsoft.Web.WebView2.Core": "1.0.4258.31",
@@ -63,7 +63,7 @@
     }
   },
   "libraries": {
-    "HuyCa/2.7.0": {
+    "HuyCa/2.8.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

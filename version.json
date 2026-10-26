@@ -1,12 +1,12 @@
 {
-  "versionCode": 18,
-  "versionName": "2.7",
-  "title": "Huy Cá v2.7 - Tích Hợp Kho Phim Ngắn Mới (Gà Mờ Mê Phim Thuyết Minh & Vietsub), Tinh Chỉnh Icon Chuẩn Đẹp Tự Nhiên",
-  "changelog": "- Tích hợp thêm Kho Phim Ngắn / Tiểu Kịch Mới: Kết nối nguồn Gà Mờ Mê Phim với hàng trăm bộ tiểu kịch hot nhất (Tổng tài, Trọng sinh, Cung đấu, Chiến thần...), hỗ trợ trọn bộ cả 2 bản Thuyết Minh và Vietsub Full HD, phát trực tiếp siêu tốc.\n- Tinh chỉnh biểu tượng ứng dụng (Icon): Đưa kích thước icon về tỉ lệ vừa vặn, cân đối, chuẩn đẹp tự nhiên trên màn hình TV, điện thoại, máy tính và webOS, không còn bị phóng to bè viền.\n- Hoàn thiện hệ sinh thái Phim Ngắn Đa Nguồn: Dễ dàng chuyển đổi linh hoạt giữa Gà Mờ Mê Phim (Thuyết minh), FreeReels (Phim dọc mở khóa full tập) và Tiểu Kịch Vietsub (KKPhim).\n- Tối ưu hiệu năng phát video và bộ nhớ đệm.",
+  "versionCode": 19,
+  "versionName": "2.8",
+  "title": "Huy Cá v2.8 - Lịch Thi Đấu Bóng Đá Real-Time ESPN, Tự Động Cập Nhật Tỉ Số & Đa Server Phát Sóng Trực Tiếp",
+  "changelog": "- Kích hoạt Bảng Lịch Thi Đấu Bóng Đá thời gian thực: Tích hợp nguồn ESPN Official Sports API toàn cầu, tự động cập nhật liên tục các trận đấu Ngoại Hạng Anh, Cúp C1 Châu Âu, La Liga, Serie A theo giờ Việt Nam (GMT+7).\n- Tự động cập nhật tỉ số và trạng thái trận đấu: Hiển thị tỉ số trực tiếp từng phút, logo câu lạc bộ HD chính thức, ghim trận đang diễn ra (🔴 LIVE) lên đầu bảng.\n- Đa dạng máy chủ xem trực tiếp: Bấm vào trận đấu để chọn xem ngay qua Kênh Vệ Tinh Quốc Tế (True Premier 1 & 2 HD, Astro SuperSport 1080p 50fps qua ExoPlayer) hoặc các Server Thể Thao BLV Tiếng Việt (Thập Cẩm, Xôi Lạc, Về Bờ, VTV6 Thể Thao).\n- Tối ưu giao diện điều khiển Remote D-Pad trên Android TV Box và đồng bộ toàn diện trên 4 nền tảng.",
   "isMaintenanceLocked": false,
   "maintenanceMessage": "Hệ thống đang bảo trì nội bộ định kỳ. Vui lòng quay lại sau hoặc liên hệ Quản trị viên Huy Cá để biết thêm chi tiết!",
-  "windowsZipUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v2.7/HuyCa_Windows_v2.7.zip",
-  "mobileApkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v2.7/HuyCaBuonCa_Mobile_v2.7.apk",
-  "tvApkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v2.7/HuyCaBuonCa_TV_v2.7.apk",
-  "lgIpkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v2.7/HuyCaBuonCa_LG_webOS_v2.7.ipk"
+  "windowsZipUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v2.8/HuyCa_Windows_v2.8.zip",
+  "mobileApkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v2.8/HuyCaBuonCa_Mobile_v2.8.apk",
+  "tvApkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v2.8/HuyCaBuonCa_TV_v2.8.apk",
+  "lgIpkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v2.8/HuyCaBuonCa_LG_webOS_v2.8.ipk"
 }
