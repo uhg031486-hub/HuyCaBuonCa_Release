@@ -12,7 +12,17 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Huy Cá">
   <link rel="apple-touch-icon" href="icon_256.png">
-  <link rel="stylesheet" href="css/style.css?v=2.8.7">
+    <script>
+    (function() {
+      var ua = navigator.userAgent || '';
+      var isTv = /Web0S|SmartTV|Tizen|Android TV|GoogleTV|AppleTV|HbbTV|POV_TV|LargeScreen|Viera|BRAVIA|Hisense/i.test(ua);
+      var isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(ua) || (window.innerWidth <= 768);
+      var saved = localStorage.getItem('huyca_view_mode');
+      var mode = saved || (isTv ? 'tv' : (isMobile ? 'mobile' : 'tv'));
+      document.documentElement.className = 'mode-' + mode;
+    })();
+  </script>
+  <link rel="stylesheet" href="css/style.css?v=2.8.9">
 </head>
 <body>
   <!-- Floating Top PWA Install Banner -->
@@ -321,8 +331,8 @@
       });
     }
   </script>
-  <script src="data/tv_channels.js?v=2.8.7"></script>
-  <script src="js/hls.min.js?v=2.8.7"></script>
-  <script src="js/app.js?v=2.8.7"></script>
+  <script src="data/tv_channels.js?v=2.8.9"></script>
+  <script src="js/hls.min.js?v=2.8.9"></script>
+  <script src="js/app.js?v=2.8.9"></script>
 </body>
 </html>

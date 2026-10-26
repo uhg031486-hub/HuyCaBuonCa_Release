@@ -2597,6 +2597,24 @@
   }
 
   // --- Video Player (Native WebOS Hardware Decoding & HLS Fallback) ---
+  
+  // Video Error Handler with Automatic Proxy Fallback
+  let currentActiveStream = '';
+  const videoElem = document.getElementById('videoPlayer');
+  if (videoElem) {
+    videoElem.addEventListener('error', (e) => {
+      console.warn('Video playback error detected:', videoElem.error);
+      if (currentActiveStream && !videoElem.src.includes('/api/proxy') && currentActiveStream.startsWith('http')) {
+        console.log('Retrying video via proxy fallback:', currentActiveStream);
+        videoElem.src = `/api/proxy?url=${encodeURIComponent(currentActiveStream)}`;
+        videoElem.load();
+        videoElem.play().catch(() => {});
+      } else {
+        showToast('Không thể tải luồng phát video. Vui lòng thử tập khác!');
+      }
+    });
+  }
+
   function playVideo(streamUrl, title, subtitle, movie, detail, epIndex, serverIndex, isTv = false, customSubtitleUrl = null) {
     if (typeof isTv === 'string') {
       customSubtitleUrl = isTv;
@@ -2608,6 +2626,7 @@
     }
 
     currentPlayingMovie = movie;
+    currentActiveStream = streamUrl;
     currentPlayingDetail = detail;
     currentEpisodeIndex = epIndex;
     currentServerIndex = serverIndex;

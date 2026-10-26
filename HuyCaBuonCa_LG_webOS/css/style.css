@@ -1206,11 +1206,7 @@ body {
   }
 }
 
-@media (max-width: 480px) {
-  .grid-container {
-    grid-template-columns: repeat(2, 1fr) !important;
-  }
-}
+
 
 
 /* Mobile App Experience Enhancements */
@@ -1764,4 +1760,393 @@ body.mode-tv .focusable:focus {
 .player-container.player-forced-landscape .player-overlay {
   width: 100% !important;
   height: 100% !important;
+}
+
+
+
+/* ==========================================================================
+   HUY CÁ EXACT UI SYNC: MOBILE EDITION (IMAGE 1) & TV EDITION (IMAGE 2)
+   ========================================================================== */
+
+/* --- MOBILE EDITION (Chuẩn 100% như APK Android ở Ảnh 1) --- */
+html.mode-mobile,
+body.mode-mobile,
+@media (max-width: 768px) {
+  /* 1. Header Bar: Siêu gọn gàng 1 hàng ~50px */
+  .header-bar {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 10px 14px !important;
+    background: #121722 !important;
+    border-bottom: 1px solid #1e2638 !important;
+    gap: 10px !important;
+    height: auto !important;
+    min-height: 48px !important;
+  }
+
+  .brand-section {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 2px !important;
+  }
+
+  /* Badge vàng HUY CÁ như Ảnh 1 */
+  .brand-badge {
+    background: #facc15 !important;
+    color: #000000 !important;
+    font-size: 13px !important;
+    font-weight: 800 !important;
+    padding: 3px 12px !important;
+    border-radius: 12px !important;
+    border: none !important;
+    box-shadow: 0 2px 8px rgba(250, 204, 21, 0.4) !important;
+    display: inline-block !important;
+    line-height: normal !important;
+  }
+  .brand-badge span {
+    color: #000000 !important;
+    font-weight: 800 !important;
+  }
+  .brand-badge .brand-logo {
+    display: none !important;
+  }
+  .brand-subtitle {
+    display: none !important;
+  }
+
+  /* Slogan vàng nghiêng Kho Phim Đẳng Cấp Di Động như Ảnh 1 */
+  .brand-slogan-mobile {
+    display: block !important;
+    color: #eab308 !important;
+    font-size: 10.5px !important;
+    font-style: italic !important;
+    margin-top: 2px !important;
+    letter-spacing: 0.3px !important;
+  }
+
+  /* Header Actions: Chỉ hiển thị 2 nút [Lưu/Cài đặt] và [Tìm kiếm] như Ảnh 1 */
+  .header-actions {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 6px !important;
+    width: auto !important;
+    overflow: visible !important;
+    padding: 0 !important;
+  }
+
+  .header-actions .btn-header {
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    padding: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 8px !important;
+    font-size: 15px !important;
+    background: #1e2538 !important;
+    border: 1px solid #2a354d !important;
+    color: #ffffff !important;
+    cursor: pointer !important;
+  }
+  .header-actions .btn-header .btn-text {
+    display: none !important;
+  }
+
+  /* Ẩn triệt để các nút rườm rà trên thanh top bar điện thoại */
+  #btnScheduleHeader,
+  #btnHistoryHeader,
+  #btnUpdateHeader,
+  .clock-display {
+    display: none !important;
+  }
+  #btnSearch,
+  #btnInstallApp {
+    display: inline-flex !important;
+  }
+
+  /* 2. 4 Nguồn Lớn: 1 hàng 4 ô khít đều ngang màn hình như Ảnh 1 */
+  .sources-bar {
+    display: flex !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 8px 8px 4px 8px !important;
+    gap: 5px !important;
+    overflow: hidden !important;
+  }
+  .btn-source {
+    flex: 1 1 24% !important;
+    min-width: 0 !important;
+    height: 36px !important;
+    line-height: 36px !important;
+    padding: 0 2px !important;
+    font-size: 11px !important;
+    font-weight: 800 !important;
+    border-radius: 8px !important;
+    text-align: center !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    background: #1a2035 !important;
+    color: #94a3b8 !important;
+    border: 1px solid #232d42 !important;
+  }
+  .btn-source.active {
+    background: linear-gradient(135deg, #facc15, #eab308) !important;
+    color: #000000 !important;
+    border-color: #facc15 !important;
+    box-shadow: 0 2px 8px rgba(234, 179, 8, 0.4) !important;
+  }
+
+  /* 3. Sub-sources và Categories dạng pill vuốt ngang êm ái */
+  .sub-sources-bar {
+    display: flex !important;
+    padding: 4px 8px !important;
+    gap: 6px !important;
+    overflow-x: auto !important;
+    scrollbar-width: none !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  .sub-sources-bar::-webkit-scrollbar,
+  .filter-bar::-webkit-scrollbar {
+    display: none !important;
+  }
+  .btn-sub-source {
+    height: 30px !important;
+    border-radius: 15px !important;
+    padding: 0 12px !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+    background: #1a2035 !important;
+    color: #cbd5e1 !important;
+    border: 1px solid #2a344d !important;
+  }
+  .btn-sub-source.active {
+    background: #eab308 !important;
+    color: #000000 !important;
+    border-color: #eab308 !important;
+  }
+
+  .filter-wrapper {
+    padding: 4px 8px !important;
+  }
+  .filter-nav-btn {
+    display: none !important;
+  }
+  .filter-bar {
+    display: flex !important;
+    overflow-x: auto !important;
+    scrollbar-width: none !important;
+    -webkit-overflow-scrolling: touch !important;
+    gap: 6px !important;
+  }
+  .btn-filter {
+    height: 28px !important;
+    border-radius: 14px !important;
+    padding: 0 10px !important;
+    font-size: 10.5px !important;
+    font-weight: 700 !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+    background: #161b26 !important;
+    color: #94a3b8 !important;
+    border: 1px solid #22293d !important;
+  }
+  .btn-filter.active {
+    background: #facc15 !important;
+    color: #000000 !important;
+    border-color: #facc15 !important;
+  }
+
+  /* 4. Ẩn khối Tiếp Tục Xem khổng lồ của TV trên giao diện điện thoại */
+  .history-section,
+  #historySection {
+    display: none !important;
+  }
+
+  /* 5. Lưới Phim: BẮT BUỘC ĐÚNG 3 CỘT (Khắc phục lỗi 2 cột to quá lố ở Ảnh 2) */
+  .grid-container {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 6px !important;
+    padding: 6px 8px 30px 8px !important;
+  }
+
+  /* Card phim gọn gàng chuẩn Mobile APK */
+  .movie-card {
+    background: #161b26 !important;
+    border-radius: 8px !important;
+    border: 1px solid #22293d !important;
+    padding: 4px !important;
+    margin: 0 !important;
+    outline: none !important;
+    box-shadow: none !important;
+  }
+  .movie-card:focus,
+  .movie-card.focused {
+    border-color: #facc15 !important;
+    box-shadow: 0 0 8px rgba(250, 204, 21, 0.5) !important;
+    transform: none !important;
+  }
+
+  .poster-wrapper {
+    aspect-ratio: 2 / 3 !important;
+    height: auto !important;
+    border-radius: 6px !important;
+    overflow: hidden !important;
+    background: #0f1420 !important;
+    position: relative !important;
+  }
+  .card-poster {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+  }
+  .movie-card.tv-card .poster-wrapper {
+    aspect-ratio: 16 / 9 !important;
+    height: auto !important;
+  }
+
+  /* Badge sắc nét bo góc nhỏ trên poster */
+  .badge-quality {
+    top: 4px !important;
+    right: 4px !important;
+    font-size: 8px !important;
+    padding: 1px 4px !important;
+    border-radius: 3px !important;
+    background: rgba(10, 25, 40, 0.88) !important;
+    border: 1px solid #00e5ff !important;
+    color: #38bdf8 !important;
+    font-weight: 700 !important;
+  }
+  .badge-fav {
+    top: 4px !important;
+    left: 4px !important;
+    font-size: 9px !important;
+    padding: 1px 3px !important;
+  }
+
+  .card-info {
+    padding: 4px 2px 2px 2px !important;
+  }
+  .card-title {
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    color: #f8fafc !important;
+    margin-bottom: 2px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    line-height: 1.3 !important;
+  }
+  .card-subtitle {
+    font-size: 10px !important;
+    color: #94a3b8 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  /* Footer Mobile */
+  .app-footer {
+    padding: 16px 8px 40px 8px !important;
+    background: #0d111a !important;
+  }
+  .footer-copyright {
+    color: #facc15 !important;
+    font-size: 11px !important;
+  }
+}
+
+/* --- TV EDITION (Chuẩn cho Android TV, Smart TV 16:9 ở Ảnh 2) --- */
+html.mode-tv body,
+body.mode-tv {
+  .brand-section {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 12px !important;
+  }
+  .brand-badge {
+    background: #dc2626 !important;
+    color: #ffffff !important;
+    font-size: 13px !important;
+    font-weight: 800 !important;
+    padding: 4px 14px !important;
+    border-radius: 6px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+  }
+  .brand-badge .brand-logo {
+    display: inline-block !important;
+    width: 22px !important;
+    height: 22px !important;
+  }
+  .brand-subtitle {
+    display: block !important;
+    font-size: 12px !important;
+    color: #94a3b8 !important;
+  }
+  .brand-slogan-mobile {
+    display: none !important;
+  }
+
+  .header-bar {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 12px 24px !important;
+    background: #121218 !important;
+  }
+  .header-actions {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 8px !important;
+  }
+  .header-actions .btn-header {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    padding: 7px 14px !important;
+    font-size: 13px !important;
+    border-radius: 6px !important;
+    background: #1e293b !important;
+  }
+  .header-actions .btn-header .btn-text {
+    display: inline !important;
+  }
+  #btnScheduleHeader,
+  #btnHistoryHeader,
+  #btnUpdateHeader,
+  .clock-display {
+    display: inline-flex !important;
+  }
+
+  /* Khối Tiếp tục xem chỉ bật trên TV */
+  .history-section {
+    display: block !important;
+  }
+
+  /* Lưới TV: 6-7 cột */
+  .grid-container {
+    grid-template-columns: repeat(6, 1fr) !important;
+    gap: 14px !important;
+    padding: 14px 20px 40px 20px !important;
+  }
+  .movie-card.focused,
+  .focusable:focus {
+    outline: none !important;
+    border-color: #00e5ff !important;
+    box-shadow: 0 0 16px rgba(0, 229, 255, 0.8), 0 0 6px #00e5ff !important;
+    transform: scale(1.04) !important;
+    z-index: 10 !important;
+  }
 }
