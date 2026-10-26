@@ -13,6 +13,11 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import java.util.TimeZone
+import com.google.gson.JsonParser
 import java.net.URLEncoder
 import java.security.MessageDigest
 import java.util.UUID
@@ -176,59 +181,176 @@ object MovieRepository {
         return imported.size
     }
 
-    fun getLiveMatches(): List<FootballMatch> {
-        return listOf(
-            FootballMatch(
-                id = "fpl_epl_1",
-                time = "18:30 • Thứ 7 (24/10)",
-                tournament = "🏴󠁧󠁢󠁥󠁮󠁧󠁿 Ngoại Hạng Anh • Vòng 8",
-                teamA = "Aston Villa",
-                teamB = "Manchester City",
-                channelName = "True Premier Football 1 HD",
-                channelSlug = "sports_sat_true_premier_1",
-                score = "18:30"
-            ),
-            FootballMatch(
-                id = "fpl_epl_2",
-                time = "21:00 • Thứ 7 (24/10)",
-                tournament = "🏴󠁧󠁢󠁥󠁮󠁧󠁿 Ngoại Hạng Anh • Vòng 8",
-                teamA = "Arsenal",
-                teamB = "Everton",
-                channelName = "True Premier Football 2 HD",
-                channelSlug = "sports_sat_true_premier_2",
-                score = "21:00"
-            ),
-            FootballMatch(
-                id = "fpl_epl_3",
-                time = "23:30 • Thứ 7 (24/10)",
-                tournament = "🏴󠁧󠁢󠁥󠁮󠁧󠁿 Ngoại Hạng Anh • Vòng 8",
-                teamA = "Chelsea",
-                teamB = "Tottenham Hotspur",
-                channelName = "Astro SuperSport 1 HD",
-                channelSlug = "sports_sat_astro_supersport_1",
-                score = "23:30"
-            ),
-            FootballMatch(
-                id = "fpl_epl_4",
-                time = "22:30 • Chủ Nhật (25/10)",
-                tournament = "🏴󠁧󠁢󠁥󠁮󠁧󠁿 Ngoại Hạng Anh • Vòng 8",
-                teamA = "Liverpool",
-                teamB = "Manchester United",
-                channelName = "Sky Sports Premier League",
-                channelSlug = "sports_sat_sky_sports_epl",
-                score = "22:30"
-            ),
-            FootballMatch(
-                id = "fpl_laliga_1",
-                time = "02:00 • Thứ 2 (26/10)",
-                tournament = "🇪🇸 Siêu Kinh Điển (El Clasico)",
-                teamA = "Real Madrid",
-                teamB = "Barcelona",
-                channelName = "beIN SPORTS 1 HD",
-                channelSlug = "sports_sat_bein_sports_1",
-                score = "02:00"
-            )
+        private var cachedMatches: List<FootballMatch>? = null
+    private var lastMatchFetchTime: Long = 0L
+    private const val MATCH_CACHE_DURATION = 10 * 60 * 1000L // 10 phút
+
+    private fun formatEspnDate(isoDate: String): String {
+        if (isoDate.isEmpty()) return "Hôm nay"
+        val patterns = arrayOf(
+            "yyyy-MM-dd'T'HH:mm'Z'",
+            "yyyy-MM-dd'T'HH:mm:ss'Z'",
+            "yyyy-MM-dd'T'HH:mmZ",
+            "yyyy-MM-dd'T'HH:mm:ssZ"
         )
+        for (p in patterns) {
+            try {
+                val sdf = SimpleDateFormat(p, Locale.US).apply {
+                    timeZone = TimeZone.getTimeZone("UTC")
+                }
+                val date = sdf.parse(isoDate)
+                if (date != null) {
+                    val outSdf = SimpleDateFormat("HH:mm • dd/MM", Locale.getDefault()).apply {
+                        timeZone = TimeZone.getTimeZone("GMT+7")
+                    }
+                    return outSdf.format(date)
+                }
+            } catch (_: Exception) {}
+        }
+        return isoDate
+    }
+
+    suspend fun fetchRealtimeLiveMatches(): List<FootballMatch> {
+        val now = System.currentTimeMillis()
+        if (cachedMatches != null && (now - lastMatchFetchTime) < MATCH_CACHE_DURATION) {
+            return cachedMatches!!
+        }
+
+        return withContext(Dispatchers.IO) {
+            val leagues = listOf(
+                Triple("eng.1", "🏴󠁧󠁢󠁥󠁮󠁧󠁿 Ngoại Hạng Anh", "True Premier Football 1 HD" to "sports_sat_true_premier_1"),
+                Triple("uefa.champions", "🏆 Cúp C1 Châu Âu", "True Premier Football 2 HD" to "sports_sat_true_premier_2"),
+                Triple("esp.1", "🇪🇸 La Liga", "Astro SuperSport 1 HD" to "sports_sat_astro_supersport_1"),
+                Triple("ita.1", "🇮🇹 Serie A", "Astro SuperSport 2 HD" to "sports_sat_astro_supersport_2")
+            )
+
+            val results = mutableListOf<FootballMatch>()
+
+            for ((leagueCode, leagueName, channelPair) in leagues) {
+                val (chName, chSlug) = channelPair
+                try {
+                    val url = "https://site.api.espn.com/apis/site/v2/sports/soccer/$leagueCode/scoreboard"
+                    val request = Request.Builder()
+                        .url(url)
+                        .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)")
+                        .build()
+
+                    val response = client.newCall(request).execute()
+                    if (response.isSuccessful) {
+                        val body = response.body?.string() ?: ""
+                        if (body.isNotEmpty()) {
+                            val jsonRoot = JsonParser.parseString(body).asJsonObject
+                            val events = jsonRoot.getAsJsonArray("events")
+                            if (events != null) {
+                                for (evElement in events) {
+                                    val ev = evElement.asJsonObject
+                                    val mId = if (ev.has("id")) ev.get("id").asString else ""
+                                    val dateIso = if (ev.has("date")) ev.get("date").asString else ""
+                                    val formattedTime = formatEspnDate(dateIso)
+
+                                    val statusObj = if (ev.has("status") && ev.get("status").isJsonObject) ev.getAsJsonObject("status") else null
+                                    val typeObj = if (statusObj != null && statusObj.has("type") && statusObj.get("type").isJsonObject) statusObj.getAsJsonObject("type") else null
+                                    val state = if (typeObj != null && typeObj.has("state")) typeObj.get("state").asString else "pre"
+                                    val detail = if (typeObj != null && typeObj.has("detail")) typeObj.get("detail").asString else ""
+
+                                    val competitions = if (ev.has("competitions") && ev.get("competitions").isJsonArray) ev.getAsJsonArray("competitions") else null
+                                    val firstComp = if (competitions != null && competitions.size() > 0 && competitions.get(0).isJsonObject) competitions.get(0).asJsonObject else null
+                                    val competitors = if (firstComp != null && firstComp.has("competitors") && firstComp.get("competitors").isJsonArray) firstComp.getAsJsonArray("competitors") else null
+
+                                    var teamHome = ""
+                                    var teamAway = ""
+                                    var logoHome = ""
+                                    var logoAway = ""
+                                    var scoreHome = ""
+                                    var scoreAway = ""
+
+                                    if (competitors != null) {
+                                        for (compElement in competitors) {
+                                            if (!compElement.isJsonObject) continue
+                                            val comp = compElement.asJsonObject
+                                            val isHome = comp.has("homeAway") && comp.get("homeAway").asString == "home"
+                                            val teamObj = if (comp.has("team") && comp.get("team").isJsonObject) comp.getAsJsonObject("team") else null
+                                            val tName = if (teamObj != null && teamObj.has("displayName")) teamObj.get("displayName").asString else ""
+                                            val tLogo = if (teamObj != null && teamObj.has("logo")) teamObj.get("logo").asString else ""
+                                            val sc = if (comp.has("score")) comp.get("score").asString else ""
+
+                                            if (isHome) {
+                                                teamHome = tName
+                                                logoHome = tLogo
+                                                scoreHome = sc
+                                            } else {
+                                                teamAway = tName
+                                                logoAway = tLogo
+                                                scoreAway = sc
+                                            }
+                                        }
+                                    }
+
+                                    val isLiveMatch = (state == "in")
+                                    val (matchTime, matchScore) = when {
+                                        state == "in" -> {
+                                            val liveStatus = if (detail.isNotEmpty()) "🔴 $detail" else "🔴 LIVE"
+                                            val sc = if (scoreHome.isNotEmpty() && scoreAway.isNotEmpty()) "$scoreHome - $scoreAway" else "LIVE"
+                                            liveStatus to sc
+                                        }
+                                        state == "post" -> {
+                                            val sc = if (scoreHome.isNotEmpty() && scoreAway.isNotEmpty()) "$scoreHome - $scoreAway" else "FT"
+                                            "🏁 Hết Giờ" to sc
+                                        }
+                                        else -> {
+                                            formattedTime to "VS"
+                                        }
+                                    }
+
+                                    results.add(
+                                        FootballMatch(
+                                            id = "espn_$mId",
+                                            time = matchTime,
+                                            tournament = leagueName,
+                                            teamA = if (teamHome.isNotEmpty()) teamHome else "Đội Nhà",
+                                            teamB = if (teamAway.isNotEmpty()) teamAway else "Đội Khách",
+                                            channelName = chName,
+                                            channelSlug = chSlug,
+                                            score = matchScore,
+                                            logoA = logoHome,
+                                            logoB = logoAway,
+                                            isLive = isLiveMatch
+                                        )
+                                    )
+                                }
+                            }
+                        }
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+
+            val sorted = results.sortedWith(
+                compareBy(
+                    { match ->
+                        when {
+                            match.isLive -> 0
+                            match.time.contains("🔴") -> 0
+                            match.score == "VS" -> 1
+                            else -> 2
+                        }
+                    }
+                )
+            )
+
+            if (sorted.isNotEmpty()) {
+                cachedMatches = sorted
+                lastMatchFetchTime = System.currentTimeMillis()
+                sorted
+            } else {
+                cachedMatches ?: emptyList()
+            }
+        }
+    }
+
+    fun getLiveMatches(): List<FootballMatch> {
+        return cachedMatches ?: emptyList()
     }
 
     fun setMatchAlarm(context: Context, match: FootballMatch, enable: Boolean) {

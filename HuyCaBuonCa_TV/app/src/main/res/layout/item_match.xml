@@ -3,9 +3,11 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="8dp"
-    android:background="@drawable/bg_btn_secondary"
+    android:background="@drawable/bg_match_card"
+    android:clickable="true"
+    android:focusable="true"
     android:orientation="vertical"
-    android:padding="10dp">
+    android:padding="12dp">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -20,7 +22,7 @@
             android:layout_weight="1"
             android:text="🏆 UEFA Champions League"
             android:textColor="@color/brand_cyan"
-            android:textSize="11sp"
+            android:textSize="12sp"
             android:textStyle="bold" />
 
         <TextView
@@ -28,31 +30,40 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="#D32F2F"
-            android:paddingStart="6dp"
-            android:paddingTop="2dp"
-            android:paddingEnd="6dp"
-            android:paddingBottom="2dp"
+            android:paddingStart="8dp"
+            android:paddingTop="3dp"
+            android:paddingEnd="8dp"
+            android:paddingBottom="3dp"
             android:text="LIVE"
             android:textColor="#FFFFFF"
-            android:textSize="9sp"
+            android:textSize="10sp"
             android:textStyle="bold" />
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
+        android:layout_marginTop="8dp"
         android:gravity="center_vertical"
         android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/imgTeamA"
+            android:layout_width="26dp"
+            android:layout_height="26dp"
+            android:layout_marginEnd="6dp"
+            android:scaleType="fitCenter" />
 
         <TextView
             android:id="@+id/txtTeamA"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:ellipsize="end"
+            android:maxLines="1"
             android:text="Real Madrid"
             android:textColor="#FFFFFF"
-            android:textSize="13sp"
+            android:textSize="14sp"
             android:textStyle="bold" />
 
         <TextView
@@ -63,7 +74,7 @@
             android:paddingEnd="12dp"
             android:text="VS"
             android:textColor="#FFD700"
-            android:textSize="12sp"
+            android:textSize="14sp"
             android:textStyle="bold" />
 
         <TextView
@@ -71,20 +82,29 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:ellipsize="end"
             android:gravity="end"
+            android:maxLines="1"
             android:text="Man City"
             android:textColor="#FFFFFF"
-            android:textSize="13sp"
+            android:textSize="14sp"
             android:textStyle="bold" />
+
+        <ImageView
+            android:id="@+id/imgTeamB"
+            android:layout_width="26dp"
+            android:layout_height="26dp"
+            android:layout_marginStart="6dp"
+            android:scaleType="fitCenter" />
     </LinearLayout>
 
     <TextView
         android:id="@+id/txtMatchChannel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:text="📺 Kênh: VTV6 Thể Thao HD (FPT) • Bấm để xem"
-        android:textColor="#FFD700"
+        android:layout_marginTop="6dp"
+        android:text="📺 Kênh: True Premier Football 1 HD • Bấm để xem"
+        android:textColor="#8899A6"
         android:textSize="11sp" />
 
 </LinearLayout>

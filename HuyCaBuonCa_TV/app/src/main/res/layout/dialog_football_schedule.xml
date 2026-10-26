@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:background="#161B26"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="20dp">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="⚽ Lịch Thi Đấu Bóng Đá Trực Tiếp"
         android:textColor="#FFD700"
-        android:textSize="16sp"
+        android:textSize="18sp"
         android:textStyle="bold" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="2dp"
-        android:text="Chạm vào trận đấu để mở kênh trực tiếp tương ứng"
+        android:layout_marginTop="4dp"
+        android:text="Cập nhật tự động thời gian thực • Bấm OK trên Remote để xem trực tiếp"
         android:textColor="#8899A6"
         android:textSize="12sp" />
 
@@ -29,20 +29,41 @@
         android:layout_marginBottom="12dp"
         android:background="#2E3C56" />
 
+    <ProgressBar
+        android:id="@+id/progressLoadingMatches"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_margin="30dp"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/txtEmptyMatches"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:padding="30dp"
+        android:text="Đang tải lịch thi đấu..."
+        android:textColor="#8899A6"
+        android:textSize="14sp"
+        android:visibility="gone" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerMatches"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:maxHeight="420dp" />
+        android:layout_height="0dp"
+        android:layout_weight="1" />
 
     <Button
         android:id="@+id/btnCloseSchedule"
         android:layout_width="match_parent"
-        android:layout_height="42dp"
-        android:layout_marginTop="16dp"
+        android:layout_height="44dp"
+        android:layout_marginTop="12dp"
         android:background="@drawable/bg_btn_selector"
-        android:text="Đóng"
-        android:textColor="#FFFFFF"
-        android:textSize="13sp" />
+        android:focusable="true"
+        android:text="Đóng (Quay Lại)"
+        android:textColor="@color/selector_btn_text"
+        android:textSize="13sp"
+        android:textStyle="bold" />
 
 </LinearLayout>

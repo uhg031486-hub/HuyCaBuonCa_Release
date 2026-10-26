@@ -5,8 +5,10 @@ import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.huycabuonca.mobile.R
 import com.huycabuonca.mobile.model.FootballMatch
 
@@ -19,9 +21,11 @@ class MatchAdapter(
     class MatchViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val txtTournament: TextView = view.findViewById(R.id.txtMatchTournament)
         val txtTime: TextView = view.findViewById(R.id.txtMatchTime)
+        val imgTeamA: ImageView = view.findViewById(R.id.imgTeamA)
         val txtTeamA: TextView = view.findViewById(R.id.txtTeamA)
         val txtScore: TextView = view.findViewById(R.id.txtMatchScore)
         val txtTeamB: TextView = view.findViewById(R.id.txtTeamB)
+        val imgTeamB: ImageView = view.findViewById(R.id.imgTeamB)
         val txtChannel: TextView = view.findViewById(R.id.txtMatchChannel)
         val btnReminder: TextView = view.findViewById(R.id.btnMatchReminder)
     }
@@ -39,10 +43,35 @@ class MatchAdapter(
 
         holder.txtTournament.text = match.tournament
         holder.txtTime.text = match.time
+
+        if (match.isLive || match.time.contains("LIVE") || match.time.contains("🔴")) {
+            holder.txtTime.setBackgroundColor(Color.parseColor("#D32F2F"))
+            holder.txtTime.text = if (match.time.contains("🔴")) match.time else "🔴 LIVE"
+        } else if (match.time.contains("Hết Giờ") || match.time.contains("FT")) {
+            holder.txtTime.setBackgroundColor(Color.parseColor("#37474F"))
+            holder.txtTime.text = "🏁 Hết Giờ"
+        } else {
+            holder.txtTime.setBackgroundColor(Color.parseColor("#1565C0"))
+        }
+
         holder.txtTeamA.text = match.teamA
         holder.txtScore.text = match.score
         holder.txtTeamB.text = match.teamB
         holder.txtChannel.text = "⚡ 4 Server (Thập Cẩm, Xôi Lạc, Về Bờ, Vệ Tinh)"
+
+        if (match.logoA.isNotEmpty()) {
+            Glide.with(context).load(match.logoA).into(holder.imgTeamA)
+            holder.imgTeamA.visibility = View.VISIBLE
+        } else {
+            holder.imgTeamA.visibility = View.GONE
+        }
+
+        if (match.logoB.isNotEmpty()) {
+            Glide.with(context).load(match.logoB).into(holder.imgTeamB)
+            holder.imgTeamB.visibility = View.VISIBLE
+        } else {
+            holder.imgTeamB.visibility = View.GONE
+        }
 
         fun updateReminderUI(active: Boolean) {
             if (active) {
@@ -58,7 +87,6 @@ class MatchAdapter(
 
         updateReminderUI(isReminderSet)
 
-        // Chỉ đặt thông báo cho đúng trận này
         holder.btnReminder.setOnClickListener {
             isReminderSet = !isReminderSet
             sp.edit().putBoolean("remind_${match.id}", isReminderSet).apply()

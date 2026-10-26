@@ -29,6 +29,14 @@
         android:layout_marginBottom="12dp"
         android:background="#2E3C56" />
 
+    <ProgressBar
+        android:id="@+id/progressLoadingMatches"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_margin="16dp"
+        android:visibility="gone" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerMatches"
         android:layout_width="match_parent"

@@ -6,6 +6,13 @@ import android.graphics.Typeface
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
+import android.widget.ProgressBar
+import android.widget.TextView
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import com.huycabuonca.tv.ui.adapter.MatchAdapter
+import com.huycabuonca.tv.model.FootballMatch
+
 import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -343,6 +350,10 @@ class MainActivity : AppCompatActivity() {
                     }
                     isSelected = true
                     currentFilterUrl = filter.endpointUrl
+
+                    if (filter.endpointUrl == "tv://schedule" || (filter.endpointUrl == "tv://football" && filter.title.contains("Lịch"))) {
+                        showScheduleDialog()
+                    }
                     loadMovies(reset = true)
                 }
             }
@@ -387,6 +398,10 @@ class MainActivity : AppCompatActivity() {
                     }
                     isSelected = true
                     currentFilterUrl = filter.endpointUrl
+
+                    if (filter.endpointUrl == "tv://schedule" || (filter.endpointUrl == "tv://football" && filter.title.contains("Lịch"))) {
+                        showScheduleDialog()
+                    }
                     loadMovies(reset = true)
                 }
             }
@@ -458,6 +473,152 @@ class MainActivity : AppCompatActivity() {
                 }
             } else {
                 isLastPage = true
+            }
+        }
+    }
+
+    private fun showScheduleDialog() {
+        val dialog = androidx.appcompat.app.AlertDialog.Builder(this).create()
+        val view = layoutInflater.inflate(R.layout.dialog_football_schedule, null)
+        dialog.setView(view)
+
+        val progress = view.findViewById<ProgressBar>(R.id.progressLoadingMatches)
+        val recycler = view.findViewById<RecyclerView>(R.id.recyclerMatches)
+        val txtEmpty = view.findViewById<TextView>(R.id.txtEmptyMatches)
+        val btnClose = view.findViewById<Button>(R.id.btnCloseSchedule)
+
+        recycler.layoutManager = LinearLayoutManager(this)
+        if (progress != null) progress.visibility = View.VISIBLE
+        if (txtEmpty != null) txtEmpty.visibility = View.GONE
+
+        btnClose.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        lifecycleScope.launch {
+            val matches = withContext(Dispatchers.IO) {
+                MovieRepository.fetchRealtimeLiveMatches()
+            }
+            if (progress != null) progress.visibility = View.GONE
+
+            if (matches.isEmpty()) {
+                if (txtEmpty != null) {
+                    txtEmpty.text = "Hiện chưa có trận đấu nào được lên lịch hôm nay."
+                    txtEmpty.visibility = View.VISIBLE
+                }
+            } else {
+                if (txtEmpty != null) txtEmpty.visibility = View.GONE
+                recycler.adapter = MatchAdapter(matches) { match: FootballMatch ->
+                    dialog.dismiss()
+                    showMatchServerSelectionDialog(match)
+                }
+                recycler.requestFocus()
+            }
+        }
+
+        dialog.show()
+        dialog.window?.let { win ->
+            val width = (resources.displayMetrics.widthPixels * 0.78).toInt()
+            val height = (resources.displayMetrics.heightPixels * 0.85).toInt()
+            win.setLayout(width, height)
+            win.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT))
+        }
+    }
+
+    private fun showMatchServerSelectionDialog(match: FootballMatch) {
+        val servers = arrayOf(
+            "📡 Server 1: Kênh Vệ Tinh Trực Tiếp (True Premier / Astro 1080p 50fps)",
+            "🇻🇳 Server 2: Kênh Thể Thao Việt Nam (VTV6 Thể Thao HD)",
+            "🟢 Server 3: Thập Cẩm HD (BLV Tiếng Việt)",
+            "🔵 Server 4: Xôi Lạc HD (BLV Tiếng Việt)",
+            "🟣 Server 5: Về Bờ HD (BLV Tiếng Việt)"
+        )
+
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("⚽ ${match.teamA} vs ${match.teamB}")
+            .setItems(servers) { _, which ->
+                when (which) {
+                    0 -> playSatelliteMatch(match)
+                    1 -> playVietnamSportsMatch(match)
+                    2, 3, 4 -> {
+                        val url = when (which) {
+                            2 -> "https://thapcamtv.to/"
+                            3 -> "https://xoilac-tv.college/"
+                            else -> "https://vebotv.live/"
+                        }
+                        try {
+                            val browserIntent = Intent(Intent.ACTION_VIEW, android.net.Uri.parse(url))
+                            startActivity(browserIntent)
+                        } catch (e: Exception) {
+                            Toast.makeText(this, "Vui lòng cài đặt trình duyệt để xem luồng này", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+            }
+            .setNegativeButton("Đóng", null)
+            .show()
+    }
+
+    private fun playSatelliteMatch(match: FootballMatch) {
+        lifecycleScope.launch(Dispatchers.IO) {
+            val allTv = MovieRepository.getAllTvChannels(this@MainActivity)
+            val found = allTv.find { it.id == match.channelSlug }
+                ?: allTv.find { it.name.contains("True Premier", ignoreCase = true) }
+                ?: allTv.find { it.name.contains("Astro", ignoreCase = true) }
+                ?: allTv.find { it.group.contains("Vệ Tinh", ignoreCase = true) }
+
+            withContext(Dispatchers.Main) {
+                if (found != null) {
+                    val defaultTvLogo = "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png"
+                    val finalLogo = if (found.logo.isNotEmpty()) found.logo else defaultTvLogo
+                    val movieItem = MovieItem(
+                        id = found.id,
+                        name = "[Vệ Tinh] ${match.teamA} vs ${match.teamB}",
+                        slug = found.id,
+                        originName = "[${match.tournament}]",
+                        thumbUrl = finalLogo,
+                        posterUrl = finalLogo,
+                        year = "2026",
+                        quality = "1080p",
+                        episodeCurrent = "Trực Tiếp",
+                        source = MovieSource.XEMTIVI
+                    )
+                    playTvChannelDirectly(movieItem)
+                } else {
+                    Toast.makeText(this@MainActivity, "Không tìm thấy luồng vệ tinh tương ứng", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
+    private fun playVietnamSportsMatch(match: FootballMatch) {
+        lifecycleScope.launch(Dispatchers.IO) {
+            val allTv = MovieRepository.getAllTvChannels(this@MainActivity)
+            val found = allTv.find { it.id == "sports_vn_vtv6" }
+                ?: allTv.find { it.name.contains("VTV6", ignoreCase = true) }
+                ?: allTv.find { it.name.contains("Thể Thao", ignoreCase = true) }
+                ?: allTv.find { it.name.contains("VTV5", ignoreCase = true) }
+
+            withContext(Dispatchers.Main) {
+                if (found != null) {
+                    val defaultTvLogo = "https://raw.githubusercontent.com/Chanhnh/vbook-ext/main/tivi/icon.png"
+                    val finalLogo = if (found.logo.isNotEmpty()) found.logo else defaultTvLogo
+                    val movieItem = MovieItem(
+                        id = found.id,
+                        name = "[Thể Thao VN] ${match.teamA} vs ${match.teamB}",
+                        slug = found.id,
+                        originName = "[${match.tournament}]",
+                        thumbUrl = finalLogo,
+                        posterUrl = finalLogo,
+                        year = "2026",
+                        quality = "1080p",
+                        episodeCurrent = "Trực Tiếp",
+                        source = MovieSource.XEMTIVI
+                    )
+                    playTvChannelDirectly(movieItem)
+                } else {
+                    Toast.makeText(this@MainActivity, "Không tìm thấy kênh thể thao phù hợp", Toast.LENGTH_SHORT).show()
+                }
             }
         }
     }

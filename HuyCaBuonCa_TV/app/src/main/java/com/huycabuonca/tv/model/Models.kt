@@ -65,5 +65,8 @@ data class FootballMatch(
     val teamB: String,
     val channelName: String,
     val channelSlug: String,
-    val score: String = "VS"
+    val score: String = "VS",
+    val logoA: String = "",
+    val logoB: String = "",
+    val isLive: Boolean = false
 ) : Serializable

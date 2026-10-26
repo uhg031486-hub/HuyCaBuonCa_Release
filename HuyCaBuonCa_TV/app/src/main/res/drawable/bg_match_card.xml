@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Khi remote TV hover/focus vÃ o tráº­n Ä‘áº¥u -->
+    <item android:state_focused="true">
+        <shape android:shape="rectangle">
+            <solid android:color="#26344E" />
+            <stroke android:width="2.5dp" android:color="#FFD700" />
+            <corners android:radius="8dp" />
+        </shape>
+    </item>
+    <item android:state_pressed="true">
+        <shape android:shape="rectangle">
+            <solid android:color="#2A3B59" />
+            <stroke android:width="2.5dp" android:color="#FFD700" />
+            <corners android:radius="8dp" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#171F2D" />
+            <stroke android:width="1dp" android:color="#2E3C56" />
+            <corners android:radius="8dp" />
+        </shape>
+    </item>
+</selector>

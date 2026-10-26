@@ -5,6 +5,7 @@ import android.graphics.Color
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
+import android.widget.ProgressBar
 import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -166,30 +167,39 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun showScheduleDialog() {
-        val matches = MovieRepository.getLiveMatches()
+        private fun showScheduleDialog() {
         val dialog = androidx.appcompat.app.AlertDialog.Builder(this).create()
         val view = layoutInflater.inflate(R.layout.dialog_football_schedule, null)
         dialog.setView(view)
 
         val recycler = view.findViewById<RecyclerView>(R.id.recyclerMatches)
+        val progress = view.findViewById<ProgressBar>(R.id.progressLoadingMatches)
         recycler.layoutManager = LinearLayoutManager(this)
-        recycler.adapter = MatchAdapter(
-            matches = matches,
-            onMatchClick = { match ->
-                dialog.dismiss()
-                showMatchServerSelectionDialog(match)
-            },
-            onReminderToggle = { match, enabled ->
-                MovieRepository.setMatchAlarm(this@MainActivity, match, enabled)
-                val msg = if (enabled) {
-                    "🔔 Đã bật chuông! App sẽ cảnh báo trước 15 phút khi trận ${match.teamA} vs ${match.teamB} bắt đầu!"
-                } else {
-                    "🔕 Đã hủy thông báo trận ${match.teamA} vs ${match.teamB}"
-                }
-                Toast.makeText(this@MainActivity, msg, Toast.LENGTH_SHORT).show()
+        if (progress != null) progress.visibility = View.VISIBLE
+
+        lifecycleScope.launch {
+            val matches = withContext(Dispatchers.IO) {
+                MovieRepository.fetchRealtimeLiveMatches()
             }
-        )
+            if (progress != null) progress.visibility = View.GONE
+
+            recycler.adapter = MatchAdapter(
+                matches = matches,
+                onMatchClick = { match ->
+                    dialog.dismiss()
+                    showMatchServerSelectionDialog(match)
+                },
+                onReminderToggle = { match, enabled ->
+                    MovieRepository.setMatchAlarm(this@MainActivity, match, enabled)
+                    val msg = if (enabled) {
+                        "🔔 Đã bật chuông! App sẽ cảnh báo trước 15 phút khi trận ${match.teamA} vs ${match.teamB} bắt đầu!"
+                    } else {
+                        "🔕 Đã hủy thông báo trận ${match.teamA} vs ${match.teamB}"
+                    }
+                    Toast.makeText(this@MainActivity, msg, Toast.LENGTH_SHORT).show()
+                }
+            )
+        }
 
         view.findViewById<Button>(R.id.btnCloseSchedule).setOnClickListener {
             dialog.dismiss()

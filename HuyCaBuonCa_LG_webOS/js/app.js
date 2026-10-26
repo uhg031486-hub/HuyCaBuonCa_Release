@@ -1809,110 +1809,98 @@
   // Tải danh sách trận đấu Ngoại Hạng Anh thời gian thực từ FPL Premier League API
   async function fetchRealtimePremierLeagueMatches() {
     try {
-      const resp = await fetch('https://fantasy.premierleague.com/api/fixtures/?future=1');
-      if (!resp.ok) throw new Error('FPL API Network Error');
-      const fixtures = await resp.json();
-      
-      const upcoming = fixtures.slice(0, 10).map(f => {
-        const teamH = PREMIER_LEAGUE_TEAMS[f.team_h] || { name: `Đội ${f.team_h}`, short: `T${f.team_h}`, logo: DEFAULT_TV_LOGO };
-        const teamA = PREMIER_LEAGUE_TEAMS[f.team_a] || { name: `Đội ${f.team_a}`, short: `T${f.team_a}`, logo: DEFAULT_TV_LOGO };
-        
-        const dateObj = new Date(f.kickoff_time);
-        // Chuyển sang giờ Việt Nam GMT+7
-        const vnHour = String(dateObj.getHours()).padStart(2, '0');
-        const vnMin = String(dateObj.getMinutes()).padStart(2, '0');
-        const vnDay = String(dateObj.getDate()).padStart(2, '0');
-        const vnMonth = String(dateObj.getMonth() + 1).padStart(2, '0');
-        
-        const timeFormatted = `${vnHour}:${vnMin} • ${vnDay}/${vnMonth}`;
-        const isLive = f.started && !f.finished;
-        const isFinished = f.finished;
-        
-        let scoreStr = `${timeFormatted}`;
-        if (isLive) {
-          scoreStr = `🔴 LIVE • ${f.team_h_score ?? 0} - ${f.team_a_score ?? 0}`;
-        } else if (isFinished) {
-          scoreStr = `FT • ${f.team_h_score ?? 0} - ${f.team_a_score ?? 0}`;
-        }
-
-        return {
-          id: `fpl_${f.id}`,
-          tournament: `🏴󠁧󠁢󠁥󠁮󠁧󠁿 Ngoại Hạng Anh • Vòng ${f.event || 8}`,
-          teamA: teamH.name,
-          teamB: teamA.name,
-          teamALogo: teamH.logo,
-          teamBLogo: teamA.logo,
-          time: scoreStr,
-          timeStr: timeFormatted,
-          kickoffTime: dateObj.getTime(),
-          isLive: isLive,
-          isFinished: isFinished
-        };
-      });
-      return upcoming;
-    } catch (err) {
-      console.warn("Dùng fallback fixtures Ngoại Hạng Anh do FPL fetch không được:", err);
-      // Fallback danh sách các trận đấu thực tế vòng 8 & 9 Ngoại Hạng Anh
-      return [
-        {
-          id: "fpl_fallback_1",
-          tournament: "🏴󠁧󠁢󠁥󠁮󠁧󠁿 Ngoại Hạng Anh • Vòng 8",
-          teamA: "Aston Villa",
-          teamB: "Manchester City",
-          teamALogo: "https://resources.premierleague.com/premierleague/badges/70/t7.png",
-          teamBLogo: "https://resources.premierleague.com/premierleague/badges/70/t43.png",
-          time: "18:30 • Thứ 7 (24/10)",
-          timeStr: "18:30 • 24/10",
-          kickoffTime: Date.now() + 3600000 * 24,
-          isLive: false,
-          isFinished: false
-        },
-        {
-          id: "fpl_fallback_2",
-          tournament: "🏴󠁧󠁢󠁥󠁮󠁧󠁿 Ngoại Hạng Anh • Vòng 8",
-          teamA: "Arsenal",
-          teamB: "Everton",
-          teamALogo: "https://resources.premierleague.com/premierleague/badges/70/t3.png",
-          teamBLogo: "https://resources.premierleague.com/premierleague/badges/70/t11.png",
-          time: "21:00 • Thứ 7 (24/10)",
-          timeStr: "21:00 • 24/10",
-          kickoffTime: Date.now() + 3600000 * 26,
-          isLive: false,
-          isFinished: false
-        },
-        {
-          id: "fpl_fallback_3",
-          tournament: "🏴󠁧󠁢󠁥󠁮󠁧󠁿 Ngoại Hạng Anh • Vòng 8",
-          teamA: "Chelsea",
-          teamB: "Tottenham Hotspur",
-          teamALogo: "https://resources.premierleague.com/premierleague/badges/70/t8.png",
-          teamBLogo: "https://resources.premierleague.com/premierleague/badges/70/t6.png",
-          time: "23:30 • Thứ 7 (24/10)",
-          timeStr: "23:30 • 24/10",
-          kickoffTime: Date.now() + 3600000 * 29,
-          isLive: false,
-          isFinished: false
-        },
-        {
-          id: "fpl_fallback_4",
-          tournament: "🏴󠁧󠁢󠁥󠁮󠁧󠁿 Ngoại Hạng Anh • Vòng 8",
-          teamA: "Liverpool",
-          teamB: "Manchester United",
-          teamALogo: "https://resources.premierleague.com/premierleague/badges/70/t14.png",
-          teamBLogo: "https://resources.premierleague.com/premierleague/badges/70/t1.png",
-          time: "22:30 • Chủ Nhật (25/10)",
-          timeStr: "22:30 • 25/10",
-          kickoffTime: Date.now() + 3600000 * 48,
-          isLive: false,
-          isFinished: false
-        }
+      const leagues = [
+        { code: 'eng.1', name: '🏴󠁧󠁢󠁥󠁮󠁧󠁿 Ngoại Hạng Anh', chName: 'True Premier Football 1 HD', chSlug: 'sports_sat_true_premier_1' },
+        { code: 'uefa.champions', name: '🏆 Cúp C1 Châu Âu', chName: 'True Premier Football 2 HD', chSlug: 'sports_sat_true_premier_2' },
+        { code: 'esp.1', name: '🇪🇸 La Liga', chName: 'Astro SuperSport 1 HD', chSlug: 'sports_sat_astro_supersport_1' },
+        { code: 'ita.1', name: '🇮🇹 Serie A', chName: 'Astro SuperSport 2 HD', chSlug: 'sports_sat_astro_supersport_2' }
       ];
+
+      const matches = [];
+
+      for (const lg of leagues) {
+        try {
+          const resp = await fetch(https://site.api.espn.com/apis/site/v2/sports/soccer//scoreboard);
+          if (!resp.ok) continue;
+          const data = await resp.json();
+          const events = data.events || [];
+          for (const ev of events) {
+            const mId = ev.id || '';
+            const dateIso = ev.date || '';
+            let timeFormatted = 'Hôm nay';
+            if (dateIso) {
+              const d = new Date(dateIso);
+              const vnHour = String(d.getHours()).padStart(2, '0');
+              const vnMin = String(d.getMinutes()).padStart(2, '0');
+              const vnDay = String(d.getDate()).padStart(2, '0');
+              const vnMonth = String(d.getMonth() + 1).padStart(2, '0');
+              timeFormatted = ${vnHour}: • /;
+            }
+
+            const state = ev.status?.type?.state || 'pre';
+            const detail = ev.status?.type?.detail || '';
+            const comps = ev.competitions?.[0]?.competitors || [];
+            let teamHome = '', teamAway = '', logoHome = DEFAULT_TV_LOGO, logoAway = DEFAULT_TV_LOGO;
+            let scoreHome = '', scoreAway = '';
+            for (const item of comps) {
+              const tName = item.team?.displayName || '';
+              const tLogo = item.team?.logo || DEFAULT_TV_LOGO;
+              const sc = item.score || '';
+              if (item.homeAway === 'home') {
+                teamHome = tName; logoHome = tLogo; scoreHome = sc;
+              } else {
+                teamAway = tName; logoAway = tLogo; scoreAway = sc;
+              }
+            }
+
+            const isLive = (state === 'in');
+            const isFinished = (state === 'post');
+            let scoreStr = timeFormatted;
+            if (isLive) {
+              scoreStr = 🔴 LIVE •  - ;
+            } else if (isFinished) {
+              scoreStr = 🏁 FT •  - ;
+            }
+
+            matches.push({
+              id: espn_,
+              tournament: lg.name,
+              teamA: teamHome || 'Đội Nhà',
+              teamB: teamAway || 'Đội Khách',
+              teamALogo: logoHome,
+              teamBLogo: logoAway,
+              time: scoreStr,
+              timeStr: timeFormatted,
+              isLive: isLive,
+              isFinished: isFinished,
+              channelName: lg.chName,
+              channelSlug: lg.chSlug
+            });
+          }
+        } catch (e) {
+          console.warn('Lỗi fetch giải:', lg.code, e);
+        }
+      }
+
+      if (matches.length > 0) {
+        matches.sort((a, b) => {
+          if (a.isLive && !b.isLive) return -1;
+          if (!a.isLive && b.isLive) return 1;
+          if (!a.isFinished && b.isFinished) return -1;
+          if (a.isFinished && !b.isFinished) return 1;
+          return 0;
+        });
+        return matches;
+      }
+      return [];
+    } catch (err) {
+      console.warn('ESPN fetch error:', err);
+      return [];
     }
   }
 
   // --- Modal Chọn 1 Trong 4 Server Xem Trực Tiếp ---
-  function openMatchServerModal(match) {
-    activeMatchForServer = match;
+  orServer = match;
     const modal = document.getElementById('matchServerModal');
     if (!modal) return;
 
@@ -2909,28 +2897,39 @@
   }
 
   // --- Football Matches Modal ---
-  function showScheduleModal() {
+  async function showScheduleModal() {
     const modal = document.getElementById('scheduleModal');
     const list = document.getElementById('matchesList');
+    list.innerHTML = '<div style="color:#8899a6; padding:20px; text-align:center;">Đang tải lịch thi đấu thời gian thực...</div>';
+    modal.style.display = 'flex';
+
+    const matches = await fetchRealtimePremierLeagueMatches();
+    const displayList = matches.length > 0 ? matches : LIVE_MATCHES;
     list.innerHTML = '';
 
-    LIVE_MATCHES.forEach(m => {
+    displayList.forEach(m => {
       const card = document.createElement('div');
       card.className = 'match-card focusable';
       card.tabIndex = 0;
       card.innerHTML = `
-        <div>
-          <div class="match-league">${m.tournament}</div>
-          <div class="match-teams">${m.teamA} vs ${m.teamB}</div>
-          <div class="match-channel">📺 Kênh: ${m.channelName} • Bấm để xem trực tiếp</div>
+        <div style="display:flex; align-items:center; gap:10px;">
+          ${m.teamALogo ? `<img src="${m.teamALogo}" style="width:24px; height:24px; object-fit:contain;" />` : ''}
+          <div>
+            <div class="match-league">${m.tournament}</div>
+            <div class="match-teams">${m.teamA} vs ${m.teamB}</div>
+            <div class="match-channel">📺 Kênh: ${m.channelName || 'Vệ Tinh Trực Tiếp'} • Bấm để xem</div>
+          </div>
+          ${m.teamBLogo ? `<img src="${m.teamBLogo}" style="width:24px; height:24px; object-fit:contain; margin-left:auto;" />` : ''}
         </div>
-        <div class="match-time-badge">${m.time}</div>
+        <div class="match-time-badge" style="${m.isLive ? 'background:#d32f2f;' : (m.isFinished ? 'background:#37474f;' : '')}">${m.time}</div>
       `;
       card.addEventListener('click', () => {
         modal.style.display = 'none';
         const channels = getAllChannels();
         const found = channels.find(c => c.id === m.channelSlug) ||
-                      channels.find(c => c.name.toLowerCase().includes('vtv6') || c.name.toLowerCase().includes('bóng'));
+                      channels.find(c => (c.name || '').toLowerCase().includes('true premier')) ||
+                      channels.find(c => (c.name || '').toLowerCase().includes('astro')) ||
+                      channels.find(c => (c.name || '').toLowerCase().includes('vtv6') || (c.name || '').toLowerCase().includes('bóng'));
         if (found) {
           playTvChannelDirectly({
             id: found.id,
@@ -2939,13 +2938,11 @@
             posterUrl: found.logo
           });
         } else {
-          showToast(`Kênh "${m.channelName}" đang được chuẩn bị.`);
+          showToast(`Kênh "${m.channelName || 'Trực Tiếp'}" đang được chuẩn bị.`);
         }
       });
       list.appendChild(card);
     });
-
-    modal.style.display = 'flex';
   }
 
   document.getElementById('btnScheduleHeader').addEventListener('click', showScheduleModal);
