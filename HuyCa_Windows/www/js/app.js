@@ -167,7 +167,7 @@
     var S21 = 5, S22 = 9, S23 = 14, S24 = 20;
     var S31 = 4, S32 = 11, S33 = 16, S34 = 23;
     var S41 = 6, S42 = 10, S43 = 15, S44 = 21;
-    str = utf8Encode(string);
+    var str = utf8Encode(string);
     x = convertToWordArray(str);
     a = 0x67452301; b = 0xEFCDAB89; c = 0x98BADCFE; d = 0x10325476;
     for (k = 0; k < x.length; k += 16) {
@@ -249,11 +249,17 @@
   // --- GaMoMePhim Native Client (v2.7) ---
   const GaMoMePhimClient = {
     BASE_URL: 'https://gamomephim.com',
+    getProxyUrl(target) {
+      if (window.location.protocol.startsWith('http')) {
+        return `/api/proxy?url=${encodeURIComponent(target)}`;
+      }
+      return target;
+    },
     async getDramaList(filterUrl, page = 1) {
       try {
         const genrePath = filterUrl.replace('gamomephim://', '');
         const targetUrl = page <= 1 ? `${this.BASE_URL}/${genrePath}` : `${this.BASE_URL}/${genrePath}?page=${page}`;
-        const resp = await fetch(targetUrl);
+        const resp = await fetch(this.getProxyUrl(targetUrl));
         if (!resp.ok) return [];
         const html = await resp.text();
         const pattern = /<a[^>]+title="([^"]+)"[^>]+href="\/phim\/([^"]+)".*?<img[^>]+src="([^"]+)"/gs;
@@ -289,7 +295,7 @@
     async getDramaDetail(cleanSlug) {
       try {
         const targetUrl = `${this.BASE_URL}/${cleanSlug}`;
-        const resp = await fetch(targetUrl);
+        const resp = await fetch(this.getProxyUrl(targetUrl));
         if (!resp.ok) return null;
         const html = await resp.text();
 
@@ -366,7 +372,7 @@
     async search(keyword) {
       try {
         const targetUrl = `${this.BASE_URL}/tim-kiem?q=${encodeURIComponent(keyword)}`;
-        const resp = await fetch(targetUrl);
+        const resp = await fetch(this.getProxyUrl(targetUrl));
         if (!resp.ok) return [];
         const html = await resp.text();
         const pattern = /<a[^>]+title="([^"]+)"[^>]+href="\/phim\/([^"]+)".*?<img[^>]+src="([^"]+)"/gs;
@@ -403,6 +409,12 @@
   // --- FreeReels Native API Client (v2.5) ---
   const FreeReelsClient = {
     API_BASE: 'https://apiv2.free-reels.com/frv2-api',
+    getProxyUrl(target) {
+      if (window.location.protocol.startsWith('http')) {
+        return `/api/proxy?url=${encodeURIComponent(target)}`;
+      }
+      return target;
+    },
     APP_SECRET: '8IAcbWyCsVhYv82S2eofRqK1DF3nNDAv',
     APP_NAME: 'com.freereels.app',
     APP_VERSION: '2.2.81',
@@ -434,7 +446,7 @@
           sign: sign
         };
 
-        const resp = await fetch(`${this.API_BASE}/anonymous/login`, {
+        const resp = await fetch(this.getProxyUrl(`${this.API_BASE}/anonymous/login`), {
           method: 'POST',
           headers: {
             'Accept': 'application/json',
@@ -512,7 +524,7 @@
       }
 
       try {
-        const resp = await fetch(url, { headers });
+        const resp = await fetch(this.getProxyUrl(url), { headers });
         if (!resp.ok) return [];
         const res = await resp.json();
         const data = res.data || {};
@@ -577,7 +589,7 @@
         timestamp: String(Date.now())
       };
       try {
-        const resp = await fetch(`${this.API_BASE}/search/drama`, {
+        const resp = await fetch(this.getProxyUrl(`${this.API_BASE}/search/drama`), {
           method: 'POST',
           headers: headers,
           body: JSON.stringify(body)
@@ -623,7 +635,7 @@
 
       const url = `${this.API_BASE}/drama/info_v2?series_id=${encodeURIComponent(seriesId)}&scene=search`;
       try {
-        const resp = await fetch(url, { headers });
+        const resp = await fetch(this.getProxyUrl(url), { headers });
         if (!resp.ok) return null;
         const res = await resp.json();
         const data = res.data || {};
@@ -706,7 +718,7 @@
       const url = `${this.API_BASE}/drama/unlock_episode`;
       const body = JSON.stringify({ series_id: seriesId, episode_id: episodeId, lang: 'vi' });
       try {
-        const resp = await fetch(url, { method: 'POST', headers, body });
+        const resp = await fetch(this.getProxyUrl(url), { method: 'POST', headers, body });
         if (!resp.ok) return null;
         const res = await resp.json();
         const data = res.data || {};
@@ -733,7 +745,7 @@
       if (!headers) return [];
       try {
         const url = `${this.API_BASE}/search/feed?keyword=${encodeURIComponent(keyword)}&page=1`;
-        const resp = await fetch(url, { headers });
+        const resp = await fetch(this.getProxyUrl(url), { headers });
         if (!resp.ok) return [];
         const res = await resp.json();
         const items = res.data?.items || res.data?.list || [];
@@ -889,6 +901,8 @@
       { name: "❤️ Yêu Thích", url: "app://favorites" }
     ]
   };
+
+  const SUB_FILTERS = SUB_SOURCES;
 
   const FILTERS = {
     KKPHIM: [
@@ -1085,7 +1099,7 @@
           animeSubBar.appendChild(btn);
         });
       }
-      filters = SUB_FILTERS[currentSubSource] || [];
+      filters = (SUB_FILTERS && SUB_FILTERS[currentSubSource]) || FILTERS[currentSource] || [];
     } else {
       if (animeSubBar) animeSubBar.style.display = 'none';
       filters = FILTERS[currentSource] || [];
@@ -1501,10 +1515,10 @@
 
         if (reset) {
           currentMoviesList = uniqueItems;
-          renderMovieGrid(currentMoviesList, false);
+          renderCards(currentMoviesList, true);
         } else {
           currentMoviesList.push(...uniqueItems);
-          renderMovieGrid(currentMoviesList, true);
+          renderCards(currentMoviesList, false);
         }
 
         if (paginationContainer) paginationContainer.style.display = 'flex';
@@ -1530,12 +1544,12 @@
         let gmMovies = await GaMoMePhimClient.getDramaList(currentFilter, currentPage);
         if (reset) {
           currentMoviesList = gmMovies;
-          renderMovieGrid(currentMoviesList, false);
+          renderCards(currentMoviesList, true);
         } else {
           const seen = new Set(currentMoviesList.map(m => m.slug));
           const unique = gmMovies.filter(m => !seen.has(m.slug));
           currentMoviesList.push(...unique);
-          renderMovieGrid(currentMoviesList, true);
+          renderCards(currentMoviesList, false);
         }
 
         if (paginationContainer) paginationContainer.style.display = 'flex';
@@ -1820,7 +1834,7 @@
 
       for (const lg of leagues) {
         try {
-          const resp = await fetch(https://site.api.espn.com/apis/site/v2/sports/soccer//scoreboard);
+          const resp = await fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/${lg.code}/scoreboard`);
           if (!resp.ok) continue;
           const data = await resp.json();
           const events = data.events || [];
@@ -1834,7 +1848,7 @@
               const vnMin = String(d.getMinutes()).padStart(2, '0');
               const vnDay = String(d.getDate()).padStart(2, '0');
               const vnMonth = String(d.getMonth() + 1).padStart(2, '0');
-              timeFormatted = ${vnHour}: • /;
+              timeFormatted = `${vnHour}:${vnMin} • ${vnDay}/${vnMonth}`;
             }
 
             const state = ev.status?.type?.state || 'pre';
@@ -1857,13 +1871,13 @@
             const isFinished = (state === 'post');
             let scoreStr = timeFormatted;
             if (isLive) {
-              scoreStr = 🔴 LIVE •  - ;
+              scoreStr = `🔴 LIVE • ${scoreHome} - ${scoreAway}`;
             } else if (isFinished) {
-              scoreStr = 🏁 FT •  - ;
+              scoreStr = `🏁 FT • ${scoreHome} - ${scoreAway}`;
             }
 
             matches.push({
-              id: espn_,
+              id: `espn_${mId}`,
               tournament: lg.name,
               teamA: teamHome || 'Đội Nhà',
               teamB: teamAway || 'Đội Khách',
@@ -1899,8 +1913,10 @@
     }
   }
 
-  // --- Modal Chọn 1 Trong 4 Server Xem Trực Tiếp ---
-  orServer = match;
+  // --- Modal Chọn 1 Trong 5 Server Xem Trực Tiếp ---
+  let selectedMatchForServer = null;
+  function showMatchServerModal(match) {
+    selectedMatchForServer = match;
     const modal = document.getElementById('matchServerModal');
     if (!modal) return;
 
@@ -2044,6 +2060,7 @@
   }
 
   // --- Render Movie Cards (7 Columns) ---
+  const renderMovieGrid = (items, reset) => renderCards(items, reset);
   function renderCards(items, reset) {
     const grid = document.getElementById('mainGrid');
     if (reset) grid.innerHTML = '';
@@ -2536,23 +2553,64 @@
     const video = document.getElementById('videoPlayer');
     container.style.display = 'flex';
 
+    // Tự động mở toàn màn hình và xoay ngang như PlayerActivity trên Android APK
+    const isMobileDevice = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) || (window.innerWidth <= 800 && window.innerHeight > window.innerWidth);
+    if (isMobileDevice) {
+      try {
+        const reqFs = container.requestFullscreen || container.webkitRequestFullscreen || container.mozRequestFullScreen || container.msRequestFullscreen;
+        if (reqFs) reqFs.call(container).catch(() => {});
+      } catch(e) {}
+
+      try {
+        if (screen.orientation && screen.orientation.lock) {
+          screen.orientation.lock('landscape').catch(() => {});
+        } else if (screen.lockOrientation) {
+          screen.lockOrientation('landscape');
+        }
+      } catch(e) {}
+    }
+
     document.getElementById('playerTitle').textContent = title;
     document.getElementById('playerSub').textContent = subtitle;
 
     const zapBtn = document.getElementById('btnQuickZap');
     const nextBtn = document.getElementById('btnNextEpisode');
+    const prevBtn = document.getElementById('btnPrevEpisode');
     const progress = document.getElementById('progressContainer');
     const iframe = document.getElementById('playerIframe');
     const isEmbed = !streamUrl.includes('.m3u8') && !streamUrl.includes('.mp4');
 
     if (isTv) {
-      zapBtn.style.display = 'block';
-      nextBtn.style.display = 'none';
-      progress.style.display = 'none';
+      if (zapBtn) zapBtn.style.display = 'block';
+      if (nextBtn) nextBtn.style.display = 'none';
+      if (prevBtn) prevBtn.style.display = 'none';
+      if (progress) progress.style.display = 'none';
     } else {
-      zapBtn.style.display = 'none';
-      nextBtn.style.display = 'block';
-      progress.style.display = 'flex';
+      if (zapBtn) zapBtn.style.display = 'none';
+      if (progress) progress.style.display = 'flex';
+
+      let totalEps = 0;
+      if (detail && detail.episodes && detail.episodes[serverIndex || 0] && detail.episodes[serverIndex || 0].server_data) {
+        totalEps = detail.episodes[serverIndex || 0].server_data.length;
+      } else if (detail && detail.items) {
+        totalEps = detail.items.length;
+      }
+
+      if (totalEps > 1) {
+        if (prevBtn) {
+          prevBtn.style.display = 'inline-flex';
+          prevBtn.disabled = (epIndex <= 0);
+          prevBtn.style.opacity = (epIndex <= 0) ? '0.4' : '1';
+        }
+        if (nextBtn) {
+          nextBtn.style.display = 'inline-flex';
+          nextBtn.disabled = (epIndex >= totalEps - 1);
+          nextBtn.style.opacity = (epIndex >= totalEps - 1) ? '0.4' : '1';
+        }
+      } else {
+        if (prevBtn) prevBtn.style.display = 'none';
+        if (nextBtn) nextBtn.style.display = 'none';
+      }
     }
 
     // Reset video & HLS & Subtitles
@@ -2725,6 +2783,32 @@
     resetOverlayTimer();
   });
 
+  const btnPrevEpisode = document.getElementById('btnPrevEpisode');
+  if (btnPrevEpisode) {
+    btnPrevEpisode.addEventListener('click', async () => {
+      if (currentPlayingDetail && currentPlayingDetail.episodes) {
+        const eps = currentPlayingDetail.episodes[currentServerIndex || 0].server_data;
+        if (currentEpisodeIndex > 0) {
+          const prevEp = eps[currentEpisodeIndex - 1];
+          let stream = prevEp.link_m3u8;
+          let sub = prevEp.subtitleUrl;
+          if (stream && stream.startsWith('freereels_unlock:')) {
+            showToast('🔓 Đang mở khóa tập trước...');
+            const seriesId = (currentPlayingMovie.id || '').replace('freereels:', '');
+            const unl = await FreeReelsClient.unlockEpisode(seriesId, prevEp.slug);
+            if (unl && unl.streamUrl) {
+              stream = unl.streamUrl;
+              if (unl.subtitleUrl) sub = unl.subtitleUrl;
+            }
+          }
+          playVideo(stream, currentPlayingMovie.name, prevEp.name, currentPlayingMovie, currentPlayingDetail, currentEpisodeIndex - 1, currentServerIndex, false, sub);
+        } else {
+          showToast('Đây là tập đầu tiên!');
+        }
+      }
+    });
+  }
+
   const btnNextEpisode = document.getElementById('btnNextEpisode');
   if (btnNextEpisode) {
     btnNextEpisode.addEventListener('click', async () => {
@@ -2782,7 +2866,68 @@
     });
   }
 
+  // --- Single Click & Double Click trên màn hình Video ---
+  // Click 1 lần: Tạm dừng / Tiếp tục phát
+  // Double click: Thoát toàn màn hình & Thu nhỏ mở lại menu chọn tập (detailModal)
+  let playerClickTimer = null;
+  const playerCont = document.getElementById('playerContainer');
+  if (playerCont) {
+    playerCont.addEventListener('click', (e) => {
+      if (e.target.closest('button, input, select, .zapping-panel, .player-buttons-row, .player-top')) {
+        return;
+      }
+      if (playerClickTimer) {
+        clearTimeout(playerClickTimer);
+        playerClickTimer = null;
+        if (document.fullscreenElement) {
+          if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
+        }
+        closePlayer(true);
+      } else {
+        playerClickTimer = setTimeout(() => {
+          playerClickTimer = null;
+          btnPlayPause.click();
+        }, 260);
+      }
+    });
+  }
+
+  // --- Bấm chuột vào vùng trống ngoài màn hình tương đương nút quay lại, back ---
+  document.querySelectorAll('.modal-overlay').forEach(modal => {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        if (modal.id === 'detailModal') {
+          const btn = document.getElementById('btnCloseDetail');
+          if (btn) btn.click();
+          else modal.style.display = 'none';
+        } else if (modal.id === 'searchModal') {
+          const btn = document.getElementById('btnCloseSearch');
+          if (btn) btn.click();
+          else modal.style.display = 'none';
+        } else if (modal.id === 'scheduleModal') {
+          const btn = document.getElementById('btnCloseSchedule');
+          if (btn) btn.click();
+          else modal.style.display = 'none';
+        } else if (modal.id === 'iptvModal') {
+          const btn = document.getElementById('btnCloseIptv');
+          if (btn) btn.click();
+          else modal.style.display = 'none';
+        } else if (modal.id === 'matchServerModal') {
+          modal.style.display = 'none';
+        } else {
+          modal.style.display = 'none';
+        }
+      }
+    });
+  });
+
   function closePlayer(shouldReturnToDetail = true) {
+    if (document.fullscreenElement) {
+      document.exitFullscreen().catch(() => {});
+    }
+    if (screen.orientation && screen.orientation.unlock) {
+      screen.orientation.unlock();
+    }
     if (video) {
       if (currentPlayingMovie && video.duration) {
         saveHistory(currentPlayingMovie, video.currentTime, video.duration, document.getElementById('playerSub').textContent);
@@ -3580,29 +3725,121 @@
     });
   }
 
-  let scrollThrottle = null;
-  window.addEventListener('scroll', () => {
-    if (btnScrollTop) {
-      if (window.scrollY > 400) {
-        btnScrollTop.style.display = 'flex';
+  // --- PWA Native App Install Prompt Handler ---
+  let deferredInstallPrompt = null;
+  const btnInstallApp = document.getElementById('btnInstallApp');
+  const bannerInstall = document.getElementById('btnBannerInstall');
+  const bannerClose = document.getElementById('btnBannerClose');
+  const pwaBanner = document.getElementById('pwaInstallBanner');
+
+  // Kiểm tra nếu ứng dụng đã được cài đặt hoặc đang chạy ở chế độ App Standalone (Windows PWA, Mobile PWA)
+  const isInstalledApp = window.matchMedia('(display-mode: standalone)').matches ||
+                         window.matchMedia('(display-mode: window-controls-overlay)').matches ||
+                         window.navigator.standalone === true ||
+                         document.referrer.includes('android-app://') ||
+                         localStorage.getItem('app_installed') === 'true';
+
+  if (isInstalledApp) {
+    if (btnInstallApp) btnInstallApp.style.display = 'none';
+    if (pwaBanner) pwaBanner.style.display = 'none';
+  } else {
+    // Chỉ hiển thị nút cài đặt trên trình duyệt thông thường
+    if (btnInstallApp) btnInstallApp.style.display = 'inline-flex';
+  }
+
+  window.addEventListener('appinstalled', () => {
+    localStorage.setItem('app_installed', 'true');
+    if (btnInstallApp) btnInstallApp.style.display = 'none';
+    if (pwaBanner) pwaBanner.style.display = 'none';
+  });
+
+  if (bannerClose && pwaBanner) {
+    bannerClose.addEventListener('click', () => {
+      pwaBanner.style.display = 'none';
+      sessionStorage.setItem('hide_pwa_banner', '1');
+    });
+    if (sessionStorage.getItem('hide_pwa_banner') === '1') {
+      pwaBanner.style.display = 'none';
+    }
+  }
+
+  function handleInstallClick() {
+    if (deferredInstallPrompt) {
+      deferredInstallPrompt.prompt();
+      deferredInstallPrompt.userChoice.then((choice) => {
+        if (choice.outcome === 'accepted') {
+          showToast('Đang cài đặt Huy Cá vào máy của bạn...');
+          if (pwaBanner) pwaBanner.style.display = 'none';
+          if (btnInstallApp) btnInstallApp.style.display = 'none';
+        }
+        deferredInstallPrompt = null;
+      });
+    } else {
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+      if (isIOS) {
+        showToast('Trên iPhone: Bấm nút Chia Sẻ [⬆] ở dưới thanh Safari -> Chọn "Thêm vào MH chính" để cài app!', 6000);
       } else {
-        btnScrollTop.style.display = 'none';
+        showToast('Trên Android: Bấm vào dấu 3 chấm [⋮] góc trên bên phải trình duyệt Chrome -> Chọn "Cài đặt ứng dụng"!', 6000);
       }
     }
+  }
 
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredInstallPrompt = e;
+    if (pwaBanner && sessionStorage.getItem('hide_pwa_banner') !== '1') {
+      pwaBanner.style.display = 'flex';
+    }
+    if (btnInstallApp) {
+      btnInstallApp.style.display = 'inline-flex';
+    }
+  });
+
+  if (bannerInstall) bannerInstall.addEventListener('click', handleInstallClick);
+  if (btnInstallApp) btnInstallApp.addEventListener('click', handleInstallClick);
+
+  // --- Tự Động Tải Thêm Phim (Infinite Scroll) Chuẩn Mobile & Desktop ---
+  function triggerAutoLoadMore() {
     if (currentSource === 'XEMTIVI' || currentFilter === 'app://favorites' || currentFilter === 'app://history') return;
     if (isLoading) return;
 
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
+    const windowHeight = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight || 0;
+    const scrollHeight = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight, 1);
+
+    if (btnScrollTop) {
+      btnScrollTop.style.display = scrollTop > 400 ? 'flex' : 'none';
+    }
+
+    // Khi cuộn còn cách đáy 800px -> Tự động nạp tiếp trang mới ngay lập tức
+    if (scrollTop + windowHeight >= scrollHeight - 800) {
+      loadMoreMovies();
+    }
+  }
+
+  let scrollThrottle = null;
+  function handleScrollThrottled() {
     if (scrollThrottle) return;
     scrollThrottle = setTimeout(() => {
       scrollThrottle = null;
-      const scrollPos = window.innerHeight + window.scrollY;
-      const docHeight = document.documentElement.scrollHeight;
-      if (scrollPos >= docHeight - 600) {
-        loadMoreMovies();
+      triggerAutoLoadMore();
+    }, 80);
+  }
+
+  window.addEventListener('scroll', handleScrollThrottled, { passive: true });
+  document.addEventListener('scroll', handleScrollThrottled, { passive: true });
+  window.addEventListener('touchmove', handleScrollThrottled, { passive: true });
+
+  // Dùng thêm IntersectionObserver để bắt dính 100% khi phần đáy xuất hiện trên màn hình
+  const paginEl = document.getElementById('paginationContainer');
+  if (paginEl && 'IntersectionObserver' in window) {
+    const bottomObserver = new IntersectionObserver((entries) => {
+      if (entries[0] && entries[0].isIntersecting) {
+        triggerAutoLoadMore();
       }
-    }, 120);
-  });
+    }, { rootMargin: '600px 0px' });
+    bottomObserver.observe(paginEl);
+  }
 
   // --- Remote Security & Maintenance Check ---
   function checkRemoteSecurityLock() {
