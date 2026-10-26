@@ -439,6 +439,7 @@ object MovieRepository {
 
     fun getShortDramaSubSources(): List<FilterItem> {
         return listOf(
+            FilterItem("🎙️ Gà Mờ Mê Phim (Thuyết Minh & Vietsub)", "freereels_sub://gamomephim"),
             FilterItem("📱 FreeReels Dọc (Phụ Đề & Lồng Tiếng)", "freereels_sub://freereels"),
             FilterItem("🇻🇳 Tiểu Kịch Vietsub (KKPhim HD)", "freereels_sub://kkphim"),
             FilterItem("💎 DramaBox Hot (Tuyển Chọn Hay Nhất)", "freereels_sub://dramabox")
@@ -447,6 +448,16 @@ object MovieRepository {
 
     fun getShortDramaFilters(subSourceUrl: String): List<FilterItem> {
         return when (subSourceUrl) {
+            "freereels_sub://gamomephim" -> listOf(
+                FilterItem("🔥 Toàn Bộ Tiểu Kịch Mới", "gamomephim://the-loai/hien-dai"),
+                FilterItem("👑 Cưới Trước Yêu Sau & Tổng Tài", "gamomephim://the-loai/cuoi-truoc-yeu-sau"),
+                FilterItem("🐉 Trọng Sinh & Báo Thù", "gamomephim://the-loai/trong-sinh"),
+                FilterItem("🏰 Cổ Trang & Xuyên Không", "gamomephim://the-loai/co-trang"),
+                FilterItem("🍵 Trà Xanh Nam & Ngược Tâm", "gamomephim://the-loai/tra-xanh-nam"),
+                FilterItem("✨ Chữa Lành & Thanh Xuân", "gamomephim://the-loai/chua-lanh"),
+                FilterItem("🕒 Lịch Sử Xem", "app://history"),
+                FilterItem("❤️ Yêu Thích", "app://favorites")
+            )
             "freereels_sub://kkphim" -> listOf(
                 FilterItem("🔥 Tất Cả Tiểu Kịch Vietsub", "https://phimapi.com/v1/api/the-loai/phim-ngan"),
                 FilterItem("👑 Tổng Tài & Bá Đạo", "short_filter://tong-tai"),
@@ -624,6 +635,9 @@ object MovieRepository {
 
                 } else if (source == MovieSource.FREEREELS) {
                     when {
+                        filterUrl.startsWith("gamomephim://") -> {
+                            GaMoMePhimClient.getDramaList(client, filterUrl, page)
+                        }
                         filterUrl.startsWith("short_filter://") || filterUrl.startsWith("short_dramabox://") -> {
                             fetchShortDramaList(filterUrl, page)
                         }
@@ -657,7 +671,11 @@ object MovieRepository {
                     val realSlug = slug.removePrefix("nguonc:")
                     NguonCClient.getFilmDetail(client, gson, realSlug)
                 } else if (source == MovieSource.FREEREELS) {
-                    FreeReelsClient.getDramaDetail(client, gson, slug)
+                    if (slug.startsWith("gamomephim:")) {
+                        GaMoMePhimClient.getDramaDetail(client, slug.removePrefix("gamomephim:"))
+                    } else {
+                        FreeReelsClient.getDramaDetail(client, gson, slug)
+                    }
                 } else if (source == MovieSource.XEMTIVI) {
                     val channel = cachedTvChannels?.find { it.id == slug }
                     if (channel != null) {
@@ -715,6 +733,10 @@ object MovieRepository {
                     it.name.contains(keyword, ignoreCase = true) || it.group.contains(keyword, ignoreCase = true)
                 } ?: emptyList()
                 results.addAll(tvMatches.map { it.toMovieItem() })
+
+                // 1.5. Tim trong Ga Mo Me Phim
+                val gaMoMatches = GaMoMePhimClient.search(client, keyword)
+                results.addAll(gaMoMatches)
 
                 // 2. Tim trong Phim Ngan FreeReels
                 val freeReelsMatches = FreeReelsClient.search(client, gson, keyword)
@@ -1551,6 +1573,243 @@ object FreeReelsClient {
                                 )
                             )
                         }
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return list
+    }
+}
+
+object GaMoMePhimClient {
+    private const val BASE_URL = "https://gamomephim.com"
+
+    fun getDramaList(client: OkHttpClient, filterUrl: String, page: Int): List<MovieItem> {
+        val list = mutableListOf<MovieItem>()
+        try {
+            val genrePath = filterUrl.removePrefix("gamomephim://")
+            val targetUrl = if (page <= 1) {
+                "$BASE_URL/$genrePath"
+            } else {
+                "$BASE_URL/$genrePath?page=$page"
+            }
+
+            val req = Request.Builder()
+                .url(targetUrl)
+                .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
+                .build()
+
+            client.newCall(req).execute().use { resp ->
+                if (!resp.isSuccessful) return emptyList()
+                val html = resp.body?.string() ?: return emptyList()
+
+                val pattern = java.util.regex.Pattern.compile(
+                    """<a[^>]+title="([^"]+)"[^>]+href="/phim/([^"]+)".*?<img[^>]+src="([^"]+)"""",
+                    java.util.regex.Pattern.DOTALL
+                )
+                val matcher = pattern.matcher(html)
+                val seen = mutableSetOf<String>()
+
+                while (matcher.find()) {
+                    val title = matcher.group(1)?.trim() ?: ""
+                    val slug = matcher.group(2)?.trim() ?: ""
+                    val thumb = matcher.group(3)?.trim() ?: ""
+
+                    if (slug.isNotEmpty() && !seen.contains(slug)) {
+                        seen.add(slug)
+                        list.add(
+                            MovieItem(
+                                id = "gamomephim:$slug",
+                                name = title,
+                                slug = "gamomephim:$slug",
+                                originName = "Gà Mờ Mê Phim • Thuyết Minh",
+                                thumbUrl = thumb,
+                                posterUrl = thumb,
+                                year = "2026",
+                                quality = "🎙️ Thuyết Minh & Vietsub",
+                                episodeCurrent = "Full Bộ HD",
+                                source = MovieSource.FREEREELS
+                            )
+                        )
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return list
+    }
+
+    fun getDramaDetail(client: OkHttpClient, cleanSlug: String): MovieDetail? {
+        return try {
+            val targetUrl = "$BASE_URL/$cleanSlug"
+            val req = Request.Builder()
+                .url(targetUrl)
+                .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
+                .build()
+
+            client.newCall(req).execute().use { resp ->
+                if (!resp.isSuccessful) return null
+                val html = resp.body?.string() ?: return null
+
+                // Title
+                var title = ""
+                val titleMatcher = java.util.regex.Pattern.compile("""<h1[^>]*>([^<]+)</h1>""").matcher(html)
+                if (titleMatcher.find()) {
+                    title = titleMatcher.group(1)?.trim() ?: ""
+                }
+                if (title.isEmpty()) {
+                    title = cleanSlug.replace("-", " ")
+                }
+
+                // Description
+                var desc = "Phim ngắn tiểu kịch lồng tiếng/thuyết minh tiếng Việt trọn bộ cực hay."
+                val descMatcher = java.util.regex.Pattern.compile("""description\\":\\"([^\\"]+)\\"""").matcher(html)
+                if (descMatcher.find()) {
+                    desc = descMatcher.group(1)?.replace("\\n", "\n") ?: desc
+                }
+
+                // Thumb / Poster
+                var thumb = ""
+                val thumbMatcher = java.util.regex.Pattern.compile("""https://r2\.gamomephim\.com/thumbnails/[^"'\s<>]+""").matcher(html)
+                if (thumbMatcher.find()) {
+                    thumb = thumbMatcher.group()
+                }
+
+                // Video Streams (MP4)
+                val streamMatcher = java.util.regex.Pattern.compile("""https://r2\.gamomephim\.com/videos/[^\s"'<>]+\.mp4""").matcher(html)
+                val streamUrls = mutableListOf<String>()
+                while (streamMatcher.find()) {
+                    val sUrl = streamMatcher.group().replace("\\", "")
+                    if (!streamUrls.contains(sUrl)) {
+                        streamUrls.add(sUrl)
+                    }
+                }
+
+                val tmStream = streamUrls.find { it.contains("-tm.mp4") }
+                val subStream = streamUrls.find { it.contains("-sub.mp4") }
+
+                val servers = mutableListOf<ServerGroup>()
+                if (tmStream != null) {
+                    servers.add(
+                        ServerGroup(
+                            serverName = "🎙️ Thuyết Minh (Gà Mờ Mê Phim)",
+                            episodes = listOf(
+                                EpisodeItem(
+                                    name = "Tập Full (Thuyết Minh)",
+                                    slug = cleanSlug,
+                                    filename = "Tập Full (Thuyết Minh)",
+                                    linkM3u8 = tmStream,
+                                    linkEmbed = null,
+                                    subtitleUrl = null
+                                )
+                            )
+                        )
+                    )
+                }
+
+                if (subStream != null) {
+                    servers.add(
+                        ServerGroup(
+                            serverName = "🇻🇳 Vietsub (Gà Mờ Mê Phim)",
+                            episodes = listOf(
+                                EpisodeItem(
+                                    name = "Tập Full (Vietsub)",
+                                    slug = cleanSlug,
+                                    filename = "Tập Full (Vietsub)",
+                                    linkM3u8 = subStream,
+                                    linkEmbed = null,
+                                    subtitleUrl = null
+                                )
+                            )
+                        )
+                    )
+                }
+
+                if (servers.isEmpty() && streamUrls.isNotEmpty()) {
+                    servers.add(
+                        ServerGroup(
+                            serverName = "▶️ Bản Chuẩn HD (Gà Mờ Mê Phim)",
+                            episodes = listOf(
+                                EpisodeItem(
+                                    name = "Tập Full",
+                                    slug = cleanSlug,
+                                    filename = "Tập Full",
+                                    linkM3u8 = streamUrls[0],
+                                    linkEmbed = null,
+                                    subtitleUrl = null
+                                )
+                            )
+                        )
+                    )
+                }
+
+                MovieDetail(
+                    id = "gamomephim:$cleanSlug",
+                    name = title,
+                    slug = "gamomephim:$cleanSlug",
+                    originName = "Gà Mờ Mê Phim Full Trọn Bộ",
+                    content = desc,
+                    thumbUrl = thumb,
+                    posterUrl = thumb,
+                    year = "2026",
+                    time = "Trọn bộ",
+                    quality = "Full HD",
+                    lang = if (tmStream != null) "Thuyết Minh" else "Vietsub",
+                    source = MovieSource.FREEREELS,
+                    servers = servers
+                )
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
+
+    fun search(client: OkHttpClient, keyword: String): List<MovieItem> {
+        val list = mutableListOf<MovieItem>()
+        try {
+            val encoded = java.net.URLEncoder.encode(keyword, "UTF-8")
+            val targetUrl = "$BASE_URL/tim-kiem?q=$encoded"
+            val req = Request.Builder()
+                .url(targetUrl)
+                .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
+                .build()
+
+            client.newCall(req).execute().use { resp ->
+                if (!resp.isSuccessful) return emptyList()
+                val html = resp.body?.string() ?: return emptyList()
+
+                val pattern = java.util.regex.Pattern.compile(
+                    """<a[^>]+title="([^"]+)"[^>]+href="/phim/([^"]+)".*?<img[^>]+src="([^"]+)"""",
+                    java.util.regex.Pattern.DOTALL
+                )
+                val matcher = pattern.matcher(html)
+                val seen = mutableSetOf<String>()
+
+                while (matcher.find()) {
+                    val title = matcher.group(1)?.trim() ?: ""
+                    val slug = matcher.group(2)?.trim() ?: ""
+                    val thumb = matcher.group(3)?.trim() ?: ""
+
+                    if (slug.isNotEmpty() && !seen.contains(slug)) {
+                        seen.add(slug)
+                        list.add(
+                            MovieItem(
+                                id = "gamomephim:$slug",
+                                name = title,
+                                slug = "gamomephim:$slug",
+                                originName = "Gà Mờ Mê Phim • Thuyết Minh",
+                                thumbUrl = thumb,
+                                posterUrl = thumb,
+                                year = "2026",
+                                quality = "🎙️ Thuyết Minh & Vietsub",
+                                episodeCurrent = "Full Bộ HD",
+                                source = MovieSource.FREEREELS
+                            )
+                        )
                     }
                 }
             }

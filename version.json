@@ -1,12 +1,12 @@
 {
-  "versionCode": 17,
-  "versionName": "2.6",
-  "title": "Huy Cá v2.6 - Icon 3D Khủng Long Mới, Tự Động Tiếp Tục Xem Đúng Tập & Vị Trí Dở Dang, Nút Xóa Lịch Sử Chữ Đen Nền Vàng",
-  "changelog": "- Cập nhật biểu tượng ứng dụng 3D Khủng Long Bạo Chúa xé toạc màn hình mới trên toàn bộ 4 nền tảng (Android TV, Android Mobile, Windows PC, LG webOS).\n- Tự động khôi phục đúng tập và đúng vị trí đang xem dở (Resume Playback): Tự động lưu tiến trình xem và khi mở lại phim, lập tức phát đúng tập dở dang và tua đến đúng phút/giây đã dừng lại, không cần phải tua thủ công hay bị ép về tập 1.\n- Nâng cấp nút 'Xóa Lịch Sử' trên Android TV: Thiết kế chữ đen tuyền trên nền vàng kim nổi bật, độ tương phản cao, dễ nhìn từ xa.\n- Tinh gọn các thanh banner và danh mục trên TV, hiển thị nhiều hàng phim hơn.\n- Xóa sạch toàn bộ quảng cáo chèn trong luồng phát video trên tất cả các nguồn phim.",
+  "versionCode": 18,
+  "versionName": "2.7",
+  "title": "Huy Cá v2.7 - Tích Hợp Kho Phim Ngắn Mới (Gà Mờ Mê Phim Thuyết Minh & Vietsub), Tinh Chỉnh Icon Chuẩn Đẹp Tự Nhiên",
+  "changelog": "- Tích hợp thêm Kho Phim Ngắn / Tiểu Kịch Mới: Kết nối nguồn Gà Mờ Mê Phim với hàng trăm bộ tiểu kịch hot nhất (Tổng tài, Trọng sinh, Cung đấu, Chiến thần...), hỗ trợ trọn bộ cả 2 bản Thuyết Minh và Vietsub Full HD, phát trực tiếp siêu tốc.\n- Tinh chỉnh biểu tượng ứng dụng (Icon): Đưa kích thước icon về tỉ lệ vừa vặn, cân đối, chuẩn đẹp tự nhiên trên màn hình TV, điện thoại, máy tính và webOS, không còn bị phóng to bè viền.\n- Hoàn thiện hệ sinh thái Phim Ngắn Đa Nguồn: Dễ dàng chuyển đổi linh hoạt giữa Gà Mờ Mê Phim (Thuyết minh), FreeReels (Phim dọc mở khóa full tập) và Tiểu Kịch Vietsub (KKPhim).\n- Tối ưu hiệu năng phát video và bộ nhớ đệm.",
   "isMaintenanceLocked": false,
   "maintenanceMessage": "Hệ thống đang bảo trì nội bộ định kỳ. Vui lòng quay lại sau hoặc liên hệ Quản trị viên Huy Cá để biết thêm chi tiết!",
-  "windowsZipUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v2.6/HuyCa_Windows_v2.6.zip",
-  "mobileApkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v2.6/HuyCaBuonCa_Mobile_v2.6.apk",
-  "tvApkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v2.6/HuyCaBuonCa_TV_v2.6.apk",
-  "lgIpkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v2.6/HuyCaBuonCa_LG_webOS_v2.6.ipk"
+  "windowsZipUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v2.7/HuyCa_Windows_v2.7.zip",
+  "mobileApkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v2.7/HuyCaBuonCa_Mobile_v2.7.apk",
+  "tvApkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v2.7/HuyCaBuonCa_TV_v2.7.apk",
+  "lgIpkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v2.7/HuyCaBuonCa_LG_webOS_v2.7.ipk"
 }
