@@ -275,60 +275,66 @@ export const TV_CHANNELS = [
     id: "true-premier-1",
     name: "True Premier Football HD 1",
     group: "Ngoại Hạng Anh 4K",
-    logo: "/logos/true_premier_1.svg",
+    logo: "./logos/true_premier_1.svg",
     quality: "FHD 50FPS",
     status: "ĐANG TRỰC TIẾP",
-    currentShow: "Trực Tiếp: Man City vs Liverpool",
-    streamUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+    currentShow: "Trực Tiếp: Giải Ngoại Hạng Anh EPL",
+    streamUrl: "https://amg00378-amg00378c4-freelivesports-emea-5637.playouts.now.amagi.tv/playlist.m3u8",
+    isLiveTv: true
   },
   {
     id: "true-premier-2",
     name: "True Premier Football HD 2",
     group: "Ngoại Hạng Anh 4K",
-    logo: "/logos/true_premier_2.svg",
+    logo: "./logos/true_premier_2.svg",
     quality: "FHD 50FPS",
     status: "ĐANG TRỰC TIẾP",
-    currentShow: "Trực Tiếp: Arsenal vs Chelsea",
-    streamUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4"
+    currentShow: "Trực Tiếp: Tâm Điểm Bóng Đá Châu Âu",
+    streamUrl: "https://amg26268-amg26268c14-freelivesports-emea-10267.playouts.now.amagi.tv/playlist.m3u8",
+    isLiveTv: true
   },
   {
-    id: "astro-supersport-1",
-    name: "Astro SuperSport 1 HD",
+    id: "bein-sports-1",
+    name: "beIN SPORTS 1 HD",
     group: "Thể Thao Quốc Tế",
-    logo: "/logos/astro_supersport_1.svg",
+    logo: "./logos/bein_sports_1.svg",
     quality: "FHD 60FPS",
     status: "ĐANG PHÁT",
-    currentShow: "Champions League Đỉnh Cao",
-    streamUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4"
+    currentShow: "Champions League & La Liga Đỉnh Cao",
+    streamUrl: "https://bein-xtra-bein.amagi.tv/playlist.m3u8",
+    isLiveTv: true
   },
   {
     id: "sky-sports-pl",
     name: "Sky Sports Premier League",
     group: "Thể Thao Quốc Tế",
-    logo: "/logos/sky_sports_pl.svg",
+    logo: "./logos/sky_sports_pl.svg",
     quality: "1080p Crystal",
     status: "LIVE STUDIO",
     currentShow: "Super Sunday Matchday Studio",
-    streamUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4"
+    streamUrl: "https://skynewsau-live-premium.akamaized.net/hls/live/2105307/foxsportsnews/master.m3u8",
+    isLiveTv: true
   },
   {
-    id: "vtvcab-on-sports",
-    name: "VTVCab ON Sports News",
+    id: "vtv1-hd",
+    name: "VTV1 HD Thời Sự",
     group: "Truyền Hình Việt Nam",
-    logo: "/logos/vtvcab_on.svg",
+    logo: "./logos/vtv1.png",
     quality: "Full HD",
     status: "TRỰC TIẾP",
-    currentShow: "Bản Tin Thể Thao 24/7",
-    streamUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4"
+    currentShow: "Thời Sự & Chính Luận VTV1",
+    streamUrl: "https://vtvgolivepre-vtv02.vtvdigital.vn/hls/vtv/live/vtv1__vtv1080p-h264/index.m3u8",
+    isLiveTv: true
   },
   {
-    id: "bbc-earth-hd",
-    name: "BBC Earth HD",
-    group: "Khám Phá Thiên Nhiên",
-    logo: "/logos/bbc_earth.svg",
-    quality: "4K HDR",
-    status: "ĐANG PHÁT",
-    currentShow: "Hành Tinh Kỳ Thú: Vùng Đất Băng Giá",
-    streamUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyBlazes.mp4"
+    id: "vtv3-hd",
+    name: "VTV3 HD Giải Trí",
+    group: "Truyền Hình Việt Nam",
+    logo: "./logos/vtv3.png",
+    quality: "Full HD",
+    status: "TRỰC TIẾP",
+    currentShow: "Giải Trí, Gameshow & Điện Ảnh",
+    streamUrl: "https://vtvgolivepre-vtv02.vtvdigital.vn/hls/vtv/live/vtv3__vtv1080p-h264/index.m3u8",
+    isLiveTv: true
   }
 ];

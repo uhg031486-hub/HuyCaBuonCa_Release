@@ -12,7 +12,7 @@ export default function Footer() {
           <div className="space-y-4 md:col-span-2">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#E50914] to-[#990000] p-0.5 shadow-neon-red flex items-center justify-center">
-                <img src="/logo.png" alt="Logo" className="w-full h-full object-cover rounded-[10px]" />
+                <img src="./logo.png" alt="Logo" className="w-full h-full object-cover rounded-[10px]" />
               </div>
               <span className="text-xl font-black text-white tracking-wider">
                 HUY CÁ <span className="text-[#E50914]">CINEMA</span>
@@ -40,12 +40,12 @@ export default function Footer() {
 
           {/* Col 3: Hỗ Trợ & Thiết Bị */}
           <div className="space-y-3">
-            <h4 className="text-sm font-bold text-white uppercase tracking-wider">Hệ Sinh Thái Huy Cá</h4>
+            <h4 className="text-sm font-bold text-white uppercase tracking-wider">Tải App Đa Nền Tảng</h4>
             <ul className="space-y-2 text-sm">
-              <li><span className="text-gray-300">Huy Cá Mobile (Android / iOS)</span></li>
-              <li><span className="text-gray-300">Huy Cá Smart TV (Android TV / LG webOS)</span></li>
-              <li><span className="text-gray-300">Huy Cá Desktop (Windows 10/11)</span></li>
-              <li><span className="text-gray-300">Huy Cá Web Streaming 4K</span></li>
+              <li><a href="/api/download?file=mobile" download="HuyCa_Mobile_v2.8.apk" className="text-[#F5C518] hover:underline font-semibold">⬇️ Huy Cá Mobile (Android APK)</a></li>
+              <li><a href="/api/download?file=tv" download="HuyCa_TV_v2.8.apk" className="text-gray-300 hover:text-white transition-colors">⬇️ Huy Cá Android TV (APK TV)</a></li>
+              <li><a href="/api/download?file=windows" download="HuyCa_Windows_v2.8.zip" className="text-gray-300 hover:text-white transition-colors">⬇️ Huy Cá Windows PC (.ZIP)</a></li>
+              <li><a href="/api/download?file=lg" download="HuyCa_LG_webOS_v2.8.ipk" className="text-gray-300 hover:text-white transition-colors">⬇️ Huy Cá LG Smart TV (.IPK)</a></li>
             </ul>
           </div>
 

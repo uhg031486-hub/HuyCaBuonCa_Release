@@ -1099,18 +1099,10 @@ body {
 }
 
 
-/* PWA Install Banner */
+/* PWA Install Banner (Đã hợp nhất vào nút Cài Đặt duy nhất trên Header) */
+#pwaInstallBanner,
 .pwa-install-banner {
-  background: linear-gradient(90deg, #0f172a, #1e1b4b, #172554);
-  border-bottom: 2px solid #eab308;
-  padding: 8px 16px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  position: sticky;
-  top: 0;
-  z-index: 90;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+  display: none !important;
 }
 .pwa-banner-content {
   display: flex;
@@ -1769,19 +1761,17 @@ body.mode-tv .focusable:focus {
    ========================================================================== */
 
 /* --- MOBILE EDITION (Chuẩn 100% như APK Android ở Ảnh 1) --- */
-html.mode-mobile,
-body.mode-mobile,
-@media (max-width: 768px) {
-  /* 1. Header Bar: Siêu gọn gàng 1 hàng ~50px */
+@media (max-width: 800px) {
+  /* 1. Header Bar: Siêu gọn gàng 1 hàng ~48px */
   .header-bar {
     display: flex !important;
     flex-direction: row !important;
     align-items: center !important;
     justify-content: space-between !important;
-    padding: 10px 14px !important;
+    padding: 8px 12px !important;
     background: #121722 !important;
     border-bottom: 1px solid #1e2638 !important;
-    gap: 10px !important;
+    gap: 8px !important;
     height: auto !important;
     min-height: 48px !important;
   }
@@ -1827,7 +1817,7 @@ body.mode-mobile,
     letter-spacing: 0.3px !important;
   }
 
-  /* Header Actions: Chỉ hiển thị 2 nút [Lưu/Cài đặt] và [Tìm kiếm] như Ảnh 1 */
+  /* Header Actions: Chỉ hiển thị 2 nút [Lưu 💾] và [Tìm kiếm 🔍] như Ảnh 1 */
   .header-actions {
     display: flex !important;
     flex-direction: row !important;
@@ -1858,14 +1848,15 @@ body.mode-mobile,
   }
 
   /* Ẩn triệt để các nút rườm rà trên thanh top bar điện thoại */
+  #btnFavHeader,
   #btnScheduleHeader,
-  #btnHistoryHeader,
   #btnUpdateHeader,
   .clock-display {
     display: none !important;
   }
-  #btnSearch,
-  #btnInstallApp {
+  #btnInstallApp,
+  #btnHistoryHeader,
+  #btnSearch {
     display: inline-flex !important;
   }
 
@@ -1874,7 +1865,7 @@ body.mode-mobile,
     display: flex !important;
     width: 100% !important;
     box-sizing: border-box !important;
-    padding: 8px 8px 4px 8px !important;
+    padding: 6px 8px 4px 8px !important;
     gap: 5px !important;
     overflow: hidden !important;
   }
@@ -1964,13 +1955,13 @@ body.mode-mobile,
     border-color: #facc15 !important;
   }
 
-  /* 4. Ẩn khối Tiếp Tục Xem khổng lồ của TV trên giao diện điện thoại */
+  /* 4. Ẩn triệt để khối Tiếp Tục Xem khổng lồ trên mobile - giải phóng không gian theo đúng yêu cầu */
   .history-section,
   #historySection {
     display: none !important;
   }
 
-  /* 5. Lưới Phim: BẮT BUỘC ĐÚNG 3 CỘT (Khắc phục lỗi 2 cột to quá lố ở Ảnh 2) */
+  /* 5. Lưới Phim: BẮT BUỘC ĐÚNG 3 CỘT (repeat(3, 1fr)) */
   .grid-container {
     grid-template-columns: repeat(3, 1fr) !important;
     gap: 6px !important;
@@ -2063,90 +2054,1205 @@ body.mode-mobile,
   }
 }
 
+/* Áp dụng thêm cho class body.mode-mobile khi xoay ngang */
+body.mode-mobile .header-bar {
+  padding: 8px 12px !important;
+  min-height: 48px !important;
+}
+body.mode-mobile .brand-badge {
+  background: #facc15 !important;
+  color: #000000 !important;
+  font-size: 13px !important;
+  border-radius: 12px !important;
+}
+body.mode-mobile .brand-badge span {
+  color: #000000 !important;
+}
+body.mode-mobile .brand-badge .brand-logo,
+body.mode-mobile .brand-subtitle {
+  display: none !important;
+}
+body.mode-mobile .brand-slogan-mobile {
+  display: block !important;
+  color: #eab308 !important;
+}
+body.mode-mobile #btnFavHeader,
+body.mode-mobile #btnScheduleHeader,
+body.mode-mobile #btnUpdateHeader,
+body.mode-mobile .clock-display {
+  display: none !important;
+}
+body.mode-mobile #btnInstallApp,
+body.mode-mobile #btnHistoryHeader,
+body.mode-mobile #btnSearch {
+  display: inline-flex !important;
+}
+body.mode-mobile .history-section,
+body.mode-mobile #historySection {
+  display: none !important;
+}
+body.mode-mobile .grid-container {
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 6px !important;
+  padding: 6px 8px 30px 8px !important;
+}
+
 /* --- TV EDITION (Chuẩn cho Android TV, Smart TV 16:9 ở Ảnh 2) --- */
-html.mode-tv body,
-body.mode-tv {
-  .brand-section {
+body.mode-tv .brand-section {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 12px !important;
+}
+body.mode-tv .brand-badge {
+  background: #dc2626 !important;
+  color: #ffffff !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  padding: 4px 14px !important;
+  border-radius: 6px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+body.mode-tv .brand-badge .brand-logo {
+  display: inline-block !important;
+  width: 22px !important;
+  height: 22px !important;
+}
+body.mode-tv .brand-subtitle {
+  display: block !important;
+  font-size: 12px !important;
+  color: #94a3b8 !important;
+}
+body.mode-tv .brand-slogan-mobile {
+  display: none !important;
+}
+body.mode-tv .header-bar {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 12px 24px !important;
+  background: #121218 !important;
+}
+body.mode-tv .header-actions {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+body.mode-tv .header-actions .btn-header {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  padding: 7px 14px !important;
+  font-size: 13px !important;
+  border-radius: 6px !important;
+  background: #1e293b !important;
+}
+body.mode-tv .header-actions .btn-header .btn-text {
+  display: inline !important;
+}
+body.mode-tv #btnScheduleHeader,
+body.mode-tv #btnHistoryHeader,
+body.mode-tv #btnUpdateHeader,
+body.mode-tv .clock-display {
+  display: inline-flex !important;
+}
+body.mode-tv .history-section {
+  display: block !important;
+}
+body.mode-tv .grid-container {
+  grid-template-columns: repeat(6, 1fr) !important;
+  gap: 14px !important;
+  padding: 14px 20px 40px 20px !important;
+}
+@media (min-width: 1700px) {
+  body.mode-tv .grid-container {
+    grid-template-columns: repeat(7, 1fr) !important;
+  }
+}
+body.mode-tv .movie-card.focused,
+body.mode-tv .focusable:focus {
+  outline: none !important;
+  border-color: #00e5ff !important;
+  box-shadow: 0 0 16px rgba(0, 229, 255, 0.8), 0 0 6px #00e5ff !important;
+  transform: scale(1.04) !important;
+  z-index: 10 !important;
+}
+
+/* ==========================================================================
+   HUY CÁ ADVANCED PLAYER: TOUCH MOBILE (IMAGE 2) & WINDOWS DESKTOP (IMAGE 3)
+   ========================================================================== */
+
+.player-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 999999;
+  background: #000000;
+  flex-direction: row;
+  overflow: hidden;
+}
+
+.player-main-area {
+  flex: 1 !important;
+  height: 100% !important;
+  position: relative !important;
+  background: #000000 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: hidden !important;
+}
+
+#videoPlayer {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  background: #000000 !important;
+}
+
+/* Nút Next nổi bên phải video (Ảnh 3) */
+.btn-quick-next-floating {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 15;
+  transition: all 0.2s ease;
+}
+.btn-quick-next-floating:hover {
+  background: rgba(37, 99, 235, 0.85);
+  transform: translateY(-50%) scale(1.1);
+}
+
+/* Overlay điều khiển cảm ứng */
+.player-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 20;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: opacity 0.3s ease;
+}
+.player-overlay.controls-hidden {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+.player-overlay > * {
+  pointer-events: auto;
+}
+
+/* Top bar điều khiển chuẩn APK (Ảnh 2) */
+.player-top {
+  padding: 12px 18px !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.92) 0%, rgba(0, 0, 0, 0.6) 60%, transparent 100%) !important;
+  z-index: 22 !important;
+}
+.player-title-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 55%;
+}
+.btn-player-square {
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  border-radius: 8px;
+  background: rgba(30, 41, 59, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.btn-player-square:hover,
+.btn-player-square.active {
+  background: #334155;
+  border-color: #facc15;
+  color: #facc15;
+}
+.player-header-text {
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+.player-sep {
+  color: #94a3b8;
+  margin: 0 4px;
+}
+.player-subtitle {
+  color: #facc15;
+  font-weight: 700;
+}
+.player-top-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Cụm 5 nút nổi trung tâm (Ảnh 2) */
+.player-center-controls {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  z-index: 25;
+}
+.btn-center-pill {
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #facc15;
+  font-size: 13px;
+  font-weight: 800;
+  padding: 8px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+  transition: all 0.2s ease;
+}
+.btn-center-pill:hover {
+  background: #1e293b;
+  transform: scale(1.06);
+}
+.btn-center-round {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+  transition: all 0.2s ease;
+}
+.btn-center-round:hover {
+  background: #1e293b;
+  transform: scale(1.08);
+}
+.btn-center-main {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.92);
+  border: 2px solid rgba(250, 204, 21, 0.85);
+  color: #facc15;
+  font-size: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 0 24px rgba(250, 204, 21, 0.35);
+  backdrop-filter: blur(8px);
+  transition: all 0.2s ease;
+}
+.btn-center-main:hover {
+  transform: scale(1.1);
+  background: #1e293b;
+}
+
+/* Nút Bỏ qua Intro +85s (Ảnh 2) */
+.btn-skip-intro {
+  position: absolute;
+  right: 24px;
+  bottom: 64px;
+  background: rgba(234, 179, 8, 0.2) !important;
+  border: 1px solid #eab308 !important;
+  color: #facc15 !important;
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  padding: 8px 18px !important;
+  border-radius: 22px !important;
+  cursor: pointer !important;
+  z-index: 25 !important;
+  box-shadow: 0 2px 14px rgba(234, 179, 8, 0.35) !important;
+  backdrop-filter: blur(6px) !important;
+  transition: all 0.2s ease !important;
+}
+.btn-skip-intro:hover {
+  background: #eab308 !important;
+  color: #000000 !important;
+  transform: scale(1.06) !important;
+}
+
+/* Bottom Bar (Ảnh 2) */
+.player-bottom-bar {
+  padding: 12px 20px !important;
+  background: linear-gradient(0deg, rgba(0, 0, 0, 0.92) 0%, rgba(0, 0, 0, 0.6) 60%, transparent 100%) !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 14px !important;
+  z-index: 22 !important;
+}
+.progress-track-wrapper {
+  flex: 1 !important;
+  display: flex !important;
+  align-items: center !important;
+}
+.btn-fullscreen-toggle {
+  background: none;
+  border: none;
+  color: #facc15;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px;
+  transition: transform 0.2s ease;
+}
+.btn-fullscreen-toggle:hover {
+  transform: scale(1.15);
+}
+
+/* Nút Mở Khóa khi đã Lock màn hình cảm ứng */
+.btn-unlock-touch {
+  position: absolute;
+  top: 24px;
+  left: 24px;
+  z-index: 60;
+  background: rgba(15, 23, 42, 0.92);
+  border: 1px solid #facc15;
+  color: #facc15;
+  padding: 8px 18px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 0 16px rgba(250, 204, 21, 0.4);
+}
+
+/* --- SIDEBAR DANH SÁCH TẬP WINDOWS / DESKTOP (Ảnh 3) --- */
+.player-sidebar {
+  width: 340px !important;
+  height: 100% !important;
+  background: #090d16 !important;
+  border-left: 1px solid #1e293b !important;
+  display: flex !important;
+  flex-direction: column !important;
+  z-index: 30 !important;
+  overflow-y: auto !important;
+  scrollbar-width: thin !important;
+  transition: transform 0.3s ease, width 0.3s ease !important;
+}
+.player-sidebar.collapsed {
+  display: none !important;
+}
+
+.sidebar-header {
+  padding: 16px 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 1px solid #1a2234;
+  background: #0f1422;
+}
+.sidebar-titles {
+  flex: 1;
+  padding-right: 10px;
+}
+.sidebar-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: #ffffff;
+  line-height: 1.3;
+  margin-bottom: 4px;
+}
+.sidebar-sub {
+  font-size: 11.5px;
+  color: #94a3b8;
+}
+.btn-close-sidebar {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 2px 6px;
+  line-height: 1;
+}
+.btn-close-sidebar:hover {
+  color: #fff;
+}
+
+.sidebar-section-title {
+  font-size: 11px;
+  font-weight: 800;
+  color: #64748b;
+  padding: 12px 16px 6px 16px;
+  letter-spacing: 0.5px;
+}
+.sidebar-servers-list {
+  display: flex;
+  gap: 8px;
+  padding: 0 16px 10px 16px;
+  overflow-x: auto;
+}
+.btn-sidebar-server {
+  background: #1e293b;
+  border: 1px solid #334155;
+  color: #cbd5e1;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 11.5px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.btn-sidebar-server.active {
+  background: #059669;
+  border-color: #10b981;
+  color: #fff;
+}
+
+.sidebar-episodes-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  padding: 8px 16px 24px 16px;
+}
+.btn-sidebar-ep {
+  background: #161e2e;
+  border: 1px solid #222d42;
+  color: #cbd5e1;
+  height: 38px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.btn-sidebar-ep:hover {
+  background: #2563eb;
+  color: #fff;
+  border-color: #3b82f6;
+}
+.btn-sidebar-ep.active {
+  background: #e50914 !important;
+  border-color: #ef4444 !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 12px rgba(229, 9, 20, 0.6) !important;
+}
+
+/* Mobile Touch adjustments for sidebar: Bottom Sheet */
+@media (max-width: 800px) {
+  .player-sidebar {
+    position: absolute !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    max-height: 65vh !important;
+    border-radius: 16px 16px 0 0 !important;
+    border-top: 2px solid #334155 !important;
+    border-left: none !important;
+    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.85) !important;
+    transform: translateY(100%) !important;
+    display: flex !important;
+  }
+  .player-sidebar.mobile-open {
+    transform: translateY(0) !important;
+  }
+  .btn-quick-next-floating {
+    display: none !important;
+  }
+}
+
+/* ==========================================================================
+   FLOATING MINI PLAYER & PICTURE-IN-PICTURE (HÌNH TRONG HÌNH)
+   ========================================================================== */
+.player-container.player-floating-mini {
+  position: fixed !important;
+  bottom: 24px !important;
+  right: 24px !important;
+  left: auto !important;
+  top: auto !important;
+  width: 320px !important;
+  height: 180px !important;
+  transform: none !important;
+  border-radius: 12px !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.95), 0 0 0 2px rgba(229, 9, 20, 0.6) !important;
+  z-index: 9999999 !important;
+  overflow: hidden !important;
+  background: #000000 !important;
+  display: flex !important;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+@media (max-width: 600px) {
+  .player-container.player-floating-mini {
+    bottom: 16px !important;
+    right: 16px !important;
+    width: 240px !important;
+    height: 135px !important;
+  }
+}
+
+.player-container.player-floating-mini .player-sidebar {
+  display: none !important;
+}
+
+.player-container.player-floating-mini .player-top,
+.player-container.player-floating-mini .player-bottom-bar,
+.player-container.player-floating-mini .player-center-controls,
+.player-container.player-floating-mini .btn-skip-intro,
+.player-container.player-floating-mini .btn-quick-next-floating {
+  display: none !important;
+}
+
+.player-container.player-floating-mini #miniPlayerBar {
+  display: flex !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  padding: 6px 10px !important;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent) !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  z-index: 100 !important;
+}
+
+.mini-player-title {
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: bold;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 170px;
+}
+
+.mini-player-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.btn-mini-action {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  border: none;
+  border-radius: 4px;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btn-mini-action:hover {
+  background: var(--accent-red);
+}
+
+
+/* Cinematic Mode Entry Button */
+.btn-header-cinematic {
+  background: linear-gradient(135deg, #E50914 0%, #990000 100%) !important;
+  color: #fff !important;
+  border: 1px solid #F5C518 !important;
+  box-shadow: 0 0 12px rgba(229, 9, 20, 0.45) !important;
+  font-weight: 800 !important;
+  text-decoration: none !important;
+  display: inline-flex !important;
+  align-items: center !important;
+}
+.btn-header-cinematic:hover {
+  transform: scale(1.05) !important;
+  box-shadow: 0 0 18px rgba(245, 197, 24, 0.6) !important;
+}
+
+
+/* Hide sub-sources-bar cleanly when a top tab has no sub-sources (e.g., XEM TIVI) */
+.sub-sources-bar.hidden-bar {
+  display: none !important;
+}
+
+/* Chuẩn hóa kích thước phụ đề WebVTT gọn đẹp, không đè giữa màn hình */
+video::cue {
+  font-size: 16px !important;
+  line-height: 1.35 !important;
+  font-weight: 500 !important;
+  color: #ffffff !important;
+  background-color: rgba(0, 0, 0, 0.65) !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95) !important;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+}
+@media (max-width: 800px) {
+  video::cue {
+    font-size: 13px !important;
+    line-height: 1.3 !important;
+  }
+}
+
+/* Custom Cinema Subtitle Overlay (#playerSubtitleOverlay) - Không bao giờ bị tràn hay đè giữa màn hình */
+#playerSubtitleOverlay {
+  position: absolute;
+  bottom: 66px;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 82%;
+  width: max-content;
+  padding: 5px 14px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.72);
+  color: #ffffff;
+  font-size: 16px;
+  line-height: 1.4;
+  font-weight: 600;
+  text-align: center;
+  pointer-events: none;
+  z-index: 25;
+  white-space: pre-line;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  display: none;
+}
+
+@media (max-width: 800px) {
+  #playerSubtitleOverlay {
+    bottom: 58px;
+    max-width: 90%;
+    font-size: 13.5px;
+    line-height: 1.35;
+    padding: 4px 10px;
+  }
+}
+
+.player-container.player-floating-mini #playerSubtitleOverlay {
+  bottom: 8px !important;
+  font-size: 10px !important;
+  padding: 2px 6px !important;
+  max-width: 92% !important;
+}
+
+/* Ẩn hoàn toàn native ::cue trên #videoPlayer vì đã có #playerSubtitleOverlay chuẩn điện ảnh */
+video#videoPlayer::cue {
+  opacity: 0 !important;
+  color: transparent !important;
+  background: transparent !important;
+  text-shadow: none !important;
+  font-size: 0px !important;
+}
+
+/* ==========================================================================
+   HỘP THOẠI & NÚT CÀI ĐẶT ĐA NỀN TẢNG (INSTALL MODAL & BUTTON v3.0.6)
+   ========================================================================== */
+.btn-header-install {
+  background: linear-gradient(135deg, #eab308 0%, #ca8a04 100%) !important;
+  color: #000000 !important;
+  border: 1px solid #fef08a !important;
+  font-weight: 800 !important;
+  box-shadow: 0 2px 10px rgba(234, 179, 8, 0.35) !important;
+}
+.btn-header-install .btn-text,
+.btn-header-install .btn-icon {
+  color: #000000 !important;
+  font-weight: 800 !important;
+}
+.btn-header-install:hover {
+  transform: scale(1.05) !important;
+  box-shadow: 0 0 16px rgba(250, 204, 21, 0.65) !important;
+}
+
+.install-modal-box {
+  max-width: 680px !important;
+  width: 94% !important;
+  background: linear-gradient(180deg, #131b2e 0%, #0d1322 100%) !important;
+  border: 1.5px solid rgba(250, 204, 21, 0.45) !important;
+  border-radius: 16px !important;
+  padding: 20px 22px !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85), 0 0 25px rgba(234, 179, 8, 0.15) !important;
+}
+
+.install-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 14px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.install-platforms-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 62vh;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.install-platform-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: rgba(30, 41, 59, 0.75);
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 12px;
+  padding: 12px 14px;
+  text-decoration: none;
+  color: #f8fafc;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.install-platform-card:hover,
+.install-platform-card:focus {
+  background: rgba(30, 41, 59, 0.98);
+  border-color: #ffd700;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5), 0 0 12px rgba(255, 215, 0, 0.25);
+}
+
+.install-platform-card.highlight-pwa {
+  background: linear-gradient(135deg, rgba(234, 179, 8, 0.16) 0%, rgba(30, 41, 59, 0.9) 100%);
+  border: 1.5px solid rgba(250, 204, 21, 0.65);
+}
+
+.platform-card-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.platform-emoji {
+  font-size: 26px;
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 23, 42, 0.75);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
+}
+
+.platform-title {
+  font-size: 14.5px;
+  font-weight: 800;
+  color: #ffffff;
+  margin-bottom: 3px;
+}
+
+.platform-desc {
+  font-size: 12px;
+  color: #94a3b8;
+  line-height: 1.35;
+}
+
+.platform-desc code {
+  color: #38bdf8;
+  background: rgba(15, 23, 42, 0.7);
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-size: 11.5px;
+}
+
+.btn-platform-download {
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  white-space: nowrap;
+  flex-shrink: 0;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.35);
+}
+
+.btn-platform-download.btn-pwa-gold {
+  background: linear-gradient(135deg, #facc15 0%, #ca8a04 100%);
+  color: #000000;
+  border-color: #fef08a;
+  box-shadow: 0 2px 10px rgba(234, 179, 8, 0.4);
+}
+
+.ios-install-guide {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px dashed rgba(250, 204, 21, 0.45);
+  color: #e2e8f0;
+  font-size: 12px;
+  line-height: 1.45;
+  text-align: left;
+}
+
+@media (max-width: 800px) {
+  .install-modal-box {
+    padding: 14px !important;
+  }
+  .install-platform-card {
+    padding: 10px !important;
+    gap: 8px !important;
+  }
+  .platform-emoji {
+    width: 36px;
+    height: 36px;
+    font-size: 20px;
+  }
+  .platform-title {
+    font-size: 13px;
+  }
+  .platform-desc {
+    font-size: 11px;
+  }
+  .btn-platform-download {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+}
+
+
+/* ==========================================================================
+   WINDOWS / DESKTOP OPTIMIZATION (v3.1.0):
+   1. Banner tiêu đề thu gọn tinh tế (Header, 4 Nguồn lớn, Nguồn con, Filter)
+   2. Chia chuẩn 4 hàng x 4 phim (16 phim hiển thị gọn trong khung nhìn Windows)
+   3. Ảnh phim ngang 16:9 sắc nét, chống phóng to/mất nét (hỗ trợ cả poster dọc)
+   4. Ẩn hoàn toàn nút Cài Đặt khi đã cài đặt ra App (chỉ hiện trên trình duyệt Web)
+   ========================================================================== */
+@media (min-width: 801px) {
+  /* 1. Thu gọn hệ thống thanh tiêu đề & banner điều hướng */
+  .header-bar,
+  body.mode-tv .header-bar,
+  body.mode-mobile .header-bar {
+    padding: 5px 18px !important;
+    min-height: 38px !important;
+    height: auto !important;
+    background: #101520 !important;
+    border-bottom: 1px solid #1e293b !important;
+  }
+
+  .brand-section,
+  body.mode-tv .brand-section,
+  body.mode-mobile .brand-section {
     display: flex !important;
     flex-direction: row !important;
     align-items: center !important;
-    gap: 12px !important;
+    gap: 10px !important;
   }
-  .brand-badge {
-    background: #dc2626 !important;
-    color: #ffffff !important;
-    font-size: 13px !important;
-    font-weight: 800 !important;
-    padding: 4px 14px !important;
+
+  .brand-badge,
+  body.mode-tv .brand-badge,
+  body.mode-mobile .brand-badge {
+    padding: 3px 10px !important;
+    font-size: 12.5px !important;
     border-radius: 6px !important;
-    display: flex !important;
+    display: inline-flex !important;
     align-items: center !important;
     gap: 6px !important;
   }
-  .brand-badge .brand-logo {
+
+  .brand-badge .brand-logo,
+  body.mode-tv .brand-badge .brand-logo {
+    width: 18px !important;
+    height: 18px !important;
     display: inline-block !important;
-    width: 22px !important;
-    height: 22px !important;
   }
-  .brand-subtitle {
-    display: block !important;
-    font-size: 12px !important;
+
+  .brand-subtitle,
+  body.mode-tv .brand-subtitle {
+    font-size: 11.5px !important;
+    display: inline-block !important;
     color: #94a3b8 !important;
   }
-  .brand-slogan-mobile {
+
+  .brand-slogan-mobile,
+  body.mode-tv .brand-slogan-mobile,
+  body.mode-mobile .brand-slogan-mobile {
     display: none !important;
   }
 
-  .header-bar {
-    display: flex !important;
-    flex-direction: row !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-    padding: 12px 24px !important;
-    background: #121218 !important;
-  }
-  .header-actions {
-    display: flex !important;
-    flex-direction: row !important;
-    align-items: center !important;
-    gap: 8px !important;
-  }
-  .header-actions .btn-header {
-    display: inline-flex !important;
-    align-items: center !important;
-    gap: 6px !important;
-    padding: 7px 14px !important;
-    font-size: 13px !important;
+  .header-actions .btn-header,
+  body.mode-tv .header-actions .btn-header,
+  body.mode-mobile .header-actions .btn-header {
+    padding: 4px 10px !important;
+    font-size: 12px !important;
+    height: 28px !important;
+    min-width: auto !important;
+    width: auto !important;
     border-radius: 6px !important;
-    background: #1e293b !important;
+    gap: 5px !important;
   }
-  .header-actions .btn-header .btn-text {
+
+  .header-actions .btn-header .btn-text,
+  body.mode-tv .header-actions .btn-header .btn-text,
+  body.mode-mobile .header-actions .btn-header .btn-text {
     display: inline !important;
   }
-  #btnScheduleHeader,
-  #btnHistoryHeader,
-  #btnUpdateHeader,
-  .clock-display {
-    display: inline-flex !important;
+
+  .clock-display,
+  body.mode-tv .clock-display {
+    font-size: 12px !important;
+    padding: 3px 8px !important;
   }
 
-  /* Khối Tiếp tục xem chỉ bật trên TV */
-  .history-section {
-    display: block !important;
+  /* 4 Nguồn Lớn gọn gàng */
+  .sources-bar,
+  body.mode-tv .sources-bar,
+  body.mode-mobile .sources-bar {
+    padding: 4px 18px 2px 18px !important;
+    gap: 8px !important;
   }
 
-  /* Lưới TV: 6-7 cột */
-  .grid-container {
-    grid-template-columns: repeat(6, 1fr) !important;
-    gap: 14px !important;
-    padding: 14px 20px 40px 20px !important;
+  .btn-source,
+  body.mode-tv .btn-source,
+  body.mode-mobile .btn-source {
+    height: 30px !important;
+    line-height: 30px !important;
+    padding: 0 10px !important;
+    font-size: 12.5px !important;
+    border-radius: 7px !important;
   }
-  .movie-card.focused,
-  .focusable:focus {
-    outline: none !important;
-    border-color: #00e5ff !important;
-    box-shadow: 0 0 16px rgba(0, 229, 255, 0.8), 0 0 6px #00e5ff !important;
-    transform: scale(1.04) !important;
-    z-index: 10 !important;
+
+  /* Thanh Nguồn Con (Sub-sources) gọn gàng */
+  .sub-sources-bar,
+  body.mode-tv .sub-sources-bar,
+  body.mode-mobile .sub-sources-bar {
+    padding: 2px 18px !important;
+    gap: 6px !important;
+  }
+
+  .btn-sub-source,
+  body.mode-tv .btn-sub-source,
+  body.mode-mobile .btn-sub-source {
+    height: 25px !important;
+    line-height: 25px !important;
+    padding: 0 11px !important;
+    font-size: 11.5px !important;
+    border-radius: 13px !important;
+  }
+
+  /* Thanh Danh Mục Lọc (Filter Bar) gọn gàng */
+  .filter-wrapper,
+  body.mode-tv .filter-wrapper,
+  body.mode-mobile .filter-wrapper {
+    padding: 2px 18px 4px 18px !important;
+    gap: 6px !important;
+  }
+
+  .filter-bar,
+  body.mode-tv .filter-bar,
+  body.mode-mobile .filter-bar {
+    padding: 2px 4px !important;
+    gap: 6px !important;
+  }
+
+  .btn-filter,
+  body.mode-tv .btn-filter,
+  body.mode-mobile .btn-filter {
+    height: 25px !important;
+    line-height: 25px !important;
+    padding: 0 11px !important;
+    font-size: 11.5px !important;
+    border-radius: 13px !important;
+  }
+
+  .filter-nav-btn,
+  body.mode-tv .filter-nav-btn {
+    width: 25px !important;
+    height: 25px !important;
+    font-size: 11px !important;
+    display: flex !important;
+  }
+
+  /* Ẩn dải Tiếp Tục Xem nổi để nhường trọn không gian cho 4 hàng phim */
+  #historySection,
+  .history-section,
+  body.mode-tv .history-section {
+    display: none !important;
+  }
+
+  /* 2. Lưới Phim Windows: BẮT BUỘC CHIA 4 CỘT x 4 HÀNG TRÊN MÀN HÌNH */
+  .grid-container,
+  body.mode-tv .grid-container,
+  body.mode-mobile .grid-container {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 10px !important;
+    padding: 4px 18px 24px 18px !important;
+  }
+
+  .movie-card,
+  body.mode-tv .movie-card,
+  body.mode-mobile .movie-card {
+    border-radius: 8px !important;
+    padding: 0 !important;
+    border: 1px solid #222c40 !important;
+    background: #141b29 !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  /* Chiều cao tự động chia 4 hàng khít khung nhìn Windows (100vh - 134px top bars) */
+  .poster-wrapper,
+  body.mode-tv .poster-wrapper,
+  body.mode-mobile .poster-wrapper,
+  .movie-card.tv-card .poster-wrapper,
+  body.mode-tv .movie-card.tv-card .poster-wrapper {
+    aspect-ratio: unset !important;
+    height: clamp(88px, calc((100vh - 328px) / 4), 170px) !important;
+    width: 100% !important;
+    border-radius: 0 !important;
+    background: #0b101b !important;
+    position: relative !important;
+    overflow: hidden !important;
+  }
+
+  .card-poster,
+  body.mode-tv .card-poster,
+  body.mode-mobile .card-poster {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    object-position: center 22% !important;
+    image-rendering: -webkit-optimize-contrast !important;
+    transform: translateZ(0) !important;
+  }
+
+  /* Với ảnh dọc (như Phim Ngắn 9:16 hoặc phim chỉ có poster dọc): Hiển thị nguyên vẹn sắc nét kèm nền mờ nghệ thuật, không phóng to vỡ nét */
+  .poster-wrapper.is-vertical-img::before {
+    content: "";
+    position: absolute;
+    inset: -12px;
+    background-image: var(--poster-bg);
+    background-size: cover;
+    background-position: center;
+    filter: blur(14px) brightness(0.42);
+    z-index: 0;
+  }
+  .poster-wrapper.is-vertical-img .card-poster {
+    position: relative !important;
+    z-index: 1 !important;
+    object-fit: contain !important;
+    object-position: center center !important;
+  }
+
+  .movie-card.tv-card .card-poster {
+    object-fit: contain !important;
+    padding: 8px !important;
+  }
+
+  .badge-quality,
+  body.mode-tv .badge-quality,
+  body.mode-mobile .badge-quality {
+    top: 5px !important;
+    right: 5px !important;
+    font-size: 9.5px !important;
+    padding: 1px 5px !important;
+    border-radius: 4px !important;
+    z-index: 2 !important;
+  }
+
+  .badge-episode,
+  body.mode-tv .badge-episode,
+  body.mode-mobile .badge-episode {
+    bottom: 5px !important;
+    right: 5px !important;
+    font-size: 9.5px !important;
+    padding: 1px 5px !important;
+    border-radius: 4px !important;
+    z-index: 2 !important;
+  }
+
+  .card-info,
+  body.mode-tv .card-info,
+  body.mode-mobile .card-info {
+    padding: 4px 8px !important;
+    height: 36px !important;
+    min-height: 36px !important;
+    max-height: 36px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    gap: 1px !important;
+    background: #141b29 !important;
+  }
+
+  .card-title,
+  body.mode-tv .card-title,
+  body.mode-mobile .card-title {
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    line-height: 1.2 !important;
+    margin: 0 !important;
+    color: #f8fafc !important;
+  }
+
+  .card-subtitle,
+  body.mode-tv .card-subtitle,
+  body.mode-mobile .card-subtitle {
+    font-size: 10px !important;
+    line-height: 1.15 !important;
+    color: #94a3b8 !important;
+    margin: 0 !important;
+  }
+}
+
+/* ẨN TUYỆT ĐỐI NÚT CÀI ĐẶT KHI ĐÃ CÀI RA APP (WINDOWS PWA / WEBVIEW2 / ANDROID / STANDALONE) */
+#btnInstallApp.installed-hidden {
+  display: none !important;
+}
+@media all and (display-mode: standalone),
+       all and (display-mode: window-controls-overlay),
+       all and (display-mode: minimal-ui),
+       all and (display-mode: fullscreen) {
+  #btnInstallApp,
+  body.mode-mobile #btnInstallApp,
+  body.mode-tv #btnInstallApp,
+  #pwaInstallBanner,
+  #installPlatformModal {
+    display: none !important;
   }
 }

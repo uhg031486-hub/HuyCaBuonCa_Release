@@ -12,7 +12,11 @@ import {
   Compass, 
   SlidersHorizontal,
   ChevronDown,
-  UserCheck
+  UserCheck,
+  Download,
+  Smartphone,
+  Monitor,
+  ExternalLink
 } from 'lucide-react';
 
 export default function Navbar({ 
@@ -27,6 +31,28 @@ export default function Navbar({
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isInstallModalOpen, setIsInstallModalOpen] = useState(false);
+  const [isInstalledApp, setIsInstalledApp] = useState(false);
+
+  useEffect(() => {
+    const checkInstalled = () => {
+      const installed =
+        window.matchMedia('(display-mode: standalone)').matches ||
+        window.matchMedia('(display-mode: window-controls-overlay)').matches ||
+        window.matchMedia('(display-mode: minimal-ui)').matches ||
+        window.matchMedia('(display-mode: fullscreen)').matches ||
+        window.navigator.standalone === true ||
+        document.referrer.includes('android-app://') ||
+        !!(window.chrome && window.chrome.webview) ||
+        !!window.webOS ||
+        window.location.hostname === 'huyca.local' ||
+        window.location.hostname.includes('appassets') ||
+        window.location.protocol === 'file:';
+      setIsInstalledApp(installed);
+    };
+    checkInstalled();
+    window.addEventListener('appinstalled', () => setIsInstalledApp(true));
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -60,7 +86,7 @@ export default function Navbar({
           <div className="flex items-center gap-3 cursor-pointer" onClick={() => setActiveTab('all')}>
             <div className="relative group">
               <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-br from-[#E50914] to-[#990000] p-0.5 shadow-neon-red flex items-center justify-center transition-transform duration-300 group-hover:scale-105">
-                <img src="/logo.png" alt="Huy Cá Logo" className="w-full h-full object-cover rounded-[10px]" />
+                <img src="./logo.png" alt="Huy Cá Logo" className="w-full h-full object-cover rounded-[10px]" />
               </div>
               <div className="absolute -top-1 -right-1 w-3 h-3 bg-[#F5C518] rounded-full border-2 border-[#0B0F17]" title="VIP Master"></div>
             </div>
@@ -175,6 +201,18 @@ export default function Navbar({
               )}
             </div>
 
+            {/* Install Platform Button - Only show on Web Browser */}
+            {!isInstalledApp && (
+              <button
+                onClick={() => setIsInstallModalOpen(true)}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-full bg-gradient-to-r from-[#F5C518] to-[#eab308] text-black font-extrabold text-xs sm:text-sm shadow-lg hover:scale-105 transition-all cursor-pointer"
+                title="Cài Đặt & Tải App Cho Các Nền Tảng"
+              >
+                <Download className="w-4 h-4 stroke-[2.5]" />
+                <span className="hidden lg:inline">Cài Đặt App</span>
+              </button>
+            )}
+
             {/* Notification Bell */}
             <button className="hidden sm:flex p-2 rounded-full text-gray-300 hover:text-white hover:bg-white/10 border border-transparent hover:border-white/10 transition-all cursor-pointer relative" aria-label="Thông báo">
               <Bell className="w-5 h-5" />
@@ -228,6 +266,123 @@ export default function Navbar({
               </button>
             );
           })}
+          <button
+            onClick={() => {
+              setIsMobileMenuOpen(false);
+              setIsInstallModalOpen(true);
+            }}
+            className="w-full px-4 py-3 rounded-xl text-left text-sm font-extrabold flex items-center gap-3 bg-[#F5C518] text-black cursor-pointer mt-2"
+          >
+            <Download className="w-5 h-5" />
+            Cài Đặt / Tải App Đa Nền Tảng
+          </button>
+        </div>
+      )}
+
+      {/* Multi-Platform Install Modal */}
+      {isInstallModalOpen && (
+        <div 
+          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4"
+          onClick={() => setIsInstallModalOpen(false)}
+        >
+          <div 
+            className="bg-[#111726] border border-[#F5C518]/40 rounded-2xl max-w-2xl w-full p-5 sm:p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-white/10 pb-4">
+              <div className="flex items-center gap-3">
+                <img src="./logo.png" alt="Huy Cá" className="w-11 h-11 rounded-xl border border-[#F5C518]" />
+                <div>
+                  <h3 className="text-lg sm:text-xl font-black text-[#F5C518]">CÀI ĐẶT ỨNG DỤNG HUY CÁ</h3>
+                  <p className="text-xs text-gray-400">Hỗ trợ đầy đủ 5 nền tảng: Điện thoại, Android TV, Windows PC, LG webOS & iOS</p>
+                </div>
+              </div>
+              <button onClick={() => setIsInstallModalOpen(false)} className="p-2 text-gray-400 hover:text-white cursor-pointer">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-2.5">
+              <a
+                href="/api/download?file=mobile"
+                download="HuyCa_Mobile_v2.8.apk"
+                className="flex items-center justify-between gap-3 p-3.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-[#F5C518] transition-all cursor-pointer"
+              >
+                <div className="flex items-center gap-3">
+                  <Smartphone className="w-7 h-7 text-[#F5C518] flex-shrink-0" />
+                  <div>
+                    <div className="text-sm font-bold text-white">Điện Thoại Android (Native APK)</div>
+                    <div className="text-xs text-gray-400">HuyCa_Mobile_v2.8.apk • Tối ưu cảm ứng, tự xoay ngang, ExoPlayer</div>
+                  </div>
+                </div>
+                <span className="px-3 py-1.5 rounded-lg bg-[#E50914] text-white text-xs font-extrabold whitespace-nowrap">TẢI APK</span>
+              </a>
+
+              <a
+                href="/api/download?file=tv"
+                download="HuyCa_TV_v2.8.apk"
+                className="flex items-center justify-between gap-3 p-3.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-[#F5C518] transition-all cursor-pointer"
+              >
+                <div className="flex items-center gap-3">
+                  <Tv className="w-7 h-7 text-[#E50914] flex-shrink-0" />
+                  <div>
+                    <div className="text-sm font-bold text-white">Android TV / Sony / Casper / Xiaomi / TV Box</div>
+                    <div className="text-xs text-gray-400">HuyCa_TV_v2.8.apk • Giao diện 16:9 chuẩn điều khiển Remote D-Pad</div>
+                  </div>
+                </div>
+                <span className="px-3 py-1.5 rounded-lg bg-[#E50914] text-white text-xs font-extrabold whitespace-nowrap">TẢI APK TV</span>
+              </a>
+
+              <a
+                href="/api/download?file=windows"
+                download="HuyCa_Windows_v2.8.zip"
+                className="flex items-center justify-between gap-3 p-3.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-[#F5C518] transition-all cursor-pointer"
+              >
+                <div className="flex items-center gap-3">
+                  <Monitor className="w-7 h-7 text-sky-400 flex-shrink-0" />
+                  <div>
+                    <div className="text-sm font-bold text-white">Máy Tính Windows PC / Laptop (Windows 10/11)</div>
+                    <div className="text-xs text-gray-400">HuyCa_Windows_v2.8.zip • Tích hợp vượt tường lửa DNS & chặn quảng cáo</div>
+                  </div>
+                </div>
+                <span className="px-3 py-1.5 rounded-lg bg-sky-600 text-white text-xs font-extrabold whitespace-nowrap">TẢI ZIP PC</span>
+              </a>
+
+              <a
+                href="/api/download?file=lg"
+                download="HuyCa_LG_webOS_v2.8.ipk"
+                className="flex items-center justify-between gap-3 p-3.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-[#F5C518] transition-all cursor-pointer"
+              >
+                <div className="flex items-center gap-3">
+                  <Tv className="w-7 h-7 text-purple-400 flex-shrink-0" />
+                  <div>
+                    <div className="text-sm font-bold text-white">Tivi LG Smart TV (Hệ điều hành webOS)</div>
+                    <div className="text-xs text-gray-400">HuyCa_LG_webOS_v2.8.ipk • Hỗ trợ chuột bay Magic Remote & phím số</div>
+                  </div>
+                </div>
+                <span className="px-3 py-1.5 rounded-lg bg-purple-600 text-white text-xs font-extrabold whitespace-nowrap">TẢI IPK LG</span>
+              </a>
+            </div>
+
+            <div className="p-3 rounded-xl bg-white/5 border border-dashed border-[#F5C518]/40 text-xs text-gray-300 leading-relaxed">
+              <strong className="text-[#F5C518]">Mẹo cho iPhone / iPad (iOS):</strong> Mở trang web bằng <strong>Safari</strong> ➔ Bấm nút <strong>Chia sẻ [⬆]</strong> ở thanh dưới cùng ➔ Chọn <strong>"Thêm vào MH chính" (Add to Home Screen)</strong> để cài đặt thành ứng dụng toàn màn hình!
+            </div>
+
+            <div className="flex items-center gap-3 pt-2">
+              <a
+                href="../"
+                className="flex-1 py-2.5 px-4 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs sm:text-sm font-bold text-center transition-colors"
+              >
+                Về Giao Diện Huy Cá Cổ Điển
+              </a>
+              <button
+                onClick={() => setIsInstallModalOpen(false)}
+                className="flex-1 py-2.5 px-4 rounded-xl bg-[#F5C518] text-black text-xs sm:text-sm font-extrabold cursor-pointer"
+              >
+                ĐÓNG
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </header>

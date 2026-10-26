@@ -146,21 +146,26 @@ export default function DetailModal({
           </div>
 
           {/* Episodes List (Nếu là phim bộ hoặc có tập) */}
+          {movie.isLoadingEpisodes && (
+            <div className="p-4 rounded-xl bg-[#161E2E]/60 border border-white/10 text-center text-sm text-gray-300 flex items-center justify-center gap-2">
+              <span className="w-4 h-4 rounded-full border-2 border-[#E50914] border-t-transparent animate-spin" />
+              Đang tải danh sách tập phim từ máy chủ...
+            </div>
+          )}
           {movie.episodes && movie.episodes.length > 0 && (
             <div>
-              <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Danh Sách Tập Phim</h4>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5">
+              <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Danh Sách Tập Phim ({movie.episodes.length} Tập)</h4>
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2 max-h-60 overflow-y-auto pr-1">
                 {movie.episodes.map((ep, idx) => (
                   <button
                     key={idx}
                     onClick={() => {
-                      onPlay({ ...movie, currentEpisode: ep.name, videoUrl: ep.url });
+                      onPlay({ ...movie, currentEpisode: ep.name, videoUrl: ep.url, subtitleUrl: ep.subtitleUrl });
                       onClose();
                     }}
-                    className="p-3 rounded-xl bg-[#161E2E] hover:bg-[#E50914] border border-white/10 hover:border-transparent text-left transition-all duration-200 cursor-pointer group"
+                    className="p-2.5 rounded-xl bg-[#161E2E] hover:bg-[#E50914] border border-white/10 hover:border-transparent text-center transition-all duration-200 cursor-pointer group"
                   >
-                    <div className="text-xs text-gray-400 group-hover:text-white/80 font-medium">Tập {idx + 1}</div>
-                    <div className="text-sm font-bold text-white truncate">{ep.name}</div>
+                    <div className="text-xs sm:text-sm font-bold text-white truncate">{ep.name}</div>
                   </button>
                 ))}
               </div>

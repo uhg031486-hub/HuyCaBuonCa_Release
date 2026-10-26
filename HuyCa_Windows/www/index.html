@@ -16,31 +16,14 @@
     (function() {
       var ua = navigator.userAgent || '';
       var isTv = /Web0S|SmartTV|Tizen|Android TV|GoogleTV|AppleTV|HbbTV|POV_TV|LargeScreen|Viera|BRAVIA|Hisense/i.test(ua);
-      var isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(ua) || (window.innerWidth <= 768);
-      var saved = localStorage.getItem('huyca_view_mode');
-      var mode = saved || (isTv ? 'tv' : (isMobile ? 'mobile' : 'tv'));
+      var isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(ua) || (window.innerWidth <= 800);
+      var mode = (isMobile && !isTv) ? 'mobile' : 'tv';
       document.documentElement.className = 'mode-' + mode;
     })();
   </script>
-  <link rel="stylesheet" href="css/style.css?v=2.8.9">
+  <link rel="stylesheet" href="css/style.css?v=3.1.0">
 </head>
 <body>
-  <!-- Floating Top PWA Install Banner -->
-  <div id="pwaInstallBanner" class="pwa-install-banner">
-    <div class="pwa-banner-content">
-      <img src="icon_256.png" class="pwa-banner-icon" alt="Huy Cá">
-      <div class="pwa-banner-text">
-        <div class="pwa-banner-title">ỨNG DỤNG HUY CÁ</div>
-        <div class="pwa-banner-sub">Cài đặt để xem toàn màn hình, mượt mà hơn</div>
-      </div>
-    </div>
-    <div class="pwa-banner-actions">
-      <button id="btnBannerInstall" class="btn-banner-install">📲 CÀI ĐẶT</button>
-      <button id="btnBannerClose" class="btn-banner-close" title="Đóng">✕</button>
-    </div>
-  </div>
-
-
   <!-- Header Bar -->
   <header class="header-bar">
     <div class="brand-section">
@@ -52,6 +35,9 @@
       <div class="brand-slogan-mobile">Kho Phim Đẳng Cấp Di Động</div>
     </div>
     <div class="header-actions">
+      <a id="btnCinematicMode" href="cinematic/" class="btn-header btn-header-cinematic focusable" tabindex="0" title="Trải nghiệm giao diện Cinematic Đỉnh Cao">
+        <span class="btn-icon">✨</span><span class="btn-text"> BẢN CINEMATIC</span>
+      </a>
       <button id="btnSearch" class="btn-header focusable" tabindex="1" title="Tìm Kiếm">
         <span class="btn-icon">🔍</span><span class="btn-text"> Tìm Kiếm</span>
       </button>
@@ -67,8 +53,8 @@
       <button id="btnUpdateHeader" class="btn-header focusable" tabindex="5" title="Cập Nhật">
         <span class="btn-icon">🔄</span><span class="btn-text"> Cập Nhật</span>
       </button>
-      <button id="btnInstallApp" class="btn-header focusable" tabindex="6" title="Cài Đặt App">
-        <span class="btn-icon">💾</span><span class="btn-text"> Cài Đặt</span>
+      <button id="btnInstallApp" class="btn-header btn-header-install focusable" tabindex="6" title="Cài Đặt & Tải App Cho Các Nền Tảng">
+        <span class="btn-icon">📲</span><span class="btn-text"> Cài Đặt App</span>
       </button>
       <div id="clockDisplay" class="clock-display">00:00</div>
     </div>
@@ -151,42 +137,97 @@
 
   <!-- Trình Phát Video Toàn Màn Hình (Player) -->
   <div id="playerContainer" class="player-container" style="display: none;">
-    <video id="videoPlayer" playsinline></video>
-    <iframe id="playerIframe" style="display:none; width: 100%; height: 100%; border: none; background: #000;" allow="autoplay; fullscreen; encrypted-media"></iframe>
-    <div id="playerOverlay" class="player-overlay">
-      <div class="player-top">
-        <div class="player-title-info">
-          <button id="btnBackPlayer" class="btn-player focusable">↩️ Thoát</button>
-          <div>
-            <div id="playerTitle" class="player-title">Tên Kênh / Phim</div>
-            <div id="playerSub" class="player-subtitle">Tập 1</div>
-          </div>
-        </div>
-        <div style="display: flex; gap: 10px;">
-          <button id="btnToggleFavPlayer" class="btn-player focusable">⭐ Yêu Thích</button>
-          <button id="btnQuickZap" class="btn-player focusable" style="display: none;">📺 Danh Sách Kênh</button>
+    <!-- Khu vực Video Chính (Main Video Area) -->
+    <div id="playerMainArea" class="player-main-area">
+      <video id="videoPlayer" playsinline></video>
+      <iframe id="playerIframe" style="display:none; width: 100%; height: 100%; border: none; background: #000;" allow="autoplay; fullscreen; encrypted-media"></iframe>
+
+      <!-- Thanh điều khiển Mini Player khi ở chế độ Hình Trong Hình (PiP) -->
+      <div id="miniPlayerBar" class="mini-player-bar" style="display: none;">
+        <span id="miniPlayerTitle" class="mini-player-title">Đang phát</span>
+        <div class="mini-player-actions">
+          <button id="btnExpandMini" class="btn-mini-action" title="Phóng to toàn màn hình">⛶</button>
+          <button id="btnCloseMini" class="btn-mini-action" title="Đóng hẳn">✕</button>
         </div>
       </div>
 
-      <div class="player-controls">
-        <div id="progressContainer" class="progress-container">
-          <span id="currentTime" class="time-label">00:00</span>
-          <input type="range" id="seekBar" class="seek-bar focusable" min="0" max="100" value="0">
-          <span id="durationTime" class="time-label">00:00</span>
+      <!-- Nút chuyển tập nổi bên phải video (Ảnh 3) -->
+      <button id="btnQuickNextFloating" class="btn-quick-next-floating" title="Tập tiếp theo">❯</button>
+
+      <!-- Nút Mở Khóa khi đã khóa cảm ứng (Ảnh 2) -->
+      <button id="btnUnlockTouch" class="btn-unlock-touch" style="display: none;" title="Mở khóa cảm ứng">🔓 Mở khóa cảm ứng</button>
+
+      <!-- Lớp Overlay Điều Khiển Trình Phát (Ảnh 2 & Ảnh 3) -->
+      <div id="playerOverlay" class="player-overlay">
+        <!-- Top Bar điều khiển chuẩn APK (Ảnh 2) -->
+        <div class="player-top">
+          <div class="player-title-info">
+            <button id="btnBackPlayer" class="btn-player-square" title="Quay lại">⮌</button>
+            <div class="player-header-text">
+              <span id="playerTitle" class="player-title">Tên Phim</span>
+              <span class="player-sep"> • </span>
+              <span id="playerSub" class="player-subtitle">Tập 1</span>
+            </div>
+          </div>
+          <div class="player-top-actions">
+            <button id="btnToggleFavPlayer" class="btn-player-square" title="Yêu thích">⭐</button>
+            <button id="btnPipPlayer" class="btn-player-square" title="Hình trong hình (PiP)">⧉</button>
+            <button id="btnSpeedPlayer" class="btn-player-square" title="Tốc độ phát">1.0x</button>
+            <button id="btnAspectPlayer" class="btn-player-square" title="Tỉ lệ khung hình">⛶</button>
+            <button id="btnEpisodeSheetPlayer" class="btn-player-square" title="Danh sách tập & Server">☰</button>
+            <button id="btnLockPlayer" class="btn-player-square" title="Khóa cảm ứng">🔒</button>
+            <button id="btnRotatePlayer" class="btn-player-square" title="Xoay màn hình">🔄</button>
+          </div>
         </div>
-        <div class="player-buttons-row">
-          <button id="btnPlayPause" class="btn-player focusable">⏸️ Tạm Dừng</button>
-          <button id="btnRewind" class="btn-player focusable">⏪ -10s</button>
-          <button id="btnForward" class="btn-player focusable">⏩ +10s</button>
-          <button id="btnPrevEpisode" class="btn-player focusable" style="display: none;">⏮️ Tập Trước</button>
-          <button id="btnNextEpisode" class="btn-player focusable" style="display: none;">⏭️ Tập Tiếp</button>
-          <button id="btnRotatePlayer" class="btn-player focusable" title="Xoay Màn Hình">🔄 Xoay Ngang</button>
-          <button id="btnFullscreen" class="btn-player focusable">🗖 Toàn Màn Hình</button>
+
+        <!-- Cụm 5 nút điều khiển nổi ở trung tâm màn hình (Ảnh 2) -->
+        <div id="playerCenterControls" class="player-center-controls">
+          <button id="btnCenterRewind" class="btn-center-pill" title="Tua lùi 10s">⏪ 10s</button>
+          <button id="btnCenterPrev" class="btn-center-round" title="Tập trước">⏮</button>
+          <button id="btnCenterPlayPause" class="btn-center-main" title="Phát / Tạm dừng">
+            <span id="centerPlayIcon">⏸</span>
+          </button>
+          <button id="btnCenterNext" class="btn-center-round" title="Tập tiếp">⏭</button>
+          <button id="btnCenterForward" class="btn-center-pill" title="Tua đi 10s">10s ⏩</button>
+        </div>
+
+        <!-- Nút tiện ích Bỏ qua Intro +85s (Ảnh 2) -->
+        <button id="btnSkipIntro" class="btn-skip-intro" style="display: none;" title="Bỏ qua đoạn dạo đầu (+85s)">
+          +85s Bỏ qua Intro ▶
+        </button>
+
+        <!-- Thanh điều khiển & Tiến trình dưới cùng (Ảnh 2 & Ảnh 3) -->
+        <div class="player-bottom-bar">
+          <span id="currentTime" class="time-label">00:00</span>
+          <div class="progress-track-wrapper">
+            <input type="range" id="seekBar" class="seek-bar focusable" min="0" max="100" value="0">
+          </div>
+          <span id="durationTime" class="time-label">00:00</span>
+          <button id="btnFullscreen" class="btn-fullscreen-toggle" title="Toàn màn hình">⛶</button>
         </div>
       </div>
     </div>
 
-    <!-- Quick Zapping Sidebar for TV -->
+    <!-- Sidebar Danh Sách Tập & Server chuẩn Windows / Desktop (Ảnh 3) -->
+    <div id="playerSidebar" class="player-sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-titles">
+          <div id="sidebarMovieTitle" class="sidebar-title">Tên Phim</div>
+          <div id="sidebarMovieSub" class="sidebar-sub">Origin Title (2026)</div>
+        </div>
+        <button id="btnCloseSidebar" class="btn-close-sidebar" title="Đóng danh sách tập">✖</button>
+      </div>
+      <div class="sidebar-servers-wrapper">
+        <div class="sidebar-section-title">CHỌN NGUỒN PHÁT / SERVER</div>
+        <div id="sidebarServersList" class="sidebar-servers-list"></div>
+      </div>
+      <div class="sidebar-episodes-wrapper">
+        <div class="sidebar-section-title">DANH SÁCH TẬP</div>
+        <div id="sidebarEpisodesGrid" class="sidebar-episodes-grid"></div>
+      </div>
+    </div>
+
+    <!-- Quick Zapping Panel cho TV -->
     <div id="zappingPanel" class="zapping-panel">
       <div class="zapping-title">
         <span>📺 KÊNH CÙNG NHÓM</span>
@@ -196,7 +237,6 @@
     </div>
   </div>
 
-  <!-- Khung Web Live Match Player Không Quảng Cáo (Ad-Free Player) -->
   <div id="matchWebPlayerContainer" class="player-container" style="display: none; z-index: 2000; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000;">
     <div class="player-top" style="position: absolute; top: 0; left: 0; width: 100%; z-index: 2005; background: linear-gradient(180deg, rgba(10,14,23,0.95), transparent); padding: 14px 28px; display: flex; justify-content: space-between; align-items: center;">
       <div class="player-title-info" style="display: flex; align-items: center; gap: 16px;">
@@ -307,7 +347,93 @@
     </div>
   </div>
 
-    <!-- Footer Chuẩn Hóa Mobile & TV Edition -->
+    <!-- Hộp Thoại Cài Đặt & Tải Ứng Dụng Cho Mọi Nền Tảng (Install Modal) -->
+  <div id="installPlatformModal" class="modal-overlay" style="display: none; z-index: 2600;">
+    <div class="modal-content install-modal-box">
+      <div class="install-modal-header">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <img src="icon_256.png" style="width: 44px; height: 44px; border-radius: 10px; border: 1.5px solid #ffd700;" alt="Huy Cá">
+          <div style="text-align: left;">
+            <h2 style="color: #ffd700; font-size: 20px; font-weight: 900; margin: 0;">📲 CÀI ĐẶT ỨNG DỤNG HUY CÁ</h2>
+            <div style="color: #94a3b8; font-size: 12.5px; margin-top: 2px;">Hỗ trợ đầy đủ 5 nền tảng: Điện thoại, Android TV, Windows PC, LG webOS & iOS</div>
+          </div>
+        </div>
+        <button id="btnCloseInstallModalTop" class="btn-close-sidebar" title="Đóng">✕</button>
+      </div>
+
+      <div class="install-platforms-grid">
+        <!-- 1. Cài đặt nhanh PWA trực tiếp trên trình duyệt (iOS / Android / Windows / Mac) -->
+        <div class="install-platform-card highlight-pwa">
+          <div class="platform-card-left">
+            <span class="platform-emoji">⚡</span>
+            <div>
+              <div class="platform-title">Cài Đặt Trực Tiếp Khỏi Cần Tải File (Web App / PWA)</div>
+              <div class="platform-desc">Tạo biểu tượng Huy Cá ngoài màn hình chính trên <b>iPhone (iOS), Android, Windows, MacBook</b> — mở toàn màn hình siêu mượt!</div>
+            </div>
+          </div>
+          <button id="btnTriggerPwaInstall" class="btn-platform-download btn-pwa-gold focusable">📲 CÀI NGAY</button>
+        </div>
+
+        <!-- 2. Android Mobile APK -->
+        <a href="/api/download?file=mobile" download="HuyCa_Mobile_v2.8.apk" class="install-platform-card focusable">
+          <div class="platform-card-left">
+            <span class="platform-emoji">📱</span>
+            <div>
+              <div class="platform-title">Điện Thoại Android (Bản Native APK)</div>
+              <div class="platform-desc">Tệp cài đặt: <code>HuyCa_Mobile_v2.8.apk</code> • Tối ưu cảm ứng, tự xoay ngang, ExoPlayer</div>
+            </div>
+          </div>
+          <span class="btn-platform-download">⬇️ TẢI APK</span>
+        </a>
+
+        <!-- 3. Android TV / Google TV / TV Box APK -->
+        <a href="/api/download?file=tv" download="HuyCa_TV_v2.8.apk" class="install-platform-card focusable">
+          <div class="platform-card-left">
+            <span class="platform-emoji">📺</span>
+            <div>
+              <div class="platform-title">Android TV / Sony / Casper / Xiaomi / TV Box</div>
+              <div class="platform-desc">Tệp cài đặt: <code>HuyCa_TV_v2.8.apk</code> • Giao diện 16:9 chuẩn điều khiển Remote D-Pad</div>
+            </div>
+          </div>
+          <span class="btn-platform-download">⬇️ TẢI APK TV</span>
+        </a>
+
+        <!-- 4. Windows PC -->
+        <a href="/api/download?file=windows" download="HuyCa_Windows_v2.8.zip" class="install-platform-card focusable">
+          <div class="platform-card-left">
+            <span class="platform-emoji">💻</span>
+            <div>
+              <div class="platform-title">Máy Tính Windows PC / Laptop (Windows 10/11)</div>
+              <div class="platform-desc">Tệp cài đặt: <code>HuyCa_Windows_v2.8.zip</code> • Tích hợp vượt tường lửa DNS & chặn quảng cáo</div>
+            </div>
+          </div>
+          <span class="btn-platform-download">⬇️ TẢI ZIP PC</span>
+        </a>
+
+        <!-- 5. LG Smart TV (webOS) -->
+        <a href="/api/download?file=lg" download="HuyCa_LG_webOS_v2.8.ipk" class="install-platform-card focusable">
+          <div class="platform-card-left">
+            <span class="platform-emoji">🖥️</span>
+            <div>
+              <div class="platform-title">Tivi LG Smart TV (Hệ điều hành webOS)</div>
+              <div class="platform-desc">Tệp cài đặt: <code>HuyCa_LG_webOS_v2.8.ipk</code> • Hỗ trợ chuột bay Magic Remote & phím số</div>
+            </div>
+          </div>
+          <span class="btn-platform-download">⬇️ TẢI IPK LG</span>
+        </a>
+      </div>
+
+      <div id="iosInstallGuideBox" class="ios-install-guide">
+        💡 <b>Mẹo cho iPhone / iPad (iOS):</b> Mở trang web bằng trình duyệt <b>Safari</b> ➔ Bấm nút <b>Chia sẻ [⬆]</b> ở thanh dưới cùng ➔ Chọn <b>"Thêm vào MH chính" (Add to Home Screen)</b> để dùng như App thực thụ!
+      </div>
+
+      <div style="display: flex; gap: 10px; margin-top: 14px;">
+        <button id="btnCloseInstallModal" class="btn-primary-yellow focusable" style="width: 100%; justify-content: center; padding: 11px; border-radius: 8px; font-weight: 800;">ĐÓNG</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer Chuẩn Hóa Mobile & TV Edition -->
   <footer class="app-footer">
     <div class="footer-copyright">© 2026 Bản quyền bởi HUY CÁ - <span id="footerEditionName">Mobile Edition</span></div>
     <div class="footer-mode-switcher">
@@ -331,8 +457,8 @@
       });
     }
   </script>
-  <script src="data/tv_channels.js?v=2.8.9"></script>
-  <script src="js/hls.min.js?v=2.8.9"></script>
-  <script src="js/app.js?v=2.8.9"></script>
+  <script src="data/tv_channels.js?v=2.9.3"></script>
+  <script src="js/hls.min.js?v=3.0.8"></script>
+  <script src="js/app.js?v=3.1.0"></script>
 </body>
 </html>

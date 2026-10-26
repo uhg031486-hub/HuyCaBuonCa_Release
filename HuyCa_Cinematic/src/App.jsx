@@ -6,11 +6,7 @@ import {
   Tv, 
   Compass, 
   TrendingUp, 
-  Trophy, 
-  Clapperboard, 
-  Layers,
-  Star,
-  Play
+  Clapperboard
 } from 'lucide-react';
 
 import Navbar from './components/Navbar';
@@ -27,9 +23,15 @@ import {
   TRENDING_MOVIES, 
   LATEST_SERIES, 
   SHORT_DRAMAS, 
-  TV_CHANNELS, 
-  CATEGORIES 
+  TV_CHANNELS 
 } from './data/mockMovies';
+
+import {
+  fetchKkphimList,
+  resolveMovieDetailAndStream,
+  searchAllSources,
+  FreeReelsApi
+} from './services/movieApi';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('all');
@@ -40,73 +42,146 @@ export default function App() {
   const [selectedMovie, setSelectedMovie] = useState(null);
   const [currentPlayingMovie, setCurrentPlayingMovie] = useState(null);
   const [isMiniMode, setIsMiniMode] = useState(false);
+  const [isLoadingStream, setIsLoadingStream] = useState(false);
 
-  // Dynamic API Movies from KKPhim
-  const [apiMovies, setApiMovies] = useState([]);
+  // Live Catalog States
+  const [liveFeatured, setLiveFeatured] = useState(FEATURED_MOVIES);
+  const [liveSingleMovies, setLiveSingleMovies] = useState(TRENDING_MOVIES);
+  const [liveSeriesMovies, setLiveSeriesMovies] = useState(LATEST_SERIES);
+  const [liveAnimeMovies, setLiveAnimeMovies] = useState([]);
+  const [liveShortDramas, setLiveShortDramas] = useState(SHORT_DRAMAS);
+  const [liveSearchResults, setLiveSearchResults] = useState([]);
 
   useEffect(() => {
-    // Tải dữ liệu thực tế từ KKPhim để làm giàu kho nội dung trực tiếp
-    fetch('https://phimapi.com/danh-sach/phim-moi-cap-nhat?page=1')
-      .then(res => res.json())
-      .then(data => {
-        if (data && data.items) {
-          const formatted = data.items.slice(0, 10).map(item => ({
-            id: item._id || item.slug,
-            title: item.name,
-            originalTitle: item.origin_name,
-            poster: item.poster_url?.startsWith('http') ? item.poster_url : `https://phimimg.com/${item.poster_url}`,
-            backdrop: item.thumb_url?.startsWith('http') ? item.thumb_url : `https://phimimg.com/${item.thumb_url}`,
-            year: item.year?.toString() || '2024',
-            quality: 'Full HD',
-            audio: 'Thuyết Minh',
-            category: 'Phim Mới Cập Nhật',
-            imdb: '7.9',
-            overview: `Bộ phim ${item.name} phát hành năm ${item.year}, với cốt truyện cuốn hút và chất lượng điện ảnh đặc sắc.`,
-            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4'
-          }));
-          setApiMovies(formatted);
+    // 1. Tải Phim Lẻ Chiếu Rạp Mới Nhất (Real HLS Streams)
+    fetchKkphimList('https://phimapi.com/v1/api/danh-sach/phim-le?page=1', 'Phim Chiếu Rạp')
+      .then(list => {
+        if (list.length > 0) {
+          setLiveSingleMovies(list);
+          setLiveFeatured(list.slice(0, 5));
         }
-      })
-      .catch(err => {
-        console.warn('Lấy dữ liệu API ngoài bị trễ, chuyển sang danh mục tuyển chọn nội bộ.', err);
+      });
+
+    // 2. Tải Phim Bộ Hot Nhất (Real HLS Streams)
+    fetchKkphimList('https://phimapi.com/v1/api/danh-sach/phim-bo?page=1', 'Phim Bộ Hot')
+      .then(list => {
+        if (list.length > 0) setLiveSeriesMovies(list);
+      });
+
+    // 3. Tải Hoạt Hình & Anime Đỉnh Cao (Real HLS Streams)
+    fetchKkphimList('https://phimapi.com/v1/api/danh-sach/hoat-hinh?page=1', 'Anime Đỉnh Cao')
+      .then(list => {
+        if (list.length > 0) setLiveAnimeMovies(list);
+      });
+
+    // 4. Tải Kho Tiểu Kịch ReelShort / FreeReels Thật (Real 9:16 HLS + Phụ đề Tiếng Việt)
+    FreeReelsApi.fetchShortDramas(0)
+      .then(list => {
+        if (list.length > 0) setLiveShortDramas(list);
       });
   }, []);
 
-  // Tổng hợp tất cả phim để tìm kiếm
+  // Live Search Debounce
+  useEffect(() => {
+    const q = searchQuery.trim();
+    if (!q) {
+      setLiveSearchResults([]);
+      return;
+    }
+    const timer = setTimeout(() => {
+      searchAllSources(q).then(res => {
+        if (res && res.length > 0) {
+          setLiveSearchResults(res);
+        }
+      });
+    }, 320);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Tổng hợp tất cả phim hiện có để lọc tức thì
   const allMoviesList = useMemo(() => {
     return [
-      ...FEATURED_MOVIES,
-      ...TRENDING_MOVIES,
-      ...LATEST_SERIES,
-      ...SHORT_DRAMAS,
-      ...apiMovies
+      ...liveSingleMovies,
+      ...liveSeriesMovies,
+      ...liveAnimeMovies,
+      ...liveShortDramas
     ];
-  }, [apiMovies]);
+  }, [liveSingleMovies, liveSeriesMovies, liveAnimeMovies, liveShortDramas]);
 
-  // Bộ lọc tìm kiếm trực tiếp
   const searchResults = useMemo(() => {
     if (!searchQuery.trim()) return [];
+    if (liveSearchResults.length > 0) return liveSearchResults;
     const q = searchQuery.toLowerCase();
     return allMoviesList.filter(m => 
-      m.title.toLowerCase().includes(q) || 
-      (m.originalTitle && m.originalTitle.toLowerCase().includes(q)) ||
-      (m.category && m.category.toLowerCase().includes(q))
+      m.title?.toLowerCase().includes(q) || 
+      m.originalTitle?.toLowerCase().includes(q)
     );
-  }, [searchQuery, allMoviesList]);
+  }, [searchQuery, liveSearchResults, allMoviesList]);
 
-  // Bộ lọc theo danh mục / tab
-  const filteredTrending = useMemo(() => {
-    if (selectedCategory === 'Tất Cả') return TRENDING_MOVIES;
-    return TRENDING_MOVIES.filter(m => m.category?.includes(selectedCategory) || selectedCategory.includes(m.category));
-  }, [selectedCategory]);
-
-  const handlePlayMovie = (movie) => {
-    setCurrentPlayingMovie(movie);
-    setIsMiniMode(false);
+  // Lọc theo nút Category
+  const handleSelectCategory = (cat) => {
+    setSelectedCategory(cat);
+    if (cat === 'Phim Chiếu Rạp') setActiveTab('movies');
+    else if (cat === 'Phim Bộ Hot') setActiveTab('series');
+    else if (cat === 'Anime Đỉnh Cao') setActiveTab('anime');
+    else if (cat === 'Tiểu Kịch ReelShort') setActiveTab('short_drama');
+    else if (cat === 'Truyền Hình Thể Thao') setActiveTab('tv');
+    else if (cat === 'Hành Động') {
+      fetchKkphimList('https://phimapi.com/v1/api/the-loai/hanh-dong?page=1', 'Hành Động').then(l => {
+        if (l.length > 0) setLiveSingleMovies(l);
+      });
+      setActiveTab('movies');
+    } else if (cat === 'Khoa Học Viễn Tưởng') {
+      fetchKkphimList('https://phimapi.com/v1/api/the-loai/vien-tuong?page=1', 'Khoa Học Viễn Tưởng').then(l => {
+        if (l.length > 0) setLiveSingleMovies(l);
+      });
+      setActiveTab('movies');
+    } else if (cat === 'Kinh Dị & Giật Gân') {
+      fetchKkphimList('https://phimapi.com/v1/api/the-loai/kinh-di?page=1', 'Kinh Dị & Giật Gân').then(l => {
+        if (l.length > 0) setLiveSingleMovies(l);
+      });
+      setActiveTab('movies');
+    } else {
+      setActiveTab('all');
+    }
   };
 
-  const handleOpenDetail = (movie) => {
-    setSelectedMovie(movie);
+  // Khi bấm Phát Phim -> Tự động lấy luồng HLS (.m3u8) thật 100% trước khi mở Player
+  const handlePlayMovie = async (movie) => {
+    if (!movie) return;
+    setIsLoadingStream(true);
+    try {
+      let resolved = await resolveMovieDetailAndStream(movie);
+      let videoUrl = resolved.videoUrl || resolved.streamUrl || '';
+      let subtitleUrl = resolved.subtitleUrl || null;
+
+      // Nếu tập phim ngắn cần mở khóa (freereels_unlock:seriesId:epId)
+      if (videoUrl.startsWith('freereels_unlock:')) {
+        const parts = videoUrl.split(':');
+        const unl = await FreeReelsApi.unlockEpisode(parts[1], parts[2]);
+        if (unl && unl.url) {
+          videoUrl = unl.url;
+          if (unl.subtitleUrl) subtitleUrl = unl.subtitleUrl;
+        }
+      }
+
+      setCurrentPlayingMovie({
+        ...resolved,
+        videoUrl,
+        subtitleUrl
+      });
+      setIsMiniMode(false);
+    } finally {
+      setIsLoadingStream(false);
+    }
+  };
+
+  // Khi bấm vào Card Phim -> Lấy đầy đủ thông tin chi tiết & danh sách tập thật
+  const handleOpenDetail = async (movie) => {
+    if (!movie) return;
+    setSelectedMovie({ ...movie, isLoadingEpisodes: true });
+    const fullDetail = await resolveMovieDetailAndStream(movie);
+    setSelectedMovie({ ...fullDetail, isLoadingEpisodes: false });
   };
 
   const handleClosePlayer = () => {
@@ -117,6 +192,14 @@ export default function App() {
   return (
     <div className="min-h-screen bg-[#0B0F17] text-gray-100 flex flex-col font-sans relative selection:bg-[#E50914] selection:text-white">
       
+      {/* Loading Stream Indicator */}
+      {isLoadingStream && (
+        <div className="fixed inset-0 z-[60] bg-black/70 backdrop-blur-sm flex flex-col items-center justify-center gap-3">
+          <div className="w-12 h-12 rounded-full border-4 border-[#E50914] border-t-transparent animate-spin" />
+          <p className="text-sm font-bold text-white tracking-wide">Đang kết nối máy chủ phát phim tốc độ cao...</p>
+        </div>
+      )}
+
       {/* Top Sticky Glassmorphism Navbar */}
       <Navbar
         activeTab={activeTab}
@@ -132,7 +215,7 @@ export default function App() {
         
         {/* Full-width Hero Banner Hoành Tráng */}
         <HeroBanner
-          featuredMovies={FEATURED_MOVIES}
+          featuredMovies={liveFeatured}
           onPlayMovie={handlePlayMovie}
           onOpenDetail={handleOpenDetail}
         />
@@ -140,72 +223,83 @@ export default function App() {
         {/* Category Pill Filters */}
         <CategoryFilter
           selectedCategory={selectedCategory}
-          onSelectCategory={setSelectedCategory}
+          onSelectCategory={handleSelectCategory}
         />
 
-        {/* Carousel 1: Xu Hướng Điện Ảnh (Trending Now) */}
-        <MovieCarousel
-          title="Xu Hướng Điện Ảnh Đỉnh Cao"
-          subtitle="Top phim được xem nhiều nhất tuần qua"
-          icon={TrendingUp}
-          movies={filteredTrending}
-          onPlayMovie={handlePlayMovie}
-          onOpenDetail={handleOpenDetail}
-          accentColor="#E50914"
-        />
-
-        {/* Section: Kênh TV Trực Tuyến & Thể Thao Đỉnh Cao */}
-        <div id="tv">
-          <LiveTvSection
-            onPlayChannel={(channel) => {
-              handlePlayMovie({
-                title: channel.name,
-                category: channel.group,
-                streamUrl: channel.streamUrl,
-                videoUrl: channel.streamUrl
-              });
-            }}
-          />
-        </div>
-
-        {/* Carousel 2: Phim Bộ Bom Tấn Mới Nhất */}
-        <div id="series">
+        {/* Carousel 1: Phim Lẻ & Chiếu Rạp Mới Nhất */}
+        {(activeTab === 'all' || activeTab === 'movies') && (
           <MovieCarousel
-            title="Phim Bộ Bom Tấn Độc Quyền VIP"
-            subtitle="Trọn bộ thuyết minh và vietsub 4K"
-            icon={Sparkles}
-            movies={LATEST_SERIES}
-            onPlayMovie={handlePlayMovie}
-            onOpenDetail={handleOpenDetail}
-            accentColor="#F5C518"
-          />
-        </div>
-
-        {/* Carousel 3: Phim Mới Cập Nhật (API Live) */}
-        {apiMovies.length > 0 && (
-          <MovieCarousel
-            title="Phim Mới Cập Nhật Hôm Nay"
-            subtitle="Cập nhật từng giờ từ hệ thống rạp chiếu"
-            icon={Film}
-            movies={apiMovies}
+            title="Phim Lẻ & Chiếu Rạp Đỉnh Cao"
+            subtitle="Phát trực tiếp Full HD / 4K Vietsub & Thuyết Minh"
+            icon={TrendingUp}
+            movies={liveSingleMovies}
             onPlayMovie={handlePlayMovie}
             onOpenDetail={handleOpenDetail}
             accentColor="#E50914"
           />
         )}
 
-        {/* Carousel 4: Kho Tiểu Kịch Đa Nền Tảng (ReelShort, DramaBox, ShortMax, AI Cinema) */}
-        <div id="short-drama">
-          <MovieCarousel
-            title="Kho Tiểu Kịch Đa Nền Tảng"
-            subtitle="ReelShort Âu Mỹ, DramaBox, AI Cinema và ShortMax trọn bộ"
-            icon={Compass}
-            movies={SHORT_DRAMAS}
-            onPlayMovie={handlePlayMovie}
-            onOpenDetail={handleOpenDetail}
-            accentColor="#E50914"
-          />
-        </div>
+        {/* Carousel 2: Phim Bộ Bom Tấn Độc Quyền */}
+        {(activeTab === 'all' || activeTab === 'series') && (
+          <div id="series">
+            <MovieCarousel
+              title="Phim Bộ Bom Tấn Độc Quyền VIP"
+              subtitle="Trọn bộ các tập thuyết minh và vietsub cập nhật liên tục"
+              icon={Sparkles}
+              movies={liveSeriesMovies}
+              onPlayMovie={handlePlayMovie}
+              onOpenDetail={handleOpenDetail}
+              accentColor="#F5C518"
+            />
+          </div>
+        )}
+
+        {/* Carousel 3: Anime & Hoạt Hình 3D */}
+        {(activeTab === 'all' || activeTab === 'anime') && liveAnimeMovies.length > 0 && (
+          <div id="anime">
+            <MovieCarousel
+              title="Anime Nhật Bản & Hoạt Hình 3D"
+              subtitle="Tuyển tập Anime & Tu Tiên 3D mới nhất"
+              icon={Flame}
+              movies={liveAnimeMovies}
+              onPlayMovie={handlePlayMovie}
+              onOpenDetail={handleOpenDetail}
+              accentColor="#E50914"
+            />
+          </div>
+        )}
+
+        {/* Carousel 4: Kho Tiểu Kịch Đa Nền Tảng (ReelShort, DramaBox, ShortMax) */}
+        {(activeTab === 'all' || activeTab === 'short_drama') && (
+          <div id="short-drama">
+            <MovieCarousel
+              title="Kho Tiểu Kịch Đa Nền Tảng (9:16)"
+              subtitle="ReelShort Âu Mỹ, DramaBox, ShortMax & Phim Lồng Tiếng"
+              icon={Compass}
+              movies={liveShortDramas}
+              onPlayMovie={handlePlayMovie}
+              onOpenDetail={handleOpenDetail}
+              accentColor="#E50914"
+            />
+          </div>
+        )}
+
+        {/* Section: Kênh TV Trực Tuyến & Thể Thao Đỉnh Cao */}
+        {(activeTab === 'all' || activeTab === 'tv') && (
+          <div id="tv">
+            <LiveTvSection
+              onPlayChannel={(channel) => {
+                handlePlayMovie({
+                  title: channel.name,
+                  category: channel.group,
+                  streamUrl: channel.streamUrl,
+                  videoUrl: channel.streamUrl,
+                  isLiveTv: true
+                });
+              }}
+            />
+          </div>
+        )}
 
       </main>
 
@@ -220,13 +314,14 @@ export default function App() {
         onPlay={handlePlayMovie}
       />
 
-      {/* Cinematic Player (Cả Fullscreen & Floating In-App PiP) */}
+      {/* Cinematic Player (Cả Fullscreen, Danh sách tập & Floating In-App PiP) */}
       <CinematicPlayer
         currentMovie={currentPlayingMovie}
         isPlaying={!!currentPlayingMovie}
         onClose={handleClosePlayer}
         isMiniMode={isMiniMode}
         setIsMiniMode={setIsMiniMode}
+        onSwitchEpisode={(epMovie) => handlePlayMovie(epMovie)}
       />
 
     </div>
