@@ -39,14 +39,27 @@
         <span>HUY CÁ</span>
       </div>
       <div class="brand-subtitle">Kho Phim & Truyền Hình Đẳng Cấp • Phiên Bản Web Trực Tuyến v2.8</div>
+      <div class="brand-slogan-mobile">Kho Phim Đẳng Cấp Di Động</div>
     </div>
     <div class="header-actions">
-      <button id="btnSearch" class="btn-header focusable" tabindex="1">🔍 Tìm Kiếm</button>
-      <button id="btnScheduleHeader" class="btn-header focusable" tabindex="2">⚽ Lịch Thi Đấu</button>
-      <button id="btnFavHeader" class="btn-header focusable" tabindex="3">⭐ Yêu Thích</button>
-      <button id="btnHistoryHeader" class="btn-header focusable" tabindex="4">🕒 Lịch Sử</button>
-      <button id="btnUpdateHeader" class="btn-header focusable" tabindex="5">🔄 Cập Nhật</button>
-      <button id="btnInstallApp" class="btn-header focusable" tabindex="6" style="display: none; background: linear-gradient(135deg, #eab308, #ca8a04); color: #000; font-weight: bold;">📲 Cài Đặt App</button>
+      <button id="btnSearch" class="btn-header focusable" tabindex="1" title="Tìm Kiếm">
+        <span class="btn-icon">🔍</span><span class="btn-text"> Tìm Kiếm</span>
+      </button>
+      <button id="btnScheduleHeader" class="btn-header focusable" tabindex="2" title="Lịch Thi Đấu">
+        <span class="btn-icon">⚽</span><span class="btn-text"> Lịch Thi Đấu</span>
+      </button>
+      <button id="btnFavHeader" class="btn-header focusable" tabindex="3" title="Yêu Thích">
+        <span class="btn-icon">⭐</span><span class="btn-text"> Yêu Thích</span>
+      </button>
+      <button id="btnHistoryHeader" class="btn-header focusable" tabindex="4" title="Lịch Sử">
+        <span class="btn-icon">🕒</span><span class="btn-text"> Lịch Sử</span>
+      </button>
+      <button id="btnUpdateHeader" class="btn-header focusable" tabindex="5" title="Cập Nhật">
+        <span class="btn-icon">🔄</span><span class="btn-text"> Cập Nhật</span>
+      </button>
+      <button id="btnInstallApp" class="btn-header focusable" tabindex="6" title="Cài Đặt App">
+        <span class="btn-icon">💾</span><span class="btn-text"> Cài Đặt</span>
+      </button>
       <div id="clockDisplay" class="clock-display">00:00</div>
     </div>
   </header>
@@ -157,6 +170,7 @@
           <button id="btnForward" class="btn-player focusable">⏩ +10s</button>
           <button id="btnPrevEpisode" class="btn-player focusable" style="display: none;">⏮️ Tập Trước</button>
           <button id="btnNextEpisode" class="btn-player focusable" style="display: none;">⏭️ Tập Tiếp</button>
+          <button id="btnRotatePlayer" class="btn-player focusable" title="Xoay Màn Hình">🔄 Xoay Ngang</button>
           <button id="btnFullscreen" class="btn-player focusable">🗖 Toàn Màn Hình</button>
         </div>
       </div>
@@ -282,6 +296,14 @@
       <div id="searchResultsGrid" class="grid-container" style="grid-template-columns: repeat(4, 1fr); padding: 0; max-height: 500px; overflow-y: auto;"></div>
     </div>
   </div>
+
+    <!-- Footer Chuẩn Hóa Mobile & TV Edition -->
+  <footer class="app-footer">
+    <div class="footer-copyright">© 2026 Bản quyền bởi HUY CÁ - <span id="footerEditionName">Mobile Edition</span></div>
+    <div class="footer-mode-switcher">
+      <button id="btnSwitchMode" class="btn-mode-switch focusable" title="Chuyển chế độ hiển thị">📺 Chuyển sang Giao diện Tivi</button>
+    </div>
+  </footer>
 
   <!-- Toast Notification -->
   <div id="toastBox" class="toast-box"></div>

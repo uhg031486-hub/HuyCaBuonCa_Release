@@ -451,7 +451,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
+  z-index: 10000;
 }
 
 .modal-content {
@@ -594,7 +594,7 @@ body {
   width: 100vw;
   height: 100vh;
   background: #000000;
-  z-index: 2000;
+  z-index: 20000;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -1096,4 +1096,672 @@ body {
   transform: translateY(-4px) scale(1.03) !important;
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.8), 0 0 16px rgba(255, 215, 0, 0.4) !important;
   border-color: #ffd700 !important;
+}
+
+
+/* PWA Install Banner */
+.pwa-install-banner {
+  background: linear-gradient(90deg, #0f172a, #1e1b4b, #172554);
+  border-bottom: 2px solid #eab308;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 90;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+}
+.pwa-banner-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.pwa-banner-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid #ffd700;
+}
+.pwa-banner-title {
+  color: #ffd700;
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+}
+.pwa-banner-sub {
+  color: #94a3b8;
+  font-size: 11px;
+}
+.pwa-banner-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.btn-banner-install {
+  background: linear-gradient(135deg, #eab308, #ca8a04);
+  color: #000;
+  font-weight: 900;
+  border: none;
+  padding: 6px 16px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(234, 179, 8, 0.4);
+}
+.btn-banner-close {
+  background: transparent;
+  color: #94a3b8;
+  border: none;
+  font-size: 16px;
+  padding: 4px 8px;
+  cursor: pointer;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .header-bar {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    padding: 10px 14px !important;
+    gap: 10px !important;
+  }
+  .brand-section {
+    justify-content: space-between !important;
+  }
+  .brand-subtitle {
+    display: none !important;
+  }
+  .header-actions {
+    overflow-x: auto !important;
+    width: 100% !important;
+    padding-bottom: 4px !important;
+    gap: 8px !important;
+    scrollbar-width: none !important;
+  }
+  .header-actions::-webkit-scrollbar {
+    display: none !important;
+  }
+  .btn-header {
+    padding: 6px 12px !important;
+    font-size: 12px !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+  }
+  .clock-display {
+    display: none !important;
+  }
+  .sources-bar {
+    padding: 6px 10px !important;
+    gap: 6px !important;
+  }
+  .btn-source {
+    font-size: 13px !important;
+    padding: 8px 6px !important;
+  }
+  .grid-container {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 8px !important;
+    padding: 8px 10px 40px 10px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .grid-container {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+
+/* Mobile App Experience Enhancements */
+@media (max-width: 768px) {
+  .modal-content {
+    width: 94% !important;
+    max-width: 94% !important;
+    padding: 16px !important;
+    margin: 10px auto !important;
+    max-height: 90vh !important;
+    border-radius: 12px !important;
+  }
+  .detail-layout {
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+    gap: 14px !important;
+  }
+  .detail-poster {
+    max-width: 140px !important;
+    height: auto !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.7) !important;
+  }
+  .detail-info {
+    width: 100% !important;
+  }
+  .detail-title {
+    font-size: 20px !important;
+    margin-bottom: 6px !important;
+  }
+  .detail-sub {
+    font-size: 13px !important;
+    margin-bottom: 8px !important;
+  }
+  .detail-tags {
+    justify-content: center !important;
+    margin-bottom: 10px !important;
+  }
+  .detail-desc {
+    font-size: 13px !important;
+    max-height: 80px !important;
+    margin-bottom: 14px !important;
+    text-align: left !important;
+  }
+  .detail-buttons {
+    justify-content: center !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+  .detail-buttons button {
+    flex: 1 1 40% !important;
+    padding: 10px 14px !important;
+    font-size: 13px !important;
+  }
+  .episodes-grid {
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 8px !important;
+    max-height: 180px !important;
+  }
+  .btn-episode {
+    padding: 8px 4px !important;
+    font-size: 12px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .episodes-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+  .detail-buttons button {
+    flex: 1 1 100% !important;
+  }
+}
+
+/* --- Standalone App & Installed PWA Mode Optimization --- */
+@media all and (display-mode: standalone), (display-mode: window-controls-overlay), (display-mode: fullscreen) {
+  #btnInstallApp,
+  #pwaInstallBanner {
+    display: none !important;
+  }
+}
+
+/* Modal Overlay Click to Dismiss */
+.modal-overlay {
+  cursor: pointer;
+}
+.modal-content {
+  cursor: default;
+}
+
+/* Player Area Interactivity */
+#videoPlayer {
+  cursor: pointer;
+}
+
+
+/* ==========================================================================
+   HUY CÁ ADAPTIVE SUITE: MOBILE EDITION & TV EDITION (PRO-ENGINEERED)
+   ========================================================================== */
+
+.brand-slogan-mobile {
+  display: none;
+}
+
+/* --- Chế Độ Di Động (Mobile Edition: Chuẩn hóa giống App Android Mobile 100%) --- */
+body.mode-mobile,
+@media (max-width: 768px) {
+  body.mode-mobile .brand-section,
+  .brand-section {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 2px !important;
+  }
+
+  body.mode-mobile .brand-badge,
+  .brand-badge {
+    background: #facc15 !important;
+    color: #000000 !important;
+    font-size: 13px !important;
+    font-weight: 800 !important;
+    padding: 3px 10px !important;
+    border-radius: 6px !important;
+    border: none !important;
+    box-shadow: 0 2px 8px rgba(250, 204, 21, 0.3) !important;
+  }
+
+  body.mode-mobile .brand-badge .brand-logo,
+  .brand-badge .brand-logo {
+    display: none !important;
+  }
+
+  body.mode-mobile .brand-subtitle,
+  .brand-subtitle {
+    display: none !important;
+  }
+
+  body.mode-mobile .brand-slogan-mobile,
+  .brand-slogan-mobile {
+    display: block !important;
+    color: #facc15 !important;
+    font-size: 10px !important;
+    font-style: italic !important;
+    margin-top: 2px !important;
+    letter-spacing: 0.3px !important;
+  }
+
+  body.mode-mobile .header-bar,
+  .header-bar {
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 10px 14px !important;
+    background: #121722 !important;
+    border-bottom: 1px solid #1e2638 !important;
+    gap: 10px !important;
+  }
+
+  body.mode-mobile .header-actions,
+  .header-actions {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 6px !important;
+    width: auto !important;
+    overflow: visible !important;
+    padding: 0 !important;
+  }
+
+  body.mode-mobile .header-actions .btn-header,
+  .header-actions .btn-header {
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    padding: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 8px !important;
+    font-size: 15px !important;
+    background: #1e2538 !important;
+    border: 1px solid #2a354d !important;
+    color: #ffffff !important;
+    cursor: pointer !important;
+  }
+
+  body.mode-mobile .header-actions .btn-header .btn-text,
+  .header-actions .btn-header .btn-text {
+    display: none !important;
+  }
+
+  body.mode-mobile #btnScheduleHeader,
+  body.mode-mobile #btnHistoryHeader,
+  body.mode-mobile #btnUpdateHeader,
+  body.mode-mobile .clock-display,
+  #btnScheduleHeader,
+  #btnHistoryHeader,
+  #btnUpdateHeader,
+  .clock-display {
+    display: none !important;
+  }
+
+  body.mode-mobile #btnSearch,
+  body.mode-mobile #btnFavHeader,
+  #btnSearch,
+  #btnFavHeader {
+    display: inline-flex !important;
+  }
+
+  /* 4 Nguồn Lớn trên Điện thoại: Chia đều 4 ô khít 1 hàng */
+  body.mode-mobile .sources-bar,
+  .sources-bar {
+    display: flex !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 8px 10px 4px 10px !important;
+    gap: 6px !important;
+    overflow-x: hidden !important;
+  }
+
+  body.mode-mobile .btn-source,
+  .btn-source {
+    flex: 1 1 23% !important;
+    min-width: 0 !important;
+    height: 36px !important;
+    line-height: 36px !important;
+    padding: 0 2px !important;
+    font-size: 11px !important;
+    font-weight: 800 !important;
+    border-radius: 8px !important;
+    text-align: center !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    background: #1a2035 !important;
+    color: #94a3b8 !important;
+    border: 1px solid #232d42 !important;
+  }
+
+  body.mode-mobile .btn-source.active,
+  .btn-source.active {
+    background: linear-gradient(135deg, #facc15, #eab308) !important;
+    color: #000000 !important;
+    border-color: #facc15 !important;
+    box-shadow: 0 2px 8px rgba(234, 179, 8, 0.4) !important;
+  }
+
+  /* Thanh danh mục con & filter: Vuốt ngang chạm vuốt cảm ứng mượt mà */
+  body.mode-mobile .sub-sources-bar,
+  .sub-sources-bar {
+    padding: 4px 10px !important;
+    gap: 6px !important;
+    overflow-x: auto !important;
+    scrollbar-width: none !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  .sub-sources-bar::-webkit-scrollbar,
+  .filter-bar::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  body.mode-mobile .btn-sub-source,
+  .btn-sub-source {
+    height: 30px !important;
+    border-radius: 15px !important;
+    padding: 0 12px !important;
+    font-size: 11px !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+  }
+
+  body.mode-mobile .filter-wrapper,
+  .filter-wrapper {
+    padding: 4px 10px !important;
+  }
+  body.mode-mobile .filter-nav-btn,
+  .filter-nav-btn {
+    display: none !important;
+  }
+
+  body.mode-mobile .filter-bar,
+  .filter-bar {
+    overflow-x: auto !important;
+    scrollbar-width: none !important;
+    -webkit-overflow-scrolling: touch !important;
+    gap: 6px !important;
+  }
+
+  body.mode-mobile .btn-filter,
+  .btn-filter {
+    height: 28px !important;
+    border-radius: 14px !important;
+    padding: 0 10px !important;
+    font-size: 10.5px !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* Lưới Phim: BẮT BUỘC 3 CỘT GỌN GÀNG ĐẲNG CẤP CHUẨN ĐIỆN THOẠI */
+  body.mode-mobile .grid-container,
+  .grid-container {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 6px !important;
+    padding: 6px 8px 30px 8px !important;
+  }
+
+  /* Thẻ Phim Compact Mobile (Giống hệt item_movie.xml) */
+  body.mode-mobile .movie-card,
+  .movie-card {
+    background: #161b26 !important;
+    border-radius: 8px !important;
+    border: 1px solid #22293d !important;
+    padding: 4px !important;
+  }
+
+  body.mode-mobile .poster-wrapper,
+  .poster-wrapper {
+    aspect-ratio: 2 / 3 !important;
+    height: auto !important;
+    border-radius: 6px !important;
+    overflow: hidden !important;
+  }
+
+  body.mode-mobile .card-poster,
+  .card-poster {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+  }
+
+  body.mode-mobile .movie-card.tv-card .poster-wrapper,
+  .movie-card.tv-card .poster-wrapper {
+    aspect-ratio: 16 / 9 !important;
+    height: auto !important;
+  }
+
+  body.mode-mobile .badge-quality,
+  .badge-quality {
+    top: 4px !important;
+    right: 4px !important;
+    font-size: 8.5px !important;
+    padding: 1px 4px !important;
+    border-radius: 3px !important;
+    background: rgba(10, 25, 40, 0.85) !important;
+    border: 1px solid #00e5ff !important;
+    color: #38bdf8 !important;
+    font-weight: bold !important;
+  }
+
+  body.mode-mobile .badge-fav,
+  .badge-fav {
+    top: 4px !important;
+    left: 4px !important;
+    font-size: 10px !important;
+    padding: 1px 4px !important;
+  }
+
+  body.mode-mobile .card-info,
+  .card-info {
+    padding: 4px 2px !important;
+  }
+
+  body.mode-mobile .card-title,
+  .card-title {
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    color: #f8fafc !important;
+    margin-bottom: 2px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    line-height: 1.3 !important;
+  }
+
+  body.mode-mobile .card-subtitle,
+  .card-subtitle {
+    font-size: 10px !important;
+    color: #94a3b8 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+}
+
+/* --- Chế Độ Tivi (TV Edition: Chuẩn hóa cho Màn hình lớn & Điều khiển Remote) --- */
+body.mode-tv .brand-section {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 12px !important;
+}
+
+body.mode-tv .brand-badge {
+  background: #dc2626 !important;
+  color: #ffffff !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  padding: 4px 12px !important;
+  border-radius: 6px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+
+body.mode-tv .brand-badge .brand-logo {
+  display: inline-block !important;
+  width: 22px !important;
+  height: 22px !important;
+}
+
+body.mode-tv .brand-subtitle {
+  display: block !important;
+  font-size: 12px !important;
+  color: #94a3b8 !important;
+}
+
+body.mode-tv .brand-slogan-mobile {
+  display: none !important;
+}
+
+body.mode-tv .header-bar {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 12px 24px !important;
+  background: #121218 !important;
+}
+
+body.mode-tv .header-actions {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 8px !important;
+  width: auto !important;
+  overflow: visible !important;
+}
+
+body.mode-tv .btn-header {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  padding: 7px 14px !important;
+  font-size: 13px !important;
+  width: auto !important;
+  height: auto !important;
+  border-radius: 6px !important;
+  background: #1e293b !important;
+}
+
+body.mode-tv .btn-header .btn-text {
+  display: inline !important;
+}
+
+body.mode-tv #btnScheduleHeader,
+body.mode-tv #btnHistoryHeader,
+body.mode-tv #btnUpdateHeader,
+body.mode-tv .clock-display {
+  display: inline-flex !important;
+}
+
+body.mode-tv .grid-container {
+  grid-template-columns: repeat(6, 1fr) !important;
+  gap: 14px !important;
+  padding: 14px 20px 40px 20px !important;
+}
+
+@media (min-width: 1700px) {
+  body.mode-tv .grid-container {
+    grid-template-columns: repeat(7, 1fr) !important;
+  }
+}
+
+body.mode-tv .movie-card {
+  border-radius: 10px !important;
+  border: 2px solid transparent !important;
+}
+
+body.mode-tv .poster-wrapper {
+  aspect-ratio: 2 / 3 !important;
+  height: auto !important;
+}
+
+body.mode-tv .movie-card.focused,
+body.mode-tv .focusable:focus {
+  outline: none !important;
+  border-color: #00e5ff !important;
+  box-shadow: 0 0 16px rgba(0, 229, 255, 0.8), 0 0 6px #00e5ff !important;
+  transform: scale(1.04) !important;
+  z-index: 10 !important;
+}
+
+/* --- Footer & Mode Switcher --- */
+.app-footer {
+  padding: 20px 10px 40px 10px;
+  text-align: center;
+  background: #0d111a;
+  border-top: 1px solid #1a2233;
+  margin-top: 24px;
+}
+
+.footer-copyright {
+  font-size: 11px;
+  font-weight: 700;
+  color: #facc15;
+  margin-bottom: 10px;
+  letter-spacing: 0.5px;
+}
+
+.btn-mode-switch {
+  background: #1e293b;
+  border: 1px solid #334155;
+  color: #cbd5e1;
+  padding: 6px 18px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-mode-switch:hover,
+.btn-mode-switch:focus {
+  background: #334155;
+  color: #ffffff;
+  border-color: #00e5ff;
+  box-shadow: 0 0 10px rgba(0, 229, 255, 0.4);
+}
+
+/* --- CSS Forced Landscape for iPhone & Mobile Browsers --- */
+.player-container.player-forced-landscape {
+  position: fixed !important;
+  top: 0 !important;
+  left: 100vw !important;
+  width: 100vh !important;
+  height: 100vw !important;
+  transform-origin: top left !important;
+  transform: rotate(90deg) !important;
+  z-index: 999999 !important;
+  overflow: hidden !important;
+  background: #000000 !important;
+}
+
+.player-container.player-forced-landscape #videoPlayer,
+.player-container.player-forced-landscape #playerIframe {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+}
+
+.player-container.player-forced-landscape .player-overlay {
+  width: 100% !important;
+  height: 100% !important;
 }
