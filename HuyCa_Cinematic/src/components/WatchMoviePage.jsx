@@ -599,7 +599,7 @@ export default function WatchMoviePage({
 
             {/* Custom Cinema Video Controls Bar */}
             {!useIframeEmbed && (
-              <div className={`absolute bottom-0 inset-x-0 p-3 sm:p-5 bg-gradient-to-t from-black/95 via-black/60 to-transparent transition-opacity duration-300 space-y-2 z-20 ${
+              <div className={`absolute bottom-0 inset-x-0 p-3 sm:p-5 bg-gradient-to-t from-black/65 via-black/25 to-transparent backdrop-blur-[2px] transition-opacity duration-300 space-y-2 z-20 ${
                 showControls ? 'opacity-100' : 'opacity-0 pointer-events-none'
               }`}>
                 
