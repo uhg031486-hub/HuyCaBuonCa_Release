@@ -215,6 +215,30 @@ export default function WatchMoviePage({
     const triggerAutoRecovery = async () => {
       if (hasAttemptedAutoRecovery.current) return;
       hasAttemptedAutoRecovery.current = true;
+
+      // NẾU LÀ TRUYỀN HÌNH HOẶC THỂ THAO TRỰC TIẾP: TUYỆT ĐỐI KHÔNG FALLBACK SANG PHIM NGẮN!
+      if (movie.isLiveTv) {
+        console.log('Live sports/TV error, attempting sports live fallbacks...');
+        const sportsFallbacks = [
+          'https://amg00378-amg00378c4-freelivesports-emea-5637.playouts.now.amagi.tv/playlist.m3u8',
+          'https://vtvgolivepre-vtv02.vtvdigital.vn/hls/vtv/live/vtv5__vtv1080p-h264/index.m3u8',
+          'https://bein-xtra-bein.amagi.tv/playlist.m3u8',
+          'https://vtvgolivepre-vtv02.vtvdigital.vn/hls/vtv/live/vtv1__vtv1080p-h264/index.m3u8'
+        ];
+        const nextUrl = sportsFallbacks.find(u => u !== url) || sportsFallbacks[0];
+        if (nextUrl) {
+          onSwitchMovie({
+            ...movie,
+            videoUrl: nextUrl,
+            streamUrl: nextUrl,
+            isLiveTv: true,
+            episodes: []
+          });
+          return true;
+        }
+        return false;
+      }
+
       console.log('Activating Auto-Recovery: resolving live stream for movie...', movie.title);
       try {
         const recovered = await resolveMovieDetailAndStream({
@@ -840,9 +864,57 @@ export default function WatchMoviePage({
             </div>
 
             {/* =====================================================================
-                3. DANH SÁCH TẬP PHIM (EPISODE SELECTOR GỌN GÀNG & NỔI BẬT)
+                3. DANH SÁCH TẬP PHIM HOẶC KÊNH TRUYỀN HÌNH TRỰC TIẾP
                ===================================================================== */}
-            {episodes.length > 0 && (
+            {movie.isLiveTv ? (
+              <div className="space-y-4 bg-[#121824]/80 p-5 rounded-2xl border border-white/10 shadow-xl">
+                <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                  <div className="flex items-center gap-2">
+                    <Radio className="w-5 h-5 text-emerald-400 animate-pulse" />
+                    <h3 className="text-base sm:text-lg font-black text-white">
+                      🔴 Truyền Hình & Thể Thao Trực Tiếp
+                    </h3>
+                  </div>
+                  <span className="text-xs px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 font-bold border border-emerald-500/40">
+                    LIVE HD 50/60FPS
+                  </span>
+                </div>
+                <div className="text-xs text-gray-300 font-medium">
+                  Đang phát sóng trực tiếp từ vệ tinh. Bấm vào kênh dưới đây để chuyển kênh tức thì:
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5 pt-1">
+                  {[
+                    { id: 'tp1', name: 'True Premier Football 1 HD', url: 'https://amg00378-amg00378c4-freelivesports-emea-5637.playouts.now.amagi.tv/playlist.m3u8' },
+                    { id: 'vtv5', name: 'VTV5 HD Thể Thao & Bóng Đá', url: 'https://vtvgolivepre-vtv02.vtvdigital.vn/hls/vtv/live/vtv5__vtv1080p-h264/index.m3u8' },
+                    { id: 'bein1', name: 'beIN SPORTS 1 HD', url: 'https://bein-xtra-bein.amagi.tv/playlist.m3u8' },
+                    { id: 'vtv1', name: 'VTV1 HD Thời Sự', url: 'https://vtvgolivepre-vtv02.vtvdigital.vn/hls/vtv/live/vtv1__vtv1080p-h264/index.m3u8' },
+                    { id: 'vtv3', name: 'VTV3 HD Giải Trí', url: 'https://vtvgolivepre-vtv02.vtvdigital.vn/hls/vtv/live/vtv3__vtv1080p-h264/index.m3u8' }
+                  ].map((ch, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => {
+                        onSwitchMovie({
+                          id: ch.id,
+                          title: ch.name,
+                          category: 'Thể Thao Trực Tiếp',
+                          videoUrl: ch.url,
+                          streamUrl: ch.url,
+                          isLiveTv: true,
+                          episodes: []
+                        });
+                      }}
+                      className={`p-3 rounded-xl text-xs font-bold text-left transition-all border cursor-pointer ${
+                        movie.videoUrl === ch.url || movie.title === ch.name
+                          ? 'bg-[#E50914] text-white border-transparent shadow-neon-red'
+                          : 'bg-[#161E2E] text-gray-300 hover:text-white hover:bg-white/10 border-white/10'
+                      }`}
+                    >
+                      <div className="truncate">{ch.name}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : episodes.length > 0 && (
               <div className="space-y-4 bg-[#121824]/80 p-5 rounded-2xl border border-white/10 shadow-xl">
                 
                 {/* Header & Search */}
@@ -1034,9 +1106,9 @@ export default function WatchMoviePage({
         </div>
 
         {/* =====================================================================
-            4. RELATED MOVIES (PHIM ĐỀ XUẤT TƯƠNG TỰ)
+            4. RELATED MOVIES (PHIM ĐỀ XUẤT TƯƠNG TỰ - CHỈ HIỆN KHI XEM PHIM)
            ===================================================================== */}
-        {relatedMovies.length > 0 && (
+        {!movie.isLiveTv && relatedMovies.length > 0 && (
           <div className="pt-8 space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">

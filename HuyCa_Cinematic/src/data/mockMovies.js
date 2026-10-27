@@ -255,14 +255,14 @@ export const TV_CHANNELS = [
     isLiveTv: true
   },
   {
-    id: "true-premier-2",
-    name: "True Premier Football HD 2",
-    group: "Ngoại Hạng Anh 4K",
-    logo: "./logos/true_premier_2.svg",
-    quality: "FHD 50FPS",
+    id: "vtv5-hd",
+    name: "VTV5 HD Thể Thao & Bóng Đá",
+    group: "Bóng Đá & Thể Thao VN",
+    logo: "./logos/vtv1.png",
+    quality: "Full HD 50FPS",
     status: "ĐANG TRỰC TIẾP",
-    currentShow: "Trực Tiếp: Tâm Điểm Bóng Đá Châu Âu",
-    streamUrl: "https://amg26268-amg26268c14-freelivesports-emea-10267.playouts.now.amagi.tv/playlist.m3u8",
+    currentShow: "Trực Tiếp: V-League & Bóng Đá Đội Tuyển",
+    streamUrl: "https://vtvgolivepre-vtv02.vtvdigital.vn/hls/vtv/live/vtv5__vtv1080p-h264/index.m3u8",
     isLiveTv: true
   },
   {
