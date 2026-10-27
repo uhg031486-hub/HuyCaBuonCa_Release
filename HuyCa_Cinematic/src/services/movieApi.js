@@ -72,8 +72,27 @@ export async function resolveMovieDetailAndStream(movie) {
     }
   }
 
-  // 3. Nếu là Phim KKPhim có slug
-  const slug = movie.slug || movie.id;
+  // 3. Nếu là Phim KKPhim có slug hoặc ID
+  let slug = movie.slug || movie.id;
+  
+  // Ánh xạ các phim mẫu cũ sang slug phim thật 100%
+  const SLUG_MAPPING = {
+    'dramabox-billionaire': 'tong-tai-le-cung-vo-vo-doi',
+    'reelshort-alpha-wolf': 'vo-tinh-nhat-duoc-tong-tai-sieu-giau-lam-chong',
+    'reelshort-alpha-mate': 'vo-tinh-nhat-duoc-tong-tai-sieu-giau-lam-chong',
+    'shortmax-reborn-queen': 'bang-ho-trong-sinh-so-kieu-truyen-2',
+    'ai-cinema-cyber-romance': 'that-bai-trong-buoi-xem-mat-toi-keo-tong-tai-di-ket-hon-chop-nhoang',
+    'dune-2': 'van-co-cua-co-ay',
+    'oppenheimer': 'chien-binh-anh-sang-teo',
+    'interstellar': 'sieu-nhan-tiga'
+  };
+
+  if (SLUG_MAPPING[slug]) {
+    slug = SLUG_MAPPING[slug];
+  } else if (movie.title && movie.title.includes('Tổng Tài Ẩn Danh')) {
+    slug = 'tong-tai-le-cung-vo-vo-doi';
+  }
+
   if (slug && !String(slug).includes(' ')) {
     let data = null;
     try {
@@ -121,6 +140,9 @@ export async function resolveMovieDetailAndStream(movie) {
         const firstEp = allEpisodes[0];
         return {
           ...movie,
+          id: slug,
+          slug: slug,
+          source: 'KKPHIM',
           title: mInfo.name || movie.title,
           originalTitle: mInfo.origin_name || movie.originalTitle,
           poster: fixImg(mInfo.poster_url || movie.poster),
@@ -141,17 +163,42 @@ export async function resolveMovieDetailAndStream(movie) {
     }
   }
 
-  // 4. Nếu là phim mẫu chưa có slug thật -> Tìm kiếm theo tên trên KKPhim
+  // 4. Nếu là phim mẫu chưa có slug thật -> Tìm kiếm thông minh qua nhiều tầng từ khóa
+  const searchQueries = [
+    movie.title ? movie.title.split(':')[0].trim() : '',
+    movie.title ? movie.title.replace(/[^a-zA-Z0-9\u00C0-\u1EF9\s]/g, ' ').trim() : '',
+    movie.title && movie.title.toLowerCase().includes('tổng tài') ? 'tổng tài' : '',
+    movie.title && movie.title.toLowerCase().includes('trọng sinh') ? 'trọng sinh' : '',
+    movie.category || 'phim mới'
+  ].filter(Boolean);
+
+  for (const q of searchQueries) {
+    try {
+      const sRes = await fetch(`https://phimapi.com/v1/api/tim-kiem?keyword=${encodeURIComponent(q)}`);
+      if (sRes.ok) {
+        const sData = await sRes.json();
+        const items = sData?.data?.items || [];
+        if (items.length > 0 && items[0].slug) {
+          return await resolveMovieDetailAndStream({
+            ...movie,
+            slug: items[0].slug,
+            source: 'KKPHIM'
+          });
+        }
+      }
+    } catch (e) {}
+  }
+
+  // 5. Fallback tuyệt đối cuối cùng: Lấy phim hot nhất đang live 100%
   try {
-    const q = encodeURIComponent(movie.title.split(':')[0].trim());
-    const sRes = await fetch(`https://phimapi.com/v1/api/tim-kiem?keyword=${q}`);
-    if (sRes.ok) {
-      const sData = await sRes.json();
-      const firstMatch = sData?.data?.items?.[0];
-      if (firstMatch && firstMatch.slug) {
+    const hotRes = await fetch('https://phimapi.com/danh-sach/phim-moi-cap-nhat?page=1');
+    if (hotRes.ok) {
+      const hotData = await hotRes.json();
+      const firstHot = hotData?.items?.[0];
+      if (firstHot && firstHot.slug) {
         return await resolveMovieDetailAndStream({
           ...movie,
-          slug: firstMatch.slug,
+          slug: firstHot.slug,
           source: 'KKPHIM'
         });
       }

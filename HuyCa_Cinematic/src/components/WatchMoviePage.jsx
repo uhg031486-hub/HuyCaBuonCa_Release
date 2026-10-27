@@ -34,6 +34,7 @@ import {
   Monitor
 } from 'lucide-react';
 import Hls from 'hls.js';
+import { resolveMovieDetailAndStream } from '../services/movieApi';
 
 export default function WatchMoviePage({ 
   movie, 
@@ -45,6 +46,7 @@ export default function WatchMoviePage({
   const videoRef = useRef(null);
   const containerRef = useRef(null);
   const controlsTimeoutRef = useRef(null);
+  const hasAttemptedAutoRecovery = useRef(false);
 
   // Playback States
   const [isPlaying, setIsPlaying] = useState(true);
@@ -210,8 +212,38 @@ export default function WatchMoviePage({
     let hlsInstance = null;
     let isProxied = url.includes('/api/proxy');
 
-    const handleVideoError = () => {
+    const triggerAutoRecovery = async () => {
+      if (hasAttemptedAutoRecovery.current) return;
+      hasAttemptedAutoRecovery.current = true;
+      console.log('Activating Auto-Recovery: resolving live stream for movie...', movie.title);
+      try {
+        const recovered = await resolveMovieDetailAndStream({
+          ...movie,
+          videoUrl: '', // Reset dead url
+          episodes: []
+        });
+        if (recovered && recovered.videoUrl && !recovered.videoUrl.includes('commondatastorage.googleapis.com')) {
+          console.log('Auto-Recovery success! Switching to live stream:', recovered.videoUrl);
+          onSwitchMovie(recovered);
+          return true;
+        }
+      } catch (e) {
+        console.warn('Auto-Recovery failed:', e);
+      }
+      return false;
+    };
+
+    // Kiểm tra ngay nếu URL là link sample chết của googleapis -> Phục hồi tức thì
+    if (url.includes('commondatastorage.googleapis.com')) {
+      triggerAutoRecovery();
+      return;
+    }
+
+    const handleVideoError = async () => {
       console.warn('Native video error, checking fallback...');
+      const recovered = await triggerAutoRecovery();
+      if (recovered) return;
+
       if (!isProxied && url && url.startsWith('http')) {
         console.log('Retrying native video via proxy fallback:', url);
         isProxied = true;
@@ -221,7 +253,7 @@ export default function WatchMoviePage({
       } else if (currentEmbedUrl) {
         setUseIframeEmbed(true);
       } else {
-        setPlaybackError('Không thể tải luồng phát video này. Bạn có thể chọn tập khác hoặc đổi Server!');
+        setPlaybackError('Không thể tải luồng phát video này. Bạn có thể bấm "Tự Động Kết Nối Luồng VIP" bên dưới hoặc chọn tập khác!');
       }
     };
 
@@ -493,6 +525,24 @@ export default function WatchMoviePage({
                 <h4 className="text-lg font-bold text-white">Chưa thể phát luồng HLS trực tiếp</h4>
                 <p className="text-sm text-gray-300 max-w-md">{playbackError}</p>
                 <div className="flex flex-wrap items-center justify-center gap-3">
+                  {/* Nút Tự Động Kết Nối Luồng VIP Cứu Nguy */}
+                  <button
+                    onClick={async () => {
+                      setPlaybackError(null);
+                      showToast('⚡ Đang tự động kết nối luồng phim VIP tốc độ cao...');
+                      const rec = await resolveMovieDetailAndStream({
+                        ...movie,
+                        videoUrl: '',
+                        episodes: []
+                      });
+                      if (rec && rec.videoUrl) onSwitchMovie(rec);
+                    }}
+                    className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#F5C518] to-amber-500 text-black font-extrabold text-sm shadow-[0_0_20px_rgba(245,197,24,0.6)] cursor-pointer hover:scale-105 transition-all flex items-center gap-2"
+                  >
+                    <Sparkles className="w-4 h-4" />
+                    Tự Động Kết Nối Luồng VIP
+                  </button>
+
                   {currentEmbedUrl && (
                     <button
                       onClick={() => {

@@ -85,11 +85,18 @@ export default function App() {
       })
       .catch(() => {});
 
-    // 4. Tải Kho Phim Ngắn FreeReels / ReelShort Thật (9:16 + Phụ đề tiếng Việt)
-    FreeReelsApi.fetchShortDramas(0)
-      .then(list => {
-        if (list.length > 0) setLiveShortDramas(list);
-        else setLiveShortDramas(SHORT_DRAMAS);
+    // 4. Tải Kho Tiểu Kịch Live Thật (Tổng Tài, Trọng Sinh, DramaBox & ReelShort)
+    Promise.all([
+      fetchKkphimList('https://phimapi.com/v1/api/tim-kiem?keyword=tổng tài', 'Tiểu Kịch Tổng Tài'),
+      fetchKkphimList('https://phimapi.com/v1/api/tim-kiem?keyword=trọng sinh', 'Tiểu Kịch Trọng Sinh')
+    ])
+      .then(([tongTaiList, trongSinhList]) => {
+        const combined = [...(tongTaiList || []), ...(trongSinhList || [])];
+        if (combined.length > 0) {
+          setLiveShortDramas(combined);
+        } else {
+          setLiveShortDramas(SHORT_DRAMAS);
+        }
       })
       .catch(() => setLiveShortDramas(SHORT_DRAMAS));
   }, []);
@@ -166,8 +173,9 @@ export default function App() {
     try {
       let resolved = movie;
 
-      // Nếu phim chưa có luồng phát trực tiếp hoặc chưa nạp danh sách tập
-      if (!movie.videoUrl || !movie.episodes || movie.episodes.length === 0) {
+      // Nếu phim chưa có luồng phát trực tiếp, hoặc link cũ là sample googleapis bị chặn, hoặc chưa nạp danh sách tập
+      const isBadUrl = !movie.videoUrl || movie.videoUrl.includes('commondatastorage.googleapis.com');
+      if (isBadUrl || !movie.episodes || movie.episodes.length === 0) {
         resolved = await resolveMovieDetailAndStream(movie);
       }
 
