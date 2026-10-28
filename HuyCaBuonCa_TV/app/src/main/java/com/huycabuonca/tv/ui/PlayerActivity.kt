@@ -165,7 +165,10 @@ class PlayerActivity : AppCompatActivity() {
 
         val subtitleUrl = intent.getStringExtra("EXTRA_SUBTITLE_URL")
 
-        if (isM3u8) {
+        if (streamUrl.contains("streamc.xyz") || streamUrl.contains("embed.php")) {
+            val cleanM3u8 = "https://huyca.pages.dev/api/nguonc_stream?url=${java.net.URLEncoder.encode(streamUrl, "UTF-8")}"
+            initExoPlayer(cleanM3u8, subtitleUrl)
+        } else if (isM3u8) {
             initExoPlayer(streamUrl, subtitleUrl)
         } else {
             initWebViewPlayer(streamUrl)
@@ -383,6 +386,12 @@ class PlayerActivity : AppCompatActivity() {
                 }
                 return
             }
+        }
+
+        if (streamUrl.contains("streamc.xyz") || streamUrl.contains("embed.php")) {
+            val cleanM3u8 = "https://huyca.pages.dev/api/nguonc_stream?url=${java.net.URLEncoder.encode(streamUrl, "UTF-8")}"
+            initExoPlayer(cleanM3u8, episode.subtitleUrl)
+            return
         }
 
         if (episode.linkM3u8 != null || streamUrl.contains(".m3u8")) {
