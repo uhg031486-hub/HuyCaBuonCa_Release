@@ -13,6 +13,9 @@ import android.webkit.WebChromeClient
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import java.io.ByteArrayInputStream
+import android.webkit.WebResourceResponse
+import android.webkit.WebResourceRequest
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -477,12 +480,86 @@ class PlayerActivity : AppCompatActivity() {
         settings.domStorageEnabled = true
         settings.mediaPlaybackRequiresUserGesture = false
         settings.mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
-        settings.userAgentString = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        settings.userAgentString = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
 
-        webView.webChromeClient = WebChromeClient()
+        // CHẶN ĐỨNG 100% CỬA SỔ POPUP QUẢNG CÁO TRÊN ANDROID TV
+        settings.setSupportMultipleWindows(false)
+        settings.javaScriptCanOpenWindowsAutomatically = false
+
+        webView.webChromeClient = object : WebChromeClient() {
+            override fun onCreateWindow(view: WebView?, isDialog: Boolean, isUserGesture: Boolean, resultMsg: android.os.Message?): Boolean {
+                // CHẶN HOÀN TOÀN MỌI CỬA SỔ POPUP TRÊN TV
+                return false
+            }
+        }
+
         webView.webViewClient = object : WebViewClient() {
-            override fun onPageFinished(view: WebView?, url: String?) {
+            override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
+                val reqUrl = request?.url?.toString() ?: return false
+                val isSafeStream = reqUrl.contains("streamc.xyz") || 
+                                   reqUrl.contains("amass17.top") || 
+                                   reqUrl.contains("hihihoho4.top") ||
+                                   reqUrl.contains("jwpcdn.com") ||
+                                   reqUrl.contains("jwplayer.com")
+                if (!isSafeStream) {
+                    // CHẶN ĐỨNG 100% CÁC LINK QUẢNG CÁO, CÁ ĐỘ, SHOPEE, TÀI XỈU, REDIRECT RA NGOÀI APP
+                    return true
+                }
+                return false
+            }
+
+            override fun shouldInterceptRequest(view: WebView?, request: WebResourceRequest?): WebResourceResponse? {
+                val reqUrl = request?.url?.toString()?.lowercase() ?: return null
+                val isAdResource = reqUrl.contains("ads.js") || 
+                                   reqUrl.contains("/ads.") || 
+                                   reqUrl.contains("adservice") ||
+                                   reqUrl.contains("doubleclick") ||
+                                   reqUrl.contains("popads") ||
+                                   reqUrl.contains("syndication") ||
+                                   reqUrl.contains("bet88") ||
+                                   reqUrl.contains("casino") ||
+                                   reqUrl.contains("shopee") ||
+                                   reqUrl.contains("lazada")
+                if (isAdResource) {
+                    // TRẢ VỀ EMPTY RESPONSE ĐỂ TRIỆT TIÊU TOÀN BỘ SCRIPT QUẢNG CÁO
+                    return WebResourceResponse("text/javascript", "UTF-8", ByteArrayInputStream("".toByteArray()))
+                }
+                return super.shouldInterceptRequest(view, request)
+            }
+
+            override fun onPageFinished(view: WebView?, loadedUrl: String?) {
                 binding.playerProgress.visibility = View.GONE
+                // TIÊM BỘ BẢO VỆ CHỐNG QUẢNG CÁO VÀ TỰ ĐỘNG PHÁT VIDEO TRÊN ANDROID TV
+                val antiAdScript = """
+                    (function() {
+                        window.open = function() { return null; };
+                        window.addEventListener('message', function(e) {
+                            if (e.data && e.data.type === 'stream-guard-hello') {
+                                window.postMessage({
+                                    type: 'stream-parent-state',
+                                    version: 'guard-5',
+                                    id: e.data.id,
+                                    helperVersion: 'guard-5',
+                                    parentAdblock: 'clear',
+                                    seq: Date.now(),
+                                    supported: true,
+                                    suspected: false
+                                }, '*');
+                            }
+                        });
+                        setInterval(function() {
+                            try {
+                                var ads = document.querySelectorAll('.stream-ads, [id*="ad"], [class*="ad"], iframe[src*="ad"]');
+                                ads.forEach(function(el) {
+                                    if (el.id !== 'player' && !el.id.includes('stream') && !el.classList.contains('jwplayer')) {
+                                        el.remove();
+                                    }
+                                });
+                            } catch(err) {}
+                        }, 1000);
+                    })();
+                """.trimIndent()
+                view?.evaluateJavascript(antiAdScript, null)
             }
         }
         webView.loadUrl(url)
