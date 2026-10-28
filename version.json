@@ -1,12 +1,11 @@
 {
-  "versionCode": 19,
-  "versionName": "2.8",
-  "title": "Huy Cá v2.8 - Lịch Thi Đấu Bóng Đá Real-Time ESPN, Tự Động Cập Nhật Tỉ Số & Đa Server Phát Sóng Trực Tiếp",
-  "changelog": "- Kích hoạt Bảng Lịch Thi Đấu Bóng Đá thời gian thực: Tích hợp nguồn ESPN Official Sports API toàn cầu, tự động cập nhật liên tục các trận đấu Ngoại Hạng Anh, Cúp C1 Châu Âu, La Liga, Serie A theo giờ Việt Nam (GMT+7).\n- Tự động cập nhật tỉ số và trạng thái trận đấu: Hiển thị tỉ số trực tiếp từng phút, logo câu lạc bộ HD chính thức, ghim trận đang diễn ra (🔴 LIVE) lên đầu bảng.\n- Đa dạng máy chủ xem trực tiếp: Bấm vào trận đấu để chọn xem ngay qua Kênh Vệ Tinh Quốc Tế (True Premier 1 & 2 HD, Astro SuperSport 1080p 50fps qua ExoPlayer) hoặc các Server Thể Thao BLV Tiếng Việt (Thập Cẩm, Xôi Lạc, Về Bờ, VTV6 Thể Thao).\n- Tối ưu giao diện điều khiển Remote D-Pad trên Android TV Box và đồng bộ toàn diện trên 4 nền tảng.",
-  "isMaintenanceLocked": false,
-  "maintenanceMessage": "Hệ thống đang bảo trì nội bộ định kỳ. Vui lòng quay lại sau hoặc liên hệ Quản trị viên Huy Cá để biết thêm chi tiết!",
-  "windowsZipUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v2.8/HuyCa_Windows_v2.8.zip",
-  "mobileApkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v2.8/HuyCa_Mobile_v2.8.apk",
-  "tvApkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v2.8/HuyCa_TV_v2.8.apk",
-  "lgIpkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v2.8/HuyCa_LG_webOS_v2.8.ipk"
+  "versionCode": 24,
+  "versionName": "3.3.0",
+  "title": "Bản Cập Nhật Huy Cá v3.3.0",
+  "changelog": "1. Khắc phục triệt để lỗi xem phim Nguồn C trên Android TV & Mobile.\n2. Bổ sung kho kênh quốc tế đỉnh cao: NHK World, ABC News, CBS News, CNA, Reuters, Al Jazeera, DW, France 24...\n3. Trọn bộ HTV1-HTV9 và HTV Thể Thao HD sạch 100%.\n4. Đồng bộ hoàn hảo đa nền tảng.",
+  "apkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.0/HuyCa_TV_v3.3.0.apk",
+  "mobileApkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.0/HuyCa_Mobile_v3.3.0.apk",
+  "lgIpkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.0/HuyCa_LG_webOS_v3.3.0.ipk",
+  "windowsZipUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.0/HuyCa_Windows_v3.3.0.zip",
+  "forceUpdate": false
 }
