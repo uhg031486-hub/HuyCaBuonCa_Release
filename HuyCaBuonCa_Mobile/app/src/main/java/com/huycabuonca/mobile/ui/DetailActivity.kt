@@ -1158,13 +1158,23 @@ class DetailActivity : AppCompatActivity() {
         if (url.contains("phimapi.com") || url.contains("phimimg.com") || url.contains("phim1280.tv")) {
             reqHeaders["Referer"] = "https://player.phimapi.com/"
             reqHeaders["Origin"] = "https://player.phimapi.com"
+        } else if (url.contains("huyca.pages.dev") || url.contains("nguonc_stream")) {
+            reqHeaders["Referer"] = "https://huyca.pages.dev/"
+            reqHeaders["Origin"] = "https://huyca.pages.dev"
         }
         val dataSourceFactory = DefaultHttpDataSource.Factory()
             .setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36")
             .setDefaultRequestProperties(reqHeaders)
             .setAllowCrossProtocolRedirects(true)
 
+        val isHlsStream = url.contains(".m3u8", ignoreCase = true) || 
+                          url.contains("m3u8", ignoreCase = true) || 
+                          url.contains("nguonc_stream", ignoreCase = true)
+
         val mediaItemBuilder = MediaItem.Builder().setUri(url)
+        if (isHlsStream) {
+            mediaItemBuilder.setMimeType(androidx.media3.common.MimeTypes.APPLICATION_M3U8)
+        }
 
         if (!subtitleUrl.isNullOrEmpty()) {
             val mimeType = if (subtitleUrl.contains(".vtt", ignoreCase = true)) {
@@ -1182,9 +1192,15 @@ class DetailActivity : AppCompatActivity() {
         }
 
         val mediaItem = mediaItemBuilder.build()
-        val mediaSourceFactory = androidx.media3.exoplayer.source.DefaultMediaSourceFactory(this)
-            .setDataSourceFactory(dataSourceFactory)
-        val mediaSource = mediaSourceFactory.createMediaSource(mediaItem)
+        val mediaSource = if (isHlsStream) {
+            androidx.media3.exoplayer.hls.HlsMediaSource.Factory(dataSourceFactory)
+                .setPlaylistParserFactory(com.huycabuonca.mobile.util.AdBlockPlaylistParserFactory())
+                .createMediaSource(mediaItem)
+        } else {
+            androidx.media3.exoplayer.source.DefaultMediaSourceFactory(this)
+                .setDataSourceFactory(dataSourceFactory)
+                .createMediaSource(mediaItem)
+        }
 
         val trackSelector = androidx.media3.exoplayer.trackselection.DefaultTrackSelector(this).apply {
             setParameters(
