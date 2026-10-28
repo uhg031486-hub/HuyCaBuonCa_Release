@@ -1,0 +1,22 @@
+[
+  {
+    "name": "Rotana Cinema",
+    "url": "https://rotana.hibridcdn.net/rotananet/cinemamasr_net-7Y83PP5adWixDF93/playlist.m3u8"
+  },
+  {
+    "name": "Action24",
+    "url": "https://actionlive.siliconweb.com/actionabr/actiontv/playlist.m3u8"
+  },
+  {
+    "name": "iFilm",
+    "url": "https://live.presstv.co.uk/hls/ifilmfa.m3u8"
+  },
+  {
+    "name": "iFilm 2 Ⓢ",
+    "url": "https://live.presstv.co.uk/hls/ifilm2.m3u8"
+  },
+  {
+    "name": "iFilm Arabic Ⓢ",
+    "url": "https://live.presstv.co.uk/hls/ifilmar.m3u8"
+  }
+]
