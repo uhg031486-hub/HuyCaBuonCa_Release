@@ -1039,7 +1039,21 @@ class DetailActivity : AppCompatActivity() {
                     setMargins(0, 0, (10 * resources.displayMetrics.density).toInt(), 0)
                 }
                 setBackgroundResource(R.drawable.bg_btn_selector)
-                text = server.serverName
+                val rawName = server.serverName
+                val isVietsub = rawName.contains("vietsub", ignoreCase = true) ||
+                                rawName.contains("phụ đề", ignoreCase = true) ||
+                                rawName.contains("sub", ignoreCase = true)
+                val isThuyetMinh = rawName.contains("thuyết minh", ignoreCase = true) ||
+                                   rawName.contains("tm", ignoreCase = true)
+                val isLongTieng = rawName.contains("lồng tiếng", ignoreCase = true) ||
+                                  rawName.contains("lt", ignoreCase = true)
+                val cleanTitle = when {
+                    isVietsub -> "🇻🇳 [Phụ Đề] $rawName"
+                    isThuyetMinh -> "🎙️ [Thuyết Minh] $rawName"
+                    isLongTieng -> "🗣️ [Lồng Tiếng] $rawName"
+                    else -> "📺 $rawName"
+                }
+                text = cleanTitle
                 setTextColor(Color.WHITE)
                 textSize = 12f
                 setTypeface(null, android.graphics.Typeface.BOLD)

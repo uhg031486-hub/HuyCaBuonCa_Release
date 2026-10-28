@@ -4,6 +4,8 @@ import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.view.View
+import android.widget.LinearLayout
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -16,6 +18,7 @@ import com.huycabuonca.tv.model.EpisodeItem
 import com.huycabuonca.tv.model.MovieDetail
 import com.huycabuonca.tv.model.MovieItem
 import com.huycabuonca.tv.model.MovieSource
+import com.huycabuonca.tv.model.ServerGroup
 import com.huycabuonca.tv.ui.adapter.EpisodeAdapter
 import com.huycabuonca.tv.util.TvFocusUtil
 import com.huycabuonca.tv.util.WatchHistoryManager
@@ -27,6 +30,10 @@ class DetailActivity : AppCompatActivity() {
     private lateinit var episodeAdapter: EpisodeAdapter
     private var movieItem: MovieItem? = null
     private var movieDetail: MovieDetail? = null
+
+    // Quản lý đa server (Phụ đề / Vietsub / Thuyết Minh)
+    private var currentServerIndex = 0
+    private val currentEpisodes = mutableListOf<EpisodeItem>()
 
     // Quản lý xem tiếp đúng tập và đúng vị trí
     private var resumeEpisodeName: String? = null
@@ -130,7 +137,7 @@ class DetailActivity : AppCompatActivity() {
         }
 
         binding.btnPlayFirst.setOnClickListener {
-            val firstEp = movieDetail?.servers?.firstOrNull()?.episodes?.firstOrNull()
+            val firstEp = currentEpisodes.firstOrNull()
             if (firstEp != null) {
                 playEpisode(firstEp, 0L)
             } else {
@@ -154,59 +161,154 @@ class DetailActivity : AppCompatActivity() {
                 if (detail.content.isNotEmpty()) {
                     binding.txtDetailDesc.text = detail.content
                 }
-                val allEps = detail.servers.flatMap { it.episodes }
-                episodeAdapter.submitList(allEps)
-                binding.txtEpisodesHeader.text = "Danh sách tập (${allEps.size} tập):"
-
-                var targetEp: EpisodeItem? = null
-                if (!resumeEpisodeName.isNullOrEmpty()) {
-                    targetEp = allEps.find {
-                        it.name.equals(resumeEpisodeName, ignoreCase = true) ||
-                        it.slug.equals(resumeEpisodeName, ignoreCase = true)
-                    }
-                    if (targetEp == null) {
-                        val epNum = Regex("\\d+").find(resumeEpisodeName ?: "")?.value
-                        if (epNum != null) {
-                            targetEp = allEps.find { Regex("\\d+").find(it.name)?.value == epNum }
-                        }
-                    }
-                }
-
-                val epToPlay = targetEp ?: allEps.firstOrNull()
-                if (targetEp != null) {
-                    val timeStr = if (resumePositionMs > 5000L) {
-                        val min = (resumePositionMs / 60000).toInt()
-                        val sec = ((resumePositionMs % 60000) / 1000).toInt()
-                        " (%02d:%02d)".format(min, sec)
-                    } else ""
-                    binding.btnPlayFirst.text = "▶ XEM TIẾP ${targetEp.name}$timeStr"
-                } else {
-                    binding.btnPlayFirst.text = "▶ XEM PHIM"
-                }
-
-                binding.btnPlayFirst.setOnClickListener {
-                    if (epToPlay != null) {
-                        val pos = if (targetEp != null) resumePositionMs else 0L
-                        playEpisode(epToPlay, pos)
-                    } else {
-                        Toast.makeText(this@DetailActivity, "Chưa tải xong danh sách tập!", Toast.LENGTH_SHORT).show()
-                    }
-                }
-
-                if (shouldAutoPlay && epToPlay != null) {
-                    shouldAutoPlay = false
-                    val pos = if (targetEp != null) resumePositionMs else 0L
-                    playEpisode(epToPlay, pos)
-                }
+                setupServerTabs(detail.servers)
             } else {
                 binding.txtDetailDesc.text = "Không tải được thông tin chi tiết phim."
             }
         }
     }
 
+    private fun setupServerTabs(servers: List<ServerGroup>) {
+        binding.layoutServers.removeAllViews()
+        if (servers.isEmpty()) {
+            binding.layoutServersContainer.visibility = View.GONE
+            return
+        }
+
+        binding.layoutServersContainer.visibility = View.VISIBLE
+        val density = resources.displayMetrics.density
+
+        servers.forEachIndexed { index, server ->
+            val rawName = server.serverName
+            val isVietsub = rawName.contains("vietsub", ignoreCase = true) ||
+                            rawName.contains("phụ đề", ignoreCase = true) ||
+                            rawName.contains("sub", ignoreCase = true)
+            val isThuyetMinh = rawName.contains("thuyết minh", ignoreCase = true) ||
+                               rawName.contains("tm", ignoreCase = true)
+            val isLongTieng = rawName.contains("lồng tiếng", ignoreCase = true) ||
+                              rawName.contains("lt", ignoreCase = true)
+            val cleanTitle = when {
+                isVietsub -> "🇻🇳 [Phụ Đề] $rawName"
+                isThuyetMinh -> "🎙️ [Thuyết Minh] $rawName"
+                isLongTieng -> "🗣️ [Lồng Tiếng] $rawName"
+                else -> "📺 $rawName"
+            }
+
+            val serverTab = TextView(this).apply {
+                val padH = (14 * density).toInt()
+                val padV = (8 * density).toInt()
+                setPadding(padH, padV, padH, padV)
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                ).apply {
+                    setMargins(0, 0, (10 * density).toInt(), 0)
+                }
+                setBackgroundResource(R.drawable.bg_btn_selector)
+                text = cleanTitle
+                textSize = 12f
+                setTypeface(null, android.graphics.Typeface.BOLD)
+                gravity = android.view.Gravity.CENTER
+                isClickable = true
+                isFocusable = true
+                isSelected = (index == currentServerIndex)
+                setTextColor(if (isSelected) Color.BLACK else Color.WHITE)
+
+                TvFocusUtil.setupFocusScale(this, 1.06f)
+
+                setOnFocusChangeListener { v, hasFocus ->
+                    if (hasFocus) {
+                        setTextColor(Color.BLACK)
+                        v.animate().scaleX(1.06f).scaleY(1.06f).setDuration(120).start()
+                    } else {
+                        val isCurr = (index == currentServerIndex)
+                        setTextColor(if (isCurr) Color.BLACK else Color.WHITE)
+                        v.animate().scaleX(1.0f).scaleY(1.0f).setDuration(120).start()
+                    }
+                }
+
+                setOnClickListener {
+                    for (i in 0 until binding.layoutServers.childCount) {
+                        val child = binding.layoutServers.getChildAt(i) as? TextView
+                        child?.isSelected = false
+                        child?.setTextColor(Color.WHITE)
+                    }
+                    isSelected = true
+                    setTextColor(Color.BLACK)
+                    switchServer(index)
+                }
+            }
+            binding.layoutServers.addView(serverTab)
+        }
+
+        switchServer(0)
+    }
+
+    private fun switchServer(serverIndex: Int) {
+        val servers = movieDetail?.servers ?: return
+        if (serverIndex !in servers.indices) return
+
+        currentServerIndex = serverIndex
+        for (i in 0 until binding.layoutServers.childCount) {
+            val child = binding.layoutServers.getChildAt(i) as? TextView
+            val isCurrent = (i == serverIndex)
+            child?.isSelected = isCurrent
+            if (child?.hasFocus() != true) {
+                child?.setTextColor(if (isCurrent) Color.BLACK else Color.WHITE)
+            }
+        }
+
+        currentEpisodes.clear()
+        currentEpisodes.addAll(servers[serverIndex].episodes)
+        episodeAdapter.submitList(currentEpisodes.toList())
+
+        val sName = servers[serverIndex].serverName
+        binding.txtEpisodesHeader.text = "Danh sách tập - $sName (${currentEpisodes.size} tập):"
+
+        var targetEp: EpisodeItem? = null
+        if (!resumeEpisodeName.isNullOrEmpty()) {
+            targetEp = currentEpisodes.find {
+                it.name.equals(resumeEpisodeName, ignoreCase = true) ||
+                it.slug.equals(resumeEpisodeName, ignoreCase = true)
+            }
+            if (targetEp == null) {
+                val epNum = Regex("\\d+").find(resumeEpisodeName ?: "")?.value
+                if (epNum != null) {
+                    targetEp = currentEpisodes.find { Regex("\\d+").find(it.name)?.value == epNum }
+                }
+            }
+        }
+
+        val epToPlay = targetEp ?: currentEpisodes.firstOrNull()
+        if (targetEp != null) {
+            val timeStr = if (resumePositionMs > 5000L) {
+                val min = (resumePositionMs / 60000).toInt()
+                val sec = ((resumePositionMs % 60000) / 1000).toInt()
+                " (%02d:%02d)".format(min, sec)
+            } else ""
+            binding.btnPlayFirst.text = "▶ XEM TIẾP ${targetEp.name}$timeStr"
+        } else {
+            binding.btnPlayFirst.text = "▶ XEM PHIM"
+        }
+
+        binding.btnPlayFirst.setOnClickListener {
+            if (epToPlay != null) {
+                val pos = if (targetEp != null) resumePositionMs else 0L
+                playEpisode(epToPlay, pos)
+            } else {
+                Toast.makeText(this@DetailActivity, "Chưa tải xong danh sách tập!", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        if (shouldAutoPlay && epToPlay != null) {
+            shouldAutoPlay = false
+            val pos = if (targetEp != null) resumePositionMs else 0L
+            playEpisode(epToPlay, pos)
+        }
+    }
+
     private fun playEpisode(episode: EpisodeItem, startPositionMs: Long = 0L) {
-        val allEps = movieDetail?.servers?.flatMap { it.episodes } ?: emptyList()
-        val currentIndex = allEps.indexOfFirst { it.slug == episode.slug || it.name == episode.name }.coerceAtLeast(0)
+        val currentIndex = currentEpisodes.indexOfFirst { it.slug == episode.slug || it.name == episode.name }.coerceAtLeast(0)
 
         val streamUrl = episode.linkM3u8 ?: episode.linkEmbed
         if (streamUrl.isNullOrEmpty()) {
@@ -230,7 +332,7 @@ class DetailActivity : AppCompatActivity() {
                             putExtra("EXTRA_EPISODE", episode.name)
                             putExtra("EXTRA_SOURCE", movieItem?.source?.name)
                             putExtra("EXTRA_CHANNEL_ID", movieItem?.id)
-                            putExtra("EXTRA_EPISODES_LIST", ArrayList(allEps))
+                            putExtra("EXTRA_EPISODES_LIST", ArrayList(currentEpisodes))
                             putExtra("EXTRA_CURRENT_EPISODE_INDEX", currentIndex)
                             putExtra("EXTRA_MOVIE_ITEM", movieItem)
                             putExtra("EXTRA_START_POSITION", startPositionMs)
@@ -253,7 +355,7 @@ class DetailActivity : AppCompatActivity() {
             putExtra("EXTRA_EPISODE", episode.name)
             putExtra("EXTRA_SOURCE", movieItem?.source?.name)
             putExtra("EXTRA_CHANNEL_ID", movieItem?.id)
-            putExtra("EXTRA_EPISODES_LIST", ArrayList(allEps))
+            putExtra("EXTRA_EPISODES_LIST", ArrayList(currentEpisodes))
             putExtra("EXTRA_CURRENT_EPISODE_INDEX", currentIndex)
             putExtra("EXTRA_MOVIE_ITEM", movieItem)
             putExtra("EXTRA_START_POSITION", startPositionMs)

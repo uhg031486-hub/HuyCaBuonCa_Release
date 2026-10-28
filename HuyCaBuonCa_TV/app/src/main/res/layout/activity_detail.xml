@@ -122,7 +122,7 @@
             android:layout_marginBottom="10dp"
             android:background="#22334F" />
 
-        <!-- Episodes Section -->
+        <!-- Episodes Section Header -->
         <TextView
             android:id="@+id/txtEpisodesHeader"
             android:layout_width="wrap_content"
@@ -131,6 +131,40 @@
             android:textColor="@color/text_primary"
             android:textSize="14sp"
             android:textStyle="bold" />
+
+        <!-- Server Selection Section (Chọn Phụ Đề / Vietsub / Thuyết Minh) -->
+        <LinearLayout
+            android:id="@+id/layoutServersContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:layout_marginBottom="4dp"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/txtServersLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="CHỌN BẢN PHÁT (PHỤ ĐỀ / THUYẾT MINH / NGUỒN):"
+                android:textColor="@color/brand_gold"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <HorizontalScrollView
+                android:id="@+id/scrollServers"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:scrollbars="none">
+
+                <LinearLayout
+                    android:id="@+id/layoutServers"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal" />
+            </HorizontalScrollView>
+        </LinearLayout>
 
         <ProgressBar
             android:id="@+id/progressEpisodes"

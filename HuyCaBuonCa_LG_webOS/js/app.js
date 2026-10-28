@@ -894,7 +894,7 @@
       { name: "❤️ Phim Yêu Thích", url: "app://favorites" }
     ],
     'anime_sub://vietsub': [
-      { name: "Anime Mới Cập Nhật", url: "https://phimapi.com/v1/api/quoc-gia/nhat-ban" },
+      { name: "Anime Mới Cập Nhật", url: "https://phimapi.com/v1/api/danh-sach/hoat-hinh" },
       { name: "🕒 Lịch Sử Xem", url: "app://history" },
       { name: "❤️ Anime Yêu Thích", url: "app://favorites" },
       { name: "Hành Động", url: "https://phimapi.com/v1/api/the-loai/hanh-dong" },
@@ -903,7 +903,7 @@
       { name: "Viễn Tưởng", url: "https://phimapi.com/v1/api/the-loai/vien-tuong" }
     ],
     'anime_sub://hh3d': [
-      { name: "3D Mới Cập Nhật", url: "https://phimapi.com/v1/api/quoc-gia/trung-quoc" },
+      { name: "3D Mới Cập Nhật", url: "https://phimapi.com/v1/api/danh-sach/hoat-hinh" },
       { name: "🕒 Lịch Sử Xem", url: "app://history" },
       { name: "❤️ Hoạt Hình Yêu Thích", url: "app://favorites" },
       { name: "Tu Tiên & Huyền Huyễn", url: "https://phimapi.com/v1/api/the-loai/than-thoai" },
@@ -1751,21 +1751,34 @@
         return;
       }
 
-      // Xử lý Tiểu Kịch Vietsub & DramaBox
-      let fetchUrl = '';
-      if (currentFilter.startsWith('short_filter://') || currentFilter.startsWith('short_dramabox://')) {
+      // Xử lý Tiểu Kịch Vietsub & DramaBox (Gọi trực tiếp FreeReels chuẩn dọc 9:16, không trộn phim dài tập KKPhim)
+      if (currentFilter.startsWith('short_filter://') || currentFilter.startsWith('short_dramabox://') || currentFilter.startsWith('multi_short://')) {
         let kw = 'tổng tài';
         if (currentFilter.includes('trong-sinh')) kw = 'trọng sinh';
-        if (currentFilter.includes('ngon-tinh')) kw = 'hôn nhân';
+        if (currentFilter.includes('ngon-tinh') || currentFilter.includes('hao-mon')) kw = 'hào môn';
         if (currentFilter.includes('hai-huoc')) kw = 'hài hước';
-        if (currentFilter.includes('chienthan')) kw = 'chiến thần';
-        if (currentFilter.includes('thieugia')) kw = 'thiếu gia';
-        if (currentFilter.includes('cotrang')) kw = 'cung đấu';
-        fetchUrl = `https://phimapi.com/v1/api/tim-kiem?keyword=${encodeURIComponent(kw)}&page=${currentPage}`;
-      } else {
-        const sep = currentFilter.includes('?') ? '&' : '?';
-        fetchUrl = `${currentFilter}${sep}page=${currentPage}`;
+        if (currentFilter.includes('chienthan') || currentFilter.includes('chien-than')) kw = 'chiến thần';
+        if (currentFilter.includes('thieugia') || currentFilter.includes('thieu-gia')) kw = 'thiếu gia';
+        if (currentFilter.includes('cotrang') || currentFilter.includes('co-trang')) kw = 'cổ trang';
+        
+        let frItems = await FreeReelsClient.search(kw, currentPage);
+        renderCards(frItems, reset);
+        if (paginationContainer) {
+          paginationContainer.style.display = 'flex';
+          if (paginationInfo) paginationInfo.textContent = `Đang hiển thị ${currentMoviesList.length} phim ngắn (Trang ${currentPage})`;
+          if (btnLoadMore) {
+            btnLoadMore.style.display = 'inline-flex';
+            const nextPageEl = document.getElementById('nextPageNum');
+            if (nextPageEl) nextPageEl.textContent = currentPage + 1;
+          }
+        }
+        if (spinner) spinner.style.display = 'none';
+        isLoading = false;
+        return;
       }
+
+      const sep = currentFilter.includes('?') ? '&' : '?';
+      const fetchUrl = `${currentFilter}${sep}page=${currentPage}`;
 
       const resp = await fetch(fetchUrl);
       if (!resp.ok) throw new Error('Network error');
@@ -1776,6 +1789,16 @@
         items = data.items;
       } else if (data.data && data.data.items && Array.isArray(data.data.items)) {
         items = data.data.items;
+      }
+
+      // Chặn triệt để phim thường (live-action) ngồi nhầm lớp sang danh mục Anime
+      if (currentSource === 'ANIMEHAY') {
+        items = items.filter(o => {
+          const type = o.type || '';
+          const hasAnimCat = Array.isArray(o.category) && o.category.some(c => (c.slug || '').includes('hoat-hinh'));
+          const nameLower = (o.name || '').toLowerCase();
+          return type === 'hoathinh' || hasAnimCat || nameLower.includes('anime') || nameLower.includes('hoạt hình');
+        });
       }
 
       const isNguonC = fetchUrl.includes('phim.nguonc.com');

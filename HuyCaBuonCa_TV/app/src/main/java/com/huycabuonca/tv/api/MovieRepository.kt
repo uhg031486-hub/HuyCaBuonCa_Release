@@ -473,7 +473,7 @@ object MovieRepository {
     fun getAnimeFilters(subSourceUrl: String): List<FilterItem> {
         return when (subSourceUrl) {
             "anime_sub://hh3d" -> listOf(
-                FilterItem("3D Mới Cập Nhật", "https://phimapi.com/v1/api/quoc-gia/trung-quoc"),
+                FilterItem("3D Mới Cập Nhật", "https://phimapi.com/v1/api/danh-sach/hoat-hinh"),
                 FilterItem("🕒 Lịch Sử Xem", "app://history"),
                 FilterItem("❤️ Hoạt Hình Yêu Thích", "app://favorites"),
                 FilterItem("Tu Tiên & Huyền Huyễn", "https://phimapi.com/v1/api/the-loai/than-thoai"),
@@ -498,7 +498,7 @@ object MovieRepository {
                 FilterItem("❤️ Yêu Thích", "app://favorites")
             )
             else -> listOf(
-                FilterItem("Anime Mới Cập Nhật", "https://phimapi.com/v1/api/quoc-gia/nhat-ban"),
+                FilterItem("Anime Mới Cập Nhật", "https://phimapi.com/v1/api/danh-sach/hoat-hinh"),
                 FilterItem("🕒 Lịch Sử Xem", "app://history"),
                 FilterItem("❤️ Anime Yêu Thích", "app://favorites"),
                 FilterItem("Hành Động", "https://phimapi.com/v1/api/the-loai/hanh-dong"),
@@ -1067,15 +1067,7 @@ object MovieRepository {
             }
         }
 
-        // 3. Ở trang 1, trộn thêm các phim tiểu kịch từ KKPhim
-        if (page == 1 && kkKeyword.isNotEmpty()) {
-            try {
-                val kkItems = fetchKKPhimSearch(kkKeyword)
-                result.addAll(kkItems)
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
+        // Đã loại bỏ hoàn toàn việc trộn phim thường từ KKPhim vào mục Phim Ngắn
 
         return result.distinctBy { it.name.trim().lowercase() }
     }
@@ -1142,6 +1134,22 @@ object MovieRepository {
             itemsArray?.forEach { el ->
                 if (el.isJsonObject) {
                     val o = el.asJsonObject
+
+                    // Chặn triệt để phim thường (live-action) ngồi nhầm lớp sang Anime/Hoạt hình
+                    if (source == MovieSource.ANIMEHAY) {
+                        val type = o.getSafeString("type")
+                        val catArr = o.getAsJsonArray("category")
+                        val isCatAnim = catArr?.any {
+                            val catSlug = it.asJsonObject.getSafeString("slug")
+                            catSlug == "hoat-hinh" || catSlug.contains("hoat-hinh")
+                        } ?: false
+                        val nameLower = o.getSafeString("name").lowercase()
+                        val isAnim = type == "hoathinh" || isCatAnim || nameLower.contains("anime") || nameLower.contains("hoạt hình")
+                        if (!isAnim) {
+                            return@forEach // Bỏ qua phim thường trong danh mục Anime
+                        }
+                    }
+
                     val thumb = o.getSafeString("thumb_url")
                     val poster = o.getSafeString("poster_url").ifEmpty { thumb }
                     val fullThumb = if (thumb.startsWith("http")) thumb else if (thumb.isNotEmpty()) KKPHIM_IMG_BASE + thumb.removePrefix("/") else ""
