@@ -13,12 +13,19 @@
   let currentEpisodeIndex = 0;
   let currentServerIndex = 0;
   let hlsInstance = null;
+  let dashInstance = null;
   let overlayTimeout = null;
   let numberZapBuffer = '';
   let numberZapTimeout = null;
   let lastBackTime = 0;
   let currentFocusedElement = null;
   const isNativeWebOS = /webOS|SmartTV/i.test(navigator.userAgent) || window.webOS !== undefined;
+  let currentAspectIdx = 0;
+  const aspectModes = [
+    { mode: 'contain', label: 'Mặc định (Fit)', desc: 'Chuẩn gốc không cắt viền', badge: 'Fit' },
+    { mode: 'cover', label: 'Lấp đầy (Fill)', desc: 'Tràn viền, cắt viền đen', badge: 'Fill' },
+    { mode: 'fill', label: 'Căng phẳng (Stretch)', desc: 'Kéo giãn 100% toàn khung', badge: 'Căng' }
+  ];
 
   // --- Constants ---
   const KKPHIM_IMG_BASE = 'https://phimimg.com/';
@@ -244,16 +251,13 @@
   }
 
   // --- GaMoMePhim Native Client (v2.7) ---
-  const GaMoMePhimClient = {
+  const GaMoMePhimClient = window.GaMoMePhimClient = {
     BASE_URL: 'https://gamomephim.com',
     getProxyUrl(target) {
-      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-        return 'https://huyca.pages.dev/api/proxy?url=' + encodeURIComponent(target);
-      }
       if (window.location.protocol.startsWith('http')) {
         return '/api/proxy?url=' + encodeURIComponent(target);
       }
-      return target;
+      return 'https://huyca.pages.dev/api/proxy?url=' + encodeURIComponent(target);
     },
     async getDramaList(filterUrl, page = 1) {
       try {
@@ -415,13 +419,10 @@
   const FreeReelsClient = window.FreeReelsClient = {
     API_BASE: 'https://apiv2.free-reels.com/frv2-api',
     getProxyUrl(target) {
-      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-        return 'https://huyca.pages.dev/api/proxy?url=' + encodeURIComponent(target);
-      }
       if (window.location.protocol.startsWith('http')) {
         return '/api/proxy?url=' + encodeURIComponent(target);
       }
-      return target;
+      return 'https://huyca.pages.dev/api/proxy?url=' + encodeURIComponent(target);
     },
     APP_SECRET: '8IAcbWyCsVhYv82S2eofRqK1DF3nNDAv',
     APP_NAME: 'com.freereels.app',
@@ -520,10 +521,9 @@
         const id = series.id || series.key || series.series_id || '';
         const title = (series.title || series.name || '').trim();
         const cover = series.cover || series.poster || '';
-        const epCount = Number(series.episode_count || 0);
-        const hasViChars = /[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/i.test(title);
+        const epCount = Number(series.episode_count || series.episodes_count || 1);
         const isForeignDub = /\((synchron|doblado|dublado|doublé|doppiato)\)/i.test(title);
-        if (id && title && title.toUpperCase() !== 'TOP' && epCount > 0 && hasViChars && !isForeignDub) {
+        if (id && title && title.toUpperCase() !== 'TOP' && !isForeignDub) {
           const isDubbed = title.toLowerCase().includes('lồng tiếng') || title.toLowerCase().includes('thuyết minh');
           list.push({
             id: `freereels:${id}`,
@@ -533,7 +533,7 @@
             thumbUrl: cover,
             posterUrl: cover,
             year: '2026',
-            quality: isDubbed ? '🎙️ Lồng Tiếng' : '🇻🇳 Phụ Đề',
+            quality: isDubbed ? '🎙️ Lồng Tiếng' : '🎬 Phụ Đề HD',
             episodeCurrent: `${epCount} tập`,
             source: 'FREEREELS'
           });
@@ -1094,10 +1094,11 @@
     }
   }
 
-  function saveHistory(movie, currentSec, durationSec, episodeName) {
+  function saveHistory(movie, currentSec, durationSec, episodeName, episodeIndex) {
     if (!movie || !movie.id) return;
     let hist = getHistory().filter(item => item.id !== movie.id);
     const percent = durationSec > 0 ? Math.min(100, Math.round((currentSec / durationSec) * 100)) : 0;
+    const epIdx = (typeof episodeIndex === 'number') ? episodeIndex : (typeof currentEpisodeIndex === 'number' ? currentEpisodeIndex : 0);
     hist.unshift({
       id: movie.id,
       name: movie.name,
@@ -1105,6 +1106,7 @@
       posterUrl: movie.posterUrl || movie.thumbUrl,
       source: movie.source || currentSource,
       episodeName: episodeName || movie.episodeCurrent || 'Tập 1',
+      episodeIndex: epIdx,
       currentSec: Math.round(currentSec),
       durationSec: Math.round(durationSec),
       percent: percent,
@@ -1124,7 +1126,7 @@
   }
 
   function getAllChannels() {
-    const base = window.INITIAL_TV_CHANNELS || [];
+    const base = window.INITIAL_TV_CHANNELS || window.CHANNELS_DATA || [];
     const custom = getCustomChannels();
     return [...custom, ...base];
   }
@@ -1361,7 +1363,8 @@
 
                 if (currentFilter === 'tv://schedule') {
           const eplMatches = await fetchRealtimePremierLeagueMatches();
-          const matchCards = eplMatches.map(m => ({
+          const sourceList = (eplMatches && eplMatches.length > 0) ? eplMatches : LIVE_MATCHES;
+          const matchCards = sourceList.map(m => ({
             id: m.id,
             name: `${m.teamA} vs ${m.teamB}`,
             slug: m.id,
@@ -1399,9 +1402,10 @@
         } else if (currentFilter === 'tv://epl') {
           // 1. Tải danh sách trận đấu Ngoại Hạng Anh FPL thời gian thực
           const eplMatches = await fetchRealtimePremierLeagueMatches();
+          const sourceList = (eplMatches && eplMatches.length > 0) ? eplMatches : LIVE_MATCHES;
           
           // Tạo các thẻ trận đấu Ngoại Hạng Anh với icon chuông thông báo độc lập
-          const matchCards = eplMatches.map(m => {
+          const matchCards = sourceList.map(m => {
             const hasReminder = isMatchReminderSet(m.id);
             return {
               id: m.id,
@@ -1440,7 +1444,7 @@
           isLoading = false;
           return;
         } else if (currentFilter === 'tv://satellite') {
-          filtered = allChannels.filter(c => (c.group || '').includes('Vệ Tinh') || (c.name || '').includes('True Premier') || (c.name || '').includes('Astro') || (c.name || '').includes('Sky Sports') || (c.name || '').includes('TNT Sports'));
+          filtered = allChannels.filter(c => (c.group || '').includes('Vệ Tinh') || (c.name || '').includes('True Premier') || (c.name || '').includes('Astro') || (c.name || '').includes('Sky Sports') || (c.name || '').includes('TNT Sports') || (c.name || '').includes('beIN'));
         } else if (currentFilter === 'tv://favorites') {
           const favs = getFavorites();
           filtered = allChannels.filter(c => favs.some(f => f.id === c.id));
@@ -1461,26 +1465,27 @@
                    nm.includes('bein') ||
                    nm.includes('cbs') ||
                    nm.includes('eurosport') ||
+                   nm.includes('fifa') ||
                    nm.includes('espn');
           });
         } else if (currentFilter === 'tv://vtv') {
-          filtered = allChannels.filter(c => (c.group || '').toLowerCase().includes('vtv'));
+          filtered = allChannels.filter(c => (c.group || '').toLowerCase().includes('vtv') || (c.name || '').toLowerCase().startsWith('vtv'));
         } else if (currentFilter === 'tv://vtvcab') {
           filtered = allChannels.filter(c => (c.group || '').toLowerCase().includes('vtvcab'));
         } else if (currentFilter === 'tv://sctv') {
           filtered = allChannels.filter(c => (c.group || '').toLowerCase().includes('sctv'));
         } else if (currentFilter === 'tv://sports_intl') {
-          filtered = allChannels.filter(c => (c.group || '').includes('ESPN') || (c.group || '').includes('Bóng Rổ') || (c.group || '').includes('FOX'));
+          filtered = allChannels.filter(c => (c.group || '').includes('ESPN') || (c.group || '').includes('Bóng Rổ') || (c.group || '').includes('FOX') || (c.group || '').includes('Bóng Đá Quốc Tế') || (c.name || '').toLowerCase().includes('sport') || (c.name || '').toLowerCase().includes('bein') || (c.name || '').toLowerCase().includes('eurosport') || (c.name || '').toLowerCase().includes('fifa') || (c.name || '').toLowerCase().includes('red bull'));
         } else if (currentFilter === 'tv://racing_combat') {
-          filtered = allChannels.filter(c => (c.group || '').includes('Đua Xe') || (c.group || '').includes('Võ Thuật') || (c.group || '').includes('Mạo Hiểm') || (c.group || '').includes('Đối Kháng'));
+          filtered = allChannels.filter(c => (c.group || '').includes('Đua Xe') || (c.group || '').includes('Võ Thuật') || (c.group || '').includes('Mạo Hiểm') || (c.group || '').includes('Đối Kháng') || (c.name || '').toLowerCase().includes('red bull'));
         } else if (currentFilter === 'tv://movies') {
-          filtered = allChannels.filter(c => (c.group || '').includes('Rạp Phim') || (c.group || '').toLowerCase().includes('phim'));
+          filtered = allChannels.filter(c => (c.group || '').includes('Rạp Phim') || (c.group || '').toLowerCase().includes('phim') || (c.name || '').toLowerCase().includes('hbo') || (c.name || '').toLowerCase().includes('warner') || (c.name || '').toLowerCase().includes('cinemax'));
         } else if (currentFilter === 'tv://live') {
           filtered = allChannels.filter(c => (c.group || '').includes('Sự Kiện') || (c.group || '').includes('LIVE'));
         } else if (currentFilter === 'tv://intl') {
-          filtered = allChannels.filter(c => (c.group || '').includes('Quốc Tế') || (c.group || '').includes('Hàn Quốc') || (c.group || '').includes('Trung Quốc') || (c.group || '').includes('Israel') || (c.group || '').includes('In The Box') || (c.group || '').includes('TVB'));
+          filtered = allChannels.filter(c => (c.group || '').includes('Quốc Tế') || (c.group || '').includes('Hàn Quốc') || (c.group || '').includes('Trung Quốc') || (c.group || '').includes('Israel') || (c.group || '').includes('In The Box') || (c.group || '').includes('TVB') || (c.group || '').includes('Vệ Tinh') || (c.name || '').includes('NHK') || (c.name || '').includes('Al Jazeera') || (c.name || '').includes('DW ') || (c.name || '').includes('France 24') || (c.name || '').includes('ABC News') || (c.name || '').includes('CBS News') || (c.name || '').includes('NBC News') || (c.name || '').includes('Bloomberg') || (c.name || '').includes('CNA') || (c.name || '').includes('Euronews') || (c.name || '').includes('Arirang') || (c.name || '').includes('Red Bull'));
         } else if (currentFilter === 'tv://local') {
-          filtered = allChannels.filter(c => (c.group || '').includes('Địa phương') || (c.group || '').includes('HTV'));
+          filtered = allChannels.filter(c => (c.group || '').includes('Địa phương') || (c.group || '').includes('HTV') || (c.name || '').toLowerCase().startsWith('htv') || (c.name || '').toLowerCase().startsWith('thvl'));
         } else if (currentFilter === 'tv://radio') {
           filtered = allChannels.filter(c => (c.group || '').includes('Radio'));
         }
@@ -1627,19 +1632,13 @@
         const kwList = SHORT_KW_MAP[kwType] || ['tiểu kịch', 'tổng tài', 'trọng sinh'];
         const targetKw = kwList[(currentPage - 1) % kwList.length];
         let newItems = await FreeReelsClient.search(targetKw, currentPage);
-        if (newItems.length < 12) {
-          const altKw = kwList[currentPage % kwList.length];
-          if (altKw !== targetKw) {
-            const altItems = await FreeReelsClient.search(altKw, 1);
-            newItems = newItems.concat(altItems);
-          }
-        }
-        if (newItems.length < 12) {
-          const altKw2 = kwList[(currentPage + 1) % kwList.length];
-          if (altKw2 !== targetKw) {
-            const altItems2 = await FreeReelsClient.search(altKw2, 1);
-            newItems = newItems.concat(altItems2);
-          }
+        if (newItems.length < 6) {
+          try {
+            const fbItems = await GaMoMePhimClient.getDramaList('gamomephim://the-loai/hien-dai', 1);
+            if (fbItems && fbItems.length > 0) {
+              newItems = newItems.concat(fbItems);
+            }
+          } catch(e) {}
         }
 
         if (reqId !== activeRequestId) return;
@@ -1966,14 +1965,22 @@
         { code: 'ita.1', name: '🇮🇹 Serie A', chName: 'Astro SuperSport 2 HD', chSlug: 'sports_sat_astro_supersport_2' }
       ];
 
-      const matches = [];
-
-      for (const lg of leagues) {
+      const fetchLeague = async (lg) => {
         try {
-          const resp = await fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/${lg.code}/scoreboard`);
-          if (!resp.ok) continue;
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 3500);
+          const espnTarget = `https://site.api.espn.com/apis/site/v2/sports/soccer/${lg.code}/scoreboard`;
+          const espnUrl = window.location.protocol.startsWith('http')
+            ? `/api/proxy?url=${encodeURIComponent(espnTarget)}`
+            : espnTarget;
+          const resp = await fetch(espnUrl, {
+            signal: controller.signal
+          });
+          clearTimeout(timeoutId);
+          if (!resp.ok) return [];
           const data = await resp.json();
           const events = data.events || [];
+          const res = [];
           for (const ev of events) {
             const mId = ev.id || '';
             const dateIso = ev.date || '';
@@ -1988,7 +1995,6 @@
             }
 
             const state = ev.status?.type?.state || 'pre';
-            const detail = ev.status?.type?.detail || '';
             const comps = ev.competitions?.[0]?.competitors || [];
             let teamHome = '', teamAway = '', logoHome = DEFAULT_TV_LOGO, logoAway = DEFAULT_TV_LOGO;
             let scoreHome = '', scoreAway = '';
@@ -2012,7 +2018,7 @@
               scoreStr = `🏁 FT • ${scoreHome} - ${scoreAway}`;
             }
 
-            matches.push({
+            res.push({
               id: `espn_${mId}`,
               tournament: lg.name,
               teamA: teamHome || 'Đội Nhà',
@@ -2027,8 +2033,17 @@
               channelSlug: lg.chSlug
             });
           }
+          return res;
         } catch (e) {
-          console.warn('Lỗi fetch giải:', lg.code, e);
+          return [];
+        }
+      };
+
+      const results = await Promise.allSettled(leagues.map(fetchLeague));
+      const matches = [];
+      for (const r of results) {
+        if (r.status === 'fulfilled' && Array.isArray(r.value)) {
+          matches.push(...r.value);
         }
       }
 
@@ -2042,26 +2057,35 @@
         });
         return matches;
       }
-      return [];
+      return LIVE_MATCHES;
     } catch (err) {
       console.warn('ESPN fetch error:', err);
-      return [];
+      return LIVE_MATCHES;
     }
   }
 
-  // --- Modal Chọn 1 Trong 5 Server Xem Trực Tiếp ---
+  // --- Modal Chọn 1 Trong 4 Server Xem Trực Tiếp ---
   let selectedMatchForServer = null;
-  function showMatchServerModal(match) {
+  function openMatchServerModal(match) {
+    if (!match) return;
+    activeMatchForServer = match;
     selectedMatchForServer = match;
     const modal = document.getElementById('matchServerModal');
     if (!modal) return;
 
-    document.getElementById('serverModalLeague').textContent = match.tournament || '🏴󠁧󠁢󠁥󠁮󠁧󠁿 NGOẠI HẠNG ANH';
-    document.getElementById('serverModalTeams').textContent = `${match.teamA} vs ${match.teamB}`;
-    document.getElementById('serverModalTime').textContent = match.time || 'Trực Tiếp';
+    const leagueEl = document.getElementById('serverModalLeague');
+    const teamsEl = document.getElementById('serverModalTeams');
+    const timeEl = document.getElementById('serverModalTime');
+
+    if (leagueEl) leagueEl.textContent = match.tournament || '🏴󠁧󠁢󠁥󠁮󠁧󠁿 NGOẠI HẠNG ANH';
+    if (teamsEl) teamsEl.textContent = `${match.teamA} vs ${match.teamB}`;
+    if (timeEl) timeEl.textContent = match.time || 'Trực Tiếp';
 
     modal.style.display = 'flex';
   }
+  const showMatchServerModal = openMatchServerModal;
+  window.openMatchServerModal = openMatchServerModal;
+  window.showMatchServerModal = openMatchServerModal;
 
   function initMatchServerModalEvents() {
     const modal = document.getElementById('matchServerModal');
@@ -2166,6 +2190,8 @@
 
     showToast(`Đang kết nối Server ${serverNum} (Không quảng cáo)...`);
     iframe.src = streamEmbedUrl;
+    const btnExt = document.getElementById('btnExternalMatch');
+    if (btnExt) btnExt.href = streamEmbedUrl;
     container.style.display = 'block';
 
     // Tiêm mã CSS/JS để xóa sạch 100% banner quảng cáo cá cược
@@ -2248,9 +2274,9 @@
 
       // Click card
       card.addEventListener('click', (e) => {
-        if (movie.isEplMatch && movie.rawMatch) {
+        if (movie.isEplMatch || movie.rawMatch) {
           // Bấm vào trận đấu Ngoại Hạng Anh: Mở bảng chọn 1 trong 4 Server
-          openMatchServerModal(movie.rawMatch);
+          openMatchServerModal(movie.rawMatch || movie);
           return;
         }
         if (movie.source === 'XEMTIVI') {
@@ -2351,6 +2377,16 @@
 
   // --- Detail Modal ---
   async function openMovieDetail(movie) {
+    if (!movie) return;
+    // BẢO VỆ CHỐNG NHẦM: Nếu là trận đấu bóng đá hoặc kênh TV, không bao giờ mở trang chi tiết phim!
+    if (movie.isEplMatch || movie.rawMatch) {
+      openMatchServerModal(movie.rawMatch || movie);
+      return;
+    }
+    if (movie.source === 'XEMTIVI' || movie.isTv || movie.isLiveTv) {
+      playTvChannelDirectly(movie);
+      return;
+    }
     const modal = document.getElementById('detailModal');
     modal.style.display = 'flex';
     pushNavigationState('detail');
@@ -2361,6 +2397,10 @@
     document.getElementById('detailDesc').textContent = 'Đang tải thông tin chi tiết phim...';
     document.getElementById('episodesGrid').innerHTML = '<div style="color: #94a3b8;">Đang tải danh sách tập...</div>';
 
+    const srvBarInit = document.getElementById('modalServerBar');
+    if (srvBarInit) srvBarInit.style.display = 'none';
+    const directBtnInit = document.getElementById('btnDirectPlayDetail');
+    if (directBtnInit) directBtnInit.style.display = 'none';
     updateDetailFavButton(movie);
 
     // CRITICAL BUG FIX: Reset nút phát ngay lập tức để không chạy nhầm phim đã xem trước đó
@@ -2422,7 +2462,7 @@
             modal.style.display = 'none';
             const first = allEps[0];
             if (first) {
-              playVideo(first.link_m3u8, movie.name, first.name, movie, data, first.epIndex, first.serverIndex);
+              playVideo(first.link_m3u8, movie.name, first.name, movie, data, first.epIndex, first.serverIndex, false, null, true);
             }
           };
         } else {
@@ -2495,7 +2535,7 @@
                 if (unl.subtitleUrl) sub = unl.subtitleUrl;
               }
             }
-            playVideo(stream, movie.name, firstEp.name, movie, data, 0, 0, sub);
+            playVideo(stream, movie.name, firstEp.name, movie, data, 0, 0, sub, true);
           }
         };
       } else if (movie.slug && movie.slug.startsWith('nguonc:')) {
@@ -2504,6 +2544,22 @@
         if (!resp.ok) throw new Error('NguonC detail error');
         const data = await resp.json();
         const m = data.movie;
+
+        // Chuẩn hóa data.episodes sang format thống nhất chuẩn (server_name, server_data) để sidebar và player dùng chung
+        if (m.episodes && m.episodes.length > 0) {
+          data.episodes = m.episodes.map((s, sIdx) => ({
+            server_name: s.server_name || `Server ${sIdx + 1}`,
+            server_data: (s.items || []).map((it, itIdx) => {
+              const epTitle = (it.name && /^\d+$/.test(it.name)) ? `Tập ${it.name}` : (it.name || `Tập ${itIdx + 1}`);
+              return {
+                name: epTitle,
+                slug: it.slug,
+                link_m3u8: it.embed || it.m3u8,
+                embed: it.embed
+              };
+            })
+          }));
+        }
         currentPlayingDetail = data;
 
         document.getElementById('detailDesc').textContent = (m.description || '').replace(/<[^>]*>?/gm, '') || 'Không có mô tả chi tiết.';
@@ -2519,27 +2575,68 @@
         const epGrid = document.getElementById('episodesGrid');
         epGrid.innerHTML = '';
 
-        if (m.episodes && m.episodes.length > 0) {
-          const s = m.episodes[0];
-          const items = s.items || [];
-          items.forEach((ep, idx) => {
-            const btn = document.createElement('button');
-            btn.className = 'btn-episode focusable';
-            const epTitle = (ep.name && /^\d+$/.test(ep.name)) ? `Tập ${ep.name}` : (ep.name || `Tập ${idx + 1}`);
-            btn.textContent = epTitle;
-            btn.addEventListener('click', () => {
-              modal.style.display = 'none';
-              playVideo(ep.m3u8 || ep.embed, movie.name, epTitle, movie, data, idx, 0);
+        if (data.episodes && data.episodes.length > 0) {
+          let activeSrvIdx = 0;
+          const renderModalEpisodes = (sIdx) => {
+            epGrid.innerHTML = '';
+            const s = data.episodes[sIdx] || data.episodes[0];
+            const items = s.server_data || [];
+            items.forEach((ep, idx) => {
+              const btn = document.createElement('button');
+              btn.className = 'btn-episode focusable';
+              btn.textContent = ep.name;
+              btn.addEventListener('click', () => {
+                modal.style.display = 'none';
+                playVideo(ep.link_m3u8 || ep.embed, movie.name, `${ep.name} (${s.server_name})`, movie, data, idx, sIdx);
+              });
+              epGrid.appendChild(btn);
             });
-            epGrid.appendChild(btn);
-          });
+          };
+
+          // Nếu có nhiều Server (Ví dụ: Vietsub #1, Lồng Tiếng #1), hiển thị thanh chuyển Server
+          const oldServerBar = document.getElementById('modalServerBar');
+          if (data.episodes.length > 1) {
+            let srvBar = oldServerBar;
+            if (!srvBar) {
+              srvBar = document.createElement('div');
+              srvBar.id = 'modalServerBar';
+              srvBar.style.cssText = 'display: flex; gap: 8px; margin-bottom: 12px; overflow-x: auto; padding: 4px 0;';
+              epGrid.parentNode.insertBefore(srvBar, epGrid);
+            }
+            srvBar.innerHTML = '';
+            srvBar.style.display = 'flex';
+            data.episodes.forEach((srv, sIdx) => {
+              const sBtn = document.createElement('button');
+              sBtn.className = `btn-server-tab focusable ${sIdx === 0 ? 'active' : ''}`;
+              sBtn.style.cssText = `padding: 6px 14px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; border: 1px solid rgba(255,255,255,0.15); background: ${sIdx === 0 ? 'var(--accent-red, #e50914)' : 'rgba(255,255,255,0.08)'}; color: #fff; transition: all 0.2s;`;
+              sBtn.textContent = srv.server_name;
+              sBtn.onclick = () => {
+                activeSrvIdx = sIdx;
+                srvBar.querySelectorAll('.btn-server-tab').forEach((b, i) => {
+                  b.style.background = (i === sIdx) ? 'var(--accent-red, #e50914)' : 'rgba(255,255,255,0.08)';
+                });
+                renderModalEpisodes(sIdx);
+              };
+              srvBar.appendChild(sBtn);
+            });
+          } else if (oldServerBar) {
+            oldServerBar.style.display = 'none';
+          }
+
+          renderModalEpisodes(0);
+
+          // Nút Xem Trực Tiếp / Pop-out cho Nguồn C: Ẩn hoàn toàn để bảo vệ người dùng không bị văng ra tab quảng cáo ngoài
+          const directBtn = document.getElementById('btnDirectPlayDetail');
+          if (directBtn) {
+            directBtn.style.display = 'none';
+          }
 
           document.getElementById('btnPlayFirst').onclick = () => {
             modal.style.display = 'none';
-            const firstEp = items[0];
+            const curSrv = data.episodes[activeSrvIdx] || data.episodes[0];
+            const firstEp = curSrv?.server_data?.[0];
             if (firstEp) {
-              const epTitle = (firstEp.name && /^\d+$/.test(firstEp.name)) ? `Tập ${firstEp.name}` : (firstEp.name || 'Tập 1');
-              playVideo(firstEp.m3u8 || firstEp.embed, movie.name, epTitle, movie, data, 0, 0);
+              playVideo(firstEp.link_m3u8 || firstEp.embed, movie.name, `${firstEp.name} (${curSrv.server_name})`, movie, data, 0, activeSrvIdx, false, null, true);
             }
           };
         }
@@ -2597,7 +2694,7 @@
             modal.style.display = 'none';
             const firstEp = s.server_data[0];
             if (firstEp) {
-              playVideo(firstEp.link_m3u8, movie.name, firstEp.name, movie, data, 0, 0);
+              playVideo(firstEp.link_m3u8, movie.name, firstEp.name, movie, data, 0, 0, false, null, true);
             }
           };
         }
@@ -2757,6 +2854,15 @@
   const videoElem = document.getElementById('videoPlayer');
   if (videoElem) {
     videoElem.addEventListener('error', (e) => {
+      // TUYỆT ĐỐI KHÔNG CAN THIỆP nếu đang phát dạng nhúng (Embed iframe) hoặc videoPlayer đang bị ẩn / src trống:
+      if (isEmbedStreamUrl(currentActiveStream) || 
+          (videoElem.style.display === 'none') || 
+          !videoElem.src || 
+          videoElem.src === window.location.href ||
+          videoElem.src.endsWith('/')) {
+        return;
+      }
+
       console.warn('Video playback error detected:', videoElem.error);
       if (currentActiveStream && !videoElem.src.includes('/api/proxy') && currentActiveStream.startsWith('http')) {
         console.log('Retrying video via proxy fallback:', currentActiveStream);
@@ -2769,7 +2875,61 @@
     });
   }
 
-  function playVideo(streamUrl, title, subtitle, movie, detail, epIndex, serverIndex, isTv = false, customSubtitleUrl = null) {
+  // --- Stream Guard Parent Helper (Giao thức Handshake Chuẩn với Iframe NguonC streamc.xyz) ---
+  window.addEventListener('message', (event) => {
+    try {
+      const data = event.data;
+      if (data && data.type === 'stream-guard-hello') {
+        const iframe = document.getElementById('playerIframe');
+        if (iframe && iframe.contentWindow) {
+          iframe.contentWindow.postMessage({
+            type: 'stream-parent-state',
+            version: 'guard-5',
+            id: data.id,
+            helperVersion: 'guard-5',
+            parentAdblock: 'clear',
+            seq: Date.now(),
+            supported: true,
+            suspected: false
+          }, '*');
+        }
+      }
+    } catch(err) {}
+  });
+
+  // --- Kiểm tra URL nhúng Iframe tuyệt đối chính xác (Chặn đứng lỗi tự động tải file manifest.mpd / .ts) ---
+  function isEmbedStreamUrl(url) {
+    if (!url || typeof url !== 'string') return false;
+    const u = url.toLowerCase().trim();
+
+    // TUYỆT ĐỐI KHÔNG BAO GIỜ COI LÀ EMBED NẾU LÀ CÁC ĐỊNH DẠNG MEDIA HOẶC LINK STREAM TRỰC TIẾP:
+    if (u.includes('.m3u8') || u.includes('.mp4') || u.includes('.mpd') || 
+        u.includes('.webm') || u.includes('.ts') || u.includes('.m4s') || 
+        u.includes('.mkv') || u.includes('.flv') || u.includes('.avi') ||
+        u.includes('/hls/') || u.includes('/live/') || u.includes('manifest') ||
+        u.includes('chunklist') || u.includes('playlist') || u.includes('/api/proxy') || u.includes('/api/nguonc_stream')) {
+      return false;
+    }
+
+    // CHỈ COI LÀ EMBED NẾU LÀ WEB PLAYER HOẶC TRANG WEB NHÚNG:
+    const embedKeywords = [
+      '/embed/', '/videoembed/', 'player.html', 'embed.html', 'youtube.com', 'youtu.be',
+      'ok.ru', 'dailymotion.com/embed', 'vidsrc', '2embed', 'autoembed', 'streamtape.com/e/'
+    ];
+    if (embedKeywords.some(kw => u.includes(kw))) return true;
+
+    // Nếu kết thúc bằng đuôi web (.html, .htm, .php)
+    const cleanPath = u.split('?')[0];
+    if (cleanPath.endsWith('.html') || cleanPath.endsWith('.htm') || cleanPath.endsWith('.php')) {
+      return true;
+    }
+
+    return false;
+  }
+
+  window.playVideo = (s, t, sub, m, d, ep, srv, tv, csub, forceStart) => playVideo(s, t, sub, m, d, ep, srv, tv, csub, forceStart);
+  window.playTvChannelDirectly = (c) => playTvChannelDirectly(c);
+  function playVideo(streamUrl, title, subtitle, movie, detail, epIndex, serverIndex, isTv = false, customSubtitleUrl = null, forceStartFromBeginning = false) {
     if (typeof isTv === 'string') {
       customSubtitleUrl = isTv;
       isTv = false;
@@ -2794,62 +2954,97 @@
       return;
     }
 
+    // GIẢI MÃ VÀ PHÁT LUỒNG NGUỒN C SẠCH 100% (ZERO ADS, NATIVE HLS)
+    if (streamUrl && (streamUrl.includes('streamc.xyz') || streamUrl.includes('embed.php?hash='))) {
+      streamUrl = `/api/nguonc_stream?url=${encodeURIComponent(streamUrl)}`;
+    }
+
     // Đảm bảo luồng R2 mp4 (Gà Mờ Mê Phim) luôn qua proxy có hỗ trợ Range HTTP 206 & CORS
     if (streamUrl && (streamUrl.includes('r2.gamomephim.com') || streamUrl.includes('gamomephim')) && !streamUrl.includes('/api/proxy')) {
       streamUrl = `/api/proxy?url=${encodeURIComponent(streamUrl)}`;
     }
 
+    // Tự động bảo vệ chống lỗi Mixed Content khi duyệt web trên HTTPS
+    if (window.location.protocol === 'https:' && streamUrl.startsWith('http://') && !streamUrl.includes('/api/proxy')) {
+      streamUrl = `/api/proxy?url=${encodeURIComponent(streamUrl)}`;
+    }
+
     currentPlayingMovie = movie;
+    window.currentPlayingMovie = movie;
     currentActiveStream = streamUrl;
     currentPlayingDetail = detail;
     currentEpisodeIndex = epIndex;
     currentServerIndex = serverIndex;
     updateSidebarAndControls(movie, detail, epIndex, serverIndex);
+    updatePlayerFavIcon(isFavorite(movie.id));
 
     const container = document.getElementById('playerContainer');
+    const miniBar = document.getElementById('miniPlayerBar');
     const video = document.getElementById('videoPlayer');
-    container.style.display = 'flex';
+    if (container) {
+      container.classList.remove('player-floating-mini');
+      container.style.display = 'flex';
+    }
+    if (miniBar) miniBar.style.display = 'none';
+    const curAsp = (aspectModes && aspectModes[currentAspectIdx]) ? aspectModes[currentAspectIdx].mode : 'contain';
+    if (video) video.style.setProperty('object-fit', curAsp, 'important');
     pushNavigationState('player');
 
-    // Khóa hướng xoay ngang mượt mà KHÔNG gọi requestFullscreen để tránh thông báo phiền phức của Chrome
-    const isMobileDevice = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) || (window.innerWidth <= 800 && window.innerHeight > window.innerWidth);
-    if (isMobileDevice) {
-      try {
-        if (screen.orientation && screen.orientation.lock) {
-          screen.orientation.lock('landscape').catch(() => {});
-        } else if (screen.lockOrientation) {
-          screen.lockOrientation('landscape');
-        }
-      } catch(e) {}
-    }
+    const isDevicePortrait = (window.innerHeight > window.innerWidth);
+    const isMobileDevice = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) || (window.innerWidth <= 800);
 
     document.getElementById('playerTitle').textContent = title;
     document.getElementById('playerSub').textContent = subtitle;
 
     const zapBtn = document.getElementById('btnQuickZap');
-    const nextBtn = document.getElementById('btnNextEpisode');
-    const prevBtn = document.getElementById('btnPrevEpisode');
+    const nextBtn = document.getElementById('btnCenterNext') || document.getElementById('btnNextEpisode');
+    const prevBtn = document.getElementById('btnCenterPrev') || document.getElementById('btnPrevEpisode');
     const progress = document.getElementById('progressContainer');
     const iframe = document.getElementById('playerIframe');
-    const isEmbed = !streamUrl.includes('.m3u8') && !streamUrl.includes('.mp4');
+    const isEmbed = isEmbedStreamUrl(streamUrl);
 
-    // Thoát chế độ Mini Floating Player nếu đang bật
-    container.classList.remove('player-floating-mini');
-    const miniBar = document.getElementById('miniPlayerBar');
-    if (miniBar) miniBar.style.display = 'none';
+    const isVerticalShortDrama = detail?.isShortDrama || movie?.isShortDrama || 
+      (movie?.source === 'FREEREELS' && !isTv) || 
+      (movie?.source === 'GAMOMEPHIM' && !isTv) ||
+      (movie?.source === 'DRAMABOX') ||
+      (movie?.source === 'REELSHORT') ||
+      (movie?.source === 'SHORTMAX') ||
+      (currentSource === 'FREEREELS' && !isTv);
 
-    const isVerticalShortDrama = detail?.isShortDrama || movie?.isShortDrama || (movie?.source === 'FREEREELS' && !isTv) || (movie?.source === 'GAMOMEPHIM' && !isTv);
-
-    // QUY TẮC MỚI: TẤT CẢ KÊNH TIVI VÀ PHIM NGANG (16:9) TỰ ĐỘNG CHUYỂN NGAY SANG MÀN HÌNH NGANG TRÊN DI ĐỘNG!
-    if (isMobileDevice && !isVerticalShortDrama) {
-      container.classList.add('player-forced-landscape');
-      const btnRotate = document.getElementById('btnRotatePlayer');
-      if (btnRotate) btnRotate.textContent = '📱 Xoay Dọc';
-      showToast(isTv ? '📺 Tự động chuyển màn hình ngang chuẩn Tivi' : '🔄 Tự động chuyển màn hình ngang chuẩn điện ảnh');
-    } else {
+    // TỰ ĐỘNG CHUYỂN HƯỚNG THEO PHIM: PHIM DỌC (9:16) VÀ PHIM NGANG (16:9)
+    const rotateBtnText = document.getElementById('rotateBtnText');
+    if (isVerticalShortDrama) {
+      // Phim ngắn màn dọc (9:16): Tự động áp dụng chế độ dọc chuẩn TikTok/Reels!
       container.classList.remove('player-forced-landscape');
-      const btnRotate = document.getElementById('btnRotatePlayer');
-      if (btnRotate) btnRotate.textContent = '🔄 Xoay Ngang';
+      container.classList.add('player-vertical-mode');
+      if (rotateBtnText) rotateBtnText.textContent = 'Phim Dọc (9:16)';
+      if (isMobileDevice) {
+        try {
+          if (screen.orientation && screen.orientation.lock) {
+            screen.orientation.lock('portrait').catch(() => {});
+          }
+        } catch(e) {}
+      }
+    } else {
+      // Phim ngang 16:9 (Phim lẻ, Phim bộ, Anime, Tivi)
+      container.classList.remove('player-vertical-mode');
+      if (isMobileDevice && isDevicePortrait) {
+        container.classList.add('player-forced-landscape');
+        if (rotateBtnText) rotateBtnText.textContent = 'Xoay Dọc';
+        showToast(isTv ? '📺 Tự động chuyển màn hình ngang chuẩn Tivi' : '🎬 Tự động chuyển màn hình ngang chuẩn điện ảnh');
+      } else {
+        container.classList.remove('player-forced-landscape');
+        if (rotateBtnText) rotateBtnText.textContent = 'Xoay Ngang';
+      }
+      if (isMobileDevice) {
+        try {
+          if (screen.orientation && screen.orientation.lock) {
+            screen.orientation.lock('landscape').catch(() => {});
+          } else if (screen.lockOrientation) {
+            screen.lockOrientation('landscape');
+          }
+        } catch(e) {}
+      }
     }
 
     if (isTv) {
@@ -2872,12 +3067,14 @@
         if (prevBtn) {
           prevBtn.style.display = 'inline-flex';
           prevBtn.disabled = (epIndex <= 0);
-          prevBtn.style.opacity = (epIndex <= 0) ? '0.4' : '1';
+          prevBtn.style.opacity = (epIndex <= 0) ? '0.35' : '1';
+          prevBtn.style.pointerEvents = (epIndex <= 0) ? 'none' : 'auto';
         }
         if (nextBtn) {
           nextBtn.style.display = 'inline-flex';
           nextBtn.disabled = (epIndex >= totalEps - 1);
-          nextBtn.style.opacity = (epIndex >= totalEps - 1) ? '0.4' : '1';
+          nextBtn.style.opacity = (epIndex >= totalEps - 1) ? '0.35' : '1';
+          nextBtn.style.pointerEvents = (epIndex >= totalEps - 1) ? 'none' : 'auto';
         }
       } else {
         if (prevBtn) prevBtn.style.display = 'none';
@@ -2885,25 +3082,166 @@
       }
     }
 
-    // Reset video & HLS & Subtitles
+    // Lưu lại lịch sử xem của tập trước đó (nếu đang chuyển từ tập cũ sang tập mới)
+    if (currentPlayingMovie && video && video.duration && typeof currentEpisodeIndex === 'number' && currentEpisodeIndex !== epIndex) {
+      const oldSub = document.getElementById('playerSub')?.textContent;
+      saveHistory(currentPlayingMovie, video.currentTime, video.duration, oldSub, currentEpisodeIndex);
+    }
+
+    // Reset video & HLS & DASH & Subtitles sạch sẽ
     if (hlsInstance) {
-      hlsInstance.destroy();
+      try { hlsInstance.stopLoad(); hlsInstance.detachMedia(); hlsInstance.destroy(); } catch(e) {}
       hlsInstance = null;
+    }
+    if (dashInstance) {
+      try { dashInstance.reset(); } catch(e) {}
+      dashInstance = null;
     }
     video.pause();
     video.removeAttribute('src');
+    video.src = '';
     video.querySelectorAll('track').forEach(t => t.remove());
-    video.load();
+    try { video.currentTime = 0; } catch(e) {}
+    try { video.load(); } catch(e) {}
+
+    // Cơ chế tự động thử link luồng dự phòng (Backup URLs) cho kênh TV nếu luồng chính lỗi:
+    let currentBackupIdx = (movie && typeof movie._lastBackupIdx === 'number') ? movie._lastBackupIdx : 0;
+    const tryNextTvBackup = () => {
+      if (isTv && movie && Array.isArray(movie.backupUrls) && currentBackupIdx < movie.backupUrls.length) {
+        const nextUrl = movie.backupUrls[currentBackupIdx];
+        currentBackupIdx++;
+        movie._lastBackupIdx = currentBackupIdx;
+        showToast(`🔄 Đang chuyển sang luồng dự phòng ${currentBackupIdx}/${movie.backupUrls.length}...`);
+        setTimeout(() => {
+          playVideo(nextUrl, title, subtitle, movie, detail, epIndex, serverIndex, true, customSubtitleUrl, forceStartFromBeginning);
+        }, 300);
+        return true;
+      }
+      return false;
+    };
+
+    // Xác định chính xác vị trí bắt đầu phát:
+    // NẾU LÀ TẬP MỚI (chuyển tập Next/Prev/chọn tập khác hoặc forceStartFromBeginning = true) -> targetStartTime BẮT BUỘC LÀ 0!
+    // CHỈ khôi phục vị trí cũ NẾU ĐÚNG LÀ CÙNG 1 TẬP đang xem dở trước đó!
+    let targetStartTime = 0;
+    if (!isTv && !forceStartFromBeginning) {
+      const hist = getHistory().find(h => h.id === movie.id);
+      const isSameEpisode = hist && (
+        (typeof hist.episodeIndex === 'number' && hist.episodeIndex === epIndex) ||
+        (hist.episodeName && subtitle && hist.episodeName.trim().toLowerCase() === subtitle.trim().toLowerCase())
+      );
+      if (isSameEpisode && hist.currentSec > 10 && hist.durationSec && hist.currentSec < hist.durationSec - 30) {
+        targetStartTime = hist.currentSec;
+      }
+    }
 
     if (isEmbed) {
       video.style.display = 'none';
+
+      // NGUỒN C EMBED & ĐA TÊN MIỀN DỰ PHÒNG (CHỐNG LỖI DNS ERR_NAME_NOT_RESOLVED)
+      const isNguonCEmbed = streamUrl.includes('streamc.xyz') || streamUrl.includes('embed.php?hash=');
+      let currentEmbedUrl = streamUrl;
+      const embedMirrors = [
+        'embed17.streamc.xyz',
+        'embed1.streamc.xyz',
+        'embed2.streamc.xyz',
+        'embed5.streamc.xyz',
+        'embed18.streamc.xyz',
+        'embed13.streamc.xyz',
+        'embed14.streamc.xyz'
+      ];
+      let currentMirrorIdx = 0;
+
+      if (isNguonCEmbed) {
+        const hashMatch = streamUrl.match(/hash=([a-f0-9]+)/i);
+        const hash = hashMatch ? hashMatch[1] : '';
+        // Tự động chuyển đổi nếu là embed14 (thường bị nhà mạng VN lỗi DNS) sang embed17 hoặc embed1
+        if (streamUrl.includes('embed14.streamc.xyz') && hash) {
+          currentEmbedUrl = `https://embed17.streamc.xyz/embed.php?hash=${hash}`;
+        }
+
+        // Tạo hoặc cập nhật Embed Helper Toolbar trên Player
+        let helperBar = document.getElementById('embedHelperBar');
+        if (!helperBar) {
+          helperBar = document.createElement('div');
+          helperBar.id = 'embedHelperBar';
+          helperBar.className = 'embed-helper-bar';
+          const mainArea = document.getElementById('playerMainArea') || container;
+          if (mainArea) mainArea.appendChild(helperBar);
+        }
+        helperBar.style.display = 'flex';
+        helperBar.innerHTML = `
+          <button id="btnSwitchEmbedMirror" class="btn-embed-action focusable" title="Chuyển sang Server Embed dự phòng khi bị lỗi DNS hoặc tải chậm">
+            <span>🔄</span> Đổi Server
+          </button>
+          <button id="btnPopoutPlayer" class="btn-embed-action btn-popout-action focusable" title="Mở cửa sổ trình phát độc lập 16:9 sắc nét, sạch bóng quảng cáo">
+            <span>🗔</span> Cửa Sổ Riêng
+          </button>
+          <button id="btnReloadEmbed" class="btn-embed-action focusable" title="Tải lại trình phát">
+            <span>🔁</span> Tải Lại
+          </button>
+        `;
+
+        const btnPop = document.getElementById('btnPopoutPlayer');
+        if (btnPop) {
+          btnPop.onclick = (e) => {
+            e.stopPropagation();
+            const w = Math.min(1280, window.screen.availWidth || 1200);
+            const h = Math.min(720, window.screen.availHeight || 680);
+            const left = Math.max(0, Math.floor((window.screen.availWidth - w) / 2));
+            const top = Math.max(0, Math.floor((window.screen.availHeight - h) / 2));
+            const popUrl = `/popout.html?stream=${encodeURIComponent(currentEmbedUrl)}&title=${encodeURIComponent(currentPlayingMovie ? currentPlayingMovie.name : 'Huy Cá')}`;
+            const popWin = window.open(
+              popUrl,
+              'HuyCaCleanPlayer',
+              `width=${w},height=${h},top=${top},left=${left},menubar=no,toolbar=no,location=no,status=no,resizable=yes,scrollbars=no`
+            );
+            if (popWin) {
+              popWin.focus();
+              showToast('🗔 Đã mở trình phát độc lập không quảng cáo!');
+            }
+          };
+        }
+
+        const btnSwitch = document.getElementById('btnSwitchEmbedMirror');
+        if (btnSwitch) {
+          btnSwitch.onclick = (e) => {
+            e.stopPropagation();
+            if (hash) {
+              currentMirrorIdx = (currentMirrorIdx + 1) % embedMirrors.length;
+              const nextDomain = embedMirrors[currentMirrorIdx];
+              currentEmbedUrl = `https://${nextDomain}/embed.php?hash=${hash}`;
+              if (iframe) iframe.src = currentEmbedUrl;
+              // btnOpenEmbedNewTab đã được loại bỏ hoàn toàn để bảo vệ người dùng
+              showToast(`🔄 Đang chuyển sang Server Embed dự phòng: ${nextDomain}...`);
+            } else {
+              showToast('⚠️ Không tìm thấy hash tập phim.');
+            }
+          };
+        }
+
+        const btnReload = document.getElementById('btnReloadEmbed');
+        if (btnReload) {
+          btnReload.onclick = (e) => {
+            e.stopPropagation();
+            if (iframe) iframe.src = currentEmbedUrl;
+            showToast('🔁 Đang tải lại khung phát...');
+          };
+        }
+      } else {
+        const helperBar = document.getElementById('embedHelperBar');
+        if (helperBar) helperBar.style.display = 'none';
+      }
+
       if (iframe) {
         iframe.style.display = 'block';
-        iframe.src = streamUrl;
+        iframe.src = currentEmbedUrl;
       }
       if (progress) progress.style.display = 'none';
       return;
     } else {
+      const helperBar = document.getElementById('embedHelperBar');
+      if (helperBar) helperBar.style.display = 'none';
       if (iframe) {
         iframe.src = '';
         iframe.style.display = 'none';
@@ -2982,13 +3320,71 @@
       console.warn('Subtitle attach warning:', e);
     }
 
-    if (window.Hls && Hls.isSupported() && streamUrl.includes('.m3u8')) {
+    // Đảm bảo video luôn bắt đầu từ targetStartTime (0s cho tập mới, vị trí cũ cho tập xem dở)
+    let hasEnforcedStartTime = false;
+    const enforceStart = () => {
+      if (hasEnforcedStartTime) return;
+      hasEnforcedStartTime = true;
+      try {
+        if (targetStartTime === 0) {
+          video.currentTime = 0;
+        } else if (targetStartTime > 0 && video.duration && targetStartTime < video.duration - 15) {
+          video.currentTime = targetStartTime;
+          showToast(`⏱️ Tiếp tục xem từ ${formatTime(targetStartTime)} (${subtitle || 'tập trước'})`);
+        }
+      } catch(e) {}
+    };
+
+    video.addEventListener('loadedmetadata', enforceStart, { once: true });
+    
+    // TỰ ĐỘNG DÒ TỈ LỆ VIDEO THỰC TẾ TỪ LUỒNG STREAM ĐỂ ĐIỀU CHỈNH DỌC / NGANG CHÍNH XÁC 100%
+    const detectOrientationFromVideo = () => {
+      const vW = video.videoWidth || 0;
+      const vH = video.videoHeight || 0;
+      if (vW > 0 && vH > 0) {
+        const isVideoVertical = (vH > vW);
+        const playerCont = document.getElementById('playerContainer');
+        const rotateText = document.getElementById('rotateBtnText');
+        if (isVideoVertical) {
+          if (playerCont) {
+            playerCont.classList.remove('player-forced-landscape');
+            playerCont.classList.add('player-vertical-mode');
+          }
+          if (rotateText) rotateText.textContent = 'Phim Dọc (9:16)';
+          showToast('📱 Tự động nhận diện phim màn dọc (9:16) chuẩn Reels');
+          if (isMobileDevice) {
+            try { if (screen.orientation && screen.orientation.lock) screen.orientation.lock('portrait').catch(() => {}); } catch(e) {}
+          }
+        } else {
+          if (playerCont) {
+            playerCont.classList.remove('player-vertical-mode');
+          }
+          if (rotateText) {
+            const isForced = playerCont && playerCont.classList.contains('player-forced-landscape');
+            rotateText.textContent = isForced ? 'Xoay Dọc' : 'Xoay Ngang';
+          }
+        }
+      }
+    };
+    video.addEventListener('loadedmetadata', detectOrientationFromVideo, { once: true });
+    video.addEventListener('canplay', () => {
+      if (targetStartTime === 0 && video.currentTime > 1) {
+        try { video.currentTime = 0; } catch(e) {}
+      }
+    }, { once: true });
+
+    if (window.Hls && Hls.isSupported() && (streamUrl.includes('.m3u8') || streamUrl.includes('type=nguonc') || streamUrl.includes('/api/nguonc_stream'))) {
       // 🚀 HLS.JS: Tương thích 100% với Windows PC, Edge Chromium & WebView2
       const pLoaderClass = getHlsPlaylistLoader();
       hlsInstance = new Hls({
+        startPosition: targetStartTime, // 🚀 BẮT BUỘC: Hls.js luôn bắt đầu chính xác từ 0s nếu là tập mới!
         maxBufferLength: 30,
         maxMaxBufferLength: 60,
         maxBufferSize: 60 * 1024 * 1024,
+        manifestLoadingTimeOut: 7000,
+        manifestLoadingMaxRetry: 2,
+        levelLoadingTimeOut: 7000,
+        fragLoadingTimeOut: 10000,
         lowLatencyMode: false,
         enableWorker: true,
         ...(pLoaderClass ? { pLoader: pLoaderClass } : {})
@@ -2996,6 +3392,9 @@
       hlsInstance.loadSource(streamUrl);
       hlsInstance.attachMedia(video);
       hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
+        try {
+          video.currentTime = targetStartTime;
+        } catch(e) {}
         video.play().catch(e => {
           console.log('Play attempt error:', e);
         });
@@ -3003,6 +3402,16 @@
       hlsInstance.on(Hls.Events.ERROR, (event, data) => {
         console.error('HLS ERROR:', data.type, data.details, data.fatal);
         if (data.fatal) {
+          if (tryNextTvBackup()) {
+            return;
+          }
+          if (data.type === Hls.ErrorTypes.NETWORK_ERROR && !streamUrl.includes('/api/proxy') && window.location.protocol.startsWith('http')) {
+            showToast('🔄 Đang kết nối lại qua đường truyền tăng tốc...');
+            setTimeout(() => {
+              playVideo(`/api/proxy?url=${encodeURIComponent(streamUrl)}`, title, subtitle, movie, detail, epIndex, serverIndex, isTv, customSubtitleUrl, forceStartFromBeginning);
+            }, 300);
+            return;
+          }
           switch (data.type) {
             case Hls.ErrorTypes.NETWORK_ERROR:
               hlsInstance.startLoad();
@@ -3016,23 +3425,42 @@
           }
         }
       });
+    } else if (streamUrl.includes('.mpd')) {
+      // 🚀 MPEG-DASH (.mpd) Player qua Dash.js (Chặn đứng 100% popup download file)
+      if (window.dashjs) {
+        try {
+          dashInstance = dashjs.MediaPlayer().create();
+          dashInstance.initialize(video, streamUrl, true);
+          dashInstance.on(dashjs.MediaPlayer.events.ERROR, (err) => {
+            console.warn('DASH ERROR:', err);
+            if (tryNextTvBackup()) return;
+            showToast('⚠️ Luồng DASH yêu cầu bản quyền DRM hoặc không khả dụng.');
+          });
+        } catch (err) {
+          if (!tryNextTvBackup()) {
+            showToast('⚠️ Lỗi khởi tạo trình phát DASH.');
+          }
+        }
+      } else {
+        if (!tryNextTvBackup()) {
+          showToast('⚠️ Định dạng MPD cần thư viện Dash.js hoặc chuyển sang kênh khác.');
+        }
+      }
     } else if (isNativeWebOS && streamUrl.includes('.m3u8')) {
       // 🚀 Dành riêng cho TV LG webOS Native
       video.src = streamUrl;
       video.load();
+      enforceStart();
       video.play().catch(e => console.log('Native auto play blocked:', e));
     } else {
+      video.onerror = () => {
+        if (tryNextTvBackup()) return;
+        if (isTv) showToast('⚠️ Không thể tải kênh truyền hình này. Vui lòng chọn kênh khác!');
+      };
       video.src = streamUrl;
       video.load();
+      enforceStart();
       video.play().catch(e => console.log('Auto play blocked:', e));
-    }
-
-    // Check last watched position
-    if (!isTv) {
-      const hist = getHistory().find(h => h.id === movie.id);
-      if (hist && hist.currentSec > 10 && hist.currentSec < hist.durationSec - 30) {
-        video.currentTime = hist.currentSec;
-      }
     }
 
     resetOverlayTimer();
@@ -3079,24 +3507,18 @@
 
       durationTimeLabel.textContent = formatTime(dur);
 
-      // Auto save history every 10 seconds
-      if (Math.round(cur) % 10 === 0 && currentPlayingMovie) {
-        saveHistory(currentPlayingMovie, cur, dur, document.getElementById('playerSub').textContent);
+      // Auto save history every 10 seconds (chỉ lưu khi đã xem qua 5 giây đầu để tránh ghi đè nhầm thời gian cũ khi vừa chuyển tập)
+      if (cur >= 5 && Math.round(cur) % 10 === 0 && currentPlayingMovie) {
+        saveHistory(currentPlayingMovie, cur, dur, document.getElementById('playerSub').textContent, currentEpisodeIndex);
       }
     }
   });
 
   video.addEventListener('ended', () => {
-    if (currentPlayingDetail && currentPlayingDetail.episodes) {
-      const eps = currentPlayingDetail.episodes[0].server_data;
-      if (currentEpisodeIndex + 1 < eps.length) {
-        showToast('Tự động phát tập tiếp theo trong 5s...');
-        setTimeout(() => {
-          const nextEp = eps[currentEpisodeIndex + 1];
-          playVideo(nextEp.link_m3u8, currentPlayingMovie.name, nextEp.name, currentPlayingMovie, currentPlayingDetail, currentEpisodeIndex + 1, currentServerIndex);
-        }, 5000);
-      }
-    }
+    showToast('Tự động phát tập tiếp theo trong 3s...');
+    setTimeout(() => {
+      playNextEpisode();
+    }, 3000);
   });
 
   seekBar.addEventListener('input', () => {
@@ -3105,101 +3527,128 @@
     }
   });
 
-  if (btnPlayPause) {
-    btnPlayPause.addEventListener('click', () => {
-      const centerIcon = document.getElementById('centerPlayIcon');
-      if (video.paused) {
-        video.play().catch(() => {});
-        if (centerIcon) centerIcon.textContent = '⏸';
-      } else {
-        video.pause();
-        if (centerIcon) centerIcon.textContent = '▶';
-      }
-      resetOverlayTimer();
-    });
-  }
-
-  const btnRewindEl = document.getElementById('btnRewind');
-  if (btnRewindEl) {
-    btnRewindEl.addEventListener('click', () => {
-      video.currentTime = Math.max(0, video.currentTime - 10);
-      resetOverlayTimer();
-    });
-  }
-
-  const btnPrevEpisode = document.getElementById('btnPrevEpisode');
-  if (btnPrevEpisode) {
-    btnPrevEpisode.addEventListener('click', async () => {
-      if (currentPlayingDetail && currentPlayingDetail.episodes) {
-        const eps = currentPlayingDetail.episodes[currentServerIndex || 0].server_data;
-        if (currentEpisodeIndex > 0) {
-          const prevEp = eps[currentEpisodeIndex - 1];
-          let stream = prevEp.link_m3u8;
-          let sub = prevEp.subtitleUrl;
-          if (stream && stream.startsWith('freereels_unlock:')) {
-            showToast('🔓 Đang mở khóa tập trước...');
-            const seriesId = (currentPlayingMovie.id || '').replace('freereels:', '');
-            const unl = await FreeReelsClient.unlockEpisode(seriesId, prevEp.slug);
-            if (unl && unl.streamUrl) {
-              stream = unl.streamUrl;
-              if (unl.subtitleUrl) sub = unl.subtitleUrl;
-            }
-          }
-          playVideo(stream, currentPlayingMovie.name, prevEp.name, currentPlayingMovie, currentPlayingDetail, currentEpisodeIndex - 1, currentServerIndex, false, sub);
-        } else {
-          showToast('Đây là tập đầu tiên!');
-        }
-      }
-    });
-  }
-
-  const btnNextEpisode = document.getElementById('btnNextEpisode');
-  if (btnNextEpisode) {
-    btnNextEpisode.addEventListener('click', async () => {
-      if (currentPlayingDetail && currentPlayingDetail.episodes) {
-        const eps = currentPlayingDetail.episodes[currentServerIndex || 0].server_data;
-        if (currentEpisodeIndex + 1 < eps.length) {
-          const nextEp = eps[currentEpisodeIndex + 1];
-          let stream = nextEp.link_m3u8;
-          let sub = nextEp.subtitleUrl;
-          if (stream && stream.startsWith('freereels_unlock:')) {
-            showToast('🔓 Đang mở khóa tập tiếp...');
-            const seriesId = (currentPlayingMovie.id || '').replace('freereels:', '');
-            const unl = await FreeReelsClient.unlockEpisode(seriesId, nextEp.slug);
-            if (unl && unl.streamUrl) {
-              stream = unl.streamUrl;
-              if (unl.subtitleUrl) sub = unl.subtitleUrl;
-            }
-          }
-          playVideo(stream, currentPlayingMovie.name, nextEp.name, currentPlayingMovie, currentPlayingDetail, currentEpisodeIndex + 1, currentServerIndex, false, sub);
-        } else {
-          showToast('Đây là tập cuối cùng!');
-        }
-      }
-    });
-  }
-
-  const btnForwardEl = document.getElementById('btnForward');
-  if (btnForwardEl) {
-    btnForwardEl.addEventListener('click', () => {
-      video.currentTime = Math.min(video.duration || 0, video.currentTime + 10);
-      resetOverlayTimer();
-    });
-  }
-
-  document.getElementById('btnBackPlayer').addEventListener('click', () => {
-    if (history.state && history.state.screen === 'player') {
-      history.back();
+  // --- Centralized Video Play/Pause Controller ---
+  function togglePlayPause() {
+    const v = document.getElementById('videoPlayer');
+    if (!v) return;
+    if (v.paused) {
+      v.play().catch(err => {
+        console.warn('Play was prevented:', err);
+      });
+      updatePlayPauseIcons(true);
     } else {
-      closePlayer(true);
+      v.pause();
+      updatePlayPauseIcons(false);
     }
-  });
+    resetOverlayTimer();
+  }
+  window.togglePlayPause = togglePlayPause;
 
-  document.getElementById('btnToggleFavPlayer').addEventListener('click', () => {
-    if (currentPlayingMovie) {
-      toggleFavorite(currentPlayingMovie);
+  // --- Centralized Episode Navigation ---
+  async function playPrevEpisode() {
+    if (!currentPlayingDetail) {
+      showToast('Đây là tập đầu tiên!');
+      return;
     }
-  });
+    let eps = [];
+    if (currentPlayingDetail.episodes && currentPlayingDetail.episodes.length > 0) {
+      const srv = currentPlayingDetail.episodes[currentServerIndex || 0] || currentPlayingDetail.episodes[0];
+      eps = (srv && srv.server_data) || [];
+    } else if (currentPlayingDetail.items && currentPlayingDetail.items.length > 0) {
+      eps = currentPlayingDetail.items;
+    }
+
+    if (currentEpisodeIndex > 0 && eps.length > 0) {
+      const prevEp = eps[currentEpisodeIndex - 1];
+      if (!prevEp) return;
+      let stream = prevEp.link_m3u8 || prevEp.m3u8 || prevEp.embed || prevEp.url;
+      let sub = prevEp.subtitleUrl;
+      if (stream && stream.startsWith('freereels_unlock:')) {
+        showToast('🔓 Đang mở khóa tập trước...');
+        const seriesId = (currentPlayingMovie.id || '').replace('freereels:', '');
+        const unl = await FreeReelsClient.unlockEpisode(seriesId, prevEp.slug);
+        if (unl && unl.streamUrl) {
+          stream = unl.streamUrl;
+          if (unl.subtitleUrl) sub = unl.subtitleUrl;
+        }
+      }
+      showToast(`⏮️ Đang chuyển về ${prevEp.name || `Tập ${currentEpisodeIndex}`}`);
+      playVideo(stream, currentPlayingMovie.name, prevEp.name, currentPlayingMovie, currentPlayingDetail, currentEpisodeIndex - 1, currentServerIndex || 0, false, sub, true);
+    } else {
+      showToast('Đây là tập đầu tiên!');
+    }
+  }
+  window.playPrevEpisode = playPrevEpisode;
+
+  async function playNextEpisode() {
+    if (!currentPlayingDetail) {
+      showToast('Đây là tập cuối cùng!');
+      return;
+    }
+    let eps = [];
+    if (currentPlayingDetail.episodes && currentPlayingDetail.episodes.length > 0) {
+      const srv = currentPlayingDetail.episodes[currentServerIndex || 0] || currentPlayingDetail.episodes[0];
+      eps = (srv && srv.server_data) || [];
+    } else if (currentPlayingDetail.items && currentPlayingDetail.items.length > 0) {
+      eps = currentPlayingDetail.items;
+    }
+
+    if (currentEpisodeIndex + 1 < eps.length) {
+      const nextEp = eps[currentEpisodeIndex + 1];
+      if (!nextEp) return;
+      let stream = nextEp.link_m3u8 || nextEp.m3u8 || nextEp.embed || nextEp.url;
+      let sub = nextEp.subtitleUrl;
+      if (stream && stream.startsWith('freereels_unlock:')) {
+        showToast('🔓 Đang mở khóa tập tiếp theo...');
+        const seriesId = (currentPlayingMovie.id || '').replace('freereels:', '');
+        const unl = await FreeReelsClient.unlockEpisode(seriesId, nextEp.slug);
+        if (unl && unl.streamUrl) {
+          stream = unl.streamUrl;
+          if (unl.subtitleUrl) sub = unl.subtitleUrl;
+        }
+      }
+      showToast(`⏭️ Đang chuyển sang ${nextEp.name || `Tập ${currentEpisodeIndex + 2}`}`);
+      playVideo(stream, currentPlayingMovie.name, nextEp.name, currentPlayingMovie, currentPlayingDetail, currentEpisodeIndex + 1, currentServerIndex || 0, false, sub, true);
+    } else {
+      showToast('Đây là tập cuối cùng!');
+    }
+  }
+  window.playNextEpisode = playNextEpisode;
+  window.getCurrentEpisodeIndex = () => currentEpisodeIndex;
+
+  // Nút Quay Lại trong Player (Thoát hoàn toàn player và khôi phục giao diện trước)
+  const btnBackPlayer = document.getElementById('btnBackPlayer');
+  if (btnBackPlayer) {
+    btnBackPlayer.addEventListener('click', (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      closePlayer(true, true);
+    });
+  }
+
+  function updatePlayerFavIcon(isFav) {
+    const star = document.getElementById('svgStarFav');
+    const btn = document.getElementById('btnToggleFavPlayer');
+    if (star) {
+      star.style.color = isFav ? '#eab308' : '#94a3b8';
+      star.style.fill = isFav ? '#eab308' : 'currentColor';
+    }
+    if (btn) {
+      btn.classList.toggle('active', Boolean(isFav));
+      btn.setAttribute('title', isFav ? 'Bỏ Yêu thích' : 'Thêm vào Yêu thích');
+    }
+  }
+
+  const btnFavPlayer = document.getElementById('btnToggleFavPlayer');
+  if (btnFavPlayer) {
+    btnFavPlayer.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (currentPlayingMovie) {
+        const added = toggleFavorite(currentPlayingMovie);
+        updatePlayerFavIcon(added);
+      }
+    });
+  }
 
   const btnFullscreen = document.getElementById('btnFullscreen');
   if (btnFullscreen) {
@@ -3229,36 +3678,14 @@
     });
   }
 
-  // --- Single Click & Double Click trên màn hình Video ---
-  // Click 1 lần: Tạm dừng / Tiếp tục phát
-  // Double click: Thoát toàn màn hình & Thu nhỏ mở lại menu chọn tập (detailModal)
-  let playerClickTimer = null;
-  const playerCont = document.getElementById('playerContainer');
-  if (playerCont) {
-    playerCont.addEventListener('click', (e) => {
-      if (e.target.closest('button, input, select, .zapping-panel, .player-buttons-row, .player-top')) {
-        return;
-      }
-      if (playerClickTimer) {
-        clearTimeout(playerClickTimer);
-        playerClickTimer = null;
-        if (document.fullscreenElement) {
-          if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
-        }
-        closePlayer(true);
-      } else {
-        playerClickTimer = setTimeout(() => {
-          playerClickTimer = null;
-          if (btnPlayPause) {
-            btnPlayPause.click();
-          } else {
-            if (video.paused) video.play().catch(() => {});
-            else video.pause();
-          }
-        }, 260);
-      }
-    });
-  }
+  // Đồng bộ biểu tượng toàn màn hình khi trạng thái thay đổi
+  document.addEventListener('fullscreenchange', () => {
+    const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement);
+    const enterSvg = document.getElementById('svgFullscreenEnter');
+    const exitSvg = document.getElementById('svgFullscreenExit');
+    if (enterSvg) enterSvg.style.display = isFs ? 'none' : 'block';
+    if (exitSvg) exitSvg.style.display = isFs ? 'block' : 'none';
+  });
 
   // --- Bấm chuột vào vùng trống ngoài màn hình tương đương nút quay lại, back ---
   document.querySelectorAll('.modal-overlay').forEach(modal => {
@@ -3308,6 +3735,10 @@
     if (miniBar) miniBar.style.display = 'flex';
     if (miniTitle && playerTitle) miniTitle.textContent = playerTitle.textContent;
 
+    // Đóng detailModal để người dùng thoải mái duyệt kho phim & nội dung khác
+    const detail = document.getElementById('detailModal');
+    if (detail) detail.style.display = 'none';
+
     showToast('📺 Đang phát ở chế độ Hình Trong Hình (Mini Player)');
   }
 
@@ -3323,9 +3754,9 @@
     }
   }
 
-  function closePlayer(shouldReturnToDetail = true, forceStop = false) {
+  function closePlayer(shouldReturnToDetail = true, forceStop = true) {
     const video = document.getElementById('videoPlayer');
-    // Nếu video đang phát và người dùng không yêu cầu dừng hẳn -> Chuyển sang Mini Floating Player để luồng không bị ngắt quãng!
+    // Chỉ chuyển sang Mini Floating Player nếu người dùng KHÔNG yêu cầu dừng hẳn (forceStop === false)
     if (!forceStop && video && !video.paused && !video.ended && (video.currentTime > 0)) {
       if (document.pictureInPictureElement === video) {
         // Đang ở Native PiP: Chỉ ẩn container chính, giữ nguyên luồng video chạy
@@ -3356,7 +3787,7 @@
     }
     if (video) {
       if (currentPlayingMovie && video.duration) {
-        saveHistory(currentPlayingMovie, video.currentTime, video.duration, document.getElementById('playerSub').textContent);
+        saveHistory(currentPlayingMovie, video.currentTime, video.duration, document.getElementById('playerSub').textContent, currentEpisodeIndex);
       }
       video.pause();
       video.removeAttribute('src');
@@ -3367,18 +3798,28 @@
       hlsInstance.destroy();
       hlsInstance = null;
     }
+    if (dashInstance) {
+      try { dashInstance.reset(); } catch(e) {}
+      dashInstance = null;
+    }
     const iframe = document.getElementById('playerIframe');
     if (iframe) {
       iframe.src = '';
       iframe.style.display = 'none';
     }
+    const helperBar = document.getElementById('embedHelperBar');
+    if (helperBar) helperBar.style.display = 'none';
     const playerCont = document.getElementById('playerContainer');
     if (playerCont) {
       playerCont.style.display = 'none';
       playerCont.classList.remove('player-forced-landscape');
+      playerCont.classList.remove('player-vertical-mode');
+      playerCont.classList.remove('player-floating-mini');
     }
-    const btnRotate = document.getElementById('btnRotatePlayer');
-    if (btnRotate) btnRotate.textContent = '🔄 Xoay Ngang';
+    const miniBar = document.getElementById('miniPlayerBar');
+    if (miniBar) miniBar.style.display = 'none';
+    const rotateBtnText = document.getElementById('rotateBtnText');
+    if (rotateBtnText) rotateBtnText.textContent = 'Xoay Ngang';
     document.getElementById('zappingPanel').classList.remove('open');
 
     // Nếu vừa xem phim từ màn hình chi tiết, mở lại Detail Modal
@@ -3401,17 +3842,6 @@
       }, 50);
     }
   }
-
-  function resetOverlayTimer() {
-    const overlay = document.getElementById('playerOverlay');
-    overlay.classList.remove('hide');
-    clearTimeout(overlayTimeout);
-    overlayTimeout = setTimeout(() => {
-      overlay.classList.add('hide');
-    }, 4500);
-  }
-
-  document.getElementById('playerContainer').addEventListener('mousemove', resetOverlayTimer);
 
   // --- Quick Zapping ---
   function setupQuickZapping(currentChannel) {
@@ -3478,53 +3908,48 @@
     }, 1200);
   }
 
-  // --- Football Matches Modal ---
-  async function showScheduleModal() {
-    const modal = document.getElementById('scheduleModal');
-    const list = document.getElementById('matchesList');
-    list.innerHTML = '<div style="color:#8899a6; padding:20px; text-align:center;">Đang tải lịch thi đấu thời gian thực...</div>';
-    modal.style.display = 'flex';
-
-    const matches = await fetchRealtimePremierLeagueMatches();
-    const displayList = matches.length > 0 ? matches : LIVE_MATCHES;
-    list.innerHTML = '';
-
-    displayList.forEach(m => {
+  function renderScheduleCards(container, matches, modal) {
+    if (!container) return;
+    container.innerHTML = '';
+    matches.forEach(m => {
       const card = document.createElement('div');
       card.className = 'match-card focusable';
       card.tabIndex = 0;
       card.innerHTML = `
         <div style="display:flex; align-items:center; gap:10px;">
-          ${m.teamALogo ? `<img src="${m.teamALogo}" style="width:24px; height:24px; object-fit:contain;" />` : ''}
+          ${m.teamALogo ? `<img src="${m.teamALogo}" style="width:24px; height:24px; object-fit:contain;" onerror="this.style.display='none'" />` : ''}
           <div>
-            <div class="match-league">${m.tournament}</div>
+            <div class="match-league">${m.tournament || 'Trực Tiếp Bóng Đá'}</div>
             <div class="match-teams">${m.teamA} vs ${m.teamB}</div>
             <div class="match-channel">📺 Kênh: ${m.channelName || 'Vệ Tinh Trực Tiếp'} • Bấm để xem</div>
           </div>
-          ${m.teamBLogo ? `<img src="${m.teamBLogo}" style="width:24px; height:24px; object-fit:contain; margin-left:auto;" />` : ''}
+          ${m.teamBLogo ? `<img src="${m.teamBLogo}" style="width:24px; height:24px; object-fit:contain; margin-left:auto;" onerror="this.style.display='none'" />` : ''}
         </div>
-        <div class="match-time-badge" style="${m.isLive ? 'background:#d32f2f;' : (m.isFinished ? 'background:#37474f;' : '')}">${m.time}</div>
+        <div class="match-time-badge" style="${m.isLive ? 'background:#d32f2f;' : (m.isFinished ? 'background:#37474f;' : '')}">${m.time || 'Trực Tiếp'}</div>
       `;
       card.addEventListener('click', () => {
         modal.style.display = 'none';
-        const channels = getAllChannels();
-        const found = channels.find(c => c.id === m.channelSlug) ||
-                      channels.find(c => (c.name || '').toLowerCase().includes('true premier')) ||
-                      channels.find(c => (c.name || '').toLowerCase().includes('astro')) ||
-                      channels.find(c => (c.name || '').toLowerCase().includes('vtv6') || (c.name || '').toLowerCase().includes('bóng'));
-        if (found) {
-          playTvChannelDirectly({
-            id: found.id,
-            name: `${found.name} - ${m.teamA} vs ${m.teamB}`,
-            streamUrl: found.url,
-            posterUrl: found.logo
-          });
-        } else {
-          showToast(`Kênh "${m.channelName || 'Trực Tiếp'}" đang được chuẩn bị.`);
-        }
+        openMatchServerModal(m);
       });
-      list.appendChild(card);
+      container.appendChild(card);
     });
+  }
+
+  // --- Football Matches Modal ---
+  async function showScheduleModal() {
+    const modal = document.getElementById('scheduleModal');
+    const list = document.getElementById('matchesList');
+    if (!modal || !list) return;
+
+    // Render ngay lập tức dữ liệu LIVE_MATCHES để không bao giờ bị chờ đợi hay treo trắng
+    renderScheduleCards(list, LIVE_MATCHES, modal);
+    modal.style.display = 'flex';
+
+    // Cập nhật ngầm từ API thời gian thực
+    const matches = await fetchRealtimePremierLeagueMatches();
+    if (matches && matches.length > 0) {
+      renderScheduleCards(list, matches, modal);
+    }
   }
 
   document.getElementById('btnScheduleHeader').addEventListener('click', showScheduleModal);
@@ -3596,67 +4021,73 @@
       });
     });
 
-    // 1.5. Search in GaMoMePhim
-    try {
-      const gmResults = await GaMoMePhimClient.search(kw);
-      if (gmResults && gmResults.length > 0) results.push(...gmResults);
-    } catch (e) {
-      console.warn('Search GaMoMePhim err:', e);
-    }
-
-    // 2. Search in FreeReels
-    try {
-      const frResults = await FreeReelsClient.search(kw);
-      frResults.forEach(item => results.push(item));
-    } catch(e) {}
-
-    // 3. Search in NguonC
-    try {
-      const respNc = await fetch(`https://phim.nguonc.com/api/films/search?keyword=${encodeURIComponent(kw)}`);
-      if (respNc.ok) {
-        const dNc = await respNc.json();
-        const itemsNc = dNc.items || [];
-        itemsNc.forEach(o => {
-          let thumb = o.thumb_url || '';
-          let poster = o.poster_url || thumb;
-          results.push({
-            id: `nguonc:${o.slug}`,
-            name: o.name,
-            slug: `nguonc:${o.slug}`,
-            originName: o.original_name || o.origin_name || '',
-            thumbUrl: thumb,
-            posterUrl: poster || thumb,
-            year: o.year || '2026',
-            quality: (o.quality || 'HD') + (o.language ? ` ${o.language}` : ''),
-            source: 'KKPHIM'
-          });
-        });
-      }
-    } catch(e) {}
-
-    // 4. Search in KKPhim
-    try {
-      const resp = await fetch(`https://phimapi.com/v1/api/tim-kiem?keyword=${encodeURIComponent(kw)}`);
-      if (resp.ok) {
-        const d = await resp.json();
-        const items = (d.data && d.data.items) || [];
-        items.forEach(o => {
-          let thumb = o.thumb_url || '';
-          if (thumb && !thumb.startsWith('http')) thumb = KKPHIM_IMG_BASE + thumb.replace(/^\//, '');
-          results.push({
-            id: o._id || o.slug,
-            name: o.name,
-            slug: o.slug,
-            originName: o.origin_name || '',
-            thumbUrl: thumb,
-            posterUrl: thumb,
-            year: o.year || '2026',
-            quality: o.quality || 'HD',
-            source: 'KKPHIM'
-          });
-        });
-      }
-    } catch (e) {}
+    // Chạy song song tìm kiếm trên tất cả các nguồn trực tuyến (KKPhim, NguonC, FreeReels, GaMoMePhim)
+    await Promise.allSettled([
+      // 1.5. GaMoMePhim
+      (async () => {
+        try {
+          const gmResults = await GaMoMePhimClient.search(kw);
+          if (gmResults && gmResults.length > 0) results.push(...gmResults);
+        } catch (e) {}
+      })(),
+      // 2. FreeReels
+      (async () => {
+        try {
+          const frResults = await FreeReelsClient.search(kw);
+          if (frResults && frResults.length > 0) results.push(...frResults);
+        } catch (e) {}
+      })(),
+      // 3. NguonC
+      (async () => {
+        try {
+          const respNc = await fetch(`https://phim.nguonc.com/api/films/search?keyword=${encodeURIComponent(kw)}`);
+          if (respNc.ok) {
+            const dNc = await respNc.json();
+            const itemsNc = dNc.items || [];
+            itemsNc.forEach(o => {
+              let thumb = o.thumb_url || '';
+              let poster = o.poster_url || thumb;
+              results.push({
+                id: `nguonc:${o.slug}`,
+                name: o.name,
+                slug: `nguonc:${o.slug}`,
+                originName: o.original_name || o.origin_name || '',
+                thumbUrl: thumb,
+                posterUrl: poster || thumb,
+                year: o.year || '2026',
+                quality: (o.quality || 'HD') + (o.language ? ` ${o.language}` : ''),
+                source: 'KKPHIM'
+              });
+            });
+          }
+        } catch (e) {}
+      })(),
+      // 4. KKPhim
+      (async () => {
+        try {
+          const resp = await fetch(`https://phimapi.com/v1/api/tim-kiem?keyword=${encodeURIComponent(kw)}`);
+          if (resp.ok) {
+            const d = await resp.json();
+            const items = (d.data && d.data.items) || [];
+            items.forEach(o => {
+              let thumb = o.thumb_url || '';
+              if (thumb && !thumb.startsWith('http')) thumb = KKPHIM_IMG_BASE + thumb.replace(/^\//, '');
+              results.push({
+                id: o._id || o.slug,
+                name: o.name,
+                slug: o.slug,
+                originName: o.origin_name || '',
+                thumbUrl: thumb,
+                posterUrl: thumb,
+                year: o.year || '2026',
+                quality: o.quality || 'HD',
+                source: 'KKPHIM'
+              });
+            });
+          }
+        } catch (e) {}
+      })()
+    ]);
 
     resGrid.innerHTML = '';
     if (results.length === 0) {
@@ -3942,9 +4373,9 @@
       return;
     }
 
-    // 2. Nếu Video Player đang mở toàn màn hình (không phải Mini Floating Player) -> Đóng player
-    if (player && player.style.display === 'flex' && !player.classList.contains('player-floating-mini')) {
-      closePlayer(true);
+    // 2. Nếu Video Player đang mở -> Đóng player dứt khoát
+    if (player && player.style.display === 'flex') {
+      closePlayer(true, true);
       return;
     }
 
@@ -4032,12 +4463,25 @@
       const player = document.getElementById('playerContainer');
       if (player && player.style.display === 'flex') {
         e.preventDefault();
-        if (btnPlayPause) {
-            btnPlayPause.click();
-          } else {
-            if (video.paused) video.play().catch(() => {});
-            else video.pause();
-          }
+        togglePlayPause();
+        return;
+      }
+    }
+
+    // Phím [ (219) và ] (221) trên PC: Tập trước / Tập tiếp theo
+    if (code === 219 && document.activeElement.tagName !== 'INPUT') {
+      const player = document.getElementById('playerContainer');
+      if (player && player.style.display === 'flex') {
+        e.preventDefault();
+        playPrevEpisode();
+        return;
+      }
+    }
+    if (code === 221 && document.activeElement.tagName !== 'INPUT') {
+      const player = document.getElementById('playerContainer');
+      if (player && player.style.display === 'flex') {
+        e.preventDefault();
+        playNextEpisode();
         return;
       }
     }
@@ -4096,15 +4540,10 @@
       const player = document.getElementById('playerContainer');
       if (player && player.style.display === 'flex') {
         const overlay = document.getElementById('playerOverlay');
-        if (overlay && overlay.classList.contains('hide')) {
+        if (overlay && (overlay.classList.contains('hide') || overlay.classList.contains('controls-hidden'))) {
           e.preventDefault();
           resetOverlayTimer();
-          if (btnPlayPause) {
-            btnPlayPause.click();
-          } else {
-            if (video.paused) video.play().catch(() => {});
-            else video.pause();
-          }
+          togglePlayPause();
           return;
         }
       }
@@ -4127,13 +4566,13 @@
     // Media keys từ Remote LG: Play (415), Pause (19), Stop (413), FastForward (417), Rewind (412)
     if (code === 415) { // Play
       if (video && video.paused) {
-        video.play();
-        btnPlayPause.textContent = '⏸️ Tạm Dừng';
+        video.play().catch(() => {});
+        updatePlayPauseIcons(true);
       }
     } else if (code === 19 || code === 413) { // Pause / Stop
       if (video && !video.paused) {
         video.pause();
-        btnPlayPause.textContent = '▶️ Tiếp Tục';
+        updatePlayPauseIcons(false);
       }
     } else if (code === 412) { // Rewind
       if (video) {
@@ -4477,12 +4916,39 @@
   if (btnRotatePlayer) {
     btnRotatePlayer.addEventListener('click', () => {
       const container = document.getElementById('playerContainer');
+      const isVertMode = container.classList.contains('player-vertical-mode');
+      const rotateBtnText = document.getElementById('rotateBtnText');
+      
       container.classList.toggle('player-forced-landscape');
       const isForced = container.classList.contains('player-forced-landscape');
-      btnRotatePlayer.textContent = isForced ? '📱 Xoay Dọc' : '🔄 Xoay Ngang';
-      showToast(isForced ? '🔄 Đã xoay ngang màn hình (Cầm ngang điện thoại để xem)' : '📱 Đã trở về màn hình dọc');
+      
+      if (rotateBtnText) {
+        if (isVertMode) {
+          rotateBtnText.textContent = isForced ? 'Xoay Dọc' : 'Phim Dọc (9:16)';
+        } else {
+          rotateBtnText.textContent = isForced ? 'Xoay Dọc' : 'Xoay Ngang';
+        }
+      }
+      showToast(isForced ? '🔄 Đã xoay ngang màn hình (Cầm ngang để xem)' : '📱 Đã trở về màn hình dọc');
     });
   }
+
+  // Tự động điều chỉnh khi người dùng xoay thiết bị thực tế (Device Orientation Change)
+  function handleDeviceOrientationChange() {
+    const container = document.getElementById('playerContainer');
+    if (!container || container.style.display === 'none') return;
+    const isLandscape = (window.innerWidth >= window.innerHeight);
+    const rotateBtnText = document.getElementById('rotateBtnText');
+    if (isLandscape) {
+      // Khi xoay ngang điện thoại thật: gỡ bỏ player-forced-landscape để video hiển thị tự nhiên
+      if (container.classList.contains('player-forced-landscape')) {
+        container.classList.remove('player-forced-landscape');
+        if (rotateBtnText) rotateBtnText.textContent = 'Màn Ngang';
+      }
+    }
+  }
+  window.addEventListener('resize', handleDeviceOrientationChange);
+  window.addEventListener('orientationchange', handleDeviceOrientationChange);
 
 
   // ==========================================================================
@@ -4491,8 +4957,6 @@
   let isTouchLocked = false;
   let currentSpeedIdx = 0;
   const speedList = [1.0, 1.25, 1.5, 2.0, 0.75];
-  let currentAspectIdx = 0;
-  const aspectList = ['contain', 'cover', 'fill'];
 
   // Toggle Overlay khi Click vào vùng Video
   const playerOverlayEl = document.getElementById('playerOverlay');
@@ -4504,6 +4968,7 @@
   function resetOverlayTimer() {
     if (!playerOverlayEl || isTouchLocked) return;
     playerOverlayEl.classList.remove('controls-hidden');
+    playerOverlayEl.classList.remove('hide');
     if (overlayHideTimeout) clearTimeout(overlayHideTimeout);
     overlayHideTimeout = setTimeout(() => {
       const v = document.getElementById('videoPlayer');
@@ -4512,9 +4977,31 @@
       }
     }, 4500);
   }
+  window.resetOverlayTimer = resetOverlayTimer;
+
+  function togglePlayerControls() {
+    if (!playerOverlayEl || isTouchLocked) return;
+    const isHidden = playerOverlayEl.classList.contains('controls-hidden');
+    if (isHidden) {
+      resetOverlayTimer();
+    } else {
+      playerOverlayEl.classList.add('controls-hidden');
+      if (overlayHideTimeout) clearTimeout(overlayHideTimeout);
+    }
+  }
+  window.togglePlayerControls = togglePlayerControls;
 
   if (playerMainAreaEl) {
     playerMainAreaEl.addEventListener('click', (e) => {
+      const container = document.getElementById('playerContainer');
+      // Nếu đang ở chế độ Mini Floating Player: Bấm vào màn hình mini để phóng to lại toàn màn hình
+      if (container && container.classList.contains('player-floating-mini')) {
+        if (!e.target.closest('#btnCloseMini')) {
+          const expandBtn = document.getElementById('btnExpandMini');
+          if (expandBtn) expandBtn.click();
+          return;
+        }
+      }
       if (e.target.closest('button, input, .player-top, .player-bottom-bar, .player-center-controls, .player-sidebar, .zapping-panel')) {
         resetOverlayTimer();
         return;
@@ -4527,15 +5014,16 @@
         }
         return;
       }
-      if (playerOverlayEl) {
-        const isHidden = playerOverlayEl.classList.contains('controls-hidden');
-        if (isHidden) {
-          resetOverlayTimer();
-        } else {
-          playerOverlayEl.classList.add('controls-hidden');
-          if (overlayHideTimeout) clearTimeout(overlayHideTimeout);
-        }
+      togglePlayerControls();
+    });
+
+    // Double-click vào màn hình video -> Bật / Tắt toàn màn hình
+    playerMainAreaEl.addEventListener('dblclick', (e) => {
+      if (e.target.closest('button, input, select, .player-top, .player-bottom-bar, .player-sidebar, .zapping-panel')) {
+        return;
       }
+      const fsBtn = document.getElementById('btnFullscreen');
+      if (fsBtn) fsBtn.click();
     });
 
     playerMainAreaEl.addEventListener('mousemove', () => {
@@ -4543,26 +5031,94 @@
     });
   }
 
-  // Cụm 5 nút nổi trung tâm (Ảnh 2)
-  const btnCenterPlayPause = document.getElementById('btnCenterPlayPause');
-  if (btnCenterPlayPause) {
-    btnCenterPlayPause.addEventListener('click', () => {
+  // --- Cinema Pro Player Event Handlers ---
+  function updatePlayPauseIcons(isPlaying) {
+    const svgPlay = document.getElementById('svgPlay');
+    const svgPause = document.getElementById('svgPause');
+    if (svgPlay) svgPlay.style.display = isPlaying ? 'none' : 'block';
+    if (svgPause) svgPause.style.display = isPlaying ? 'block' : 'none';
+
+    // Flash Center Ripple Animation (Netflix / YouTube Style)
+    const ripple = document.getElementById('centerPlayRipple');
+    const rPlay = document.getElementById('centerRipplePlaySvg');
+    const rPause = document.getElementById('centerRipplePauseSvg');
+    if (ripple && rPlay && rPause) {
+      rPlay.style.display = isPlaying ? 'block' : 'none';
+      rPause.style.display = isPlaying ? 'none' : 'block';
+      ripple.style.display = 'flex';
+      ripple.classList.remove('animate-pulse-scale');
+      void ripple.offsetWidth; // force reflow
+      ripple.classList.add('animate-pulse-scale');
+      setTimeout(() => {
+        if (ripple) ripple.style.display = 'none';
+      }, 550);
+    }
+  }
+
+  // Volume slider binding
+  const volumeSliderEl = document.getElementById('volumeSlider');
+  const btnVolumeToggleEl = document.getElementById('btnVolumeToggle');
+  const svgVolumeHighEl = document.getElementById('svgVolumeHigh');
+  const svgVolumeMutedEl = document.getElementById('svgVolumeMuted');
+  let lastNonZeroVolume = 1;
+
+  if (volumeSliderEl) {
+    volumeSliderEl.addEventListener('input', (e) => {
+      e.stopPropagation();
+      const v = document.getElementById('videoPlayer');
+      const val = parseFloat(e.target.value);
+      if (v) {
+        v.volume = val;
+        v.muted = (val === 0);
+      }
+      if (val > 0) lastNonZeroVolume = val;
+      if (svgVolumeHighEl) svgVolumeHighEl.style.display = (val === 0) ? 'none' : 'block';
+      if (svgVolumeMutedEl) svgVolumeMutedEl.style.display = (val === 0) ? 'block' : 'none';
+    });
+    volumeSliderEl.addEventListener('click', (e) => e.stopPropagation());
+  }
+
+  if (btnVolumeToggleEl) {
+    btnVolumeToggleEl.addEventListener('click', (e) => {
+      e.stopPropagation();
       const v = document.getElementById('videoPlayer');
       if (!v) return;
-      if (v.paused) {
-        v.play();
-        if (centerPlayIconEl) centerPlayIconEl.textContent = '⏸';
+      if (v.muted || v.volume === 0) {
+        v.muted = false;
+        v.volume = lastNonZeroVolume || 1;
+        if (volumeSliderEl) volumeSliderEl.value = v.volume;
+        if (svgVolumeHighEl) svgVolumeHighEl.style.display = 'block';
+        if (svgVolumeMutedEl) svgVolumeMutedEl.style.display = 'none';
       } else {
-        v.pause();
-        if (centerPlayIconEl) centerPlayIconEl.textContent = '▶';
+        lastNonZeroVolume = v.volume;
+        v.muted = true;
+        v.volume = 0;
+        if (volumeSliderEl) volumeSliderEl.value = 0;
+        if (svgVolumeHighEl) svgVolumeHighEl.style.display = 'none';
+        if (svgVolumeMutedEl) svgVolumeMutedEl.style.display = 'block';
       }
       resetOverlayTimer();
     });
   }
 
+  // Nút Play / Pause chính dưới Dock (Cinema Pro)
+  const btnPlayPauseMain = document.getElementById('btnPlayPause');
+  if (btnPlayPauseMain) {
+    btnPlayPauseMain.addEventListener('click', (e) => {
+      e.stopPropagation();
+      togglePlayPause();
+    });
+  }
+  const vMain = document.getElementById('videoPlayer');
+  if (vMain) {
+    vMain.addEventListener('play', () => updatePlayPauseIcons(true));
+    vMain.addEventListener('pause', () => updatePlayPauseIcons(false));
+  }
+
   const btnCenterRewind = document.getElementById('btnCenterRewind');
   if (btnCenterRewind) {
-    btnCenterRewind.addEventListener('click', () => {
+    btnCenterRewind.addEventListener('click', (e) => {
+      e.stopPropagation();
       const v = document.getElementById('videoPlayer');
       if (v) v.currentTime = Math.max(0, v.currentTime - 10);
       showToast('⏪ -10 giây');
@@ -4572,7 +5128,8 @@
 
   const btnCenterForward = document.getElementById('btnCenterForward');
   if (btnCenterForward) {
-    btnCenterForward.addEventListener('click', () => {
+    btnCenterForward.addEventListener('click', (e) => {
+      e.stopPropagation();
       const v = document.getElementById('videoPlayer');
       if (v) v.currentTime = Math.min(v.duration || 0, v.currentTime + 10);
       showToast('⏩ +10 giây');
@@ -4582,9 +5139,9 @@
 
   const btnCenterPrev = document.getElementById('btnCenterPrev');
   if (btnCenterPrev) {
-    btnCenterPrev.addEventListener('click', () => {
-      const prev = document.getElementById('btnPrevEpisode');
-      if (prev) prev.click();
+    btnCenterPrev.addEventListener('click', (e) => {
+      e.stopPropagation();
+      playPrevEpisode();
       resetOverlayTimer();
     });
   }
@@ -4592,16 +5149,16 @@
   const btnCenterNext = document.getElementById('btnCenterNext');
   const btnQuickNextFloating = document.getElementById('btnQuickNextFloating');
   if (btnCenterNext) {
-    btnCenterNext.addEventListener('click', () => {
-      const next = document.getElementById('btnNextEpisode');
-      if (next) next.click();
+    btnCenterNext.addEventListener('click', (e) => {
+      e.stopPropagation();
+      playNextEpisode();
       resetOverlayTimer();
     });
   }
   if (btnQuickNextFloating) {
-    btnQuickNextFloating.addEventListener('click', () => {
-      const next = document.getElementById('btnNextEpisode');
-      if (next) next.click();
+    btnQuickNextFloating.addEventListener('click', (e) => {
+      e.stopPropagation();
+      playNextEpisode();
       resetOverlayTimer();
     });
   }
@@ -4609,7 +5166,8 @@
   // Nút Bỏ qua Intro +85s (Ảnh 2)
   const btnSkipIntroEl = document.getElementById('btnSkipIntro');
   if (btnSkipIntroEl) {
-    btnSkipIntroEl.addEventListener('click', () => {
+    btnSkipIntroEl.addEventListener('click', (e) => {
+      e.stopPropagation();
       const v = document.getElementById('videoPlayer');
       if (v && v.duration) {
         v.currentTime = Math.min(v.duration, v.currentTime + 85);
@@ -4623,7 +5181,8 @@
   // Nút Tốc độ phát (Ảnh 2)
   const btnSpeedPlayer = document.getElementById('btnSpeedPlayer');
   if (btnSpeedPlayer) {
-    btnSpeedPlayer.addEventListener('click', () => {
+    btnSpeedPlayer.addEventListener('click', (e) => {
+      e.stopPropagation();
       const v = document.getElementById('videoPlayer');
       if (!v) return;
       currentSpeedIdx = (currentSpeedIdx + 1) % speedList.length;
@@ -4635,29 +5194,18 @@
     });
   }
 
-  // Nút Picture in Picture (PiP) / Hình trong hình
+  // Nút Picture in Picture (PiP) / Thu nhỏ Hình trong hình
   const btnPipPlayer = document.getElementById('btnPipPlayer');
   if (btnPipPlayer) {
-    btnPipPlayer.addEventListener('click', async () => {
-      const v = document.getElementById('videoPlayer');
-      if (!v) return;
-      try {
-        if (document.pictureInPictureElement) {
-          await document.exitPictureInPicture();
-        } else if (v.requestPictureInPicture) {
-          await v.requestPictureInPicture();
-          // Khi đã vào Native PiP: Thu nhỏ player và quay về duyệt phim
-          const cont = document.getElementById('playerContainer');
-          if (cont) {
-            cont.style.display = 'none';
-            cont.classList.remove('player-forced-landscape');
-          }
-        } else {
-          // Fallback sang In-App Mini Floating Player
-          enableMiniFloatingPlayer();
-        }
-      } catch(e) {
-        // Fallback sang In-App Mini Floating Player nếu Native PiP bị từ chối
+    btnPipPlayer.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const cont = document.getElementById('playerContainer');
+      if (!cont) return;
+
+      if (cont.classList.contains('player-floating-mini')) {
+        const expandBtn = document.getElementById('btnExpandMini');
+        if (expandBtn) expandBtn.click();
+      } else {
         enableMiniFloatingPlayer();
       }
       resetOverlayTimer();
@@ -4673,14 +5221,19 @@
       const miniBar = document.getElementById('miniPlayerBar');
       if (container) {
         container.classList.remove('player-floating-mini');
+        container.style.display = 'flex';
         const isMobileDevice = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) || (window.innerWidth <= 800);
-        if (isMobileDevice) {
+        const isVert = container.classList.contains('player-vertical-mode');
+        const isPortrait = (window.innerHeight > window.innerWidth);
+        if (isMobileDevice && !isVert && isPortrait) {
           container.classList.add('player-forced-landscape');
-          const btnRotate = document.getElementById('btnRotatePlayer');
-          if (btnRotate) btnRotate.textContent = '📱 Xoay Dọc';
+          const rotateBtnText = document.getElementById('rotateBtnText');
+          if (rotateBtnText) rotateBtnText.textContent = 'Xoay Dọc';
         }
       }
       if (miniBar) miniBar.style.display = 'none';
+      resetOverlayTimer();
+      showToast('🗖 Đã phóng to toàn màn hình');
     });
   }
 
@@ -4694,15 +5247,20 @@
 
   // Nút Tỉ lệ khung hình (Aspect Ratio: Fit / Fill / Stretch)
   const btnAspectPlayer = document.getElementById('btnAspectPlayer');
+  const aspectBadgeText = document.getElementById('aspectBadgeText');
   if (btnAspectPlayer) {
-    btnAspectPlayer.addEventListener('click', () => {
+    btnAspectPlayer.addEventListener('click', (e) => {
+      e.stopPropagation();
       const v = document.getElementById('videoPlayer');
+      const iframe = document.getElementById('playerIframe');
       if (!v) return;
-      currentAspectIdx = (currentAspectIdx + 1) % aspectList.length;
-      const asp = aspectList[currentAspectIdx];
-      v.style.objectFit = asp;
-      const labels = { contain: 'Mặc định (Fit)', cover: 'Lấp đầy (Fill)', fill: 'Căng 16:9' };
-      showToast(`Tỉ lệ màn hình: ${labels[asp] || asp}`);
+      currentAspectIdx = (currentAspectIdx + 1) % aspectModes.length;
+      const cur = aspectModes[currentAspectIdx];
+      v.style.setProperty('object-fit', cur.mode, 'important');
+      if (iframe) iframe.style.setProperty('object-fit', cur.mode, 'important');
+      if (aspectBadgeText) aspectBadgeText.textContent = cur.badge;
+      btnAspectPlayer.setAttribute('title', `Tỉ lệ: ${cur.label} - ${cur.desc}`);
+      showToast(`📐 Tỉ lệ màn hình: ${cur.label} (${cur.desc})`);
       resetOverlayTimer();
     });
   }
@@ -4710,8 +5268,10 @@
   // Nút Khóa cảm ứng (Ảnh 2)
   const btnLockPlayer = document.getElementById('btnLockPlayer');
   if (btnLockPlayer) {
-    btnLockPlayer.addEventListener('click', () => {
+    btnLockPlayer.addEventListener('click', (e) => {
+      e.stopPropagation();
       isTouchLocked = true;
+      window.isTouchLocked = true;
       if (playerOverlayEl) playerOverlayEl.classList.add('controls-hidden');
       if (btnUnlockTouchEl) btnUnlockTouchEl.style.display = 'block';
       showToast('🔒 Đã khóa cảm ứng (Bấm nút mở khóa để điều khiển lại)');
@@ -4719,8 +5279,10 @@
   }
 
   if (btnUnlockTouchEl) {
-    btnUnlockTouchEl.addEventListener('click', () => {
+    btnUnlockTouchEl.addEventListener('click', (e) => {
+      e.stopPropagation();
       isTouchLocked = false;
+      window.isTouchLocked = false;
       btnUnlockTouchEl.style.display = 'none';
       if (playerOverlayEl) playerOverlayEl.classList.remove('controls-hidden');
       showToast('🔓 Đã mở khóa cảm ứng');
@@ -4734,17 +5296,20 @@
   const btnEpisodeSheetPlayerEl = document.getElementById('btnEpisodeSheetPlayer');
 
   if (btnCloseSidebarEl && playerSidebarEl) {
-    btnCloseSidebarEl.addEventListener('click', () => {
-      playerSidebarEl.classList.add('collapsed');
+    btnCloseSidebarEl.addEventListener('click', (e) => {
+      e.stopPropagation();
       playerSidebarEl.classList.remove('mobile-open');
-      showToast('Đã thu nhỏ danh sách tập');
+      playerSidebarEl.classList.add('collapsed');
+      showToast('Đã đóng danh sách tập');
     });
   }
 
   if (btnEpisodeSheetPlayerEl && playerSidebarEl) {
-    btnEpisodeSheetPlayerEl.addEventListener('click', () => {
-      const isMobile = window.innerWidth <= 800;
+    btnEpisodeSheetPlayerEl.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isMobile = window.innerWidth <= 800 || (document.getElementById('playerContainer') && document.getElementById('playerContainer').classList.contains('player-vertical-mode'));
       if (isMobile) {
+        playerSidebarEl.classList.remove('collapsed');
         playerSidebarEl.classList.toggle('mobile-open');
       } else {
         playerSidebarEl.classList.toggle('collapsed');
@@ -4763,7 +5328,15 @@
     if (sTitle) sTitle.textContent = movie.name || '';
     if (sSub) sSub.textContent = `${movie.originName || ''} (${movie.year || '2026'})`;
 
-    if (!sServers || !sGrid || !detail) return;
+    if (!sServers || !sGrid) return;
+
+    // NẾU LÀ TRUYỀN HÌNH HOẶC TRẬN ĐẤU BÓNG ĐÁ TRỰC TIẾP (Không có detail hoặc episodes rỗng)
+    // BẮT BUỘC DỌN SẠCH DANH SÁCH TẬP CỦA PHIM CŨ ĐỂ KHÔNG HIỆN NHẦM TẬP PHIM NGẮN!
+    if (!detail || !detail.episodes || detail.episodes.length === 0) {
+      sServers.innerHTML = '<span style="color: var(--accent-cyan); font-weight: 800; font-size: 13px;">🔴 TRUYỀN HÌNH TRỰC TIẾP</span>';
+      sGrid.innerHTML = '<div style="padding: 24px; color: #94a3b8; font-size: 13px; text-align: center; grid-column: 1 / -1; line-height: 1.6;">⚽ Đang phát sóng trận đấu trực tiếp.<br><span style="color: #64748b; font-size: 12px;">Kênh không có danh sách tập phim.</span></div>';
+      return;
+    }
     sServers.innerHTML = '';
     sGrid.innerHTML = '';
 
@@ -4815,10 +5388,24 @@
             if (unl.subtitleUrl) sub = unl.subtitleUrl;
           }
         }
-        playVideo(stream, movie.name, ep.name, movie, detail, idx, serverIndex || 0, false, sub);
+        playVideo(stream, movie.name, ep.name, movie, detail, idx, serverIndex || 0, false, sub, true);
       });
       sGrid.appendChild(epBtn);
     });
+
+    // Cập nhật trạng thái phím Prev / Next dưới thanh điều khiển
+    const centerPrevBtn = document.getElementById('btnCenterPrev');
+    const centerNextBtn = document.getElementById('btnCenterNext');
+    if (centerPrevBtn) {
+      centerPrevBtn.disabled = (epIndex <= 0);
+      centerPrevBtn.style.opacity = (epIndex <= 0) ? '0.35' : '1';
+      centerPrevBtn.style.pointerEvents = (epIndex <= 0) ? 'none' : 'auto';
+    }
+    if (centerNextBtn) {
+      centerNextBtn.disabled = (epIndex >= epItems.length - 1);
+      centerNextBtn.style.opacity = (epIndex >= epItems.length - 1) ? '0.35' : '1';
+      centerNextBtn.style.pointerEvents = (epIndex >= epItems.length - 1) ? 'none' : 'auto';
+    }
 
     // Mở Sidebar mặc định trên Windows / Desktop, đóng trên Mobile
     if (window.innerWidth > 800) {
