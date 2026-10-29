@@ -2,6 +2,15 @@
 (function () {
   'use strict';
 
+  function getAppProxyUrl(target) {
+    if (!target) return '';
+    if (target.includes('/api/proxy?url=')) return target;
+    const isCloudflare = window.location.hostname && (window.location.hostname.endsWith('pages.dev') || window.location.hostname.includes('huyca.'));
+    const base = isCloudflare ? '/api/proxy?url=' : 'https://huyca.pages.dev/api/proxy?url=';
+    return base + encodeURIComponent(target);
+  }
+
+
   // --- State ---
   let currentSource = 'KKPHIM'; // KKPHIM, ANIMEHAY, XEMTIVI, FREEREELS
   let currentFilter = '';
@@ -264,10 +273,59 @@
   const GaMoMePhimClient = window.GaMoMePhimClient = {
     BASE_URL: 'https://gamomephim.com',
     getProxyUrl(target) {
-      if (window.location.protocol.startsWith('http')) {
-        return '/api/proxy?url=' + encodeURIComponent(target);
+      return getAppProxyUrl(target);
+    },
+    parseHtmlItems(html) {
+      const list = [];
+      const seen = new Set();
+      const aRegex = /<a[^>]+href="\/phim\/([^"/]+)"[^>]*>(.*?)<\/a>/gs;
+      let match;
+      while ((match = aRegex.exec(html)) !== null) {
+        const slug = match[1].trim();
+        const body = match[2];
+        if (!slug || seen.has(slug)) continue;
+
+        let title = '';
+        const titleMatch = match[0].match(/title="([^"]+)"/);
+        if (titleMatch) {
+          title = titleMatch[1].trim();
+        }
+        if (!title) {
+          const hMatch = body.match(/<h[34][^>]*>(.*?)<\/h[34]>/s);
+          if (hMatch) {
+            title = hMatch[1].replace(/<[^>]+>/g, '').trim();
+          }
+        }
+        if (!title) {
+          const altMatch = body.match(/<img[^>]+alt="([^"]+)"/);
+          if (altMatch) {
+            title = altMatch[1].replace(/Poster phim |Poster /g, '').trim();
+          }
+        }
+
+        let thumb = '';
+        const imgMatch = body.match(/<img[^>]+src="([^"]+)"/);
+        if (imgMatch) {
+          thumb = imgMatch[1].trim();
+        }
+
+        if (slug && title) {
+          seen.add(slug);
+          list.push({
+            id: `gamomephim:${slug}`,
+            name: title,
+            slug: `gamomephim:${slug}`,
+            originName: 'Gà Mờ Mê Phim • Thuyết Minh',
+            thumbUrl: thumb,
+            posterUrl: thumb,
+            year: '2026',
+            quality: '🎙️ Thuyết Minh & Vietsub',
+            episodeCurrent: 'Full Bộ HD',
+            source: 'FREEREELS'
+          });
+        }
       }
-      return 'https://huyca.pages.dev/api/proxy?url=' + encodeURIComponent(target);
+      return list;
     },
     async getDramaList(filterUrl, page = 1) {
       try {
@@ -276,30 +334,27 @@
         const resp = await fetch(this.getProxyUrl(targetUrl));
         if (!resp.ok) return [];
         const html = await resp.text();
-        const pattern = /<a[^>]+title="([^"]+)"[^>]+href="\/phim\/([^"]+)".*?<img[^>]+src="([^"]+)"/gs;
-        const matches = [...html.matchAll(pattern)];
-        const list = [];
-        const seen = new Set();
-        for (const m of matches) {
-          const title = m[1].trim();
-          const slug = m[2].trim();
-          const thumb = m[3].trim();
-          if (slug && !seen.has(slug)) {
-            seen.add(slug);
-            list.push({
-              id: `gamomephim:${slug}`,
-              name: title,
-              slug: `gamomephim:${slug}`,
-              originName: 'Gà Mờ Mê Phim • Thuyết Minh',
-              thumbUrl: thumb,
-              posterUrl: thumb,
-              year: '2026',
-              quality: '🎙️ Thuyết Minh & Vietsub',
-              episodeCurrent: 'Full Bộ HD',
-              source: 'FREEREELS'
-            });
+        let list = this.parseHtmlItems(html);
+
+        // Tự động fallback sang Phim Mới nếu thể loại này ít phim và hết ở trang tiếp theo (chống lỗi kéo thêm không ra phim)
+        if (list.length === 0 && page > 1 && genrePath !== 'phim-moi') {
+          try {
+            const fbResp = await fetch(this.getProxyUrl(`${this.BASE_URL}/phim-moi?page=${page}`));
+            if (fbResp.ok) {
+              const fbHtml = await fbResp.text();
+              const fbList = this.parseHtmlItems(fbHtml);
+              if (fbList.length > 0) {
+                fbList.forEach(item => {
+                  item.originName = 'Gà Mờ Mê Phim • Mới Cập Nhật';
+                  list.push(item);
+                });
+              }
+            }
+          } catch(err) {
+            console.warn('GaMoMePhim fallback err:', err);
           }
         }
+
         return list;
       } catch (e) {
         console.warn('GaMoMePhim getDramaList err:', e);
@@ -429,10 +484,7 @@
   const FreeReelsClient = window.FreeReelsClient = {
     API_BASE: 'https://apiv2.free-reels.com/frv2-api',
     getProxyUrl(target) {
-      if (window.location.protocol.startsWith('http')) {
-        return '/api/proxy?url=' + encodeURIComponent(target);
-      }
-      return 'https://huyca.pages.dev/api/proxy?url=' + encodeURIComponent(target);
+      return getAppProxyUrl(target);
     },
     APP_SECRET: '8IAcbWyCsVhYv82S2eofRqK1DF3nNDAv',
     APP_NAME: 'com.freereels.app',
@@ -762,10 +814,14 @@
             el.subtitle_list.forEach(s => {
               const lang = (s.language || '').toLowerCase();
               const disp = (s.display_name || '').toLowerCase();
-              if (lang.includes('vi') || disp.includes('việt')) {
+              if (lang.includes('vi') || disp.includes('việt') || disp.includes('viet')) {
                 viSubUrl = s.subtitle || s.vtt || null;
               }
             });
+            if (!viSubUrl && el.subtitle_list.length > 0) {
+              const enSub = el.subtitle_list.find(s => (s.language || '').toLowerCase().includes('en'));
+              viSubUrl = enSub ? (enSub.subtitle || enSub.vtt) : (el.subtitle_list[0].subtitle || el.subtitle_list[0].vtt);
+            }
           }
           if (viSubUrl && viSubUrl.startsWith('http')) {
             viSubUrl = this.getProxyUrl(viSubUrl);
@@ -841,10 +897,14 @@
           data.subtitle_list.forEach(s => {
             const lang = (s.language || '').toLowerCase();
             const disp = (s.display_name || '').toLowerCase();
-            if (lang.includes('vi') || disp.includes('việt')) {
+            if (lang.includes('vi') || disp.includes('việt') || disp.includes('viet')) {
               viSubUrl = s.subtitle || s.vtt || null;
             }
           });
+          if (!viSubUrl && data.subtitle_list.length > 0) {
+            const enSub = data.subtitle_list.find(s => (s.language || '').toLowerCase().includes('en'));
+            viSubUrl = enSub ? (enSub.subtitle || enSub.vtt) : (data.subtitle_list[0].subtitle || data.subtitle_list[0].vtt);
+          }
         }
         if (viSubUrl && viSubUrl.startsWith('http')) {
           viSubUrl = this.getProxyUrl(viSubUrl);
@@ -978,12 +1038,21 @@
       { name: "❤️ Yêu Thích", url: "app://favorites" }
     ],
     'short_src://gamomephim': [
-      { name: "🔥 Tiểu Kịch Hiện Đại Mới", url: "gamomephim://the-loai/hien-dai" },
+      { name: "🔥 Phim Mới Cập Nhật", url: "gamomephim://phim-moi" },
+      { name: "🏆 Bảng Xếp Hạng Thịnh Hành", url: "gamomephim://ban-xep-hang" },
       { name: "👑 Cưới Trước Yêu Sau & Tổng Tài", url: "gamomephim://the-loai/cuoi-truoc-yeu-sau" },
+      { name: "🪞 Gương Vỡ Lại Lành & Ngược Tâm", url: "gamomephim://the-loai/guong-vo-lai-lanh" },
+      { name: "💘 Yêu Thầm & Ngọt Sủng", url: "gamomephim://the-loai/yeu-tham" },
+      { name: "🌆 Tiểu Kịch Hiện Đại", url: "gamomephim://the-loai/hien-dai" },
       { name: "🐉 Trọng Sinh & Báo Thù", url: "gamomephim://the-loai/trong-sinh" },
-      { name: "🏰 Cổ Trang & Xuyên Không", url: "gamomephim://the-loai/co-trang" },
+      { name: "⏳ Xuyên Không Trùng Sinh", url: "gamomephim://the-loai/xuyen-khong" },
+      { name: "🏰 Cổ Trang & Cung Đấu", url: "gamomephim://the-loai/co-trang" },
+      { name: "🤣 Hài Hước & Hóm Hỉnh", url: "gamomephim://the-loai/hai-huoc" },
       { name: "🍵 Trà Xanh Nam & Ngược Tâm", url: "gamomephim://the-loai/tra-xanh-nam" },
       { name: "✨ Chữa Lành & Thanh Xuân", url: "gamomephim://the-loai/chua-lanh" },
+      { name: "🎒 Thanh Xuân Vườn Trường", url: "gamomephim://the-loai/thanh-xuan" },
+      { name: "🕰️ Dân Quốc & Niên Đại", url: "gamomephim://the-loai/dan-quoc" },
+      { name: "🌾 Niên Đại Thập Niên", url: "gamomephim://the-loai/nien-dai" },
       { name: "🕒 Lịch Sử Xem", url: "app://history" },
       { name: "❤️ Yêu Thích", url: "app://favorites" }
     ],
@@ -3031,7 +3100,58 @@
 
   window.playVideo = (s, t, sub, m, d, ep, srv, tv, csub, forceStart) => playVideo(s, t, sub, m, d, ep, srv, tv, csub, forceStart);
   window.playTvChannelDirectly = (c) => playTvChannelDirectly(c);
-  function playVideo(streamUrl, title, subtitle, movie, detail, epIndex, serverIndex, isTv = false, customSubtitleUrl = null, forceStartFromBeginning = false) {
+  
+  function parseSubtitleText(text) {
+    if (!text || typeof text !== 'string') return [];
+    const cues = [];
+    const normalized = text.replace(/\r\n|\r/g, '\n');
+    const blocks = normalized.split(/\n\s*\n/);
+    const timeRegex = /(?:(\d{1,2}):)?(\d{2}):(\d{2})[,.](\d{3})\s*-->\s*(?:(\d{1,2}):)?(\d{2}):(\d{2})[,.](\d{3})/;
+
+    for (const block of blocks) {
+      const lines = block.trim().split('\n');
+      let timeLineIdx = -1;
+      for (let i = 0; i < lines.length; i++) {
+        if (timeRegex.test(lines[i])) {
+          timeLineIdx = i;
+          break;
+        }
+      }
+      if (timeLineIdx === -1) continue;
+
+      const match = lines[timeLineIdx].match(timeRegex);
+      if (!match) continue;
+
+      const parseSeconds = (h, m, s, ms) => {
+        const hours = parseInt(h || '0', 10);
+        const minutes = parseInt(m, 10);
+        const seconds = parseInt(s, 10);
+        const millis = parseInt(ms, 10);
+        return hours * 3600 + minutes * 60 + seconds + millis / 1000;
+      };
+
+      const startTime = parseSeconds(match[1], match[2], match[3], match[4]);
+      const endTime = parseSeconds(match[5], match[6], match[7], match[8]);
+      const cueLines = lines.slice(timeLineIdx + 1)
+        .map(l => l.replace(/<\/?[^>]+(>|$)/g, '').replace(/\{\\[^}]*\}/g, '').trim())
+        .filter(l => l.length > 0);
+
+      if (cueLines.length > 0 && endTime > startTime) {
+        cues.push({ start: startTime, end: endTime, text: cueLines.join('\n') });
+      }
+    }
+    return cues;
+  }
+
+  function convertSrtToVtt(srtText) {
+    if (!srtText || typeof srtText !== 'string') return 'WEBVTT\n\n';
+    if (srtText.trim().startsWith('WEBVTT')) return srtText;
+    return 'WEBVTT\n\n' + srtText
+      .replace(/\r\n|\r/g, '\n')
+      .replace(/(\d{2}:\d{2}:\d{2}),(\d{3})/g, '.');
+  }
+
+function playVideo(streamUrl, title, subtitle, movie, detail, epIndex, serverIndex, isTv = false, customSubtitleUrl = null, forceStartFromBeginning = false) {
     if (typeof isTv === 'string') {
       customSubtitleUrl = isTv;
       isTv = false;
@@ -3363,6 +3483,12 @@
       subOverlay.textContent = '';
       subOverlay.style.display = 'none';
 
+      if (window._subTimeUpdateHandler) {
+        video.removeEventListener('timeupdate', window._subTimeUpdateHandler);
+        window._subTimeUpdateHandler = null;
+      }
+      video.querySelectorAll('track').forEach(t => t.remove());
+
       let currentEp = null;
       if (detail) {
         const sIdx = serverIndex || 0;
@@ -3375,46 +3501,49 @@
       const subUrl = customSubtitleUrl || (currentEp && currentEp.subtitleUrl);
       if (subUrl) {
         video.crossOrigin = 'anonymous';
-        const track = document.createElement('track');
-        track.kind = 'subtitles';
-        track.srclang = 'vi';
-        track.label = 'Tiếng Việt';
-        track.src = subUrl;
-        track.default = true;
-        video.appendChild(track);
+        let fetchUrl = subUrl;
+        if (fetchUrl.startsWith('http') && !fetchUrl.includes('/api/proxy') && window.location.protocol.startsWith('http')) {
+          fetchUrl = '/api/proxy?url=' + encodeURIComponent(fetchUrl);
+        }
 
-        const bindHiddenTrack = () => {
-          if (!track.track) return;
-          // Ẩn renderer mặc định của trình duyệt để không bao giờ bị font 78px của FreeReels đè lên video
-          track.track.mode = 'hidden';
-          track.track.oncuechange = () => {
-            const active = track.track.activeCues;
-            if (active && active.length > 0) {
-              const lines = [];
-              for (let i = 0; i < active.length; i++) {
-                const cleaned = (active[i].text || '')
-                  .replace(/<\/?[^>]+(>|$)/g, '')
-                  .replace(/\{\\[^}]*\}/g, '')
-                  .trim();
-                if (cleaned && !lines.includes(cleaned)) {
-                  lines.push(cleaned);
-                }
-              }
-              if (lines.length > 0) {
-                subOverlay.textContent = lines.join('\n');
+        fetch(fetchUrl)
+          .then(r => r.text())
+          .then(rawText => {
+            if (!rawText || rawText.trim().length === 0) return;
+            const parsedCues = parseSubtitleText(rawText);
+            const vttContent = convertSrtToVtt(rawText);
+            const blobUrl = URL.createObjectURL(new Blob([vttContent], { type: 'text/vtt' }));
+
+            const track = document.createElement('track');
+            track.kind = 'subtitles';
+            track.srclang = 'vi';
+            track.label = 'Tiếng Việt';
+            track.src = blobUrl;
+            track.default = true;
+            video.appendChild(track);
+
+            const bindHiddenTrack = () => {
+              if (track.track) track.track.mode = 'hidden';
+            };
+            bindHiddenTrack();
+            track.addEventListener('load', bindHiddenTrack);
+
+            window._subTimeUpdateHandler = () => {
+              if (!parsedCues || parsedCues.length === 0) return;
+              const cur = video.currentTime;
+              const matched = parsedCues.find(c => cur >= c.start && cur <= c.end);
+              if (matched) {
+                subOverlay.textContent = matched.text;
                 subOverlay.style.display = 'block';
               } else {
                 subOverlay.style.display = 'none';
               }
-            } else {
-              subOverlay.style.display = 'none';
-            }
-          };
-        };
-        bindHiddenTrack();
-        track.addEventListener('load', bindHiddenTrack);
-        setTimeout(bindHiddenTrack, 50);
-        setTimeout(bindHiddenTrack, 350);
+            };
+            video.addEventListener('timeupdate', window._subTimeUpdateHandler);
+          })
+          .catch(e => {
+            console.warn('Subtitle fetch/parse failed:', e);
+          });
       } else {
         video.removeAttribute('crossorigin');
       }

@@ -439,14 +439,32 @@ class PlayerActivity : AppCompatActivity() {
         }
 
         val mediaItem = mediaItemBuilder.build()
-        val mediaSource = if (isHlsStream) {
+        val baseMediaSource = if (isHlsStream) {
             HlsMediaSource.Factory(dataSourceFactory)
                 .setPlaylistParserFactory(com.huycabuonca.mobile.util.AdBlockPlaylistParserFactory())
                 .createMediaSource(mediaItem)
         } else {
-            androidx.media3.exoplayer.source.DefaultMediaSourceFactory(this)
-                .setDataSourceFactory(dataSourceFactory)
+            androidx.media3.exoplayer.source.ProgressiveMediaSource.Factory(dataSourceFactory)
                 .createMediaSource(mediaItem)
+        }
+
+        val mediaSource = if (!subtitleUrl.isNullOrEmpty()) {
+            val mimeType = if (subtitleUrl.contains(".vtt", ignoreCase = true)) {
+                androidx.media3.common.MimeTypes.TEXT_VTT
+            } else {
+                androidx.media3.common.MimeTypes.APPLICATION_SUBRIP
+            }
+            val subConfig = MediaItem.SubtitleConfiguration.Builder(android.net.Uri.parse(subtitleUrl))
+                .setMimeType(mimeType)
+                .setLanguage("vi")
+                .setLabel("Tiếng Việt")
+                .setSelectionFlags(androidx.media3.common.C.SELECTION_FLAG_DEFAULT or androidx.media3.common.C.SELECTION_FLAG_FORCED)
+                .build()
+            val subSource = androidx.media3.exoplayer.source.SingleSampleMediaSource.Factory(dataSourceFactory)
+                .createMediaSource(subConfig, androidx.media3.common.C.TIME_UNSET)
+            androidx.media3.exoplayer.source.MergingMediaSource(baseMediaSource, subSource)
+        } else {
+            baseMediaSource
         }
 
         val trackSelector = androidx.media3.exoplayer.trackselection.DefaultTrackSelector(this).apply {
