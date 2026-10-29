@@ -21,7 +21,7 @@
       document.documentElement.className = 'mode-' + mode;
     })();
   </script>
-  <link rel="stylesheet" href="css/style.css?v=3.1.0">
+  <link rel="stylesheet" href="css/style.css?v=3.3.1">
 </head>
 <body>
   <!-- Header Bar -->
@@ -31,7 +31,7 @@
         <img src="icon_256.png" class="brand-logo" alt="Logo">
         <span>HUY CÁ</span>
       </div>
-      <div class="brand-subtitle">Kho Phim & Truyền Hình Đẳng Cấp • Phiên Bản Web Trực Tuyến v2.8</div>
+      <div class="brand-subtitle">Kho Phim & Truyền Hình Đẳng Cấp • Phiên Bản Web Trực Tuyến v3.3.2.2</div>
       <div class="brand-slogan-mobile">Kho Phim Đẳng Cấp Di Động</div>
     </div>
     <div class="header-actions">
@@ -123,6 +123,7 @@
           <p id="detailDesc" class="detail-desc">Mô tả phim...</p>
           <div class="detail-buttons">
             <button id="btnPlayFirst" class="btn-primary-yellow focusable">▶️ XEM TẬP ĐẦU</button>
+            <button id="btnDirectPlayDetail" class="btn-direct-detail focusable" style="display: none;">↗️ XEM TRỰC TIẾP</button>
             <button id="btnToggleFavDetail" class="btn-back-style focusable">⭐ THÊM YÊU THÍCH</button>
             <button id="btnCloseDetail" class="btn-back-style focusable">↩️ QUAY LẠI</button>
           </div>
@@ -140,7 +141,7 @@
     <!-- Khu vực Video Chính (Main Video Area) -->
     <div id="playerMainArea" class="player-main-area">
       <video id="videoPlayer" playsinline></video>
-      <iframe id="playerIframe" style="display:none; width: 100%; height: 100%; border: none; background: #000;" allow="autoplay; fullscreen; encrypted-media"></iframe>
+      <iframe id="playerIframe" style="display:none; width: 100%; height: 100%; border: none; background: #000;" allow="autoplay; fullscreen; encrypted-media; picture-in-picture; display-capture" sandbox="allow-scripts allow-same-origin allow-forms allow-presentation" referrerpolicy="no-referrer-when-downgrade"></iframe>
 
       <!-- Thanh điều khiển Mini Player khi ở chế độ Hình Trong Hình (PiP) -->
       <div id="miniPlayerBar" class="mini-player-bar" style="display: none;">
@@ -151,65 +152,207 @@
         </div>
       </div>
 
-      <!-- Nút chuyển tập nổi bên phải video (Ảnh 3) -->
-      <button id="btnQuickNextFloating" class="btn-quick-next-floating" title="Tập tiếp theo">❯</button>
+            <!-- Nút Mở Khóa khi đã khóa cảm ứng -->
+      <button id="btnUnlockTouch" class="btn-unlock-touch" style="display: none;" title="Mở khóa cảm ứng">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <span>Mở khóa cảm ứng</span>
+      </button>
 
-      <!-- Nút Mở Khóa khi đã khóa cảm ứng (Ảnh 2) -->
-      <button id="btnUnlockTouch" class="btn-unlock-touch" style="display: none;" title="Mở khóa cảm ứng">🔓 Mở khóa cảm ứng</button>
+      <!-- Biểu tượng gợn sóng khi Play/Pause giữa màn hình (Chuẩn Netflix / YouTube) -->
+      <div id="centerPlayRipple" class="center-play-ripple" style="display: none;">
+        <svg id="centerRipplePlaySvg" class="center-ripple-svg" viewBox="0 0 24 24" fill="currentColor">
+          <polygon points="5 3 19 12 5 21 5 3"/>
+        </svg>
+        <svg id="centerRipplePauseSvg" class="center-ripple-svg" viewBox="0 0 24 24" fill="currentColor" style="display: none;">
+          <rect x="6" y="4" width="4" height="16"/>
+          <rect x="14" y="4" width="4" height="16"/>
+        </svg>
+      </div>
 
-      <!-- Lớp Overlay Điều Khiển Trình Phát (Ảnh 2 & Ảnh 3) -->
+      <!-- Lớp Overlay Điều Khiển Trình Phát Cinema Pro (Chuẩn Rạp Chiếu & Netflix) -->
       <div id="playerOverlay" class="player-overlay">
-        <!-- Top Bar điều khiển chuẩn APK (Ảnh 2) -->
+        
+        <!-- 1. Top Bar: Tiêu đề & Công cụ nhanh thanh thoát -->
         <div class="player-top">
           <div class="player-title-info">
-            <button id="btnBackPlayer" class="btn-player-square" title="Quay lại">⮌</button>
+            <button id="btnBackPlayer" class="btn-header-action" title="Quay lại (Esc)">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 12H5M12 19l-7-7 7-7"/>
+              </svg>
+            </button>
             <div class="player-header-text">
               <span id="playerTitle" class="player-title">Tên Phim</span>
-              <span class="player-sep"> • </span>
-              <span id="playerSub" class="player-subtitle">Tập 1</span>
+              <span id="playerSub" class="player-subtitle-badge">Tập 1</span>
             </div>
           </div>
           <div class="player-top-actions">
-            <button id="btnToggleFavPlayer" class="btn-player-square" title="Yêu thích">⭐</button>
-            <button id="btnPipPlayer" class="btn-player-square" title="Hình trong hình (PiP)">⧉</button>
-            <button id="btnSpeedPlayer" class="btn-player-square" title="Tốc độ phát">1.0x</button>
-            <button id="btnAspectPlayer" class="btn-player-square" title="Tỉ lệ khung hình">⛶</button>
-            <button id="btnEpisodeSheetPlayer" class="btn-player-square" title="Danh sách tập & Server">☰</button>
-            <button id="btnLockPlayer" class="btn-player-square" title="Khóa cảm ứng">🔒</button>
-            <button id="btnRotatePlayer" class="btn-player-square" title="Xoay màn hình">🔄</button>
+            <button id="btnToggleFavPlayer" class="btn-header-action" title="Yêu thích">
+              <svg id="svgStarFav" class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+              </svg>
+            </button>
+            <button id="btnRotatePlayer" class="btn-header-action btn-rotate-pill" title="Xoay màn hình">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+              </svg>
+              <span id="rotateBtnText">Xoay Ngang</span>
+            </button>
+            <button id="btnLockPlayer" class="btn-header-action" title="Khóa cảm ứng">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+            </button>
           </div>
         </div>
 
-        <!-- Cụm 5 nút điều khiển nổi ở trung tâm màn hình (Ảnh 2) -->
-        <div id="playerCenterControls" class="player-center-controls">
-          <button id="btnCenterRewind" class="btn-center-pill" title="Tua lùi 10s">⏪ 10s</button>
-          <button id="btnCenterPrev" class="btn-center-round" title="Tập trước">⏮</button>
-          <button id="btnCenterPlayPause" class="btn-center-main" title="Phát / Tạm dừng">
-            <span id="centerPlayIcon">⏸</span>
-          </button>
-          <button id="btnCenterNext" class="btn-center-round" title="Tập tiếp">⏭</button>
-          <button id="btnCenterForward" class="btn-center-pill" title="Tua đi 10s">10s ⏩</button>
-        </div>
-
-        <!-- Nút tiện ích Bỏ qua Intro +85s (Ảnh 2) -->
-        <button id="btnSkipIntro" class="btn-skip-intro" style="display: none;" title="Bỏ qua đoạn dạo đầu (+85s)">
-          +85s Bỏ qua Intro ▶
-        </button>
-
-        <!-- Thanh điều khiển & Tiến trình dưới cùng (Ảnh 2 & Ảnh 3) -->
+        <!-- 2. Bottom Dock: Bảng điều khiển trung tâm rạp chiếu (Tất cả phím tích hợp dưới đáy, không che màn hình) -->
         <div class="player-bottom-bar">
-          <span id="currentTime" class="time-label">00:00</span>
-          <div class="progress-track-wrapper">
+          
+          <!-- Hàng 1: Thanh Scrubber tiến trình chuẩn rạp chiếu -->
+          <div id="progressContainer" class="progress-track-wrapper">
             <input type="range" id="seekBar" class="seek-bar focusable" min="0" max="100" value="0">
+            <div id="seekHoverTime" class="seek-hover-time" style="display: none;">00:00</div>
           </div>
-          <span id="durationTime" class="time-label">00:00</span>
-          <button id="btnFullscreen" class="btn-fullscreen-toggle" title="Toàn màn hình">⛶</button>
+
+          <!-- Hàng 2: Hàng nút điều khiển chuyên nghiệp -->
+          <div class="player-controls-row">
+            
+            <!-- Nhóm phím bên trái: Phát, Tua, Tập, Âm lượng, Thời gian -->
+            <div class="controls-left">
+              <!-- Nút Phát / Tạm dừng chính -->
+              <button id="btnPlayPause" class="btn-ctrl-action btn-play-pause-main" title="Phát / Tạm dừng (Space)">
+                <svg id="svgPlay" class="ctrl-icon" viewBox="0 0 24 24" fill="currentColor">
+                  <polygon points="5 3 19 12 5 21 5 3"/>
+                </svg>
+                <svg id="svgPause" class="ctrl-icon" viewBox="0 0 24 24" fill="currentColor" style="display:none;">
+                  <rect x="6" y="4" width="4" height="16"/>
+                  <rect x="14" y="4" width="4" height="16"/>
+                </svg>
+              </button>
+
+              <!-- Tua lùi 10 giây -->
+              <button id="btnCenterRewind" class="btn-ctrl-action" title="Tua lùi 10s (←)">
+                <svg class="ctrl-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                  <path d="M3 3v5h5"/>
+                  <text x="12" y="15.5" font-size="7.5" font-weight="900" fill="currentColor" stroke="none" text-anchor="middle">10</text>
+                </svg>
+              </button>
+
+              <!-- Tua đi 10 giây -->
+              <button id="btnCenterForward" class="btn-ctrl-action" title="Tua đi 10s (→)">
+                <svg class="ctrl-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.9 1 6.74 2.74L21 8"/>
+                  <path d="M21 3v5h-5"/>
+                  <text x="12" y="15.5" font-size="7.5" font-weight="900" fill="currentColor" stroke="none" text-anchor="middle">10</text>
+                </svg>
+              </button>
+
+              <!-- Tập trước -->
+              <button id="btnCenterPrev" class="btn-ctrl-action" title="Tập trước ([)">
+                <svg class="ctrl-icon" viewBox="0 0 24 24" fill="currentColor">
+                  <polygon points="19 20 9 12 19 4 19 20"/>
+                  <rect x="5" y="4" width="2" height="16"/>
+                </svg>
+              </button>
+
+              <!-- Tập tiếp theo -->
+              <button id="btnCenterNext" class="btn-ctrl-action" title="Tập tiếp theo (])">
+                <svg class="ctrl-icon" viewBox="0 0 24 24" fill="currentColor">
+                  <polygon points="5 4 15 12 5 20 5 4"/>
+                  <rect x="17" y="4" width="2" height="16"/>
+                </svg>
+              </button>
+
+              <!-- Điều khiển âm lượng -->
+              <div class="volume-control-wrapper">
+                <button id="btnVolumeToggle" class="btn-ctrl-action" title="Bật / Tắt âm">
+                  <svg id="svgVolumeHigh" class="ctrl-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                    <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                  </svg>
+                  <svg id="svgVolumeMuted" class="ctrl-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                    <line x1="23" y1="9" x2="17" y2="15"/>
+                    <line x1="17" y1="9" x2="23" y2="15"/>
+                  </svg>
+                </button>
+                <input type="range" id="volumeSlider" class="volume-slider" min="0" max="1" step="0.05" value="1">
+              </div>
+
+              <!-- Đồng hồ thời lượng -->
+              <div class="player-time-display">
+                <span id="currentTime" class="time-label">00:00</span>
+                <span class="time-divider">/</span>
+                <span id="durationTime" class="time-label">00:00</span>
+              </div>
+            </div>
+
+            <!-- Nhóm phím bên phải: Intro, Tốc độ, Danh sách tập, PiP, Khung hình, Toàn màn hình -->
+            <div class="controls-right">
+              <!-- Nút Bỏ qua Intro -->
+              <button id="btnSkipIntro" class="btn-skip-intro-pill" style="display: none;" title="Bỏ qua đoạn intro (+85s)">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 4 15 12 5 20 5 4"/><rect x="17" y="4" width="2" height="16"/></svg>
+                <span>Bỏ qua Intro</span>
+              </button>
+
+              <!-- Chọn tốc độ phát -->
+              <button id="btnSpeedPlayer" class="btn-ctrl-badge" title="Tốc độ phát">1.0x</button>
+
+              <!-- Mở danh sách tập -->
+              <button id="btnEpisodeSheetPlayer" class="btn-ctrl-action" title="Danh sách tập & Server">
+                <svg class="ctrl-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                  <line x1="4" y1="6" x2="20" y2="6"/>
+                  <line x1="4" y1="12" x2="20" y2="12"/>
+                  <line x1="4" y1="18" x2="20" y2="18"/>
+                </svg>
+                <span class="btn-ctrl-text">Danh Sách Tập</span>
+              </button>
+
+              <!-- Đổi kênh Tivi Zapping (chỉ hiện khi xem Tivi) -->
+              <button id="btnQuickZap" class="btn-ctrl-action" style="display: none;" title="Đổi Kênh Tivi (Zapping)">
+                <svg class="ctrl-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="2" y="7" width="20" height="15" rx="2" ry="2"/>
+                  <polyline points="17 2 12 7 7 2"/>
+                </svg>
+                <span class="btn-ctrl-text">Đổi Kênh</span>
+              </button>
+
+              <!-- Tỉ lệ khung hình -->
+              <button id="btnAspectPlayer" class="btn-ctrl-action" title="Tỉ lệ khung hình (Fit / Fill / Căng)">
+                <svg class="ctrl-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="2" y="4" width="20" height="16" rx="2"/>
+                  <path d="M8 9h8v6H8z"/>
+                </svg>
+                <span id="aspectBadgeText" class="btn-ctrl-text">Fit</span>
+              </button>
+
+              <!-- Hình trong hình PiP -->
+              <button id="btnPipPlayer" class="btn-ctrl-action" title="Thu nhỏ hình trong hình (Mini Player)">
+                <svg class="ctrl-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="2" y="4" width="20" height="16" rx="2"/>
+                  <rect x="12" y="11" width="8" height="7" rx="1"/>
+                </svg>
+                <span class="btn-ctrl-text">Thu Nhỏ</span>
+              </button>
+
+              <!-- Toàn màn hình -->
+              <button id="btnFullscreen" class="btn-ctrl-action" title="Toàn màn hình (F)">
+                <svg id="svgFullscreenEnter" class="ctrl-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+                </svg>
+                <svg id="svgFullscreenExit" class="ctrl-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+                  <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/>
+                </svg>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
-
     <!-- Sidebar Danh Sách Tập & Server chuẩn Windows / Desktop (Ảnh 3) -->
-    <div id="playerSidebar" class="player-sidebar">
+    <div id="playerSidebar" class="player-sidebar collapsed">
       <div class="sidebar-header">
         <div class="sidebar-titles">
           <div id="sidebarMovieTitle" class="sidebar-title">Tên Phim</div>
@@ -247,6 +390,7 @@
         </div>
       </div>
       <div style="display: flex; gap: 10px;">
+        <a id="btnExternalMatch" href="#" target="_blank" class="btn-player focusable" style="text-decoration: none; display: flex; align-items: center; gap: 4px;">🌐 Mở Tab Mới</a>
         <button id="btnSwitchServerQuick" class="btn-player focusable">🔄 Đổi Server</button>
         <button id="btnFullscreenMatch" class="btn-player focusable">🗖 Toàn Màn Hình</button>
       </div>
@@ -375,48 +519,48 @@
         </div>
 
         <!-- 2. Android Mobile APK -->
-        <a href="/api/download?file=mobile" download="HuyCa_Mobile_v2.8.apk" class="install-platform-card focusable">
+        <a href="/api/download?file=mobile" download="HuyCa_Mobile_v3.3.2.2.apk" class="install-platform-card focusable">
           <div class="platform-card-left">
             <span class="platform-emoji">📱</span>
             <div>
               <div class="platform-title">Điện Thoại Android (Bản Native APK)</div>
-              <div class="platform-desc">Tệp cài đặt: <code>HuyCa_Mobile_v2.8.apk</code> • Tối ưu cảm ứng, tự xoay ngang, ExoPlayer</div>
+              <div class="platform-desc">Tệp cài đặt: <code>HuyCa_Mobile_v3.3.2.2.apk</code> • Tối ưu cảm ứng, tự xoay ngang, ExoPlayer</div>
             </div>
           </div>
           <span class="btn-platform-download">⬇️ TẢI APK</span>
         </a>
 
         <!-- 3. Android TV / Google TV / TV Box APK -->
-        <a href="/api/download?file=tv" download="HuyCa_TV_v2.8.apk" class="install-platform-card focusable">
+        <a href="/api/download?file=tv" download="HuyCa_TV_v3.3.2.2.apk" class="install-platform-card focusable">
           <div class="platform-card-left">
             <span class="platform-emoji">📺</span>
             <div>
               <div class="platform-title">Android TV / Sony / Casper / Xiaomi / TV Box</div>
-              <div class="platform-desc">Tệp cài đặt: <code>HuyCa_TV_v2.8.apk</code> • Giao diện 16:9 chuẩn điều khiển Remote D-Pad</div>
+              <div class="platform-desc">Tệp cài đặt: <code>HuyCa_TV_v3.3.2.2.apk</code> • Giao diện 16:9 chuẩn điều khiển Remote D-Pad</div>
             </div>
           </div>
           <span class="btn-platform-download">⬇️ TẢI APK TV</span>
         </a>
 
         <!-- 4. Windows PC -->
-        <a href="/api/download?file=windows" download="HuyCa_Windows_v2.8.zip" class="install-platform-card focusable">
+        <a href="/api/download?file=windows" download="HuyCa_Windows_v3.3.2.2.zip" class="install-platform-card focusable">
           <div class="platform-card-left">
             <span class="platform-emoji">💻</span>
             <div>
               <div class="platform-title">Máy Tính Windows PC / Laptop (Windows 10/11)</div>
-              <div class="platform-desc">Tệp cài đặt: <code>HuyCa_Windows_v2.8.zip</code> • Tích hợp vượt tường lửa DNS & chặn quảng cáo</div>
+              <div class="platform-desc">Tệp cài đặt: <code>HuyCa_Windows_v3.3.2.2.zip</code> • Tích hợp vượt tường lửa DNS & chặn quảng cáo</div>
             </div>
           </div>
           <span class="btn-platform-download">⬇️ TẢI ZIP PC</span>
         </a>
 
         <!-- 5. LG Smart TV (webOS) -->
-        <a href="/api/download?file=lg" download="HuyCa_LG_webOS_v2.8.ipk" class="install-platform-card focusable">
+        <a href="/api/download?file=lg" download="HuyCa_LG_webOS_v3.3.2.2.ipk" class="install-platform-card focusable">
           <div class="platform-card-left">
             <span class="platform-emoji">🖥️</span>
             <div>
               <div class="platform-title">Tivi LG Smart TV (Hệ điều hành webOS)</div>
-              <div class="platform-desc">Tệp cài đặt: <code>HuyCa_LG_webOS_v2.8.ipk</code> • Hỗ trợ chuột bay Magic Remote & phím số</div>
+              <div class="platform-desc">Tệp cài đặt: <code>HuyCa_LG_webOS_v3.3.2.2.ipk</code> • Hỗ trợ chuột bay Magic Remote & phím số</div>
             </div>
           </div>
           <span class="btn-platform-download">⬇️ TẢI IPK LG</span>
@@ -457,8 +601,9 @@
       });
     }
   </script>
-  <script src="data/tv_channels.js?v=2.9.3"></script>
-  <script src="js/hls.min.js?v=3.0.8"></script>
-  <script src="js/app.js?v=3.1.0"></script>
+  <script src="data/tv_channels.js?v=3.3.1"></script>
+  <script src="js/hls.min.js?v=3.3.1"></script>
+  <script src="js/dash.all.min.js?v=3.3.1"></script>
+  <script src="js/app.js?v=3.3.1"></script>
 </body>
 </html>

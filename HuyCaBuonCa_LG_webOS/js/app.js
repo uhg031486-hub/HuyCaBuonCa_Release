@@ -73,6 +73,8 @@
       tournament: "🏆 UEFA Champions League",
       teamA: "Real Madrid",
       teamB: "Manchester City",
+      teamALogo: "https://a.espncdn.com/i/teamlogos/soccer/500/86.png",
+      teamBLogo: "https://a.espncdn.com/i/teamlogos/soccer/500/382.png",
       time: "Đang diễn ra • Trực Tiếp",
       channelSlug: "sports_vn_vtv6",
       channelName: "VTV6 Thể Thao HD (FPT)"
@@ -82,6 +84,8 @@
       tournament: "🏴󠁧󠁢󠁥󠁮󠁧󠁿 Ngoại Hạng Anh",
       teamA: "Arsenal",
       teamB: "Chelsea",
+      teamALogo: "https://a.espncdn.com/i/teamlogos/soccer/500/359.png",
+      teamBLogo: "https://a.espncdn.com/i/teamlogos/soccer/500/363.png",
       time: "Hôm Nay • 20:30",
       channelSlug: "sports_intl_cbs_golazo",
       channelName: "CBS Sports Golazo (Cúp C1 / Serie A)"
@@ -91,6 +95,8 @@
       tournament: "🇪🇸 La Liga Tây Ban Nha",
       teamA: "Barcelona",
       teamB: "Atletico Madrid",
+      teamALogo: "https://a.espncdn.com/i/teamlogos/soccer/500/83.png",
+      teamBLogo: "https://a.espncdn.com/i/teamlogos/soccer/500/1068.png",
       time: "Hôm Nay • 23:00",
       channelSlug: "sports_intl_bein_xtra",
       channelName: "beIN SPORTS XTRA HD"
@@ -100,6 +106,8 @@
       tournament: "🇻🇳 AFF Mitsubishi Electric Cup",
       teamA: "Việt Nam",
       teamB: "Thái Lan",
+      teamALogo: "https://a.espncdn.com/i/teamlogos/soccer/500/2927.png",
+      teamBLogo: "https://a.espncdn.com/i/teamlogos/soccer/500/2926.png",
       time: "Ngày Mai • 19:30",
       channelSlug: "vtv5_tay_nam_bo",
       channelName: "VTV5 Tây Nam Bộ"
@@ -109,6 +117,8 @@
       tournament: "🏆 UEFA Europa League",
       teamA: "Manchester United",
       teamB: "AS Roma",
+      teamALogo: "https://a.espncdn.com/i/teamlogos/soccer/500/360.png",
+      teamBLogo: "https://a.espncdn.com/i/teamlogos/soccer/500/104.png",
       time: "Hôm Nay • 03:00",
       channelSlug: "sports_intl_eurosport_live",
       channelName: "Eurosport Live HD"
@@ -1304,10 +1314,6 @@
       showIptvModal();
       return;
     }
-    if (filterItem.url === 'tv://schedule') {
-      showScheduleModal();
-      return;
-    }
     currentFilter = filterItem.url;
     currentPage = 1;
     loadMovies(true);
@@ -1371,6 +1377,10 @@
             originName: m.tournament,
             thumbUrl: m.teamALogo || DEFAULT_TV_LOGO,
             posterUrl: m.teamALogo || DEFAULT_TV_LOGO,
+            teamA: m.teamA,
+            teamB: m.teamB,
+            teamALogo: m.teamALogo || DEFAULT_TV_LOGO,
+            teamBLogo: m.teamBLogo || DEFAULT_TV_LOGO,
             quality: m.isLive ? 'LIVE' : 'EPL',
             episodeCurrent: m.time,
             source: 'XEMTIVI',
@@ -1414,6 +1424,10 @@
               originName: m.tournament,
               thumbUrl: m.teamALogo || DEFAULT_TV_LOGO,
               posterUrl: m.teamALogo || DEFAULT_TV_LOGO,
+              teamA: m.teamA,
+              teamB: m.teamB,
+              teamALogo: m.teamALogo || DEFAULT_TV_LOGO,
+              teamBLogo: m.teamBLogo || DEFAULT_TV_LOGO,
               quality: m.isLive ? 'LIVE' : 'EPL',
               episodeCurrent: m.time,
               source: 'XEMTIVI',
@@ -2101,7 +2115,19 @@
     const timeEl = document.getElementById('serverModalTime');
 
     if (leagueEl) leagueEl.textContent = match.tournament || '🏴󠁧󠁢󠁥󠁮󠁧󠁿 NGOẠI HẠNG ANH';
-    if (teamsEl) teamsEl.textContent = `${match.teamA} vs ${match.teamB}`;
+    if (teamsEl) {
+      const logoA = match.teamALogo || DEFAULT_TV_LOGO;
+      const logoB = match.teamBLogo || DEFAULT_TV_LOGO;
+      teamsEl.innerHTML = `
+        <div style="display: flex; align-items: center; justify-content: center; gap: 14px; margin: 8px 0; flex-wrap: wrap;">
+          <img src="${logoA}" style="width: 44px; height: 44px; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));" onerror="this.style.display='none'">
+          <span style="font-size: 20px; font-weight: 900; color: #ffffff;">${match.teamA}</span>
+          <span style="font-size: 15px; font-weight: 900; color: #facc15; padding: 2px 8px; background: rgba(250,204,21,0.15); border-radius: 6px;">VS</span>
+          <span style="font-size: 20px; font-weight: 900; color: #ffffff;">${match.teamB}</span>
+          <img src="${logoB}" style="width: 44px; height: 44px; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));" onerror="this.style.display='none'">
+        </div>
+      `;
+    }
     if (timeEl) timeEl.textContent = match.time || 'Trực Tiếp';
 
     modal.style.display = 'flex';
@@ -2260,40 +2286,93 @@
     items.forEach(movie => {
       const card = document.createElement('div');
       const isTv = movie.source === 'XEMTIVI';
-      card.className = `movie-card focusable ${isTv ? 'tv-card' : ''}`;
-      card.tabIndex = 0;
-      card.dataset.id = movie.id;
+      const isMatch = !!(movie.isEplMatch || movie.rawMatch);
 
-      const favBadge = isFavorite(movie.id) ? '<div class="badge-fav">⭐</div>' : '';
-      const qualityBadge = `<div class="badge-quality">${movie.quality || 'HD'}</div>`;
-      const epBadge = movie.episodeCurrent ? `<div class="badge-episode">${movie.episodeCurrent}</div>` : '';
-      const isDesktopLayout = window.innerWidth > 800 && !(/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || ''));
-      const displayImgUrl = isTv
-        ? getTvChannelLogo(movie)
-        : (isDesktopLayout
-            ? (movie.landscapeUrl || movie.thumbUrl || movie.posterUrl || DEFAULT_TV_LOGO)
-            : (movie.portraitUrl || movie.posterUrl || movie.thumbUrl || DEFAULT_TV_LOGO));
+      if (isMatch) {
+        // --- GIAO DIỆN TRẬN ĐẤU BÓNG ĐÁ SONG ĐẤU ĐỦ 2 BIỂU TƯỢNG (HOME & AWAY) ---
+        const raw = movie.rawMatch || {};
+        const teamA = movie.teamA || raw.teamA || 'Đội Nhà';
+        const teamB = movie.teamB || raw.teamB || 'Đội Khách';
+        const logoA = movie.teamALogo || raw.teamALogo || DEFAULT_TV_LOGO;
+        const logoB = movie.teamBLogo || raw.teamBLogo || DEFAULT_TV_LOGO;
+        const tournament = raw.tournament || movie.originName || 'BÓNG ĐÁ';
+        const isLive = !!(raw.isLive || movie.quality === 'LIVE');
+        const badgeText = isLive ? 'LIVE' : (movie.quality || 'EPL');
+        const matchTime = movie.episodeCurrent || raw.time || '';
+        const vsOrScore = isLive ? (raw.score || '🔴 LIVE') : (raw.isFinished ? (raw.score || '🏁 FT') : 'VS');
 
-      card.innerHTML = `
-        <div class="poster-wrapper" style="--poster-bg: url('${displayImgUrl}')">
-          <img class="card-poster" src="${displayImgUrl}" alt="${movie.name}" onload="if(window.innerWidth>800 && this.naturalHeight>this.naturalWidth*1.12){this.parentElement.classList.add('is-vertical-img');}" onerror="this.onerror=null; this.src='${isTv ? getTvChannelLogo(movie) : (movie.posterUrl || movie.thumbUrl || DEFAULT_TV_LOGO)}';" loading="lazy">
-          ${qualityBadge}
-          ${favBadge}
-          ${epBadge}
-        </div>
-        <div class="card-info">
-          <div class="card-title">${movie.name}</div>
-          <div class="card-subtitle">${movie.originName || movie.year || ''}</div>
-          ${movie.isEplMatch ? `
-            <div style="margin-top: 6px; display: flex; justify-content: space-between; align-items: center;">
-              <span style="font-size: 11px; color: var(--accent-cyan); font-weight: bold;">4 Server Trực Tiếp</span>
+        card.className = 'movie-card focusable match-grid-card tv-card';
+        card.tabIndex = 0;
+        card.dataset.id = movie.id;
+
+        card.innerHTML = `
+          <div class="match-grid-card-inner">
+            <div class="match-grid-header">
+              <span class="match-grid-tournament" title="${tournament}">${tournament}</span>
+              <span class="match-grid-badge ${isLive ? 'live' : ''}">${badgeText}</span>
+            </div>
+
+            <div class="match-grid-versus">
+              <!-- Cột Đội Nhà -->
+              <div class="match-team-item team-home">
+                <div class="match-team-logo-wrap">
+                  <img class="team-crest" src="${logoA}" alt="${teamA}" onerror="this.onerror=null; this.src='https://assets.coingecko.com/coins/images/2518/small/ball.png';" loading="lazy">
+                </div>
+                <div class="match-team-title" title="${teamA}">${teamA}</div>
+              </div>
+
+              <!-- Cột Trung Tâm: VS / Tỷ Số + Giờ Đá -->
+              <div class="match-center-pillar">
+                <div class="match-vs-text ${isLive ? 'is-live' : ''}">${vsOrScore}</div>
+                <div class="match-time-text">${matchTime}</div>
+              </div>
+
+              <!-- Cột Đội Khách -->
+              <div class="match-team-item team-away">
+                <div class="match-team-logo-wrap">
+                  <img class="team-crest" src="${logoB}" alt="${teamB}" onerror="this.onerror=null; this.src='https://assets.coingecko.com/coins/images/2518/small/ball.png';" loading="lazy">
+                </div>
+                <div class="match-team-title" title="${teamB}">${teamB}</div>
+              </div>
+            </div>
+
+            <div class="match-grid-footer">
+              <span class="match-servers-text">⚡ 4 Server Trực Tiếp</span>
               <button class="btn-bell-reminder ${movie.hasReminder ? 'active' : ''}" data-match-id="${movie.id}" title="Thông báo khi đến giờ đá">
                 ${movie.hasReminder ? '🔔 Đã Đặt' : '🔔 Nhắc Tôi'}
               </button>
             </div>
-          ` : ''}
-        </div>
-      `;
+          </div>
+        `;
+      } else {
+        // --- GIAO DIỆN PHIM / KÊNH TV THÔNG THƯỜNG ---
+        card.className = `movie-card focusable ${isTv ? 'tv-card' : ''}`;
+        card.tabIndex = 0;
+        card.dataset.id = movie.id;
+
+        const favBadge = isFavorite(movie.id) ? '<div class="badge-fav">⭐</div>' : '';
+        const qualityBadge = `<div class="badge-quality">${movie.quality || 'HD'}</div>`;
+        const epBadge = movie.episodeCurrent ? `<div class="badge-episode">${movie.episodeCurrent}</div>` : '';
+        const isDesktopLayout = window.innerWidth > 800 && !(/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || ''));
+        const displayImgUrl = isTv
+          ? getTvChannelLogo(movie)
+          : (isDesktopLayout
+              ? (movie.landscapeUrl || movie.thumbUrl || movie.posterUrl || DEFAULT_TV_LOGO)
+              : (movie.portraitUrl || movie.posterUrl || movie.thumbUrl || DEFAULT_TV_LOGO));
+
+        card.innerHTML = `
+          <div class="poster-wrapper" style="--poster-bg: url('${displayImgUrl}')">
+            <img class="card-poster" src="${displayImgUrl}" alt="${movie.name}" onload="if(window.innerWidth>800 && this.naturalHeight>this.naturalWidth*1.12){this.parentElement.classList.add('is-vertical-img');}" onerror="this.onerror=null; this.src='${isTv ? getTvChannelLogo(movie) : (movie.posterUrl || movie.thumbUrl || DEFAULT_TV_LOGO)}';" loading="lazy">
+            ${qualityBadge}
+            ${favBadge}
+            ${epBadge}
+          </div>
+          <div class="card-info">
+            <div class="card-title">${movie.name}</div>
+            <div class="card-subtitle">${movie.originName || movie.year || ''}</div>
+          </div>
+        `;
+      }
 
       // Click card
       card.addEventListener('click', (e) => {
