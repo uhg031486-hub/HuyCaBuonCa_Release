@@ -1,11 +1,11 @@
 {
-  "versionCode": 27,
-  "versionName": "3.3.3",
-  "title": "Bản Cập Nhật Huy Cá v3.3.3",
-  "changelog": "1. Bổ sung đầy đủ 17 bộ lọc chuyên sâu cho kho Phim Ngắn Gà Mờ Mê Phim.\n2. Phân trang vô cực thông minh: Cuộn kéo phim mượt mà không bao giờ thiếu phim.\n3. Khắc phục triệt để hiển thị phụ đề tiếng Việt phim ngắn.\n4. Đồng bộ hoàn hảo đa nền tảng.",
-  "apkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.3/HuyCa_TV_v3.3.3.apk",
-  "mobileApkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.3/HuyCa_Mobile_v3.3.3.apk",
-  "lgIpkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.3/HuyCa_LG_webOS_v3.3.3.ipk",
-  "windowsZipUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.3/HuyCa_Windows_v3.3.3.zip",
+  "versionCode": 28,
+  "versionName": "3.3.4",
+  "title": "Bản Cập Nhật Huy Cá v3.3.4",
+  "changelog": "1. Đồng bộ 100% kho Phim Ngắn FreeReels và 7 Sub-sources giữa Android và Web.\n2. Tích hợp cơ chế Fallback thông minh theo Tab Feed, nạp hàng ngàn phim không bị nghẽn.\n3. Khắc phục triệt để lỗi mở khóa tập phim ngắn và lỗi phát video trên Android TV và Mobile Player.\n4. Tối ưu hiển thị phụ đề tiếng Việt sắc nét trên mọi thiết bị.",
+  "apkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.4/HuyCa_TV_v3.3.4.apk",
+  "mobileApkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.4/HuyCa_Mobile_v3.3.4.apk",
+  "lgIpkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.4/HuyCa_LG_webOS_v3.3.4.ipk",
+  "windowsZipUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.4/HuyCa_Windows_v3.3.4.zip",
   "forceUpdate": false
 }
