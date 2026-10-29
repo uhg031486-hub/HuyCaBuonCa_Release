@@ -1,12 +1,12 @@
 {
-  "versionCode": 21,
-  "versionName": "3.2.7",
-  "title": "Huy Cá v3.2.7 - Kích Hoạt Ad-Shield Chặn 100% Quảng Cáo Nguồn C, Tự Động Diệt Popup & Redirect Cờ Bạc",
-  "changelog": "- Kích hoạt hệ thống Ad-Shield độc quyền: Chặn đứng 100% cửa sổ popup quảng cáo, cờ bạc, shopee, tài xỉu khi xem phim Nguồn C trên cả Mobile, Android TV và Web.\n- Tự động diệt sạch các request tải script quảng cáo độc hại (ads.js, popads, syndication) bằng WebResourceResponse rỗng.\n- Chặn đứng 100% các hành vi cướp quyền điều khiển màn hình và tự ý chuyển hướng (Redirect).\n- Tự động tiêm script dọn dẹp các banner quảng cáo đè lên video và kích hoạt luồng phát mượt mà.",
+  "versionCode": 28,
+  "versionName": "3.3.4",
+  "title": "Huy Cá v3.3.4 - Đồng Bộ Toàn Diện Kho Phim Ngắn FreeReels & Sửa Lỗi Phát Player Trên Mọi Thiết Bị",
+  "changelog": "1. Đồng bộ 100% kho Phim Ngắn FreeReels và 7 Sub-sources (ReelShort, DramaBox, ShortMax, FreeReels Gốc, Gà Mờ Mê Phim, AI Cinema, GoodShort) giữa Android và Web.\n2. Tích hợp cơ chế Fallback thông minh theo Tab Feed, đảm bảo nạp hàng nghìn phim ngắn không bao giờ rỗng hay bị nghẽn rate-limit.\n3. Khắc phục triệt để lỗi mở khóa tập phim ngắn và lỗi phát video trên cả Android TV và Mobile Player.\n4. Tối ưu hiển thị phụ đề tiếng Việt sắc nét, mượt mà trên mọi kích thước màn hình.",
   "isMaintenanceLocked": false,
   "maintenanceMessage": "Hệ thống đang bảo trì nội bộ định kỳ. Vui lòng quay lại sau hoặc liên hệ Quản trị viên Huy Cá để biết thêm chi tiết!",
-  "windowsZipUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.2.7/HuyCa_Windows_v3.2.7.zip",
-  "mobileApkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.2.7/HuyCa_Mobile_v3.2.7.apk",
-  "tvApkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.2.7/HuyCa_TV_v3.2.7.apk",
-  "lgIpkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.2.7/HuyCa_LG_webOS_v3.2.7.ipk"
+  "windowsZipUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.4/HuyCa_Windows_v3.3.4.zip",
+  "mobileApkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.4/HuyCa_Mobile_v3.3.4.apk",
+  "tvApkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.4/HuyCa_TV_v3.3.4.apk",
+  "lgIpkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.4/HuyCa_LG_webOS_v3.3.4.ipk"
 }

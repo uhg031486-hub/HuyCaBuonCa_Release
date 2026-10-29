@@ -321,7 +321,7 @@ class DetailActivity : AppCompatActivity() {
             if (tokens.size >= 3) {
                 binding.progressEpisodes.visibility = View.VISIBLE
                 lifecycleScope.launch {
-                    val res = MovieRepository.unlockFreeReelsEpisode(tokens[1], tokens[2])
+                    val res = MovieRepository.unlockFreeReelsEpisode(tokens[1].removePrefix("freereels:"), tokens[2])
                     binding.progressEpisodes.visibility = View.GONE
                     if (res != null && res.streamUrl.isNotEmpty()) {
                         val intent = Intent(this@DetailActivity, PlayerActivity::class.java).apply {

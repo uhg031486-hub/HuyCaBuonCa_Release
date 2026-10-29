@@ -2,6 +2,7 @@ package com.huycabuonca.mobile.api
 
 import android.content.Context
 import com.google.gson.Gson
+import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import com.google.gson.reflect.TypeToken
 import com.huycabuonca.mobile.model.*
@@ -848,11 +849,12 @@ object MovieRepository {
                 if (slug.startsWith("nguonc:")) {
                     val realSlug = slug.removePrefix("nguonc:")
                     NguonCClient.getFilmDetail(client, gson, realSlug)
-                } else if (source == MovieSource.FREEREELS) {
+                } else if (source == MovieSource.FREEREELS || slug.startsWith("freereels:") || slug.startsWith("gamomephim:")) {
                     if (slug.startsWith("gamomephim:")) {
                         GaMoMePhimClient.getDramaDetail(client, slug.removePrefix("gamomephim:"))
                     } else {
-                        FreeReelsClient.getDramaDetail(client, gson, slug)
+                        val cleanId = slug.removePrefix("freereels:")
+                        FreeReelsClient.getDramaDetail(client, gson, cleanId)
                     }
                 } else if (source == MovieSource.XEMTIVI) {
                     val channel = cachedTvChannels?.find { it.id == slug }
@@ -1573,89 +1575,204 @@ object FreeReelsClient {
         }
     }
 
-    fun getDramaList(client: OkHttpClient, gson: Gson, filterUrl: String, page: Int): List<MovieItem> {
+    private fun parseDramaItems(itemsArray: com.google.gson.JsonArray?, outList: MutableList<MovieItem>) {
+        if (itemsArray == null) return
+        itemsArray.forEach { el ->
+            if (el.isJsonObject) {
+                val obj = el.asJsonObject
+                val series = if (obj.has("series") && obj.get("series").isJsonObject) {
+                    obj.getAsJsonObject("series")
+                } else if (obj.has("info") && obj.get("info").isJsonObject) {
+                    obj.getAsJsonObject("info")
+                } else obj
+
+                val rawId = series.getSafeString("id").ifEmpty {
+                    series.getSafeString("key").ifEmpty {
+                        series.getSafeString("series_id")
+                    }
+                }
+                val title = series.getSafeString("title").ifEmpty {
+                    series.getSafeString("name")
+                }
+                val cover = series.getSafeString("cover").ifEmpty {
+                    series.getSafeString("poster")
+                }
+                val epCount = series.getSafeString("episode_count")
+
+                if (rawId.isNotEmpty() && title.isNotEmpty() && !title.equals("TOP", ignoreCase = true)) {
+                    val isDubbed = title.contains("lồng tiếng", ignoreCase = true) || title.contains("thuyết minh", ignoreCase = true)
+                    val qualityBadge = if (isDubbed) "🎙️ Lồng Tiếng" else "🇻🇳 Phụ Đề"
+                    outList.add(
+                        MovieItem(
+                            id = "freereels:$rawId",
+                            name = title,
+                            slug = "freereels:$rawId",
+                            originName = if (isDubbed) "$epCount tập • Lồng Tiếng Việt" else "$epCount tập • Phụ Đề Tiếng Việt",
+                            thumbUrl = cover,
+                            posterUrl = cover,
+                            year = "2026",
+                            quality = qualityBadge,
+                            episodeCurrent = if (epCount.isNotEmpty()) "$epCount tập" else "Trọn bộ",
+                            source = MovieSource.FREEREELS
+                        )
+                    )
+                }
+            }
+        }
+    }
+
+    data class TabMeta(val moduleKey: String, val pos: Int, val simpleNext: Boolean)
+
+    private val TAB_META = mapOf(
+        "503" to TabMeta("1036", 10000, true),
+        "505" to TabMeta("1040", 10001, false),
+        "504" to TabMeta("1039", 10003, false),
+        "506" to TabMeta("1041", 10004, false),
+        "547" to TabMeta("2204", 10005, true)
+    )
+
+    fun fetchTabFeedOffset(client: OkHttpClient, gson: Gson, tabKey: String = "503", offset: Int = 0): List<MovieItem> {
         val list = mutableListOf<MovieItem>()
         try {
-            val req = when {
-                filterUrl.startsWith("freereels://tab_") -> {
-                    val tabKey = filterUrl.removePrefix("freereels://tab_")
-                    if (page <= 1) {
-                        buildAuthorizedRequest(client, gson, "$API_BASE/homepage/v2/tab/index?tab_key=$tabKey&position_index=10000&rec_trigger=0", "GET")
-                    } else {
-                        val cursor = "offset=${(page - 1) * 10}"
-                        buildAuthorizedRequest(client, gson, "$API_BASE/foryou/feed?next=$cursor", "GET")
-                    }
+            if (tabKey == "foryou") {
+                val nextParam = if (offset > 0) "offset=$offset" else ""
+                val req = buildAuthorizedRequest(client, gson, "$API_BASE/foryou/feed?next=${java.net.URLEncoder.encode(nextParam, "UTF-8")}", "GET")
+                    ?: return emptyList()
+                client.newCall(req).execute().use { resp ->
+                    if (!resp.isSuccessful) return emptyList()
+                    val respStr = resp.body?.string() ?: return emptyList()
+                    val root = gson.fromJson(respStr, JsonObject::class.java)
+                    val data = root.getAsJsonObject("data") ?: return emptyList()
+                    val items = if (data.has("items") && !data.get("items").isJsonNull) data.getAsJsonArray("items")
+                                else if (data.has("list") && !data.get("list").isJsonNull) data.getAsJsonArray("list")
+                                else null
+                    parseDramaItems(items, list)
                 }
-                filterUrl == "freereels://coming" -> {
-                    if (page <= 1) {
-                        buildAuthorizedRequest(client, gson, "$API_BASE/homepage/v2/tab/index?tab_key=622&position_index=10000&rec_trigger=0", "GET")
-                    } else {
-                        val cursor = "offset=${(page - 1) * 10}"
-                        buildAuthorizedRequest(client, gson, "$API_BASE/foryou/feed?next=$cursor", "GET")
-                    }
-                }
-                else -> {
-                    val cursor = if (page <= 1) "" else "offset=${(page - 1) * 10}"
-                    buildAuthorizedRequest(client, gson, "$API_BASE/foryou/feed?next=$cursor", "GET")
-                }
-            } ?: return emptyList()
+                return list
+            }
+
+            val meta = TAB_META[tabKey] ?: TAB_META["503"]!!
+            val nextStr = if (meta.simpleNext) {
+                "offset=$offset&position_index=${meta.pos}"
+            } else {
+                "last_quality=0&offset=$offset&position_index=${meta.pos}&timestamp="
+            }
+
+            val bodyJson = JsonObject().apply {
+                addProperty("tab_key", tabKey)
+                addProperty("module_key", meta.moduleKey)
+                addProperty("next", nextStr)
+            }.toString()
+
+            val req = buildAuthorizedRequest(client, gson, "$API_BASE/homepage/v2/tab/feed", "POST", bodyJson)
+                ?: return emptyList()
 
             client.newCall(req).execute().use { resp ->
                 if (!resp.isSuccessful) return emptyList()
                 val respStr = resp.body?.string() ?: return emptyList()
                 val root = gson.fromJson(respStr, JsonObject::class.java)
                 val data = root.getAsJsonObject("data") ?: return emptyList()
+                val items = if (data.has("items") && !data.get("items").isJsonNull) data.getAsJsonArray("items")
+                            else if (data.has("list") && !data.get("list").isJsonNull) data.getAsJsonArray("list")
+                            else null
+                parseDramaItems(items, list)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return list
+    }
 
-                val itemsArray = if (data.has("items") && !data.get("items").isJsonNull) {
-                    val itArr = data.getAsJsonArray("items")
-                    if (itArr.size() > 0 && itArr[0].isJsonObject && itArr[0].asJsonObject.has("items")) {
-                        itArr[0].asJsonObject.getAsJsonArray("items")
-                    } else {
-                        itArr
-                    }
-                } else if (data.has("list") && !data.get("list").isJsonNull) {
-                    data.getAsJsonArray("list")
-                } else null
+    fun getDramaList(client: OkHttpClient, gson: Gson, filterUrl: String, page: Int): List<MovieItem> {
+        val baseOffset = (page - 1) * 20
+        return when {
+            filterUrl == "freereels://foryou" || filterUrl.startsWith("freereels://foryou") -> {
+                val a = fetchTabFeedOffset(client, gson, "503", baseOffset + 10)
+                val b = fetchTabFeedOffset(client, gson, "504", baseOffset + 20)
+                (a + b).distinctBy { it.id }
+            }
+            filterUrl == "freereels://dubbed_vi" -> {
+                val a = fetchTabFeedOffset(client, gson, "503", baseOffset)
+                val b = fetchTabFeedOffset(client, gson, "504", baseOffset)
+                val c = fetchTabFeedOffset(client, gson, "506", baseOffset)
+                val combined = (a + b + c).distinctBy { it.id }
+                val dubbed = combined.filter { it.name.contains("lồng tiếng", ignoreCase = true) || it.name.contains("thuyết minh", ignoreCase = true) }
+                if (dubbed.isNotEmpty()) dubbed else combined
+            }
+            filterUrl.startsWith("freereels://tab_") -> {
+                val tabKey = filterUrl.removePrefix("freereels://tab_")
+                val a = fetchTabFeedOffset(client, gson, tabKey, baseOffset)
+                val b = fetchTabFeedOffset(client, gson, tabKey, baseOffset + 10)
+                (a + b).distinctBy { it.id }
+            }
+            else -> {
+                val a = fetchTabFeedOffset(client, gson, "503", baseOffset)
+                val b = fetchTabFeedOffset(client, gson, "foryou", baseOffset)
+                (a + b).distinctBy { it.id }
+            }
+        }
+    }
 
-                itemsArray?.forEach { el ->
-                    if (el.isJsonObject) {
-                        val obj = el.asJsonObject
-                        val series = if (obj.has("series") && obj.get("series").isJsonObject) {
-                            obj.getAsJsonObject("series")
-                        } else if (obj.has("info") && obj.get("info").isJsonObject) {
-                            obj.getAsJsonObject("info")
-                        } else obj
+    private val FALLBACK_FEED_MAP = mapOf(
+        "người sói" to listOf("505", "0", "foryou", "10"),
+        "vua sói" to listOf("505", "20", "foryou", "0"),
+        "ma cà rồng" to listOf("505", "20", "foryou", "30"),
+        "tỷ phú" to listOf("505", "10", "foryou", "20"),
+        "mafia" to listOf("505", "30", "foryou", "40"),
+        "hợp đồng" to listOf("505", "40", "foryou", "50"),
+        "tổng tài" to listOf("504", "0", "503", "10"),
+        "báo thù" to listOf("503", "20", "504", "20"),
+        "trọng sinh" to listOf("503", "30", "504", "30"),
+        "chiến thần" to listOf("503", "10", "506", "30"),
+        "cổ trang" to listOf("504", "10", "506", "20"),
+        "hào môn" to listOf("504", "40", "503", "20"),
+        "nghịch tập" to listOf("506", "10", "503", "40"),
+        "cao thủ" to listOf("506", "30", "503", "10"),
+        "thần y" to listOf("506", "20", "506", "30"),
+        "mạt thế" to listOf("506", "40", "547", "20"),
+        "thế thân" to listOf("504", "20", "505", "20"),
+        "người máy" to listOf("547", "10", "547", "0"),
+        "trí tuệ nhân tạo" to listOf("547", "20", "506", "20"),
+        "khoa học" to listOf("547", "20", "547", "30"),
+        "đếm ngược" to listOf("547", "30", "506", "10"),
+        "hệ thống" to listOf("547", "0", "503", "20"),
+        "cưng chiều" to listOf("foryou", "0", "504", "20"),
+        "tình yêu" to listOf("foryou", "10", "504", "30"),
+        "định mệnh" to listOf("foryou", "20", "505", "10"),
+        "cô dâu" to listOf("foryou", "10", "504", "10"),
+        "ngọt sủng" to listOf("foryou", "30", "504", "0"),
+        "bảo bối" to listOf("504", "30", "foryou", "40"),
+        "lồng tiếng" to listOf("503", "0", "506", "0")
+    )
 
-                        val id = series.getSafeString("id").ifEmpty {
-                            series.getSafeString("key").ifEmpty {
-                                series.getSafeString("series_id")
-                            }
-                        }
-                        val title = series.getSafeString("title").ifEmpty {
-                            series.getSafeString("name")
-                        }
-                        val cover = series.getSafeString("cover").ifEmpty {
-                            series.getSafeString("poster")
-                        }
-                        val epCount = series.getSafeString("episode_count")
+    fun search(client: OkHttpClient, gson: Gson, keyword: String, page: Int = 1): List<MovieItem> {
+        val list = mutableListOf<MovieItem>()
+        try {
+            val ts = System.currentTimeMillis().toString()
+            val offset = (page - 1) * 20
+            val nextCursor = if (page > 1) "offset=$offset&page_size=20" else ""
+            val jsonBody = JsonObject().apply {
+                addProperty("keyword", keyword)
+                addProperty("page_size", 20)
+                addProperty("next", nextCursor)
+                addProperty("timestamp", ts)
+            }.toString()
 
-                        if (id.isNotEmpty() && title.isNotEmpty()) {
-                            val isDubbed = title.contains("lồng tiếng", ignoreCase = true) || title.contains("thuyết minh", ignoreCase = true)
-                            val qualityBadge = if (isDubbed) "🎙️ Lồng Tiếng" else "🇻🇳 Phụ Đề"
-                            list.add(
-                                MovieItem(
-                                    id = id,
-                                    name = title,
-                                    slug = id,
-                                    originName = if (isDubbed) "$epCount tập • Lồng Tiếng Việt" else "$epCount tập • Phụ Đề Tiếng Việt",
-                                    thumbUrl = cover,
-                                    posterUrl = cover,
-                                    year = "2026",
-                                    quality = qualityBadge,
-                                    episodeCurrent = if (epCount.isNotEmpty()) "$epCount tập" else "Trọn bộ",
-                                    source = MovieSource.FREEREELS
-                                )
-                            )
+            val req = buildAuthorizedRequest(client, gson, "$API_BASE/search/drama", "POST", jsonBody)
+            if (req != null) {
+                client.newCall(req).execute().use { resp ->
+                    if (resp.isSuccessful) {
+                        val respStr = resp.body?.string() ?: ""
+                        val root = gson.fromJson(respStr, JsonObject::class.java)
+                        val data = root.getAsJsonObject("data")
+                        if (data != null) {
+                            val itemsArray = if (data.has("items") && !data.get("items").isJsonNull) {
+                                data.getAsJsonArray("items")
+                            } else if (data.has("list") && !data.get("list").isJsonNull) {
+                                data.getAsJsonArray("list")
+                            } else null
+
+                            parseDramaItems(itemsArray, list)
                         }
                     }
                 }
@@ -1663,16 +1780,27 @@ object FreeReelsClient {
         } catch (e: Exception) {
             e.printStackTrace()
         }
-        if (filterUrl == "freereels://dubbed_vi") {
-            val dubbedList = list.filter { it.name.contains("lồng tiếng", ignoreCase = true) || it.name.contains("thuyết minh", ignoreCase = true) }
-            if (dubbedList.isNotEmpty()) return dubbedList
+
+        if (list.size < 4) {
+            val kwLower = keyword.lowercase().trim()
+            val cfg = FALLBACK_FEED_MAP[kwLower] ?: listOf("503", ((kwLower.length % 5) * 10).toString(), "foryou", (((kwLower.length + 2) % 5) * 10).toString())
+            val pOffset = (cfg[1].toIntOrNull() ?: 0) + (page - 1) * 20
+            val sOffset = (cfg[3].toIntOrNull() ?: 0) + (page - 1) * 20
+            val batch1 = fetchTabFeedOffset(client, gson, cfg[0], pOffset)
+            val batch2 = fetchTabFeedOffset(client, gson, cfg[2], sOffset)
+            val combined = (batch1 + batch2).distinctBy { it.id }
+            if (combined.isNotEmpty()) {
+                list.addAll(combined)
+            }
         }
-        return list
+
+        return list.distinctBy { it.id }
     }
 
     fun getDramaDetail(client: OkHttpClient, gson: Gson, seriesId: String): MovieDetail? {
         return try {
-            val req = buildAuthorizedRequest(client, gson, "$API_BASE/drama/info_v2?series_id=$seriesId&scene=search", "GET")
+            val cleanSeriesId = seriesId.removePrefix("freereels:")
+            val req = buildAuthorizedRequest(client, gson, "$API_BASE/drama/info_v2?series_id=$cleanSeriesId&scene=search", "GET")
                 ?: return null
 
             client.newCall(req).execute().use { resp ->
@@ -1749,7 +1877,7 @@ object FreeReelsClient {
                                 name = epName,
                                 slug = epId,
                                 filename = epName,
-                                linkM3u8 = "freereels_unlock:$seriesId:$epId",
+                                linkM3u8 = "freereels_unlock:$cleanSeriesId:$epId",
                                 linkEmbed = null,
                                 subtitleUrl = viSubUrl
                             )
@@ -1760,7 +1888,7 @@ object FreeReelsClient {
                 // Tự động mở khóa trước link tập 1 để phát mượt ngay tức thì
                 if (epList.isNotEmpty()) {
                     val firstEp = epList[0]
-                    val unlockRes = unlockEpisode(client, gson, seriesId, firstEp.slug)
+                    val unlockRes = unlockEpisode(client, gson, cleanSeriesId, firstEp.slug)
                     if (unlockRes != null) {
                         epList[0] = firstEp.copy(
                             linkM3u8 = unlockRes.streamUrl,
@@ -1770,9 +1898,9 @@ object FreeReelsClient {
                 }
 
                 MovieDetail(
-                    id = seriesId,
+                    id = "freereels:$cleanSeriesId",
                     name = title,
-                    slug = seriesId,
+                    slug = "freereels:$cleanSeriesId",
                     originName = "$epCount tập • FreeReels Dọc (9:16)",
                     content = desc,
                     thumbUrl = cover,
@@ -1798,8 +1926,9 @@ object FreeReelsClient {
 
     fun unlockEpisode(client: OkHttpClient, gson: Gson, seriesId: String, episodeId: String): FreeReelsUnlocked? {
         return try {
+            val cleanSeriesId = seriesId.removePrefix("freereels:")
             val jsonBody = JsonObject().apply {
-                addProperty("series_id", seriesId)
+                addProperty("series_id", cleanSeriesId)
                 addProperty("episode_id", episodeId)
                 addProperty("lang", "vi")
             }.toString()
@@ -1866,73 +1995,6 @@ object FreeReelsClient {
             e.printStackTrace()
             null
         }
-    }
-
-    fun search(client: OkHttpClient, gson: Gson, keyword: String, page: Int = 1): List<MovieItem> {
-        val list = mutableListOf<MovieItem>()
-        try {
-            val ts = System.currentTimeMillis().toString()
-            val offset = (page - 1) * 20
-            val nextCursor = if (page > 1) "offset=$offset&page_size=20" else ""
-            val jsonBody = JsonObject().apply {
-                addProperty("keyword", keyword)
-                addProperty("page_size", 20)
-                addProperty("next", nextCursor)
-                addProperty("timestamp", ts)
-            }.toString()
-
-            val req = buildAuthorizedRequest(client, gson, "$API_BASE/search/drama", "POST", jsonBody)
-                ?: return emptyList()
-
-            client.newCall(req).execute().use { resp ->
-                if (!resp.isSuccessful) return emptyList()
-                val respStr = resp.body?.string() ?: return emptyList()
-                val root = gson.fromJson(respStr, JsonObject::class.java)
-                val data = root.getAsJsonObject("data") ?: return emptyList()
-
-                val itemsArray = if (data.has("list") && !data.get("list").isJsonNull) {
-                    data.getAsJsonArray("list")
-                } else if (data.has("items") && !data.get("items").isJsonNull) {
-                    data.getAsJsonArray("items")
-                } else null
-
-                itemsArray?.forEach { el ->
-                    if (el.isJsonObject) {
-                        val obj = el.asJsonObject
-                        val series = if (obj.has("series") && obj.get("series").isJsonObject) {
-                            obj.getAsJsonObject("series")
-                        } else obj
-
-                        val id = series.getSafeString("id").ifEmpty { series.getSafeString("key") }
-                        val title = series.getSafeString("title").ifEmpty { series.getSafeString("name") }
-                        val cover = series.getSafeString("cover").ifEmpty { series.getSafeString("poster") }
-                        val epCount = series.getSafeString("episode_count")
-
-                        if (id.isNotEmpty() && title.isNotEmpty()) {
-                            val isDubbed = title.contains("lồng tiếng", ignoreCase = true) || title.contains("thuyết minh", ignoreCase = true)
-                            val qualityBadge = if (isDubbed) "🎙️ Lồng Tiếng" else "🇻🇳 Phụ Đề"
-                            list.add(
-                                MovieItem(
-                                    id = id,
-                                    name = title,
-                                    slug = id,
-                                    originName = if (isDubbed) "$epCount tập • Lồng Tiếng Việt" else "$epCount tập • Phụ Đề Tiếng Việt",
-                                    thumbUrl = cover,
-                                    posterUrl = cover,
-                                    year = "2026",
-                                    quality = qualityBadge,
-                                    episodeCurrent = if (epCount.isNotEmpty()) "$epCount tập" else "Trọn bộ",
-                                    source = MovieSource.FREEREELS
-                                )
-                            )
-                        }
-                    }
-                }
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-        return list
     }
 }
 

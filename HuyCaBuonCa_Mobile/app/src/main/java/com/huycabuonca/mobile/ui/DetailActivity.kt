@@ -1128,7 +1128,7 @@ class DetailActivity : AppCompatActivity() {
         if (streamUrl.startsWith("freereels_unlock:")) {
             val tokens = streamUrl.split(":")
             if (tokens.size >= 3) {
-                val sId = tokens[1]
+                val sId = tokens[1].removePrefix("freereels:")
                 val epId = tokens[2]
                 binding.playerLoading.visibility = View.VISIBLE
                 lifecycleScope.launch {

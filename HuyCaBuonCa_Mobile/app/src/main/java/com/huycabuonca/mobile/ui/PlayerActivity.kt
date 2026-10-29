@@ -18,6 +18,8 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -166,7 +168,33 @@ class PlayerActivity : AppCompatActivity() {
 
         binding.txtPlayerTitle.text = if (episode.isNotEmpty()) "$title - $episode" else title
 
-        if (isM3u8) {
+        if (streamUrl.startsWith("freereels_unlock:")) {
+            val tokens = streamUrl.split(":")
+            if (tokens.size >= 3) {
+                val sId = tokens[1].removePrefix("freereels:")
+                val epId = tokens[2]
+                binding.playerProgress.visibility = View.VISIBLE
+                lifecycleScope.launch {
+                    val res = MovieRepository.unlockFreeReelsEpisode(sId, epId)
+                    binding.playerProgress.visibility = View.GONE
+                    if (res != null && res.streamUrl.isNotEmpty()) {
+                        initExoPlayer(res.streamUrl, res.subtitleUrl ?: subtitleUrl)
+                    } else {
+                        Toast.makeText(this@PlayerActivity, "Không thể tải tập phim ngắn này", Toast.LENGTH_SHORT).show()
+                    }
+                }
+                return
+            }
+        }
+
+        if (streamUrl.contains("streamc.xyz") || streamUrl.contains("embed.php")) {
+            val cleanM3u8 = "https://huyca.pages.dev/api/nguonc_stream?url=${java.net.URLEncoder.encode(streamUrl, "UTF-8")}"
+            initExoPlayer(cleanM3u8, subtitleUrl)
+            return
+        }
+
+        val isExo = isM3u8 || streamUrl.contains(".m3u8", ignoreCase = true) || streamUrl.contains(".mp4", ignoreCase = true) || streamUrl.contains("gamomephim")
+        if (isExo) {
             initExoPlayer(streamUrl, subtitleUrl)
         } else {
             initWebViewPlayer(streamUrl)

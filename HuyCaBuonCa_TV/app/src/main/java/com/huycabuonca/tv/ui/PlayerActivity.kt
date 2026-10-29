@@ -165,10 +165,26 @@ class PlayerActivity : AppCompatActivity() {
 
         val subtitleUrl = intent.getStringExtra("EXTRA_SUBTITLE_URL")
 
-        if (streamUrl.contains("streamc.xyz") || streamUrl.contains("embed.php")) {
+        if (streamUrl.startsWith("freereels_unlock:")) {
+            val tokens = streamUrl.split(":")
+            if (tokens.size >= 3) {
+                val sId = tokens[1].removePrefix("freereels:")
+                val epId = tokens[2]
+                binding.playerProgress.visibility = View.VISIBLE
+                lifecycleScope.launch {
+                    val res = MovieRepository.unlockFreeReelsEpisode(sId, epId)
+                    binding.playerProgress.visibility = View.GONE
+                    if (res != null && res.streamUrl.isNotEmpty()) {
+                        initExoPlayer(res.streamUrl, res.subtitleUrl ?: subtitleUrl)
+                    } else {
+                        Toast.makeText(this@PlayerActivity, "Không thể tải tập phim ngắn này", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        } else if (streamUrl.contains("streamc.xyz") || streamUrl.contains("embed.php")) {
             val cleanM3u8 = "https://huyca.pages.dev/api/nguonc_stream?url=${java.net.URLEncoder.encode(streamUrl, "UTF-8")}"
             initExoPlayer(cleanM3u8, subtitleUrl)
-        } else if (isM3u8) {
+        } else if (isM3u8 || streamUrl.contains(".m3u8") || streamUrl.contains(".mp4") || streamUrl.contains("gamomephim")) {
             initExoPlayer(streamUrl, subtitleUrl)
         } else {
             initWebViewPlayer(streamUrl)
@@ -405,7 +421,7 @@ class PlayerActivity : AppCompatActivity() {
             if (tokens.size >= 3) {
                 binding.playerProgress.visibility = View.VISIBLE
                 lifecycleScope.launch {
-                    val res = MovieRepository.unlockFreeReelsEpisode(tokens[1], tokens[2])
+                    val res = MovieRepository.unlockFreeReelsEpisode(tokens[1].removePrefix("freereels:"), tokens[2])
                     binding.playerProgress.visibility = View.GONE
                     if (res != null && res.streamUrl.isNotEmpty()) {
                         initExoPlayer(res.streamUrl, res.subtitleUrl ?: episode.subtitleUrl)
@@ -423,7 +439,7 @@ class PlayerActivity : AppCompatActivity() {
             return
         }
 
-        if (episode.linkM3u8 != null || streamUrl.contains(".m3u8")) {
+        if (episode.linkM3u8 != null || streamUrl.contains(".m3u8") || streamUrl.contains(".mp4") || streamUrl.contains("gamomephim")) {
             initExoPlayer(streamUrl, episode.subtitleUrl)
         } else {
             initWebViewPlayer(streamUrl)
