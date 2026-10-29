@@ -1,11 +1,11 @@
 {
-  "versionCode": 25,
-  "versionName": "3.3.1",
-  "title": "Bản Cập Nhật Huy Cá v3.3.1",
-  "changelog": "1. Khắc phục triệt để lỗi phân loại Anime & Phim Ngắn (chấm dứt tình trạng ngồi nhầm lớp).\n2. Bổ sung thanh chọn Server Phụ Đề / Thuyết Minh / Lồng Tiếng trên Android TV.\n3. Nâng cấp trải nghiệm D-Pad và đồng bộ đa nền tảng.",
-  "apkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.1/HuyCa_TV_v3.3.1.apk",
-  "mobileApkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.1/HuyCa_Mobile_v3.3.1.apk",
-  "lgIpkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.1/HuyCa_LG_webOS_v3.3.1.ipk",
-  "windowsZipUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.1/HuyCa_Windows_v3.3.1.zip",
+  "versionCode": 26,
+  "versionName": "3.3.2",
+  "title": "Bản Cập Nhật Huy Cá v3.3.2",
+  "changelog": "1. Nâng cấp lịch thi đấu bóng đá: Hiển thị đầy đủ 2 biểu tượng (logo Đội Nhà & Đội Khách), chữ VS và giờ thi đấu chuẩn quốc tế.\n2. Tối ưu giao diện thẻ trận đấu và modal chọn 4 Server trực tiếp.\n3. Đồng bộ hoàn hảo đa nền tảng.",
+  "apkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.2/HuyCa_TV_v3.3.2.apk",
+  "mobileApkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.2/HuyCa_Mobile_v3.3.2.apk",
+  "lgIpkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.2/HuyCa_LG_webOS_v3.3.2.ipk",
+  "windowsZipUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.2/HuyCa_Windows_v3.3.2.zip",
   "forceUpdate": false
 }
