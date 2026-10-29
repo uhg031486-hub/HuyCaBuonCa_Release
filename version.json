@@ -1,12 +1,11 @@
 {
-  "versionCode": 26,
-  "versionName": "3.3.2",
-  "title": "Bản Cập Nhật Huy Cá v3.3.2",
-  "changelog": "1. Nâng cấp lịch thi đấu bóng đá: Hiển thị đầy đủ 2 biểu tượng (logo Đội Nhà & Đội Khách), chữ VS và giờ thi đấu chuẩn quốc tế.\n2. Tối ưu giao diện thẻ trận đấu và modal chọn 4 Server trực tiếp.\n3. Khắc phục triệt để tính năng tự động hỏi cập nhật trên Smart TV v2.8.",
-  "tvApkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.2/HuyCa_TV_v3.3.2.apk",
-  "apkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.2/HuyCa_TV_v3.3.2.apk",
-  "mobileApkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.2/HuyCa_Mobile_v3.3.2.apk",
-  "lgIpkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.2/HuyCa_LG_webOS_v3.3.2.ipk",
-  "windowsZipUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.2/HuyCa_Windows_v3.3.2.zip",
+  "versionCode": 27,
+  "versionName": "3.3.3",
+  "title": "Bản Cập Nhật Huy Cá v3.3.3",
+  "changelog": "1. Bổ sung đầy đủ 17 bộ lọc chuyên sâu cho kho Phim Ngắn Gà Mờ Mê Phim.\n2. Phân trang vô cực thông minh: Cuộn kéo phim mượt mà không bao giờ thiếu phim.\n3. Khắc phục triệt để hiển thị phụ đề tiếng Việt phim ngắn.\n4. Đồng bộ hoàn hảo đa nền tảng.",
+  "apkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.3/HuyCa_TV_v3.3.3.apk",
+  "mobileApkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.3/HuyCa_Mobile_v3.3.3.apk",
+  "lgIpkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.3/HuyCa_LG_webOS_v3.3.3.ipk",
+  "windowsZipUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.3/HuyCa_Windows_v3.3.3.zip",
   "forceUpdate": false
 }
