@@ -78,7 +78,7 @@ object AppUpdateManager {
                     val remoteVersionName = json.optString("versionName", "")
                     val title = json.optString("title", "Phiên bản mới")
                     val changelog = json.optString("changelog", "Cải tiến hiệu năng và cập nhật tính năng mới.")
-                    val apkUrl = json.optString("tvApkUrl", "")
+                    val apkUrl = json.optString("tvApkUrl").ifEmpty { json.optString("apkUrl", "") }
                     val isMaintenanceLocked = json.optBoolean("isMaintenanceLocked", false)
                     val maintenanceMessage = json.optString("maintenanceMessage", "Hệ thống đang bảo trì nội bộ. Vui lòng quay lại sau!")
 
