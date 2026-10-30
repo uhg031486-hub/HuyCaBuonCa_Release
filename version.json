@@ -1,11 +1,11 @@
 {
-  "versionCode": 30,
-  "versionName": "3.3.6",
-  "title": "Bản Cập Nhật Huy Cá v3.3.6",
-  "changelog": "1. Chuẩn hóa và hiển thị 100% icon sắc nét cho toàn bộ 152 kênh truyền hình (mỗi kênh 1 icon riêng biệt).\n2. Tích hợp trực tiếp 77+ logo PNG chất lượng cao vào asset cục bộ giúp nạp icon tức thì (0ms latency).\n3. Khắc phục triệt để lỗi link logo Wikimedia 400 và iptv-org 404.\n4. Đồng bộ trải nghiệm giao diện xem Tivi hoàn hảo trên Android TV, Mobile, LG webOS và Windows.",
-  "apkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.6/HuyCa_TV_v3.3.6.apk",
-  "mobileApkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.6/HuyCa_Mobile_v3.3.6.apk",
-  "lgIpkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.6/HuyCa_LG_webOS_v3.3.6.ipk",
-  "windowsZipUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.6/HuyCa_Windows_v3.3.6.zip",
+  "versionCode": 31,
+  "versionName": "3.3.7",
+  "title": "Bản Cập Nhật Huy Cá v3.3.7",
+  "changelog": "1. Khắc phục triệt để lỗi chạm màn hình video trên thiết bị di động không hiển thị thanh điều hướng/controls.\n2. Chuẩn hóa cơ chế xử lý cảm ứng (Touch & Click Ergonomics) tách biệt cử chỉ chạm TAP và vuốt, ngăn chặn hoàn toàn xung đột synthetic mousemove.\n3. Bổ sung thanh điều khiển Thoát & Chọn Tập phim nổi bật cho trình phát nhúng Embed Iframe trên điện thoại.\n4. Đồng bộ hoàn hảo trên Android TV, Mobile, LG webOS, Windows và Web.",
+  "apkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.7/HuyCa_TV_v3.3.7.apk",
+  "mobileApkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.7/HuyCa_Mobile_v3.3.7.apk",
+  "lgIpkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.7/HuyCa_LG_webOS_v3.3.7.ipk",
+  "windowsZipUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.7/HuyCa_Windows_v3.3.7.zip",
   "forceUpdate": false
 }
