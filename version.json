@@ -1,12 +1,13 @@
 {
-  "versionCode": 30,
-  "versionName": "3.3.6",
-  "title": "Huy Cá v3.3.6 - Sửa Triệt Để Lỗi Phát Video & Phụ Đề ExoPlayer Cho Tất Cả Các Nguồn Phim Ngắn",
-  "changelog": "1. Khắc phục triệt để lỗi ExoPlayer Playback Error (Legacy decoding is disabled) trên Android TV và Mobile khi phát phim ngắn có phụ đề.\n2. Tích hợp cơ chế tự động giải mã phụ đề cũ và cơ chế Fallback an toàn tự phục hồi luồng video.\n3. Đồng bộ hóa nguồn Gà Mờ Mê Phim, nhận diện chính xác luồng stream MP4 Thuyết Minh và Vietsub trực tiếp từ Cloudflare R2.\n4. Đảm bảo 100% tất cả 7 sub-sources (ReelShort, DramaBox, ShortMax, FreeReels Gốc, Gà Mờ Mê Phim, AI Cinema, GoodShort) nạp mượt mà và phát trơn tru.",
+  "versionCode": 31,
+  "versionName": "3.3.7",
+  "title": "Bản Cập Nhật Huy Cá v3.3.7",
+  "changelog": "1. Khắc phục triệt để lỗi chạm màn hình video trên thiết bị di động không hiển thị thanh điều hướng/controls.\n2. Chuẩn hóa cơ chế xử lý cảm ứng (Touch & Click Ergonomics) tách biệt cử chỉ chạm TAP và vuốt, ngăn chặn hoàn toàn xung đột synthetic mousemove.\n3. Bổ sung thanh điều khiển Thoát & Chọn Tập phim nổi bật cho trình phát nhúng Embed Iframe trên điện thoại.\n4. Đồng bộ hoàn hảo trên Android TV, Mobile, LG webOS, Windows và Web.",
   "isMaintenanceLocked": false,
   "maintenanceMessage": "Hệ thống đang bảo trì định kỳ. Vui lòng quay lại sau!",
-  "windowsZipUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.6/HuyCa_Windows_v3.3.6.zip",
-  "mobileApkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.6/HuyCa_Mobile_v3.3.6.apk",
+  "windowsZipUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.7/HuyCa_Windows_v3.3.7.zip",
+  "mobileApkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.7/HuyCa_Mobile_v3.3.7.apk",
   "tvApkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.6/HuyCa_TV_v3.3.6.apk",
-  "lgIpkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.6/HuyCa_LG_webOS_v3.3.6.ipk"
+  "lgIpkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.7/HuyCa_LG_webOS_v3.3.7.ipk",
+  "apkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.7/HuyCa_TV_v3.3.7.apk"
 }

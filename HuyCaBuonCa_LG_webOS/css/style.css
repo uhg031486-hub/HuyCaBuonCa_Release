@@ -3658,6 +3658,16 @@ video#videoPlayer::cue {
   text-decoration: none;
   transition: all 0.2s ease;
 }
+.btn-embed-back {
+  background: rgba(239, 68, 68, 0.25) !important;
+  border-color: #ef4444 !important;
+  color: #fca5a5 !important;
+  font-weight: 800 !important;
+}
+.btn-embed-back:hover, .btn-embed-back:focus {
+  background: #dc2626 !important;
+  color: #ffffff !important;
+}
 .btn-embed-action:hover, .btn-embed-action:focus {
   background: var(--accent-red, #e50914);
   border-color: var(--accent-red, #e50914);
