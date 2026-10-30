@@ -1,11 +1,11 @@
 {
-  "versionCode": 29,
-  "versionName": "3.3.5",
-  "title": "Bản Cập Nhật Huy Cá v3.3.5",
-  "changelog": "1. Khắc phục triệt để lỗi phát video và phụ đề SRT/VTT trên Media3 ExoPlayer cho toàn bộ kho Phim Ngắn.\n2. Tối ưu bộ giải mã Cloudflare R2 cho Gà Mờ Mê Phim (đầy đủ Thuyết Minh & Vietsub).\n3. Tăng cường độ ổn định cho FreeReels và 7 Sub-sources (ReelShort, DramaBox, ShortMax, GoodShort, AI Cinema...).\n4. Đảm bảo trải nghiệm xem phim ngắn đồng bộ hoàn hảo trên cả Android TV và Mobile.",
-  "apkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.5/HuyCa_TV_v3.3.5.apk",
-  "mobileApkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.5/HuyCa_Mobile_v3.3.5.apk",
-  "lgIpkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.5/HuyCa_LG_webOS_v3.3.5.ipk",
-  "windowsZipUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.5/HuyCa_Windows_v3.3.5.zip",
+  "versionCode": 30,
+  "versionName": "3.3.6",
+  "title": "Bản Cập Nhật Huy Cá v3.3.6",
+  "changelog": "1. Chuẩn hóa và hiển thị 100% icon sắc nét cho toàn bộ 152 kênh truyền hình (mỗi kênh 1 icon riêng biệt).\n2. Tích hợp trực tiếp 77+ logo PNG chất lượng cao vào asset cục bộ giúp nạp icon tức thì (0ms latency).\n3. Khắc phục triệt để lỗi link logo Wikimedia 400 và iptv-org 404.\n4. Đồng bộ trải nghiệm giao diện xem Tivi hoàn hảo trên Android TV, Mobile, LG webOS và Windows.",
+  "apkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.6/HuyCa_TV_v3.3.6.apk",
+  "mobileApkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.6/HuyCa_Mobile_v3.3.6.apk",
+  "lgIpkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.6/HuyCa_LG_webOS_v3.3.6.ipk",
+  "windowsZipUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.6/HuyCa_Windows_v3.3.6.zip",
   "forceUpdate": false
 }
