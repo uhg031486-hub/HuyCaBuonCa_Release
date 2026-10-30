@@ -1,11 +1,11 @@
 {
-  "versionCode": 28,
-  "versionName": "3.3.4",
-  "title": "Bản Cập Nhật Huy Cá v3.3.4",
-  "changelog": "1. Đồng bộ 100% kho Phim Ngắn FreeReels và 7 Sub-sources giữa Android và Web.\n2. Tích hợp cơ chế Fallback thông minh theo Tab Feed, nạp hàng ngàn phim không bị nghẽn.\n3. Khắc phục triệt để lỗi mở khóa tập phim ngắn và lỗi phát video trên Android TV và Mobile Player.\n4. Tối ưu hiển thị phụ đề tiếng Việt sắc nét trên mọi thiết bị.",
-  "apkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.4/HuyCa_TV_v3.3.4.apk",
-  "mobileApkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.4/HuyCa_Mobile_v3.3.4.apk",
-  "lgIpkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.4/HuyCa_LG_webOS_v3.3.4.ipk",
-  "windowsZipUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.4/HuyCa_Windows_v3.3.4.zip",
+  "versionCode": 29,
+  "versionName": "3.3.5",
+  "title": "Bản Cập Nhật Huy Cá v3.3.5",
+  "changelog": "1. Khắc phục triệt để lỗi phát video và phụ đề SRT/VTT trên Media3 ExoPlayer cho toàn bộ kho Phim Ngắn.\n2. Tối ưu bộ giải mã Cloudflare R2 cho Gà Mờ Mê Phim (đầy đủ Thuyết Minh & Vietsub).\n3. Tăng cường độ ổn định cho FreeReels và 7 Sub-sources (ReelShort, DramaBox, ShortMax, GoodShort, AI Cinema...).\n4. Đảm bảo trải nghiệm xem phim ngắn đồng bộ hoàn hảo trên cả Android TV và Mobile.",
+  "apkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.5/HuyCa_TV_v3.3.5.apk",
+  "mobileApkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.5/HuyCa_Mobile_v3.3.5.apk",
+  "lgIpkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.5/HuyCa_LG_webOS_v3.3.5.ipk",
+  "windowsZipUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.5/HuyCa_Windows_v3.3.5.zip",
   "forceUpdate": false
 }
