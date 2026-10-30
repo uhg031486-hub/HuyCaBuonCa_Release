@@ -12,6 +12,7 @@ import com.huycabuonca.mobile.databinding.ItemMovieBinding
 import com.huycabuonca.mobile.model.MovieItem
 import com.huycabuonca.mobile.model.MovieSource
 import com.huycabuonca.mobile.util.FavoriteMovieManager
+import com.huycabuonca.mobile.util.ImageResolver
 import com.huycabuonca.mobile.util.TvFocusUtil
 
 class MovieAdapter(
@@ -80,8 +81,8 @@ class MovieAdapter(
             binding.txtYear.text = "$yearText$epText"
             binding.txtQuality.text = if (item.quality.isNotEmpty()) item.quality else "HD"
 
-            val imgUrl = if (item.posterUrl.isNotEmpty()) item.posterUrl else item.thumbUrl
-            if (item.source == MovieSource.XEMTIVI) {
+            val isTv = item.source == MovieSource.XEMTIVI
+            if (isTv) {
                 binding.imgPoster.scaleType = android.widget.ImageView.ScaleType.FIT_CENTER
                 val pad = (6 * binding.imgPoster.context.resources.displayMetrics.density).toInt()
                 binding.imgPoster.setPadding(pad, pad, pad, pad)
@@ -89,19 +90,42 @@ class MovieAdapter(
                 binding.imgPoster.scaleType = android.widget.ImageView.ScaleType.CENTER_CROP
                 binding.imgPoster.setPadding(0, 0, 0, 0)
             }
+
             val defaultTvLogo = "file:///android_asset/logos/tv_default_premium.png"
-            val finalImgUrl = if (item.source == MovieSource.XEMTIVI) {
-                if (imgUrl.isNotEmpty()) imgUrl else defaultTvLogo
+            val defaultErrorRes = if (isTv) R.mipmap.ic_launcher else R.drawable.bg_btn_secondary
+
+            val primaryUrl = if (isTv) {
+                item.posterUrl.ifEmpty { item.thumbUrl }.ifEmpty { defaultTvLogo }
             } else {
-                imgUrl
+                ImageResolver.cleanAndResolve(item.posterUrl, item.thumbUrl)
             }
 
-            Glide.with(binding.imgPoster.context)
-                .load(finalImgUrl)
+            val fallbackUrl = if (isTv) {
+                defaultTvLogo
+            } else {
+                ImageResolver.cleanAndResolve(item.thumbUrl, item.posterUrl)
+            }
+
+            val primaryGlide = ImageResolver.buildGlideUrl(primaryUrl)
+            val fallbackGlide = ImageResolver.buildGlideUrl(fallbackUrl)
+
+            val fallbackRequest = if (fallbackUrl.isNotEmpty() && fallbackUrl != primaryUrl) {
+                Glide.with(binding.imgPoster.context)
+                    .load(fallbackGlide)
+                    .transition(DrawableTransitionOptions.withCrossFade())
+                    .error(defaultErrorRes)
+            } else null
+
+            val glideRequest = Glide.with(binding.imgPoster.context)
+                .load(primaryGlide)
                 .transition(DrawableTransitionOptions.withCrossFade())
                 .placeholder(R.drawable.bg_focus_card)
-                .error(if (item.source == MovieSource.XEMTIVI) R.mipmap.ic_launcher else R.drawable.bg_btn_secondary)
-                .into(binding.imgPoster)
+
+            if (fallbackRequest != null) {
+                glideRequest.error(fallbackRequest).into(binding.imgPoster)
+            } else {
+                glideRequest.error(defaultErrorRes).into(binding.imgPoster)
+            }
         }
     }
 }

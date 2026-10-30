@@ -20,6 +20,7 @@ import com.huycabuonca.tv.model.MovieItem
 import com.huycabuonca.tv.model.MovieSource
 import com.huycabuonca.tv.model.ServerGroup
 import com.huycabuonca.tv.ui.adapter.EpisodeAdapter
+import com.huycabuonca.tv.util.ImageResolver
 import com.huycabuonca.tv.util.TvFocusUtil
 import com.huycabuonca.tv.util.WatchHistoryManager
 import kotlinx.coroutines.launch
@@ -107,11 +108,26 @@ class DetailActivity : AppCompatActivity() {
             updateFavBtnText()
         }
 
-        val imgUrl = if (movie.posterUrl.isNotEmpty()) movie.posterUrl else movie.thumbUrl
-        Glide.with(this)
-            .load(imgUrl)
+        val primaryUrl = ImageResolver.cleanAndResolve(movie.posterUrl, movie.thumbUrl)
+        val fallbackUrl = ImageResolver.cleanAndResolve(movie.thumbUrl, movie.posterUrl)
+        val primaryGlide = ImageResolver.buildGlideUrl(primaryUrl)
+        val fallbackGlide = ImageResolver.buildGlideUrl(fallbackUrl)
+
+        val fallbackRequest = if (fallbackUrl.isNotEmpty() && fallbackUrl != primaryUrl) {
+            Glide.with(this)
+                .load(fallbackGlide)
+                .error(R.drawable.bg_btn_secondary)
+        } else null
+
+        val glideRequest = Glide.with(this)
+            .load(primaryGlide)
             .placeholder(R.drawable.bg_focus_card)
-            .into(binding.imgDetailPoster)
+
+        if (fallbackRequest != null) {
+            glideRequest.error(fallbackRequest).into(binding.imgDetailPoster)
+        } else {
+            glideRequest.error(R.drawable.bg_btn_secondary).into(binding.imgDetailPoster)
+        }
 
         episodeAdapter = EpisodeAdapter { episode ->
             val isResumeEp = !resumeEpisodeName.isNullOrEmpty() && (

@@ -1,5 +1,7 @@
 package com.huycabuonca.mobile.api
 
+import com.huycabuonca.mobile.util.ImageResolver
+
 import android.content.Context
 import com.google.gson.Gson
 import com.google.gson.JsonArray
@@ -1008,7 +1010,9 @@ object MovieRepository {
                         items?.forEach { element ->
                             val obj = element.asJsonObject
                             val thumb = obj.getSafeString("thumb_url")
-                            val fullThumb = if (thumb.startsWith("http")) thumb else KKPHIM_IMG_BASE + thumb.removePrefix("/")
+                            val poster = obj.getSafeString("poster_url").ifEmpty { thumb }
+                            val fullPoster = ImageResolver.cleanAndResolve(poster, thumb)
+                            val fullThumb = ImageResolver.cleanAndResolve(thumb, poster)
                             results.add(
                                 MovieItem(
                                     id = obj.getSafeString("_id"),
@@ -1016,7 +1020,7 @@ object MovieRepository {
                                     slug = obj.getSafeString("slug"),
                                     originName = obj.getSafeString("origin_name"),
                                     thumbUrl = fullThumb,
-                                    posterUrl = fullThumb,
+                                    posterUrl = fullPoster,
                                     year = obj.getSafeString("year"),
                                     quality = obj.getSafeString("quality", "HD"),
                                     episodeCurrent = obj.getSafeString("episode_current"),
@@ -1088,8 +1092,8 @@ object MovieRepository {
                                     if (matched) {
                                         val thumb = o.getSafeString("thumb_url")
                                         val poster = o.getSafeString("poster_url").ifEmpty { thumb }
-                                        val fullThumb = if (thumb.startsWith("http")) thumb else if (thumb.isNotEmpty()) KKPHIM_IMG_BASE + thumb.removePrefix("/") else ""
-                                        val fullPoster = if (poster.startsWith("http")) poster else if (poster.isNotEmpty()) KKPHIM_IMG_BASE + poster.removePrefix("/") else fullThumb
+                                        val fullPoster = ImageResolver.cleanAndResolve(poster, thumb)
+                                        val fullThumb = ImageResolver.cleanAndResolve(thumb, poster)
 
                                         items.add(
                                             MovieItem(
@@ -1265,8 +1269,8 @@ object MovieRepository {
                         val o = el.asJsonObject
                         val thumb = o.getSafeString("thumb_url")
                         val poster = o.getSafeString("poster_url").ifEmpty { thumb }
-                        val fullThumb = if (thumb.startsWith("http")) thumb else if (thumb.isNotEmpty()) KKPHIM_IMG_BASE + thumb.removePrefix("/") else ""
-                        val fullPoster = if (poster.startsWith("http")) poster else if (poster.isNotEmpty()) KKPHIM_IMG_BASE + poster.removePrefix("/") else fullThumb
+                        val fullPoster = ImageResolver.cleanAndResolve(poster, thumb)
+                        val fullThumb = ImageResolver.cleanAndResolve(thumb, poster)
 
                         result.add(
                             MovieItem(
@@ -1329,8 +1333,8 @@ object MovieRepository {
 
                     val thumb = o.getSafeString("thumb_url")
                     val poster = o.getSafeString("poster_url").ifEmpty { thumb }
-                    val fullThumb = if (thumb.startsWith("http")) thumb else if (thumb.isNotEmpty()) KKPHIM_IMG_BASE + thumb.removePrefix("/") else ""
-                    val fullPoster = if (poster.startsWith("http")) poster else if (poster.isNotEmpty()) KKPHIM_IMG_BASE + poster.removePrefix("/") else fullThumb
+                    val fullPoster = ImageResolver.cleanAndResolve(poster, thumb)
+                    val fullThumb = ImageResolver.cleanAndResolve(thumb, poster)
 
                     list.add(
                         MovieItem(
@@ -1363,8 +1367,8 @@ object MovieRepository {
 
             val thumb = movie.getSafeString("thumb_url")
             val poster = movie.getSafeString("poster_url").ifEmpty { thumb }
-            val fullThumb = if (thumb.startsWith("http")) thumb else KKPHIM_IMG_BASE + thumb.removePrefix("/")
-            val fullPoster = if (poster.startsWith("http")) poster else KKPHIM_IMG_BASE + poster.removePrefix("/")
+            val fullPoster = ImageResolver.cleanAndResolve(poster, thumb)
+            val fullThumb = ImageResolver.cleanAndResolve(thumb, poster)
 
             val serverGroups = mutableListOf<ServerGroup>()
             val episodesArray = root.getAsJsonArray("episodes")
@@ -1441,8 +1445,10 @@ object NguonCClient {
                     if (el.isJsonObject) {
                         val o = el.asJsonObject
                         val slug = o.getSafeString("slug")
-                        val thumb = o.getSafeString("thumb_url")
-                        val poster = o.getSafeString("poster_url").ifEmpty { thumb }
+                        val rawThumb = o.getSafeString("thumb_url")
+                        val rawPoster = o.getSafeString("poster_url").ifEmpty { rawThumb }
+                        val portraitImg = ImageResolver.cleanAndResolve(rawThumb, rawPoster, ImageResolver.NGUONC_IMG_BASE)
+                        val landscapeImg = ImageResolver.cleanAndResolve(rawPoster, rawThumb, ImageResolver.NGUONC_IMG_BASE)
                         val epCurrent = o.getSafeString("current_episode")
                         val quality = o.getSafeString("quality", "HD")
                         val lang = o.getSafeString("language", "Vietsub")
@@ -1454,8 +1460,8 @@ object NguonCClient {
                                 name = o.getSafeString("name"),
                                 slug = "nguonc:$slug",
                                 originName = o.getSafeString("original_name"),
-                                thumbUrl = thumb,
-                                posterUrl = poster,
+                                thumbUrl = landscapeImg,
+                                posterUrl = portraitImg,
                                 year = o.getSafeString("year", "2026"),
                                 quality = badge,
                                 episodeCurrent = epCurrent,
@@ -1482,8 +1488,10 @@ object NguonCClient {
                 val movie = root.getAsJsonObject("movie") ?: return null
 
                 val title = movie.getSafeString("name")
-                val thumb = movie.getSafeString("thumb_url")
-                val poster = movie.getSafeString("poster_url").ifEmpty { thumb }
+                val rawThumb = movie.getSafeString("thumb_url")
+                val rawPoster = movie.getSafeString("poster_url").ifEmpty { rawThumb }
+                val portraitImg = ImageResolver.cleanAndResolve(rawThumb, rawPoster, ImageResolver.NGUONC_IMG_BASE)
+                val landscapeImg = ImageResolver.cleanAndResolve(rawPoster, rawThumb, ImageResolver.NGUONC_IMG_BASE)
                 val desc = movie.getSafeString("description")
                 val epArray = movie.getAsJsonArray("episodes")
 
@@ -1527,8 +1535,8 @@ object NguonCClient {
                     slug = "nguonc:$realSlug",
                     originName = movie.getSafeString("original_name"),
                     content = desc,
-                    thumbUrl = thumb,
-                    posterUrl = poster,
+                    thumbUrl = landscapeImg,
+                    posterUrl = portraitImg,
                     year = movie.getSafeString("year", "2026"),
                     time = movie.getSafeString("time"),
                     quality = movie.getSafeString("quality", "HD"),
@@ -1667,9 +1675,14 @@ object FreeReelsClient {
                 val title = series.getSafeString("title").ifEmpty {
                     series.getSafeString("name")
                 }
-                val cover = series.getSafeString("cover").ifEmpty {
-                    series.getSafeString("poster")
+                val rawCover = series.getSafeString("cover").ifEmpty {
+                    series.getSafeString("poster").ifEmpty {
+                        series.getSafeString("cover_url").ifEmpty {
+                            series.getSafeString("thumb_url")
+                        }
+                    }
                 }
+                val cover = ImageResolver.cleanAndResolve(rawCover)
                 val epCount = series.getSafeString("episode_count")
 
                 if (rawId.isNotEmpty() && !rawId.equals("null", ignoreCase = true) && title.isNotEmpty() && !title.equals("TOP", ignoreCase = true) && !title.startsWith("TOP ")) {
@@ -2112,10 +2125,12 @@ object GaMoMePhimClient {
             }
 
             var thumb = ""
-            val imgM = java.util.regex.Pattern.compile("""<img[^>]+src="([^"]+)"""").matcher(body)
+            val imgPattern = java.util.regex.Pattern.compile("""<img[^>]+(?:src|data-src|data-original)=["']([^"']+)["']""")
+            val imgM = imgPattern.matcher(body)
             if (imgM.find()) {
                 thumb = imgM.group(1)?.trim() ?: ""
             }
+            val cleanThumb = ImageResolver.cleanAndResolve(thumb, defaultBase = ImageResolver.GAMOME_IMG_BASE)
 
             if (slug.isNotEmpty() && title.isNotEmpty()) {
                 seen.add(slug)
@@ -2125,8 +2140,8 @@ object GaMoMePhimClient {
                         name = title,
                         slug = "gamomephim:$slug",
                         originName = "Gà Mờ Mê Phim • Thuyết Minh",
-                        thumbUrl = thumb,
-                        posterUrl = thumb,
+                        thumbUrl = cleanThumb,
+                        posterUrl = cleanThumb,
                         year = "2026",
                         quality = "🎙️ Thuyết Minh & Vietsub",
                         episodeCurrent = "Full Bộ HD",
