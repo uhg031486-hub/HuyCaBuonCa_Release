@@ -1,0 +1,128 @@
+[
+  {
+    "source": "IPTV_VN",
+    "name": "VTV2 HD (1080p)",
+    "logo": "",
+    "group": "",
+    "url": "http://125hvt.ddns.net:21585/vtv2/playlist.m3u8"
+  },
+  {
+    "source": "IPTV_VN",
+    "name": "VTV1 HD (1080p) [Geo-blocked]",
+    "logo": "",
+    "group": "",
+    "url": "https://livesct.vtvprime.vn/Live_DASHDRM1/VTV1_HD/manifest.mpd"
+  },
+  {
+    "source": "IPTV_VN",
+    "name": "VTV5 Tay Nguyen HD",
+    "logo": "",
+    "group": "",
+    "url": "http://dethich.pw/vtv5tn/index.m3u8"
+  },
+  {
+    "source": "IPTV_VN",
+    "name": "VTV1 HD (720p)",
+    "logo": "",
+    "group": "",
+    "url": "https://dethich.pw/vtv1/index.m3u8"
+  },
+  {
+    "source": "IPTV_VN",
+    "name": "HTV7 (720p)",
+    "logo": "",
+    "group": "",
+    "url": "https://dethich.pw/htv7/index.m3u8"
+  },
+  {
+    "source": "IPTV_VN",
+    "name": "HTV2 (720p)",
+    "logo": "",
+    "group": "",
+    "url": "https://dethich.pw/htv2/index.m3u8"
+  },
+  {
+    "source": "IPTV_VN",
+    "name": "VTV5 HD (720p)",
+    "logo": "",
+    "group": "",
+    "url": "https://dethich.pw/vtv5/index.m3u8"
+  },
+  {
+    "source": "IPTV_VN",
+    "name": "VTV2 HD (720p)",
+    "logo": "",
+    "group": "",
+    "url": "https://dethich.pw/vtv2/index.m3u8"
+  },
+  {
+    "source": "IPTV_VN",
+    "name": "VTV3 HD (720p)",
+    "logo": "",
+    "group": "",
+    "url": "https://dethich.pw/vtv3/index.m3u8"
+  },
+  {
+    "source": "IPTV_VN",
+    "name": "VTV8 HD (720p)",
+    "logo": "",
+    "group": "",
+    "url": "https://dethich.pw/vtv8/index.m3u8"
+  },
+  {
+    "source": "IPTV_VN",
+    "name": "VTV5 Tay Nam Bo HD",
+    "logo": "",
+    "group": "",
+    "url": "https://dethich.pw/vtv5tnb/index.m3u8"
+  },
+  {
+    "source": "IPTV_VN",
+    "name": "HTV1 (720p)",
+    "logo": "",
+    "group": "",
+    "url": "https://dethich.pw/htv1/index.m3u8"
+  },
+  {
+    "source": "IPTV_VN",
+    "name": "VTV9 HD (720p)",
+    "logo": "",
+    "group": "",
+    "url": "https://dethich.pw/vtv9/index.m3u8"
+  },
+  {
+    "source": "IPTV_VN",
+    "name": "VTV4 HD (720p)",
+    "logo": "",
+    "group": "",
+    "url": "https://dethich.pw/vtv4/index.m3u8"
+  },
+  {
+    "source": "IPTV_VN",
+    "name": "VTV7 HD (720p)",
+    "logo": "",
+    "group": "",
+    "url": "https://dethich.pw/vtv7/index.m3u8"
+  },
+  {
+    "source": "IPTV_VN",
+    "name": "HTV9 (720p)",
+    "logo": "",
+    "group": "",
+    "url": "https://dethich.pw/htv9/index.m3u8"
+  },
+  {
+    "source": "IPTV_VN",
+    "name": "VTV10 (720p)",
+    "logo": "",
+    "group": "",
+    "url": "https://dethich.pw/vtv10/index.m3u8"
+  },
+  {
+    "source": "IPTV_VN",
+    "name": "HTV3 (720p)",
+    "logo": "",
+    "group": "",
+    "url": "https://dethich.pw/htv3/index.m3u8"
+  }
+]

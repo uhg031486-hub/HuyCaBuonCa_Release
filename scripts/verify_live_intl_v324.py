@@ -19,14 +19,16 @@ def verify_live_intl_v324():
         )
         page = context.new_page()
 
-        print("1. Truy cập https://huyca.pages.dev ...")
-        page.goto("https://huyca.pages.dev", wait_until="networkidle", timeout=30000)
+        # Cache busting để nhận bản build mới nhất từ Cloudflare Pages
+        live_url = f"https://huyca.pages.dev?t={int(time.time())}"
+        print(f"1. Truy cập {live_url} ...")
+        page.goto(live_url, wait_until="networkidle", timeout=30000)
         time.sleep(2)
 
         page.locator("#srcXemTiVi").click()
         time.sleep(2)
 
-        # Kiểm tra 4 kênh quan trọng đại diện: BBC, Bloomberg, CNN, HBO
+        # Kiểm tra các kênh quốc tế quan trọng đại diện: BBC, Bloomberg, CNN, HBO, Discovery
         test_samples = [
             ('bbc_world_news_140', 'BBC World News'),
             ('bloomberg_142', 'Bloomberg TV'),
@@ -47,7 +49,8 @@ def verify_live_intl_v324():
                 return false;
             }""", ch_id)
 
-            time.sleep(3.5)
+            # Đợi 5 giây để buffer video
+            time.sleep(5.0)
 
             state = page.evaluate("""() => {
                 const v = document.getElementById('videoPlayer');
@@ -59,14 +62,19 @@ def verify_live_intl_v324():
             }""")
 
             is_ok = state['readyState'] >= 2 or state['currentTime'] > 0
+            if not is_ok:
+                time.sleep(2.0)
+                state = page.evaluate("() => ({ readyState: document.getElementById('videoPlayer')?.readyState || 0, currentTime: document.getElementById('videoPlayer')?.currentTime || 0, title: document.getElementById('playerTitle')?.textContent || '' })")
+                is_ok = state['readyState'] >= 2 or state['currentTime'] > 0
+
             icon = "✅ ĐƯỢC" if is_ok else "❌ KHÔNG ĐƯỢC"
             print(f"   {icon} | {ch_name}: readyState={state['readyState']}, time={state['currentTime']}s (Title: {state['title']})")
             assert is_ok == True, f"Kênh {ch_name} phải phát thành công trên Live!"
 
-        # Chụp ảnh minh chứng kênh HBO HD trên Live
+        # Chụp ảnh minh chứng
         snap_hbo = os.path.join(screenshots_dir, 'live_prod_v324_hbo_hd.png')
         page.screenshot(path=snap_hbo)
-        print(f"📸 Đã lưu ảnh chụp Live HBO HD: {snap_hbo}")
+        print(f"📸 Đã lưu ảnh chụp Live: {snap_hbo}")
 
         browser.close()
 

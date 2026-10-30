@@ -89,9 +89,9 @@ class MovieAdapter(
                 binding.imgPoster.scaleType = android.widget.ImageView.ScaleType.CENTER_CROP
                 binding.imgPoster.setPadding(0, 0, 0, 0)
             }
-            val defaultTvLogo = "file:///android_asset/logos/vtv1.png"
-            val finalImgUrl = if (item.source == MovieSource.XEMTIVI && imgUrl.isEmpty()) {
-                defaultTvLogo
+            val defaultTvLogo = "file:///android_asset/logos/tv_default_premium.png"
+            val finalImgUrl = if (item.source == MovieSource.XEMTIVI) {
+                if (imgUrl.isNotEmpty()) imgUrl else defaultTvLogo
             } else {
                 imgUrl
             }
@@ -100,7 +100,7 @@ class MovieAdapter(
                 .load(finalImgUrl)
                 .transition(DrawableTransitionOptions.withCrossFade())
                 .placeholder(R.drawable.bg_focus_card)
-                .error(if (item.source == MovieSource.XEMTIVI) R.drawable.tv_banner else R.drawable.bg_btn_secondary)
+                .error(if (item.source == MovieSource.XEMTIVI) R.mipmap.ic_launcher else R.drawable.bg_btn_secondary)
                 .into(binding.imgPoster)
         }
     }

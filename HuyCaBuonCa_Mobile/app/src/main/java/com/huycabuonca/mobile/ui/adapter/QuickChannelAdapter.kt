@@ -57,11 +57,11 @@ class QuickChannelAdapter(
             holder.txtBadge.visibility = View.GONE
         }
 
-        val defaultTvLogo = "file:///android_asset/logos/vtv1.png"
+        val resolvedLogo = com.huycabuonca.mobile.api.MovieRepository.resolveChannelLogo(ch)
         Glide.with(holder.itemView.context)
-            .load(if (!ch.logo.isNullOrEmpty()) ch.logo else defaultTvLogo)
+            .load(resolvedLogo)
             .placeholder(R.drawable.bg_focus_card)
-            .error(R.drawable.bg_btn_secondary)
+            .error(R.mipmap.ic_launcher)
             .into(holder.imgLogo)
 
         holder.itemView.setOnClickListener {

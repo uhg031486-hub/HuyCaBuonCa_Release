@@ -1,34 +1,44 @@
-import re
+import sys, io
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
-def bump_file(path, old_vcode, new_vcode, old_vname, new_vname):
-    with open(path, "r", encoding="utf-8") as f:
-        txt = f.read()
-    txt = txt.replace(f"versionCode = {old_vcode}", f"versionCode = {new_vcode}")
-    txt = txt.replace(f'versionName = "{old_vname}"', f'versionName = "{new_vname}"')
-    with open(path, "w", encoding="utf-8") as f:
-        f.write(txt)
-    print(f"Updated {path}")
+# 1. TV build.gradle.kts
+tv_b = 'HuyCaBuonCa_TV/app/build.gradle.kts'
+with open(tv_b, 'r', encoding='utf-8') as f:
+    c = f.read()
+c = c.replace('versionCode = 26', 'versionCode = 27').replace('versionName = "3.3.2"', 'versionName = "3.3.3"')
+with open(tv_b, 'w', encoding='utf-8') as f:
+    f.write(c)
+print('Updated TV build.gradle.kts to v3.3.3 (27)')
 
-# 1. TV Gradle
-bump_file(r"HuyCaBuonCa_TV\app\build.gradle.kts", 17, 18, "2.6", "2.7")
+# 2. Mobile build.gradle.kts
+m_b = 'HuyCaBuonCa_Mobile/app/build.gradle.kts'
+with open(m_b, 'r', encoding='utf-8') as f:
+    c = f.read()
+c = c.replace('versionCode = 26', 'versionCode = 27').replace('versionName = "3.3.2"', 'versionName = "3.3.3"')
+with open(m_b, 'w', encoding='utf-8') as f:
+    f.write(c)
+print('Updated Mobile build.gradle.kts to v3.3.3 (27)')
 
-# 2. Mobile Gradle
-bump_file(r"HuyCaBuonCa_Mobile\app\build.gradle.kts", 17, 18, "2.6", "2.7")
+# 3. WebOS appinfo.json
+webos_path = 'HuyCa_WebOS/appinfo.json'
+try:
+    with open(webos_path, 'r', encoding='utf-8') as f:
+        c = f.read()
+    c = c.replace('"version": "3.3.2"', '"version": "3.3.3"')
+    with open(webos_path, 'w', encoding='utf-8') as f:
+        f.write(c)
+    print('Updated WebOS appinfo.json to v3.3.3')
+except Exception as e:
+    print('WebOS appinfo error:', e)
 
-# 3. webOS appinfo.json
-with open(r"HuyCaBuonCa_LG_webOS\appinfo.json", "r", encoding="utf-8") as f:
-    webos = f.read()
-webos = webos.replace('"version": "2.6.0"', '"version": "2.7.0"')
-with open(r"HuyCaBuonCa_LG_webOS\appinfo.json", "w", encoding="utf-8") as f:
-    f.write(webos)
-print("Updated webOS appinfo.json")
-
-# 4. Windows csproj
-with open(r"HuyCa_Windows\HuyCa_Windows.csproj", "r", encoding="utf-8") as f:
-    wincsproj = f.read()
-wincsproj = wincsproj.replace("<Version>2.6.0</Version>", "<Version>2.7.0</Version>")
-wincsproj = wincsproj.replace("<FileVersion>2.6.0.0</FileVersion>", "<FileVersion>2.7.0.0</FileVersion>")
-wincsproj = wincsproj.replace("<AssemblyVersion>2.6.0.0</AssemblyVersion>", "<AssemblyVersion>2.7.0.0</AssemblyVersion>")
-with open(r"HuyCa_Windows\HuyCa_Windows.csproj", "w", encoding="utf-8") as f:
-    f.write(wincsproj)
-print("Updated Windows csproj")
+# 4. Web index.html
+web_idx = 'HuyCa_Web/index.html'
+try:
+    with open(web_idx, 'r', encoding='utf-8') as f:
+        c = f.read()
+    c = c.replace('v3.3.2', 'v3.3.3').replace('3.3.2', '3.3.3')
+    with open(web_idx, 'w', encoding='utf-8') as f:
+        f.write(c)
+    print('Updated HuyCa_Web/index.html to v3.3.3')
+except Exception as e:
+    print('Web index.html error:', e)

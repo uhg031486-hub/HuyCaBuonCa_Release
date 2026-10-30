@@ -11,8 +11,8 @@ android {
         applicationId = "com.huycabuonca.tv"
         minSdk = 21
         targetSdk = 34
-        versionCode = 29
-        versionName = "3.3.5"
+        versionCode = 30
+        versionName = "3.3.6"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

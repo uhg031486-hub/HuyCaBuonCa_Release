@@ -8,7 +8,8 @@ async def run_test():
         page = await browser.new_page(viewport={'width': 1280, 'height': 800})
 
         print("1. Navigating to Web App http://localhost:8080 ...")
-        await page.goto("http://localhost:8080", wait_until="networkidle")
+        await page.goto("http://localhost:8080", wait_until="domcontentloaded")
+        await page.wait_for_timeout(3000)
 
         # 2. Bấm vào tab FREEREELS (Phim Ngắn)
         print("2. Clicking Tab FREEREELS (#srcPhimNgan)...")

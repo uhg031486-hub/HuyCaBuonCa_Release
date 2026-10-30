@@ -1,0 +1,210 @@
+{
+  "total": 216,
+  "alive": 187,
+  "dead": 29,
+  "dead_list": [
+    {
+      "id": "sports_sat_true_premier_2",
+      "name": "True Premier Football 2 HD (EPL Trực Tiếp)",
+      "cat": null,
+      "url": "https://amg26268-amg26268c14-freelivesports-emea-10267.playouts.now.amagi.tv/playlist.m3u8",
+      "error": "HTTP Error 401: Unauthorized"
+    },
+    {
+      "id": "sports_espn_latam_3",
+      "name": "ESPN 3 Latin America (1080p)",
+      "cat": null,
+      "url": "https://barinaslive1.boldmss.com/ESPN_3/ESPN_3.isml/ESPN_3.m3u8",
+      "error": "<urlopen error _ssl.c:993: The handshake operation timed out>"
+    },
+    {
+      "id": "sports_espn_latam_1",
+      "name": "ESPN Latin America (1080p)",
+      "cat": null,
+      "url": "https://barinaslive1.boldmss.com/ESPN/ESPN.isml/ESPN.m3u8",
+      "error": "<urlopen error _ssl.c:993: The handshake operation timed out>"
+    },
+    {
+      "id": "sports_espn_latam_6",
+      "name": "ESPN 6 Latin America (1080p)",
+      "cat": null,
+      "url": "https://barinaslive1.boldmss.com/ESPN_6/ESPN_6.isml/ESPN_6.m3u8",
+      "error": "<urlopen error _ssl.c:993: The handshake operation timed out>"
+    },
+    {
+      "id": "tv_d6db82f59b",
+      "name": "ESPN 4 Latin America (1080p)",
+      "cat": null,
+      "url": "https://barinaslive1.boldmss.com/ESPN_4/ESPN_4.isml/ESPN_4.m3u8",
+      "error": "<urlopen error _ssl.c:993: The handshake operation timed out>"
+    },
+    {
+      "id": "tv_693b64c79e",
+      "name": "ESPN 6 Latin America (1080p)",
+      "cat": null,
+      "url": "https://barinaslive1.boldmss.com/ESPN_6/ESPN_6.isml/ESPN_6.m3u8",
+      "error": "<urlopen error _ssl.c:993: The handshake operation timed out>"
+    },
+    {
+      "id": "on_phim_vi_t_47",
+      "name": "ON Phim Việt",
+      "cat": null,
+      "url": "https://vmttv.dpdns.org/tv360/?id=vtvcab-2-phim-viet-hd",
+      "error": "The read operation timed out"
+    },
+    {
+      "id": "tv_3ee9f8f318",
+      "name": "ESPN Latin America (1080p)",
+      "cat": null,
+      "url": "https://barinaslive1.boldmss.com/ESPN/ESPN.isml/ESPN.m3u8",
+      "error": "<urlopen error _ssl.c:993: The handshake operation timed out>"
+    },
+    {
+      "id": "tv_a32d1cb40d",
+      "name": "ESPN 2 Latin America (1080p)",
+      "cat": null,
+      "url": "https://barinaslive1.boldmss.com/ESPN_2/ESPN_2.isml/ESPN_2.m3u8",
+      "error": "<urlopen error _ssl.c:993: The handshake operation timed out>"
+    },
+    {
+      "id": "on_golf_53",
+      "name": "On Golf",
+      "cat": null,
+      "url": "https://vmttv.dpdns.org/tv360/?id=vtvcab-23-golf-channel",
+      "error": "The read operation timed out"
+    },
+    {
+      "id": "on_e_channel_46",
+      "name": "ON E- Channel",
+      "cat": null,
+      "url": "https://freem3u.xyz/api/live/play.m3u8?vid=182",
+      "error": "<urlopen error _ssl.c:993: The handshake operation timed out>"
+    },
+    {
+      "id": "sctv14_65",
+      "name": "SCTV14",
+      "cat": null,
+      "url": "https://vmttv.dpdns.org/VTVGo/?sctv14",
+      "error": "The read operation timed out"
+    },
+    {
+      "id": "sctv20_72",
+      "name": "SCTV20",
+      "cat": null,
+      "url": "https://vmttv.dpdns.org/VTVGo/?sctv20",
+      "error": "The read operation timed out"
+    },
+    {
+      "id": "sctv3_74",
+      "name": "SCTV3",
+      "cat": null,
+      "url": "https://vmttv.dpdns.org/VTVGo/?sctv3",
+      "error": "The read operation timed out"
+    },
+    {
+      "id": "sctv5_76",
+      "name": "SCTV5",
+      "cat": null,
+      "url": "https://vmttv.dpdns.org/VTVGo/?sctv5",
+      "error": "The read operation timed out"
+    },
+    {
+      "id": "sctv4_75",
+      "name": "SCTV4",
+      "cat": null,
+      "url": "https://vmttv.dpdns.org/VTVGo/?sctv4",
+      "error": "The read operation timed out"
+    },
+    {
+      "id": "sctv7_77",
+      "name": "SCTV7",
+      "cat": null,
+      "url": "https://vmttv.dpdns.org/VTVGo/?sctv7",
+      "error": "The read operation timed out"
+    },
+    {
+      "id": "sctv16_67",
+      "name": "SCTV16",
+      "cat": null,
+      "url": "https://vmttv.dpdns.org/VTVGo/?sctv16",
+      "error": "The read operation timed out"
+    },
+    {
+      "id": "360_ho_t_h_nh_80",
+      "name": "360 Hoạt hình",
+      "cat": null,
+      "url": "https://vmttv.dpdns.org/tv360/?id=hoat-hinh",
+      "error": "The read operation timed out"
+    },
+    {
+      "id": "tv360_9_91",
+      "name": "TV360+9",
+      "cat": null,
+      "url": "https://vmttv.dpdns.org/tv360/?id=tv360-9",
+      "error": "HTTP Error 404: Not Found"
+    },
+    {
+      "id": "360_phim_kinh_i_n_85",
+      "name": "360 Phim Kinh Điển",
+      "cat": null,
+      "url": "https://vmttv.dpdns.org/tv360/?id=360-phim-kinh-dien",
+      "error": "HTTP Error 404: Not Found"
+    },
+    {
+      "id": "tv360_8_90",
+      "name": "TV360+8",
+      "cat": null,
+      "url": "https://vmttv.dpdns.org/tv360/?id=tv360-8",
+      "error": "HTTP Error 404: Not Found"
+    },
+    {
+      "id": "360_phim_vi_t_86",
+      "name": "360 Phim Việt",
+      "cat": null,
+      "url": "https://vmttv.dpdns.org/tv360/?id=phim-viet",
+      "error": "HTTP Error 404: Not Found"
+    },
+    {
+      "id": "360_phim_u_m_87",
+      "name": "360 Phim Âu Mỹ",
+      "cat": null,
+      "url": "https://vmttv.dpdns.org/tv360/?id=phim-au-my",
+      "error": "HTTP Error 404: Not Found"
+    },
+    {
+      "id": "hu_tv_b_o_v_ptth_hu_197",
+      "name": "Huế TV - Báo và PTTH Huế",
+      "cat": null,
+      "url": "https://live.huetv.com.vn/TRT-Online/chunklist.m3u8",
+      "error": "<urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1010)>"
+    },
+    {
+      "id": "nrt1_b_o_v_ptth_n_ng_212",
+      "name": "ĐNRT1 - Báo và PTTH Đà Nẵng",
+      "cat": null,
+      "url": "https://freem3u.xyz/api/live/play.m3u8?vid=49",
+      "error": "Remote end closed connection without response"
+    },
+    {
+      "id": "mbc_jeju_176",
+      "name": "MBC Jeju",
+      "cat": null,
+      "url": "https://wowza.jejumbc.com/live/tv_jejumbc/playlist.m3u8",
+      "error": "HTTP Error 404: Not Found"
+    },
+    {
+      "id": "h_n_i_fm_96_224",
+      "name": "Hà Nội FM 96",
+      "cat": null,
+      "url": "https://freem3u.xyz/api/live/play.m3u8?vid=9906",
+      "error": "Remote end closed connection without response"
+    },
+    {
+      "id": "tv360_10_88",
+      "name": "TV360+10",
+      "cat": null,
+      "url": "https://vmttv.dpdns.org/tv360/?id=tv360-10",
+      "error": "The read operation timed out"
+    }
+  ]
+}
