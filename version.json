@@ -1,12 +1,12 @@
 {
-  "versionCode": 28,
-  "versionName": "3.3.4",
-  "title": "Huy Cá v3.3.4 - Đồng Bộ Toàn Diện Kho Phim Ngắn FreeReels & Sửa Lỗi Phát Player Trên Mọi Thiết Bị",
-  "changelog": "1. Đồng bộ 100% kho Phim Ngắn FreeReels và 7 Sub-sources (ReelShort, DramaBox, ShortMax, FreeReels Gốc, Gà Mờ Mê Phim, AI Cinema, GoodShort) giữa Android và Web.\n2. Tích hợp cơ chế Fallback thông minh theo Tab Feed, đảm bảo nạp hàng nghìn phim ngắn không bao giờ rỗng hay bị nghẽn rate-limit.\n3. Khắc phục triệt để lỗi mở khóa tập phim ngắn và lỗi phát video trên cả Android TV và Mobile Player.\n4. Tối ưu hiển thị phụ đề tiếng Việt sắc nét, mượt mà trên mọi kích thước màn hình.",
+  "versionCode": 29,
+  "versionName": "3.3.5",
+  "title": "Huy Cá v3.3.5 - Sửa Triệt Để Lỗi Phát Video & Phụ Đề ExoPlayer Cho Tất Cả Các Nguồn Phim Ngắn",
+  "changelog": "1. Khắc phục triệt để lỗi ExoPlayer Playback Error (Legacy decoding is disabled) trên Android TV và Mobile khi phát phim ngắn có phụ đề.\n2. Tích hợp cơ chế tự động giải mã phụ đề cũ và cơ chế Fallback an toàn tự phục hồi luồng video.\n3. Đồng bộ hóa nguồn Gà Mờ Mê Phim, nhận diện chính xác luồng stream MP4 Thuyết Minh và Vietsub trực tiếp từ Cloudflare R2.\n4. Đảm bảo 100% tất cả 7 sub-sources (ReelShort, DramaBox, ShortMax, FreeReels Gốc, Gà Mờ Mê Phim, AI Cinema, GoodShort) nạp mượt mà và phát trơn tru.",
   "isMaintenanceLocked": false,
-  "maintenanceMessage": "Hệ thống đang bảo trì nội bộ định kỳ. Vui lòng quay lại sau hoặc liên hệ Quản trị viên Huy Cá để biết thêm chi tiết!",
-  "windowsZipUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.4/HuyCa_Windows_v3.3.4.zip",
-  "mobileApkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.4/HuyCa_Mobile_v3.3.4.apk",
-  "tvApkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.4/HuyCa_TV_v3.3.4.apk",
-  "lgIpkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.4/HuyCa_LG_webOS_v3.3.4.ipk"
+  "maintenanceMessage": "Hệ thống đang bảo trì định kỳ. Vui lòng quay lại sau!",
+  "windowsZipUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.5/HuyCa_Windows_v3.3.5.zip",
+  "mobileApkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.5/HuyCa_Mobile_v3.3.5.apk",
+  "tvApkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.5/HuyCa_TV_v3.3.5.apk",
+  "lgIpkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.5/HuyCa_LG_webOS_v3.3.5.ipk"
 }

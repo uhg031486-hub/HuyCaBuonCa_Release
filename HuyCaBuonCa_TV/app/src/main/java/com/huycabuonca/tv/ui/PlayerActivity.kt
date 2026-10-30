@@ -304,7 +304,22 @@ class PlayerActivity : AppCompatActivity() {
             )
             .build()
 
-        player = ExoPlayer.Builder(this)
+        val renderersFactory = object : androidx.media3.exoplayer.DefaultRenderersFactory(this) {
+            override fun buildTextRenderers(
+                context: android.content.Context,
+                output: androidx.media3.exoplayer.text.TextOutput,
+                outputLooper: android.os.Looper,
+                extensionRendererMode: Int,
+                out: java.util.ArrayList<androidx.media3.exoplayer.Renderer>
+            ) {
+                val tr = androidx.media3.exoplayer.text.TextRenderer(output, outputLooper).apply {
+                    experimentalSetLegacyDecodingEnabled(true)
+                }
+                out.add(tr)
+            }
+        }
+
+        player = ExoPlayer.Builder(this, renderersFactory)
             .setTrackSelector(trackSelector)
             .setLoadControl(loadControl)
             .build().apply {
@@ -332,6 +347,12 @@ class PlayerActivity : AppCompatActivity() {
 
                 override fun onPlayerError(error: androidx.media3.common.PlaybackException) {
                     binding.playerProgress.visibility = View.GONE
+                    android.util.Log.e("PlayerActivity", "ExoPlayer playback error: ${error.message}", error)
+                    if (!subtitleUrl.isNullOrEmpty()) {
+                        android.util.Log.w("PlayerActivity", "Lỗi phát với Subtitle, tự động fallback sang video không subtitle")
+                        initExoPlayer(url, null)
+                        return
+                    }
                     val embedUrl = intent.getStringExtra("EXTRA_EMBED_URL")
                     if (!embedUrl.isNullOrEmpty() && binding.webViewPlayer.visibility != View.VISIBLE) {
                         initWebViewPlayer(embedUrl)

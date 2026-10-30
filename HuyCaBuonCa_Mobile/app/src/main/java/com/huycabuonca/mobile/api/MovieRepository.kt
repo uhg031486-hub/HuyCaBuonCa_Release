@@ -1599,7 +1599,7 @@ object FreeReelsClient {
                 }
                 val epCount = series.getSafeString("episode_count")
 
-                if (rawId.isNotEmpty() && title.isNotEmpty() && !title.equals("TOP", ignoreCase = true)) {
+                if (rawId.isNotEmpty() && !rawId.equals("null", ignoreCase = true) && title.isNotEmpty() && !title.equals("TOP", ignoreCase = true) && !title.startsWith("TOP ")) {
                     val isDubbed = title.contains("lồng tiếng", ignoreCase = true) || title.contains("thuyết minh", ignoreCase = true)
                     val qualityBadge = if (isDubbed) "🎙️ Lồng Tiếng" else "🇻🇳 Phụ Đề"
                     outList.add(
@@ -1872,12 +1872,21 @@ object FreeReelsClient {
                             }
                         }
 
+                        val rawStream = epObj.getSafeString("external_audio_h264_m3u8").ifEmpty {
+                            epObj.getSafeString("m3u8_url").ifEmpty {
+                                epObj.getSafeString("video_url").ifEmpty {
+                                    epObj.getSafeString("external_audio_h265_m3u8")
+                                }
+                            }
+                        }
+                        val finalStream = if (rawStream.startsWith("http")) rawStream else "freereels_unlock:$cleanSeriesId:$epId"
+
                         epList.add(
                             EpisodeItem(
                                 name = epName,
                                 slug = epId,
                                 filename = epName,
-                                linkM3u8 = "freereels_unlock:$cleanSeriesId:$epId",
+                                linkM3u8 = finalStream,
                                 linkEmbed = null,
                                 subtitleUrl = viSubUrl
                             )
@@ -2106,15 +2115,35 @@ object GaMoMePhimClient {
 
     fun getDramaDetail(client: OkHttpClient, cleanSlug: String): MovieDetail? {
         return try {
-            val targetUrl = "$BASE_URL/$cleanSlug"
+            val realSlug = cleanSlug.removePrefix("gamomephim:").removePrefix("/phim/").removePrefix("phim/").removePrefix("/")
+            var targetUrl = "$BASE_URL/$realSlug"
             val req = Request.Builder()
                 .url(targetUrl)
                 .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
                 .build()
 
+            var html = ""
             client.newCall(req).execute().use { resp ->
-                if (!resp.isSuccessful) return null
-                val html = resp.body?.string() ?: return null
+                if (resp.isSuccessful) {
+                    html = resp.body?.string() ?: ""
+                }
+            }
+            if (!html.contains(".mp4") && !html.contains("r2.gamomephim.com/videos")) {
+                try {
+                    val fbReq = Request.Builder().url("$BASE_URL/phim/$realSlug").header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36").build()
+                    client.newCall(fbReq).execute().use { fbResp ->
+                        if (fbResp.isSuccessful) {
+                            val fbHtml = fbResp.body?.string() ?: ""
+                            if (fbHtml.contains(".mp4") || fbHtml.contains("r2.gamomephim.com/videos")) {
+                                html = fbHtml
+                            }
+                        }
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+            if (html.isEmpty()) return null
 
                 // Title
                 var title = ""
@@ -2223,7 +2252,6 @@ object GaMoMePhimClient {
                     source = MovieSource.FREEREELS,
                     servers = servers
                 )
-            }
         } catch (e: Exception) {
             e.printStackTrace()
             null
