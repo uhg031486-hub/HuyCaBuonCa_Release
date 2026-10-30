@@ -5240,14 +5240,40 @@ function playVideo(streamUrl, title, subtitle, movie, detail, epIndex, serverInd
   let currentSpeedIdx = 0;
   const speedList = [1.0, 1.25, 1.5, 2.0, 0.75];
 
-  // --- HỆ THỐNG ĐIỀU KHIỂN CẢM ỨNG ĐA NỀN TẢNG (TOUCH & CLICK ERGONOMICS v3.3.7) ---
+  // --- HỆ THỐNG ĐIỀU KHIỂN CẢM ỨNG & GESTURE CHUẨN CINEMATIC (TOUCH, DOUBLE-TAP, SWIPE OSD v3.3.8) ---
   const playerOverlayEl = document.getElementById('playerOverlay');
   const playerMainAreaEl = document.getElementById('playerMainArea');
+  const playerGestureSurfaceEl = document.getElementById('playerGestureSurface');
+  const playerBrightnessOverlayEl = document.getElementById('playerBrightnessOverlay');
+  const playerGestureHudEl = document.getElementById('playerGestureHud');
+  const hudBrightnessSvgEl = document.getElementById('hudBrightnessSvg');
+  const hudVolumeSvgEl = document.getElementById('hudVolumeSvg');
+  const playerGestureHudFillEl = document.getElementById('playerGestureHudFill');
+  const playerGestureHudTextEl = document.getElementById('playerGestureHudText');
+  const doubleTapLeftRippleEl = document.getElementById('doubleTapLeftRipple');
+  const doubleTapRightRippleEl = document.getElementById('doubleTapRightRipple');
   const btnUnlockTouchEl = document.getElementById('btnUnlockTouch');
   const centerPlayIconEl = document.getElementById('centerPlayIcon');
+
   let overlayHideTimeout = null;
+  let hudHideTimeout = null;
+  let singleTapTimeout = null;
+  let doubleTapRippleTimeout = null;
+
+  let currentBrightnessLevel = 1.0; // 0.2 -> 1.5
   let lastTouchActionTimestamp = 0;
-  let touchStartCoords = { x: 0, y: 0 };
+  let lastTapTimestamp = 0;
+  let lastTapCoords = { x: 0, y: 0 };
+
+  // Quản lý vuốt dọc (Vertical Swipe)
+  let touchStartData = {
+    x: 0,
+    y: 0,
+    time: 0,
+    isVerticalDrag: false,
+    gestureType: null, // 'brightness' | 'volume'
+    startValue: 0
+  };
 
   function showPlayerControls() {
     if (!playerOverlayEl || isTouchLocked) return;
@@ -5265,7 +5291,7 @@ function playVideo(streamUrl, title, subtitle, movie, detail, epIndex, serverInd
   }
   window.hidePlayerControls = hidePlayerControls;
 
-  function resetOverlayTimer(customDelay = 5000) {
+  function resetOverlayTimer(customDelay = 4500) {
     if (!playerOverlayEl || isTouchLocked) return;
     playerOverlayEl.classList.remove('controls-hidden');
     playerOverlayEl.classList.remove('hide');
@@ -5274,7 +5300,6 @@ function playVideo(streamUrl, title, subtitle, movie, detail, epIndex, serverInd
       const v = document.getElementById('videoPlayer');
       const isSidebarOpen = document.getElementById('playerSidebar')?.classList.contains('mobile-open');
       const isZappingOpen = document.getElementById('zappingPanel')?.classList.contains('active');
-      // Không tự ẩn nếu sidebar tập đang mở hoặc zapping đang mở
       if (isSidebarOpen || isZappingOpen) return;
       if ((v && !v.paused) || (isEmbedStreamUrl(currentActiveStream))) {
         playerOverlayEl.classList.add('controls-hidden');
@@ -5294,64 +5319,202 @@ function playVideo(streamUrl, title, subtitle, movie, detail, epIndex, serverInd
   }
   window.togglePlayerControls = togglePlayerControls;
 
-  if (playerMainAreaEl) {
-    // 1. Lắng nghe touchstart trên màn hình di động: Ghi nhận tọa độ chạm ban đầu
-    playerMainAreaEl.addEventListener('touchstart', (e) => {
-      if (e.touches && e.touches.length > 0) {
-        touchStartCoords = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-        lastTouchActionTimestamp = Date.now();
+  // Hiển thị HUD OSD (Độ Sáng / Âm Lượng)
+  function showGestureHud(type, percentage) {
+    if (!playerGestureHudEl) return;
+    if (hudHideTimeout) clearTimeout(hudHideTimeout);
+
+    if (type === 'brightness') {
+      if (hudBrightnessSvgEl) hudBrightnessSvgEl.style.display = 'block';
+      if (hudVolumeSvgEl) hudVolumeSvgEl.style.display = 'none';
+      if (playerGestureHudFillEl) {
+        playerGestureHudFillEl.style.width = Math.min(100, Math.max(0, percentage)) + '%';
+        playerGestureHudFillEl.style.background = 'linear-gradient(90deg, #F5C518, #FF8C00)';
+      }
+      if (playerGestureHudTextEl) {
+        playerGestureHudTextEl.textContent = 'Độ sáng: ' + Math.round(percentage) + '%';
+      }
+    } else if (type === 'volume') {
+      if (hudBrightnessSvgEl) hudBrightnessSvgEl.style.display = 'none';
+      if (hudVolumeSvgEl) hudVolumeSvgEl.style.display = 'block';
+      if (playerGestureHudFillEl) {
+        playerGestureHudFillEl.style.width = Math.min(100, Math.max(0, percentage)) + '%';
+        playerGestureHudFillEl.style.background = 'linear-gradient(90deg, #38bdf8, #0284c7)';
+      }
+      if (playerGestureHudTextEl) {
+        playerGestureHudTextEl.textContent = 'Âm lượng: ' + Math.round(percentage) + '%';
+      }
+    }
+
+    playerGestureHudEl.style.display = 'flex';
+    playerGestureHudEl.style.opacity = '1';
+  }
+
+  function hideGestureHud(delay = 850) {
+    if (!playerGestureHudEl) return;
+    if (hudHideTimeout) clearTimeout(hudHideTimeout);
+    hudHideTimeout = setTimeout(() => {
+      if (playerGestureHudEl) {
+        playerGestureHudEl.style.opacity = '0';
+        setTimeout(() => {
+          if (playerGestureHudEl && playerGestureHudEl.style.opacity === '0') {
+            playerGestureHudEl.style.display = 'none';
+          }
+        }, 300);
+      }
+    }, delay);
+  }
+
+  // Áp dụng độ sáng màn hình
+  function applyBrightness(level) {
+    currentBrightnessLevel = Math.min(1.5, Math.max(0.2, level));
+    const v = document.getElementById('videoPlayer');
+    const iframe = document.getElementById('playerIframe');
+    if (v) v.style.filter = `brightness(${currentBrightnessLevel})`;
+    if (iframe) iframe.style.filter = `brightness(${currentBrightnessLevel})`;
+
+    if (playerBrightnessOverlayEl) {
+      if (currentBrightnessLevel < 1.0) {
+        playerBrightnessOverlayEl.style.opacity = (1.0 - currentBrightnessLevel) * 0.85;
+      } else {
+        playerBrightnessOverlayEl.style.opacity = 0;
+      }
+    }
+
+    const pct = Math.round((currentBrightnessLevel / 1.0) * 100);
+    showGestureHud('brightness', pct);
+  }
+  window.applyBrightness = applyBrightness;
+
+  // Áp dụng âm lượng
+  function applyVolume(vol) {
+    const v = document.getElementById('videoPlayer');
+    const slider = document.getElementById('volumeSlider');
+    const clamped = Math.min(1.0, Math.max(0, vol));
+    if (v) {
+      v.volume = clamped;
+      v.muted = (clamped === 0);
+    }
+    if (slider) slider.value = clamped;
+
+    const svgHigh = document.getElementById('svgVolumeHigh');
+    const svgMuted = document.getElementById('svgVolumeMuted');
+    if (svgHigh) svgHigh.style.display = (clamped === 0) ? 'none' : 'block';
+    if (svgMuted) svgMuted.style.display = (clamped === 0) ? 'block' : 'none';
+
+    showGestureHud('volume', clamped * 100);
+  }
+  window.applyVolume = applyVolume;
+
+  // Kích hoạt hiệu ứng Double Tap tua 10s (YouTube Pro Style)
+  function triggerDoubleTapSeek(direction) {
+    const v = document.getElementById('videoPlayer');
+    if (direction === 'left') {
+      if (v) v.currentTime = Math.max(0, v.currentTime - 10);
+      if (doubleTapLeftRippleEl) {
+        doubleTapLeftRippleEl.style.display = 'flex';
+        doubleTapLeftRippleEl.classList.remove('double-tap-ripple');
+        void doubleTapLeftRippleEl.offsetWidth;
+        doubleTapLeftRippleEl.classList.add('double-tap-ripple');
+      }
+      showToast('⏪ -10 giây');
+    } else {
+      if (v) v.currentTime = Math.min(v.duration || 0, v.currentTime + 10);
+      if (doubleTapRightRippleEl) {
+        doubleTapRightRippleEl.style.display = 'flex';
+        doubleTapRightRippleEl.classList.remove('double-tap-ripple');
+        void doubleTapRightRippleEl.offsetWidth;
+        doubleTapRightRippleEl.classList.add('double-tap-ripple');
+      }
+      showToast('⏩ +10 giây');
+    }
+
+    if (doubleTapRippleTimeout) clearTimeout(doubleTapRippleTimeout);
+    doubleTapRippleTimeout = setTimeout(() => {
+      if (doubleTapLeftRippleEl) doubleTapLeftRippleEl.style.display = 'none';
+      if (doubleTapRightRippleEl) doubleTapRightRippleEl.style.display = 'none';
+    }, 650);
+
+    resetOverlayTimer();
+  }
+
+  // Gắn sự kiện cử chỉ vào Lớp Phủ Cảm Ứng Toàn Màn Hình playerGestureSurface
+  const touchTargetSurface = playerGestureSurfaceEl || playerMainAreaEl;
+  if (touchTargetSurface) {
+
+    // 1. TOUCHSTART: Bắt đầu chạm
+    touchTargetSurface.addEventListener('touchstart', (e) => {
+      if (!e.touches || e.touches.length === 0) return;
+      lastTouchActionTimestamp = Date.now();
+      const t = e.touches[0];
+      const rect = touchTargetSurface.getBoundingClientRect();
+      const relX = t.clientX - rect.left;
+      const width = rect.width || window.innerWidth;
+
+      touchStartData.x = t.clientX;
+      touchStartData.y = t.clientY;
+      touchStartData.time = Date.now();
+      touchStartData.isVerticalDrag = false;
+
+      // Nửa bên trái: Độ sáng | Nửa bên phải: Âm lượng
+      if (relX < width * 0.5) {
+        touchStartData.gestureType = 'brightness';
+        touchStartData.startValue = currentBrightnessLevel;
+      } else {
+        touchStartData.gestureType = 'volume';
+        const v = document.getElementById('videoPlayer');
+        touchStartData.startValue = v ? v.volume : 1.0;
       }
     }, { passive: true });
 
-    // 2. Lắng nghe touchend: Xử lý thao tác chạm TAP dứt khoát trên điện thoại (Không xung đột với vuốt)
-    playerMainAreaEl.addEventListener('touchend', (e) => {
-      if (!e.changedTouches || e.changedTouches.length === 0) return;
-      const dx = Math.abs(e.changedTouches[0].clientX - touchStartCoords.x);
-      const dy = Math.abs(e.changedTouches[0].clientY - touchStartCoords.y);
-      // Nếu ngón tay di chuyển > 14px -> Coi là cử chỉ vuốt, không phải tap
-      if (dx > 14 || dy > 14) return;
+    // 2. TOUCHMOVE: Vuốt ngón tay
+    touchTargetSurface.addEventListener('touchmove', (e) => {
+      if (!e.touches || e.touches.length === 0) return;
+      const t = e.touches[0];
+      const deltaX = t.clientX - touchStartData.x;
+      const deltaY = t.clientY - touchStartData.y;
+      const rect = touchTargetSurface.getBoundingClientRect();
+      const height = rect.height || window.innerHeight;
 
-      lastTouchActionTimestamp = Date.now();
-
-      // Nếu chạm vào các nút điều khiển, input, thanh scrubber tiến trình, sidebar
-      if (e.target.closest('button, input, select, a, .player-top, .player-bottom-bar, .player-sidebar, .zapping-panel, .embed-helper-bar, .btn-unlock-touch')) {
-        resetOverlayTimer();
-        return;
-      }
-
-      if (isTouchLocked) {
-        if (btnUnlockTouchEl) {
-          btnUnlockTouchEl.style.display = 'block';
-          setTimeout(() => { if (isTouchLocked && btnUnlockTouchEl) btnUnlockTouchEl.style.display = 'none'; }, 3000);
+      // Nhận diện cử chỉ vuốt dọc khi deltaY vượt ngưỡng và lớn hơn deltaX
+      if (!touchStartData.isVerticalDrag) {
+        if (Math.abs(deltaY) > 12 && Math.abs(deltaY) > Math.abs(deltaX) * 1.2) {
+          touchStartData.isVerticalDrag = true;
+          if (singleTapTimeout) {
+            clearTimeout(singleTapTimeout);
+            singleTapTimeout = null;
+          }
         }
-        return;
       }
 
-      // THỰC HIỆN BẬT / TẮT THANH ĐIỀU HƯỚNG PHIM
-      e.preventDefault();
-      togglePlayerControls();
+      if (touchStartData.isVerticalDrag) {
+        if (e.cancelable) e.preventDefault();
+        // Vuốt lên (deltaY âm) -> Tăng giá trị | Vuốt xuống -> Giảm giá trị
+        const change = -deltaY / (height * 0.65);
+        if (touchStartData.gestureType === 'brightness') {
+          applyBrightness(touchStartData.startValue + change);
+        } else if (touchStartData.gestureType === 'volume') {
+          applyVolume(touchStartData.startValue + change);
+        }
+      }
     }, { passive: false });
 
-    // 3. Lắng nghe click (dành cho chuột máy tính Desktop và dự phòng)
-    playerMainAreaEl.addEventListener('click', (e) => {
-      // Nếu vừa xử lý qua sự kiện touchend trong vòng 650ms, BỎ QUA synthetic click để tránh toggle kép!
-      if (Date.now() - lastTouchActionTimestamp < 650) {
+    // 3. TOUCHEND: Kết thúc chạm (Phân biệt Vuốt dọc, Double Tap tua 10s, Single Tap hiện controls)
+    touchTargetSurface.addEventListener('touchend', (e) => {
+      lastTouchActionTimestamp = Date.now();
+
+      // Nếu vừa vuốt dọc -> Kết thúc vuốt, ẩn HUD OSD sau 850ms, không kích hoạt tap
+      if (touchStartData.isVerticalDrag) {
+        touchStartData.isVerticalDrag = false;
+        hideGestureHud(850);
         return;
       }
 
-      const container = document.getElementById('playerContainer');
-      // Nếu đang ở chế độ Mini Floating Player
-      if (container && container.classList.contains('player-floating-mini')) {
-        if (!e.target.closest('#btnCloseMini')) {
-          const expandBtn = document.getElementById('btnExpandMini');
-          if (expandBtn) expandBtn.click();
-          return;
-        }
-      }
-
-      if (e.target.closest('button, input, select, a, .player-top, .player-bottom-bar, .player-center-controls, .player-sidebar, .zapping-panel, .embed-helper-bar, .btn-unlock-touch')) {
-        resetOverlayTimer();
-        return;
+      // Kiểm tra khoảng cách di chuyển: Nếu di chuyển quá 14px -> Coi là cử chỉ lướt nhẹ, bỏ qua
+      const touchEndItem = (e.changedTouches && e.changedTouches[0]) ? e.changedTouches[0] : null;
+      if (touchEndItem) {
+        const moveDist = Math.hypot(touchEndItem.clientX - touchStartData.x, touchEndItem.clientY - touchStartData.y);
+        if (moveDist > 14) return;
       }
 
       if (isTouchLocked) {
@@ -5359,23 +5522,72 @@ function playVideo(streamUrl, title, subtitle, movie, detail, epIndex, serverInd
           btnUnlockTouchEl.style.display = 'block';
           setTimeout(() => { if (isTouchLocked && btnUnlockTouchEl) btnUnlockTouchEl.style.display = 'none'; }, 3000);
         }
+        return;
+      }
+
+      const now = Date.now();
+      const tapInterval = now - lastTapTimestamp;
+      const rect = touchTargetSurface.getBoundingClientRect();
+      const clickX = touchEndItem ? (touchEndItem.clientX - rect.left) : (rect.width * 0.5);
+      const width = rect.width || window.innerWidth;
+
+      // KIỂM TRA DOUBLE TAP: Nếu 2 lần chạm liên tiếp trong vòng 280ms
+      if (tapInterval > 40 && tapInterval < 280) {
+        if (singleTapTimeout) {
+          clearTimeout(singleTapTimeout);
+          singleTapTimeout = null;
+        }
+        lastTapTimestamp = 0; // Reset để tránh triple tap
+
+        // Double tap bên trái: Tua lùi 10s | Double tap bên phải: Tua tới 10s
+        if (clickX < width * 0.48) {
+          triggerDoubleTapSeek('left');
+        } else {
+          triggerDoubleTapSeek('right');
+        }
+        return;
+      }
+
+      // NẾU LÀ CÚ CHẠM ĐẦU TIÊN: Đợi 240ms để kiểm chứng có double tap không
+      lastTapTimestamp = now;
+      if (singleTapTimeout) clearTimeout(singleTapTimeout);
+      singleTapTimeout = setTimeout(() => {
+        singleTapTimeout = null;
+        // SINGLE TAP: BẬT / TẮT THANH TIẾN TRÌNH VÀ THANH ĐIỀU HƯỚNG PHIM
+        togglePlayerControls();
+      }, 240);
+
+    }, { passive: false });
+
+    // 4. CLICK TRÊN DESKTOP:
+    touchTargetSurface.addEventListener('click', (e) => {
+      // Bỏ qua nếu là synthetic click từ điện thoại
+      if (Date.now() - lastTouchActionTimestamp < 650) return;
+
+      const container = document.getElementById('playerContainer');
+      if (container && container.classList.contains('player-floating-mini')) {
+        const expandBtn = document.getElementById('btnExpandMini');
+        if (expandBtn) expandBtn.click();
+        return;
+      }
+
+      if (isTouchLocked) {
+        if (btnUnlockTouchEl) btnUnlockTouchEl.style.display = 'block';
         return;
       }
 
       togglePlayerControls();
     });
 
-    // 4. Double-click vào màn hình video -> Bật / Tắt toàn màn hình
-    playerMainAreaEl.addEventListener('dblclick', (e) => {
-      if (e.target.closest('button, input, select, .player-top, .player-bottom-bar, .player-sidebar, .zapping-panel, .embed-helper-bar')) {
-        return;
-      }
+    // 5. DOUBLE CLICK TRÊN DESKTOP: Bật / Tắt Toàn Màn Hình
+    touchTargetSurface.addEventListener('dblclick', (e) => {
+      if (Date.now() - lastTouchActionTimestamp < 650) return;
       const fsBtn = document.getElementById('btnFullscreen');
       if (fsBtn) fsBtn.click();
     });
 
-    // 5. Sự kiện di chuột: Bỏ qua hoàn toàn nếu là synthetic mousemove phát sinh từ touch
-    playerMainAreaEl.addEventListener('mousemove', () => {
+    // 6. MOUSE MOVE TRÊN DESKTOP: Hiện controls và reset timer
+    touchTargetSurface.addEventListener('mousemove', () => {
       if (Date.now() - lastTouchActionTimestamp < 1200) return;
       if (!isTouchLocked) resetOverlayTimer();
     });

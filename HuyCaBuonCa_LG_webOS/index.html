@@ -31,7 +31,7 @@
         <img src="icon_256.png" class="brand-logo" alt="Logo">
         <span>HUY CÁ</span>
       </div>
-      <div class="brand-subtitle">Kho Phim & Truyền Hình Đẳng Cấp • Phiên Bản Web Trực Tuyến v3.3.7</div>
+      <div class="brand-subtitle">Kho Phim & Truyền Hình Đẳng Cấp • Phiên Bản Web Trực Tuyến v3.3.8</div>
       <div class="brand-slogan-mobile">Kho Phim Đẳng Cấp Di Động</div>
     </div>
     <div class="header-actions">
@@ -142,6 +142,38 @@
     <div id="playerMainArea" class="player-main-area">
       <video id="videoPlayer" playsinline></video>
       <iframe id="playerIframe" style="display:none; width: 100%; height: 100%; border: none; background: #000;" allow="autoplay; fullscreen; encrypted-media; picture-in-picture; display-capture" sandbox="allow-scripts allow-same-origin allow-forms allow-presentation" referrerpolicy="no-referrer-when-downgrade"></iframe>
+
+      <!-- LỚP PHỦ CẢM ỨNG ĐA ĐIỂM BẮT 100% CỬ CHỈ (TOUCH & GESTURE SURFACE) -->
+      <div id="playerGestureSurface" class="player-gesture-surface" title="Chạm để hiển thị điều khiển"></div>
+
+      <!-- LỚP PHỦ ĐIỀU CHỈNH ĐỘ SÁNG MÀN HÌNH (BRIGHTNESS OVERLAY) -->
+      <div id="playerBrightnessOverlay" class="player-brightness-overlay" style="opacity: 0;"></div>
+
+      <!-- HUD OSD THÔNG BÁO ĐỘ SÁNG / ÂM LƯỢNG KHI VUỐT DỌC (MX PLAYER / VLC STYLE) -->
+      <div id="playerGestureHud" class="player-gesture-hud" style="display: none;">
+        <div id="playerGestureHudIcon" class="player-gesture-hud-icon">
+          <svg id="hudBrightnessSvg" class="hud-svg" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <svg id="hudVolumeSvg" class="hud-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+        </div>
+        <div class="player-gesture-hud-bar-wrapper">
+          <div id="playerGestureHudFill" class="player-gesture-hud-bar-fill" style="height: 100%;"></div>
+        </div>
+        <div id="playerGestureHudText" class="player-gesture-hud-text">100%</div>
+      </div>
+
+      <!-- HIỆU ỨNG GỢN SÓNG TUA NHANH 10S KHI DOUBLE TAP TRÁI / PHẢI (YOUTUBE PRO STYLE) -->
+      <div id="doubleTapLeftRipple" class="double-tap-ripple double-tap-left" style="display: none;">
+        <div class="double-tap-arrow-box">
+          <svg class="double-tap-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/></svg>
+          <span class="double-tap-label">-10s</span>
+        </div>
+      </div>
+      <div id="doubleTapRightRipple" class="double-tap-ripple double-tap-right" style="display: none;">
+        <div class="double-tap-arrow-box">
+          <svg class="double-tap-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="13 17 18 12 13 7"/><polyline points="6 17 11 12 6 7"/></svg>
+          <span class="double-tap-label">+10s</span>
+        </div>
+      </div>
 
       <!-- Thanh điều khiển Mini Player khi ở chế độ Hình Trong Hình (PiP) -->
       <div id="miniPlayerBar" class="mini-player-bar" style="display: none;">
@@ -519,48 +551,48 @@
         </div>
 
         <!-- 2. Android Mobile APK -->
-        <a href="/api/download?file=mobile" download="HuyCa_Mobile_v3.3.7.apk" class="install-platform-card focusable">
+        <a href="/api/download?file=mobile" download="HuyCa_Mobile_v3.3.8.apk" class="install-platform-card focusable">
           <div class="platform-card-left">
             <span class="platform-emoji">📱</span>
             <div>
               <div class="platform-title">Điện Thoại Android (Bản Native APK)</div>
-              <div class="platform-desc">Tệp cài đặt: <code>HuyCa_Mobile_v3.3.7.apk</code> • Tối ưu cảm ứng, tự xoay ngang, ExoPlayer</div>
+              <div class="platform-desc">Tệp cài đặt: <code>HuyCa_Mobile_v3.3.8.apk</code> • Tối ưu cảm ứng, tự xoay ngang, ExoPlayer</div>
             </div>
           </div>
           <span class="btn-platform-download">⬇️ TẢI APK</span>
         </a>
 
         <!-- 3. Android TV / Google TV / TV Box APK -->
-        <a href="/api/download?file=tv" download="HuyCa_TV_v3.3.7.apk" class="install-platform-card focusable">
+        <a href="/api/download?file=tv" download="HuyCa_TV_v3.3.8.apk" class="install-platform-card focusable">
           <div class="platform-card-left">
             <span class="platform-emoji">📺</span>
             <div>
               <div class="platform-title">Android TV / Sony / Casper / Xiaomi / TV Box</div>
-              <div class="platform-desc">Tệp cài đặt: <code>HuyCa_TV_v3.3.7.apk</code> • Giao diện 16:9 chuẩn điều khiển Remote D-Pad</div>
+              <div class="platform-desc">Tệp cài đặt: <code>HuyCa_TV_v3.3.8.apk</code> • Giao diện 16:9 chuẩn điều khiển Remote D-Pad</div>
             </div>
           </div>
           <span class="btn-platform-download">⬇️ TẢI APK TV</span>
         </a>
 
         <!-- 4. Windows PC -->
-        <a href="/api/download?file=windows" download="HuyCa_Windows_v3.3.7.zip" class="install-platform-card focusable">
+        <a href="/api/download?file=windows" download="HuyCa_Windows_v3.3.8.zip" class="install-platform-card focusable">
           <div class="platform-card-left">
             <span class="platform-emoji">💻</span>
             <div>
               <div class="platform-title">Máy Tính Windows PC / Laptop (Windows 10/11)</div>
-              <div class="platform-desc">Tệp cài đặt: <code>HuyCa_Windows_v3.3.7.zip</code> • Tích hợp vượt tường lửa DNS & chặn quảng cáo</div>
+              <div class="platform-desc">Tệp cài đặt: <code>HuyCa_Windows_v3.3.8.zip</code> • Tích hợp vượt tường lửa DNS & chặn quảng cáo</div>
             </div>
           </div>
           <span class="btn-platform-download">⬇️ TẢI ZIP PC</span>
         </a>
 
         <!-- 5. LG Smart TV (webOS) -->
-        <a href="/api/download?file=lg" download="HuyCa_LG_webOS_v3.3.7.ipk" class="install-platform-card focusable">
+        <a href="/api/download?file=lg" download="HuyCa_LG_webOS_v3.3.8.ipk" class="install-platform-card focusable">
           <div class="platform-card-left">
             <span class="platform-emoji">🖥️</span>
             <div>
               <div class="platform-title">Tivi LG Smart TV (Hệ điều hành webOS)</div>
-              <div class="platform-desc">Tệp cài đặt: <code>HuyCa_LG_webOS_v3.3.7.ipk</code> • Hỗ trợ chuột bay Magic Remote & phím số</div>
+              <div class="platform-desc">Tệp cài đặt: <code>HuyCa_LG_webOS_v3.3.8.ipk</code> • Hỗ trợ chuột bay Magic Remote & phím số</div>
             </div>
           </div>
           <span class="btn-platform-download">⬇️ TẢI IPK LG</span>

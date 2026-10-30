@@ -1,13 +1,13 @@
 {
-  "versionCode": 31,
-  "versionName": "3.3.7",
-  "title": "Bản Cập Nhật Huy Cá v3.3.7",
-  "changelog": "1. Khắc phục triệt để lỗi chạm màn hình video trên thiết bị di động không hiển thị thanh điều hướng/controls.\n2. Chuẩn hóa cơ chế xử lý cảm ứng (Touch & Click Ergonomics) tách biệt cử chỉ chạm TAP và vuốt, ngăn chặn hoàn toàn xung đột synthetic mousemove.\n3. Bổ sung thanh điều khiển Thoát & Chọn Tập phim nổi bật cho trình phát nhúng Embed Iframe trên điện thoại.\n4. Đồng bộ hoàn hảo trên Android TV, Mobile, LG webOS, Windows và Web.",
+  "versionCode": 32,
+  "versionName": "3.3.8",
+  "title": "Bản Cập Nhật Huy Cá v3.3.8 - Cử Chỉ Cảm Ứng Đa Điểm Chuẩn Cinematic & YouTube Pro",
+  "changelog": "1. Khắc phục triệt để lỗi chạm màn hình trên điện thoại: Ấn vào bất kỳ đâu trên màn hình lập tức hiển thị thanh tiến trình seekbar và toàn bộ thanh điều hướng phim.\n2. Bổ sung cử chỉ Nhấn đúp (Double Tap): Nhấn đúp bên trái để tua lùi 10 giây (-10s), nhấn đúp bên phải để tua tới 10 giây (+10s) kèm hiệu ứng sóng nước nhấp nháy chuẩn YouTube.\n3. Bổ sung cử chỉ Vuốt dọc (Vertical Swipe): Vuốt dọc nửa trái màn hình để tăng/giảm Độ sáng (15% - 150%), vuốt dọc nửa phải để tăng/giảm Âm lượng (0% - 100%) kèm HUD OSD trực quan chuẩn MX Player & VLC.\n4. Đồng bộ hoàn chỉnh trải nghiệm cảm ứng cao cấp từ bản Cinematic sang Web chính, Mobile APK, TV APK, LG webOS và Windows Desktop.",
   "isMaintenanceLocked": false,
   "maintenanceMessage": "Hệ thống đang bảo trì định kỳ. Vui lòng quay lại sau!",
-  "windowsZipUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.7/HuyCa_Windows_v3.3.7.zip",
-  "mobileApkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.7/HuyCa_Mobile_v3.3.7.apk",
-  "tvApkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.6/HuyCa_TV_v3.3.6.apk",
-  "lgIpkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.7/HuyCa_LG_webOS_v3.3.7.ipk",
-  "apkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.7/HuyCa_TV_v3.3.7.apk"
+  "windowsZipUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.8/HuyCa_Windows_v3.3.8.zip",
+  "mobileApkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.8/HuyCa_Mobile_v3.3.8.apk",
+  "tvApkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.8/HuyCa_TV_v3.3.8.apk",
+  "lgIpkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.8/HuyCa_LG_webOS_v3.3.8.ipk",
+  "apkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.3.8/HuyCa_TV_v3.3.8.apk"
 }

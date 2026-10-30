@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
+  Sun,
   Play, 
   Pause, 
   Volume2, 
@@ -37,6 +38,122 @@ export default function CinematicPlayer({
   const [useIframeEmbed, setUseIframeEmbed] = useState(false);
   const [playbackError, setPlaybackError] = useState(null);
   const controlsTimeoutRef = useRef(null);
+  const [brightness, setBrightness] = useState(1.0);
+  const [gestureHud, setGestureHud] = useState({ type: null, value: 0, visible: false });
+  const [doubleTapSide, setDoubleTapSide] = useState(null);
+  const hudTimeoutRef = useRef(null);
+  const doubleTapTimeoutRef = useRef(null);
+  const lastTapRef = useRef({ time: 0, x: 0 });
+  const singleTapTimerRef = useRef(null);
+  const touchStartRef = useRef({ x: 0, y: 0, isDrag: false, type: null, startVal: 0 });
+
+  const showGestureHud = (type, val) => {
+    if (hudTimeoutRef.current) clearTimeout(hudTimeoutRef.current);
+    setGestureHud({ type, value: Math.round(val), visible: true });
+    hudTimeoutRef.current = setTimeout(() => {
+      setGestureHud(prev => ({ ...prev, visible: false }));
+    }, 900);
+  };
+
+  const handleTouchStart = (e) => {
+    if (!e.touches || e.touches.length === 0) return;
+    const t = e.touches[0];
+    const rect = e.currentTarget.getBoundingClientRect();
+    const relX = t.clientX - rect.left;
+    const width = rect.width || window.innerWidth;
+
+    touchStartRef.current = {
+      x: t.clientX,
+      y: t.clientY,
+      isDrag: false,
+      type: relX < width * 0.5 ? 'brightness' : 'volume',
+      startVal: relX < width * 0.5 ? brightness : (videoRef.current ? videoRef.current.volume : 1)
+    };
+  };
+
+  const handleTouchMove = (e) => {
+    if (!e.touches || e.touches.length === 0) return;
+    const t = e.touches[0];
+    const deltaX = t.clientX - touchStartRef.current.x;
+    const deltaY = t.clientY - touchStartRef.current.y;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const height = rect.height || window.innerHeight;
+
+    if (!touchStartRef.current.isDrag) {
+      if (Math.abs(deltaY) > 12 && Math.abs(deltaY) > Math.abs(deltaX) * 1.2) {
+        touchStartRef.current.isDrag = true;
+        if (singleTapTimerRef.current) {
+          clearTimeout(singleTapTimerRef.current);
+          singleTapTimerRef.current = null;
+        }
+      }
+    }
+
+    if (touchStartRef.current.isDrag) {
+      if (e.cancelable) e.preventDefault();
+      const change = -deltaY / (height * 0.65);
+      if (touchStartRef.current.type === 'brightness') {
+        const newB = Math.min(1.5, Math.max(0.2, touchStartRef.current.startVal + change));
+        setBrightness(newB);
+        showGestureHud('brightness', (newB / 1.0) * 100);
+      } else {
+        const newV = Math.min(1.0, Math.max(0, touchStartRef.current.startVal + change));
+        if (videoRef.current) {
+          videoRef.current.volume = newV;
+          videoRef.current.muted = (newV === 0);
+          setIsMuted(newV === 0);
+        }
+        showGestureHud('volume', newV * 100);
+      }
+    }
+  };
+
+  const handleTouchEnd = (e) => {
+    if (touchStartRef.current.isDrag) {
+      touchStartRef.current.isDrag = false;
+      return;
+    }
+
+    const t = (e.changedTouches && e.changedTouches[0]) ? e.changedTouches[0] : null;
+    if (t) {
+      const dist = Math.hypot(t.clientX - touchStartRef.current.x, t.clientY - touchStartRef.current.y);
+      if (dist > 14) return;
+    }
+
+    const now = Date.now();
+    const interval = now - lastTapRef.current.time;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const clickX = t ? (t.clientX - rect.left) : (rect.width * 0.5);
+    const width = rect.width || window.innerWidth;
+
+    if (interval > 40 && interval < 280) {
+      if (singleTapTimerRef.current) {
+        clearTimeout(singleTapTimerRef.current);
+        singleTapTimerRef.current = null;
+      }
+      lastTapRef.current.time = 0;
+
+      if (clickX < width * 0.48) {
+        if (videoRef.current) videoRef.current.currentTime = Math.max(0, videoRef.current.currentTime - 10);
+        setDoubleTapSide('left');
+      } else {
+        if (videoRef.current) videoRef.current.currentTime = Math.min(duration || 0, videoRef.current.currentTime + 10);
+        setDoubleTapSide('right');
+      }
+
+      if (doubleTapTimeoutRef.current) clearTimeout(doubleTapTimeoutRef.current);
+      doubleTapTimeoutRef.current = setTimeout(() => setDoubleTapSide(null), 650);
+      handleMouseMove();
+      return;
+    }
+
+    lastTapRef.current.time = now;
+    if (singleTapTimerRef.current) clearTimeout(singleTapTimerRef.current);
+    singleTapTimerRef.current = setTimeout(() => {
+      singleTapTimerRef.current = null;
+      setShowControls(prev => !prev);
+    }, 240);
+  };
 
   // Reset embed state khi đổi phim
   useEffect(() => {
@@ -351,6 +468,53 @@ export default function CinematicPlayer({
       onMouseMove={handleMouseMove}
       className="fixed inset-0 z-50 bg-black flex items-center justify-center select-none overflow-hidden"
     >
+      {/* Lớp phủ cảm ứng đa điểm bắt trọn 100% cử chỉ chạm (Touch Gesture Surface) */}
+      <div 
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        className="absolute inset-0 z-10 touch-none cursor-pointer"
+        title="Chạm để bật/tắt điều khiển, chạm đúp để tua 10s, vuốt để chỉnh sáng/âm"
+      />
+
+      {/* Hiệu ứng gợn sóng tua 10s khi double tap trái/phải */}
+      {doubleTapSide === 'left' && (
+        <div className="absolute top-0 bottom-0 left-0 w-[44%] z-30 pointer-events-none flex items-center justify-center bg-gradient-to-r from-white/20 via-red-500/10 to-transparent rounded-r-full animate-in fade-in zoom-in-95 duration-200">
+          <div className="flex flex-col items-center gap-1.5 text-white drop-shadow-xl">
+            <RotateCcw className="w-10 h-10 animate-bounce" />
+            <span className="text-sm font-black bg-black/70 px-3.5 py-1 rounded-full border border-white/25">-10s</span>
+          </div>
+        </div>
+      )}
+      {doubleTapSide === 'right' && (
+        <div className="absolute top-0 bottom-0 right-0 w-[44%] z-30 pointer-events-none flex items-center justify-center bg-gradient-to-l from-white/20 via-red-500/10 to-transparent rounded-l-full animate-in fade-in zoom-in-95 duration-200">
+          <div className="flex flex-col items-center gap-1.5 text-white drop-shadow-xl">
+            <RotateCcw className="w-10 h-10 animate-bounce scale-x-[-1]" />
+            <span className="text-sm font-black bg-black/70 px-3.5 py-1 rounded-full border border-white/25">+10s</span>
+          </div>
+        </div>
+      )}
+
+      {/* HUD OSD khi vuốt dọc Độ Sáng / Âm Lượng */}
+      {gestureHud.visible && (
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 z-40 bg-[#0B0F17]/95 border border-white/20 backdrop-blur-xl rounded-2xl px-5 py-3.5 flex flex-col items-center gap-2.5 shadow-2xl pointer-events-none animate-in fade-in zoom-in-90 duration-150">
+          {gestureHud.type === 'brightness' ? (
+            <Sun className="w-7 h-7 text-[#F5C518]" />
+          ) : (
+            <Volume2 className="w-7 h-7 text-sky-400" />
+          )}
+          <div className="w-20 h-1.5 bg-white/20 rounded-full overflow-hidden">
+            <div 
+              className={`h-full rounded-full ${gestureHud.type === 'brightness' ? 'bg-[#F5C518]' : 'bg-sky-400'}`}
+              style={{ width: `${Math.min(100, Math.max(0, gestureHud.value))}%` }}
+            />
+          </div>
+          <span className="text-xs font-mono font-bold text-white">
+            {gestureHud.type === 'brightness' ? 'Độ sáng' : 'Âm lượng'}: {gestureHud.value}%
+          </span>
+        </div>
+      )}
+
       {/* Video hoặc Iframe Embed */}
       {useIframeEmbed && currentEmbedUrl ? (
         <iframe
@@ -363,7 +527,7 @@ export default function CinematicPlayer({
       ) : (
         <video
           ref={videoRef}
-          className="w-full h-full object-contain cursor-pointer"
+          className="w-full h-full object-contain cursor-pointer" style={{ filter: `brightness(${brightness})` }}
           onClick={togglePlay}
           onTimeUpdate={handleTimeUpdate}
           onEnded={() => {

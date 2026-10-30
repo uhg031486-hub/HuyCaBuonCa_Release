@@ -3928,3 +3928,205 @@ body.mode-tv .movie-card.match-grid-card:focus {
   font-weight: 700;
   color: #00e5ff;
 }
+
+
+/* ==========================================================================
+   HỆ THỐNG CẢM ỨNG & GESTURE CHUẨN CINEMATIC (TOUCH, DOUBLE-TAP, SWIPE OSD)
+   ========================================================================== */
+
+/* Lớp Phủ Cảm Ứng Đa Điểm Toàn Diện (Touch & Gesture Surface) */
+.player-gesture-surface {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+  touch-action: none;
+  background: transparent;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Lớp Phủ Điều Chỉnh Độ Sáng (Brightness Overlay) */
+.player-brightness-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 8;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.1s ease;
+}
+
+/* HUD OSD Thông Báo Độ Sáng & Âm Lượng Khi Vuốt Dọc (MX Player / VLC Pro Style) */
+.player-gesture-hud {
+  position: absolute;
+  top: 25%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 35;
+  background: rgba(11, 15, 23, 0.90);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.85);
+  border-radius: 20px;
+  padding: 14px 22px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  min-width: 120px;
+  pointer-events: none;
+  animation: hudPopIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+@keyframes hudPopIn {
+  from { opacity: 0; transform: translate(-50%, -40%) scale(0.9); }
+  to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
+.player-gesture-hud-icon {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary-gold, #F5C518);
+}
+
+.player-gesture-hud-icon svg {
+  width: 28px;
+  height: 28px;
+}
+
+.player-gesture-hud-bar-wrapper {
+  width: 84px;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+  overflow: hidden;
+  position: relative;
+}
+
+.player-gesture-hud-bar-fill {
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(90deg, #F5C518, #E50914);
+  border-radius: 999px;
+  transition: width 0.08s linear;
+  box-shadow: 0 0 10px rgba(245, 197, 24, 0.6);
+}
+
+.player-gesture-hud-text {
+  font-size: 13px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 0.5px;
+  font-family: monospace, sans-serif;
+}
+
+/* Hiệu Ứng Gợn Sóng Tua Nhanh 10s Khi Double Tap (YouTube Style) */
+.double-tap-ripple {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 44%;
+  z-index: 32;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: doubleTapFade 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.double-tap-left {
+  left: 0;
+  border-top-right-radius: 50% 100%;
+  border-bottom-right-radius: 50% 100%;
+  background: radial-gradient(circle at 10% 50%, rgba(255, 255, 255, 0.32), rgba(229, 9, 20, 0.15) 50%, transparent 75%);
+}
+
+.double-tap-right {
+  right: 0;
+  border-top-left-radius: 50% 100%;
+  border-bottom-left-radius: 50% 100%;
+  background: radial-gradient(circle at 90% 50%, rgba(255, 255, 255, 0.32), rgba(229, 9, 20, 0.15) 50%, transparent 75%);
+}
+
+.double-tap-arrow-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  color: #fff;
+  filter: drop-shadow(0 4px 14px rgba(0,0,0,0.85));
+}
+
+.double-tap-svg {
+  width: 38px;
+  height: 38px;
+  animation: arrowPulse 0.35s ease-in-out infinite alternate;
+}
+
+.double-tap-label {
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  background: rgba(0, 0, 0, 0.65);
+  padding: 4px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+@keyframes doubleTapFade {
+  0% { opacity: 0; transform: scale(0.9); }
+  20% { opacity: 1; transform: scale(1); }
+  80% { opacity: 1; }
+  100% { opacity: 0; transform: scale(1.08); }
+}
+
+@keyframes arrowPulse {
+  0% { transform: scale(0.95); }
+  100% { transform: scale(1.15); }
+}
+
+
+/* ĐẢM BẢO TRIỆT ĐỂ: Khi controls ẩn, TẤT CẢ các con của overlay KHÔNG ĐƯỢC nuốt pointer-events */
+.player-overlay.controls-hidden,
+.player-overlay.controls-hidden *,
+.player-overlay.hide,
+.player-overlay.hide * {
+  pointer-events: none !important;
+}
+
+/* Nâng z-index của Gesture Surface lên 25 để bắt trọn 100% cú chạm */
+.player-gesture-surface {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  z-index: 25 !important;
+  touch-action: none !important;
+  background: transparent !important;
+  cursor: pointer !important;
+  -webkit-tap-highlight-color: transparent !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+}
+
+.player-overlay {
+  z-index: 30 !important;
+  pointer-events: none !important;
+}
+
+.player-overlay:not(.controls-hidden):not(.hide) > * {
+  pointer-events: auto !important;
+}
