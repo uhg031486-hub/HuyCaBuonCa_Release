@@ -37,6 +37,7 @@ export default function CinematicPlayer({
   const [activeSubText, setActiveSubText] = useState('');
   const [useIframeEmbed, setUseIframeEmbed] = useState(false);
   const [playbackError, setPlaybackError] = useState(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const controlsTimeoutRef = useRef(null);
   const [brightness, setBrightness] = useState(1.0);
   const [gestureHud, setGestureHud] = useState({ type: null, value: 0, visible: false });
@@ -354,6 +355,42 @@ export default function CinematicPlayer({
     videoRef.current.currentTime = pos * duration;
   };
 
+  useEffect(() => {
+    const handleFsChange = () => {
+      setIsFullscreen(Boolean(document.fullscreenElement));
+    };
+    document.addEventListener('fullscreenchange', handleFsChange);
+    document.addEventListener('webkitfullscreenchange', handleFsChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFsChange);
+      document.removeEventListener('webkitfullscreenchange', handleFsChange);
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) return;
+      if (e.key === ' ' || e.key === 'k' || e.key === 'K') {
+        e.preventDefault();
+        togglePlay();
+      } else if (e.key === 'f' || e.key === 'F') {
+        e.preventDefault();
+        requestFullscreen();
+      } else if (e.key === 'm' || e.key === 'M') {
+        e.preventDefault();
+        toggleMute();
+      } else if (e.key === 'ArrowLeft' || e.key === 'j' || e.key === 'J') {
+        e.preventDefault();
+        if (videoRef.current) videoRef.current.currentTime = Math.max(0, videoRef.current.currentTime - 10);
+      } else if (e.key === 'ArrowRight' || e.key === 'l' || e.key === 'L') {
+        e.preventDefault();
+        if (videoRef.current) videoRef.current.currentTime = Math.min(duration || 0, videoRef.current.currentTime + 10);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isPlayingState, isMuted, duration, isFullscreen]);
+
   const requestFullscreen = () => {
     if (!containerRef.current) return;
     if (document.fullscreenElement) {
@@ -466,7 +503,7 @@ export default function CinematicPlayer({
     <div 
       ref={containerRef}
       onMouseMove={handleMouseMove}
-      className="fixed inset-0 z-50 bg-black flex items-center justify-center select-none overflow-hidden"
+      className={`fixed inset-0 z-50 bg-black flex items-center justify-center select-none overflow-hidden ${!showControls && isPlayingState ? "cursor-none" : "cursor-default"}`}
     >
       {/* Lớp phủ cảm ứng đa điểm bắt trọn 100% cử chỉ chạm (Touch Gesture Surface) */}
       <div 
@@ -781,9 +818,9 @@ export default function CinematicPlayer({
               <button
                 onClick={requestFullscreen}
                 className="p-2.5 rounded-xl hover:bg-white/10 text-white cursor-pointer transition-colors"
-                title="Toàn màn hình"
+                title={isFullscreen ? "Thoát toàn màn hình (F/Esc)" : "Toàn màn hình (F)"}
               >
-                <Maximize2 className="w-5 h-5" />
+                {isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
               </button>
             </div>
           </div>

@@ -61,6 +61,7 @@ export default function WatchMoviePage({
   const [useIframeEmbed, setUseIframeEmbed] = useState(false);
   const [playbackError, setPlaybackError] = useState(null);
   const [activeSubText, setActiveSubText] = useState('');
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   // Dropdown Menus in Player
   const [showSettingsMenu, setShowSettingsMenu] = useState(false);
@@ -403,6 +404,50 @@ export default function WatchMoviePage({
     videoRef.current.currentTime = pos * duration;
   };
 
+  useEffect(() => {
+    const handleFsChange = () => {
+      setIsFullscreen(Boolean(document.fullscreenElement));
+    };
+    document.addEventListener('fullscreenchange', handleFsChange);
+    document.addEventListener('webkitfullscreenchange', handleFsChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFsChange);
+      document.removeEventListener('webkitfullscreenchange', handleFsChange);
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) return;
+      if (e.key === ' ' || e.key === 'k' || e.key === 'K') {
+        e.preventDefault();
+        togglePlay();
+      } else if (e.key === 'f' || e.key === 'F') {
+        e.preventDefault();
+        toggleFullscreen();
+      } else if (e.key === 'm' || e.key === 'M') {
+        e.preventDefault();
+        toggleMute();
+      } else if (e.key === 'ArrowLeft' || e.key === 'j' || e.key === 'J') {
+        e.preventDefault();
+        handleSkip(-10);
+      } else if (e.key === 'ArrowRight' || e.key === 'l' || e.key === 'L') {
+        e.preventDefault();
+        handleSkip(10);
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        const newV = Math.min(1, volume + 0.1);
+        handleVolumeChange({ target: { value: newV } });
+      } else if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        const newV = Math.max(0, volume - 0.1);
+        handleVolumeChange({ target: { value: newV } });
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isPlaying, volume, isFullscreen]);
+
   const toggleFullscreen = () => {
     if (!containerRef.current) return;
     if (document.fullscreenElement) {
@@ -419,7 +464,7 @@ export default function WatchMoviePage({
       if (isPlaying && !showSettingsMenu && !showAudioSubMenu) {
         setShowControls(false);
       }
-    }, 3500);
+    }, 2500);
   };
 
   const formatTime = (timeInSeconds) => {
@@ -511,7 +556,7 @@ export default function WatchMoviePage({
           <div
             ref={containerRef}
             onMouseMove={handleMouseMove}
-            className="relative aspect-video rounded-2xl overflow-hidden bg-black border border-white/15 shadow-[0_20px_60px_rgba(0,0,0,0.9)] group select-none"
+            className={`relative aspect-video rounded-2xl overflow-hidden bg-black border border-white/15 shadow-[0_20px_60px_rgba(0,0,0,0.9)] group select-none ${!showControls && isPlaying ? "cursor-none" : "cursor-default"}`}
           >
             {/* Real Video or Embed Iframe */}
             {useIframeEmbed && currentEmbedUrl ? (
@@ -597,9 +642,36 @@ export default function WatchMoviePage({
               </div>
             )}
 
+            {/* Fullscreen Top Header Bar */}
+            {isFullscreen && (
+              <div className={`absolute top-0 inset-x-0 p-4 sm:p-6 bg-gradient-to-b from-black/80 via-black/20 to-transparent transition-opacity duration-300 flex items-center justify-between z-20 ${
+                showControls ? 'opacity-100' : 'opacity-0 pointer-events-none'
+              }`}>
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-[#E50914] flex items-center justify-center shadow-neon-red">
+                    <Film className="w-4 h-4 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-white font-extrabold text-sm sm:text-base flex items-center gap-2 drop-shadow">
+                      <span>{movie.title || movie.name}</span>
+                      {currentEpName && <span className="text-[#F5C518] text-xs sm:text-sm font-semibold">• {currentEpName}</span>}
+                    </h3>
+                  </div>
+                </div>
+                <button
+                  onClick={toggleFullscreen}
+                  className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold cursor-pointer transition-colors flex items-center gap-1.5 border border-white/15"
+                  title="Thoát toàn màn hình (Esc)"
+                >
+                  <Minimize2 className="w-4 h-4" />
+                  <span>Thoát Fullscreen (Esc)</span>
+                </button>
+              </div>
+            )}
+
             {/* Custom Cinema Video Controls Bar */}
             {!useIframeEmbed && (
-              <div className={`absolute bottom-0 inset-x-0 p-3 sm:p-5 bg-gradient-to-t from-black/65 via-black/25 to-transparent backdrop-blur-[2px] transition-opacity duration-300 space-y-2 z-20 ${
+              <div className={`absolute bottom-0 inset-x-0 p-3 sm:p-5 bg-gradient-to-t from-black/65 via-black/25 to-transparent  transition-opacity duration-300 space-y-2 z-20 ${
                 showControls ? 'opacity-100' : 'opacity-0 pointer-events-none'
               }`}>
                 
@@ -772,9 +844,9 @@ export default function WatchMoviePage({
                     <button 
                       onClick={toggleFullscreen}
                       className="p-1.5 sm:p-2 rounded-lg hover:bg-white/10 text-gray-300 hover:text-white cursor-pointer"
-                      title="Toàn màn hình"
+                      title={isFullscreen ? "Thoát toàn màn hình (F/Esc)" : "Toàn màn hình (F)"}
                     >
-                      <Maximize2 className="w-4 h-4 sm:w-5 sm:h-5" />
+                      {isFullscreen ? <Minimize2 className="w-4 h-4 sm:w-5 sm:h-5" /> : <Maximize2 className="w-4 h-4 sm:w-5 sm:h-5" />}
                     </button>
 
                   </div>
@@ -1142,7 +1214,7 @@ export default function WatchMoviePage({
                       </span>
                     )}
 
-                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-[2px]">
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity ">
                       <div className="w-10 h-10 rounded-full bg-[#E50914] text-white flex items-center justify-center shadow-neon-red">
                         <Play className="w-5 h-5 fill-white ml-0.5" />
                       </div>
