@@ -269,6 +269,9 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:clipToPadding="false"
+            android:descendantFocusability="afterDescendants"
+            android:focusable="false"
+            android:focusableInTouchMode="false"
             android:paddingBottom="6dp" />
 
         <ProgressBar
@@ -295,7 +298,7 @@
             android:layout_height="24dp"
             android:layout_gravity="bottom|center_horizontal"
             android:layout_marginBottom="4dp"
-            android:visibility="gone" />
+            android:visibility="invisible" />
 
     </FrameLayout>
 

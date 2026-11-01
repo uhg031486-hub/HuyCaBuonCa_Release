@@ -5,6 +5,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.DecodeFormat
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.huycabuonca.mobile.R
 import com.huycabuonca.mobile.api.MovieRepository
@@ -112,13 +114,17 @@ class MovieAdapter(
             val fallbackRequest = if (fallbackUrl.isNotEmpty() && fallbackUrl != primaryUrl) {
                 Glide.with(binding.imgPoster.context)
                     .load(fallbackGlide)
-                    .transition(DrawableTransitionOptions.withCrossFade())
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .format(DecodeFormat.PREFER_RGB_565)
+                    .transition(DrawableTransitionOptions.withCrossFade(150))
                     .error(defaultErrorRes)
             } else null
 
             val glideRequest = Glide.with(binding.imgPoster.context)
                 .load(primaryGlide)
-                .transition(DrawableTransitionOptions.withCrossFade())
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .format(DecodeFormat.PREFER_RGB_565)
+                .transition(DrawableTransitionOptions.withCrossFade(150))
                 .placeholder(R.drawable.bg_focus_card)
 
             if (fallbackRequest != null) {

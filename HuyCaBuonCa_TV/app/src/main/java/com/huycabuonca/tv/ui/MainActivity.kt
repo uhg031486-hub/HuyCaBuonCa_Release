@@ -18,7 +18,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.GridLayoutManager
+import com.huycabuonca.tv.util.TvGridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.huycabuonca.tv.R
@@ -39,7 +39,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var adapter: MovieAdapter
     private lateinit var historyAdapter: HistoryAdapter
-    private lateinit var layoutManager: GridLayoutManager
+    private lateinit var layoutManager: TvGridLayoutManager
 
     private var currentSource = MovieSource.KKPHIM
     private var currentFilterUrl = "https://phimapi.com/danh-sach/phim-moi-cap-nhat"
@@ -130,12 +130,18 @@ class MainActivity : AppCompatActivity() {
             }
         )
 
-        // 7 cột card nhỏ gọn để hiển thị được 3 đến 4 hàng phim trên màn hình TV Box
-        layoutManager = GridLayoutManager(this, 7)
-        binding.recyclerMovies.layoutManager = layoutManager
-        binding.recyclerMovies.adapter = adapter
+        // 7 cột card nhỏ gọn với TvGridLayoutManager chống nhảy con trỏ khi cuộn remote nhanh
+        layoutManager = TvGridLayoutManager(this, 7)
+        binding.recyclerMovies.apply {
+            layoutManager = this@MainActivity.layoutManager
+            adapter = this@MainActivity.adapter
+            itemAnimator = null // Tắt animation để tránh mất focus khi thêm phần tử mới
+            descendantFocusability = android.view.ViewGroup.FOCUS_AFTER_DESCENDANTS
+            isFocusable = false
+            isFocusableInTouchMode = false
+        }
 
-        // Infinite Scroll cho TV Box (Tải hàng ngàn phim khi cuộn remote)
+        // Infinite Scroll cho TV Box (Tải trước 21 phim để remote cuộn liên tục không bị khựng)
         binding.recyclerMovies.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
@@ -143,7 +149,7 @@ class MainActivity : AppCompatActivity() {
                 val totalItemCount = layoutManager.itemCount
                 val firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
 
-                if (!isLoading && !isLastPage && (visibleItemCount + firstVisibleItemPosition) >= totalItemCount - 6) {
+                if (!isLoading && !isLastPage && (visibleItemCount + firstVisibleItemPosition) >= totalItemCount - 21) {
                     loadMoreMovies()
                 }
             }
@@ -459,7 +465,7 @@ class MainActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             val items = MovieRepository.getMovies(currentSource, currentFilterUrl, currentPage, this@MainActivity)
-            binding.progressLoadMore.visibility = View.GONE
+            binding.progressLoadMore.visibility = View.INVISIBLE
             isLoading = false
 
             if (items.isNotEmpty()) {
