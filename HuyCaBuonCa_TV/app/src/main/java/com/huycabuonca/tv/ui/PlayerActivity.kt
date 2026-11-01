@@ -177,7 +177,7 @@ class PlayerActivity : AppCompatActivity() {
                     if (res != null && res.streamUrl.isNotEmpty()) {
                         initExoPlayer(res.streamUrl, res.subtitleUrl ?: subtitleUrl)
                     } else {
-                        Toast.makeText(this@PlayerActivity, "Không thể tải tập phim ngắn này", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@PlayerActivity, "Tập này thuộc gói VIP FreeReels (yêu cầu nạp xu). Vui lòng chọn các tập miễn phí!", Toast.LENGTH_SHORT).show()
                     }
                 }
             }

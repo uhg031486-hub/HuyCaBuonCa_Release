@@ -1138,7 +1138,7 @@ class DetailActivity : AppCompatActivity() {
                         val subUrl = res.subtitleUrl ?: episode.subtitleUrl
                         initExoPlayer(res.streamUrl, subUrl)
                     } else {
-                        Toast.makeText(this@DetailActivity, "Tập phim ngắn này đang tải luồng phát, vui lòng thử lại!", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@DetailActivity, "Tập này thuộc gói VIP FreeReels (yêu cầu nạp xu). Vui lòng chọn các tập miễn phí!", Toast.LENGTH_SHORT).show()
                     }
                 }
                 return

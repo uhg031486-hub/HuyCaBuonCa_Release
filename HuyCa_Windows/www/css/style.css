@@ -580,6 +580,15 @@ body {
   font-size: 14px;
   font-weight: bold;
 }
+.btn-episode.ep-vip-locked {
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px dashed rgba(245, 158, 11, 0.4);
+  color: #e2e8f0;
+}
+.btn-episode.ep-vip-locked:hover {
+  background: rgba(245, 158, 11, 0.15);
+  border-color: #f59e0b;
+}
 .btn-episode.active {
   background: var(--primary-gold);
   color: #000000;
@@ -616,7 +625,7 @@ body {
   flex-direction: column;
   justify-content: space-between;
   padding: 24px 36px;
-  background: linear-gradient(180deg, rgba(0,0,0,0.85) 0%, transparent 25%, transparent 70%, rgba(0,0,0,0.9) 100%);
+  background: transparent !important;
   opacity: 1;
   transition: opacity 0.3s ease;
   pointer-events: none;
@@ -816,7 +825,7 @@ body {
   border-radius: 30px;
   font-size: 16px;
   font-weight: bold;
-  z-index: 3000;
+  z-index: 9999999 !important;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
   display: none;
 }
@@ -1637,7 +1646,7 @@ body.mode-tv .header-actions {
   overflow: visible !important;
 }
 
-body.mode-tv .btn-header {
+body.mode-tv .btn-header:not(#btnInstallApp):not(.btn-header-install) {
   display: inline-flex !important;
   align-items: center !important;
   gap: 6px !important;
@@ -2157,7 +2166,7 @@ body.mode-tv .header-actions {
   align-items: center !important;
   gap: 8px !important;
 }
-body.mode-tv .header-actions .btn-header {
+body.mode-tv .header-actions .btn-header:not(#btnInstallApp):not(.btn-header-install) {
   display: inline-flex !important;
   align-items: center !important;
   gap: 6px !important;
@@ -2265,7 +2274,7 @@ body.mode-tv .focusable:focus {
   display: flex !important;
   justify-content: space-between !important;
   align-items: center !important;
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.75) 0%, rgba(0, 0, 0, 0.35) 50%, transparent 100%) !important;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.45) 0%, transparent 100%) !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important;
   z-index: 22 !important;
 }
 
@@ -2386,7 +2395,7 @@ body.mode-tv .focusable:focus {
 /* 3. CINEMA PRO BOTTOM DOCK (Thanh điều khiển cao cấp tích hợp dưới đáy) */
 .player-bottom-bar {
   padding: 20px 28px 18px 28px !important;
-  background: linear-gradient(0deg, rgba(0, 0, 0, 0.88) 0%, rgba(0, 0, 0, 0.45) 60%, transparent 100%) !important;
+  background: linear-gradient(0deg, rgba(0, 0, 0, 0.5) 0%, transparent 100%) !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important;
   display: flex !important;
   flex-direction: column !important;
   gap: 12px !important;
@@ -2905,7 +2914,7 @@ video::cue {
   }
 }
 
-/* Custom Cinema Subtitle Overlay (#playerSubtitleOverlay) - Không bao giờ bị tràn hay đè giữa màn hình */
+/* Custom Cinema Subtitle Overlay (#playerSubtitleOverlay) - Chuẩn điện ảnh, tự nhiên theo nguồn */
 #playerSubtitleOverlay {
   position: absolute;
   bottom: 66px;
@@ -2915,7 +2924,9 @@ video::cue {
   width: max-content;
   padding: 5px 14px;
   border-radius: 6px;
-  background: rgba(0, 0, 0, 0.72);
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   color: #ffffff;
   font-size: 16px;
   line-height: 1.4;
@@ -2933,7 +2944,7 @@ video::cue {
 
 @media (max-width: 800px) {
   #playerSubtitleOverlay {
-    bottom: 58px;
+    bottom: 62px;
     max-width: 90%;
     font-size: 13.5px;
     line-height: 1.35;
@@ -2941,11 +2952,22 @@ video::cue {
   }
 }
 
+/* Chế độ Phim Ngắn / Màn Hình Dọc (.player-vertical-mode) */
+.player-container.player-vertical-mode #playerSubtitleOverlay {
+  bottom: 88px;
+  max-width: 90% !important;
+  font-size: 14.5px !important;
+  font-weight: 600 !important;
+  padding: 5px 12px !important;
+  background: rgba(0, 0, 0, 0.78) !important;
+}
+
 .player-container.player-floating-mini #playerSubtitleOverlay {
   bottom: 8px !important;
   font-size: 10px !important;
   padding: 2px 6px !important;
   max-width: 92% !important;
+  pointer-events: none;
 }
 
 /* Ẩn hoàn toàn native ::cue trên #videoPlayer vì đã có #playerSubtitleOverlay chuẩn điện ảnh */
@@ -2960,21 +2982,46 @@ video#videoPlayer::cue {
 /* ==========================================================================
    HỘP THOẠI & NÚT CÀI ĐẶT ĐA NỀN TẢNG (INSTALL MODAL & BUTTON v3.0.6)
    ========================================================================== */
-.btn-header-install {
-  background: linear-gradient(135deg, #eab308 0%, #ca8a04 100%) !important;
+/* Nút Cài Đặt App luôn hiển thị nền VÀNG nổi bật, chữ ĐEN đậm trên mọi chế độ */
+#btnInstallApp,
+.header-actions #btnInstallApp,
+body.mode-tv .header-actions #btnInstallApp,
+body.mode-tv #btnInstallApp,
+.btn-header-install,
+body.mode-tv .btn-header-install {
+  background: linear-gradient(135deg, #facc15 0%, #eab308 50%, #ca8a04 100%) !important;
+  background-color: #eab308 !important;
   color: #000000 !important;
-  border: 1px solid #fef08a !important;
+  border: 1.5px solid #fef08a !important;
   font-weight: 800 !important;
-  box-shadow: 0 2px 10px rgba(234, 179, 8, 0.35) !important;
+  box-shadow: 0 0 15px rgba(250, 204, 21, 0.45) !important;
+  letter-spacing: 0.3px;
 }
+
+#btnInstallApp .btn-text,
+#btnInstallApp .btn-icon,
 .btn-header-install .btn-text,
-.btn-header-install .btn-icon {
+.btn-header-install .btn-icon,
+body.mode-tv .header-actions #btnInstallApp .btn-text,
+body.mode-tv .header-actions #btnInstallApp .btn-icon,
+body.mode-tv .btn-header-install .btn-text,
+body.mode-tv .btn-header-install .btn-icon {
   color: #000000 !important;
   font-weight: 800 !important;
 }
-.btn-header-install:hover {
-  transform: scale(1.05) !important;
-  box-shadow: 0 0 16px rgba(250, 204, 21, 0.65) !important;
+
+#btnInstallApp:hover,
+#btnInstallApp:focus-visible,
+.btn-header-install:hover,
+.btn-header-install:focus-visible,
+body.mode-tv .header-actions #btnInstallApp:hover,
+body.mode-tv .header-actions #btnInstallApp:focus-visible {
+  background: linear-gradient(135deg, #fef08a 0%, #facc15 50%, #eab308 100%) !important;
+  background-color: #facc15 !important;
+  border-color: #ffffff !important;
+  color: #000000 !important;
+  transform: translateY(-2px) scale(1.04) !important;
+  box-shadow: 0 0 22px rgba(250, 204, 21, 0.8) !important;
 }
 
 .install-modal-box {
@@ -3045,20 +3092,25 @@ video#videoPlayer::cue {
 .player-container.player-vertical-mode #videoPlayer {
   width: 100% !important;
   height: 100% !important;
-  object-fit: contain !important;
   max-width: 100vw !important;
   max-height: 100vh !important;
 }
 
 .player-container.player-vertical-mode .player-bottom-bar {
-  background: linear-gradient(0deg, rgba(0, 0, 0, 0.94) 0%, rgba(0, 0, 0, 0.5) 60%, transparent 100%) !important;
+  background: linear-gradient(0deg, rgba(0, 0, 0, 0.5) 0%, transparent 100%) !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important;
   padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px)) !important;
 }
 
 .player-container.player-vertical-mode .btn-rotate-pill {
-  background: rgba(34, 197, 94, 0.2) !important;
-  border-color: #22c55e !important;
-  color: #22c55e !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  color: #ffffff !important;
+}
+/* Ẩn nút xoay trên desktop vì không cần thiết */
+@media (min-width: 801px) {
+  #btnRotatePlayer {
+    display: none !important;
+  }
 }
 
 /* ==========================================================================
@@ -4129,4 +4181,893 @@ body.mode-tv .movie-card.match-grid-card:focus {
 
 .player-overlay:not(.controls-hidden):not(.hide) > * {
   pointer-events: auto !important;
+}
+
+
+/* ==========================================================================
+   HUY CÁ CINEMATIC BOTTOM BAR & CONTROLS SPECIFICATION (CHUẨN NETFLIX / CINEMA)
+   ========================================================================== */
+
+/* Nút Play/Pause chính: Đỏ Neon chuẩn Cinematic */
+.btn-play-pause-cinematic {
+  width: 44px !important;
+  height: 44px !important;
+  min-width: 44px !important;
+  border-radius: 50% !important;
+  background: #E50914 !important;
+  border: none !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 18px rgba(229, 9, 20, 0.65) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  transition: transform 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease !important;
+  padding: 0 !important;
+}
+
+.btn-play-pause-cinematic:hover {
+  background: #F40612 !important;
+  transform: scale(1.12) !important;
+  box-shadow: 0 0 24px rgba(229, 9, 20, 0.85) !important;
+}
+
+.btn-play-pause-cinematic:active {
+  transform: scale(0.95) !important;
+}
+
+.ctrl-icon-play,
+.ctrl-icon-pause {
+  width: 22px !important;
+  height: 22px !important;
+  fill: #ffffff !important;
+  pointer-events: none !important;
+}
+.ctrl-icon-play {
+  margin-left: 2px !important;
+}
+
+/* Thanh Tiến Trình Seekbar Chuẩn Cinematic với Buffer Bar & Played Bar Đỏ Neon */
+.progress-track-wrapper {
+  position: relative !important;
+  width: 100% !important;
+  height: 20px !important;
+  display: flex !important;
+  align-items: center !important;
+  cursor: pointer !important;
+}
+
+.seek-buffer-bar {
+  position: absolute !important;
+  top: 50% !important;
+  left: 0 !important;
+  transform: translateY(-50%) !important;
+  height: 4px !important;
+  background: rgba(255, 255, 255, 0.3) !important;
+  border-radius: 4px !important;
+  pointer-events: none !important;
+  z-index: 2 !important;
+  transition: width 0.25s ease !important;
+}
+
+.seek-played-bar {
+  position: absolute !important;
+  top: 50% !important;
+  left: 0 !important;
+  transform: translateY(-50%) !important;
+  height: 4px !important;
+  background: #E50914 !important;
+  border-radius: 4px !important;
+  pointer-events: none !important;
+  z-index: 3 !important;
+  box-shadow: 0 0 12px rgba(229, 9, 20, 0.8) !important;
+}
+
+.progress-track-wrapper:hover .seek-buffer-bar,
+.progress-track-wrapper:hover .seek-played-bar {
+  height: 7px !important;
+}
+
+.seek-bar {
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  position: absolute !important;
+  top: 50% !important;
+  left: 0 !important;
+  transform: translateY(-50%) !important;
+  width: 100% !important;
+  height: 6px !important;
+  background: transparent !important;
+  border-radius: 4px !important;
+  outline: none !important;
+  cursor: pointer !important;
+  z-index: 5 !important;
+  margin: 0 !important;
+}
+
+.seek-bar::-webkit-slider-runnable-track {
+  background: rgba(255, 255, 255, 0.15) !important;
+  height: 4px !important;
+  border-radius: 4px !important;
+}
+.progress-track-wrapper:hover .seek-bar::-webkit-slider-runnable-track {
+  height: 7px !important;
+}
+
+.seek-bar::-webkit-slider-thumb {
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  width: 14px !important;
+  height: 14px !important;
+  border-radius: 50% !important;
+  background: #ffffff !important;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.9) !important;
+  cursor: pointer !important;
+  margin-top: -5px !important;
+  transition: transform 0.15s ease !important;
+}
+
+.progress-track-wrapper:hover .seek-bar::-webkit-slider-thumb {
+  transform: scale(1.3) !important;
+  background: #ffffff !important;
+  box-shadow: 0 0 14px rgba(229, 9, 20, 0.9) !important;
+}
+
+/* Nút Bỏ Qua Intro Nổi Tinh Tế ở góc phải (Netflix Floating Pill) - KHÔNG che giữa màn hình */
+.btn-skip-intro-floating {
+  position: absolute !important;
+  right: 28px !important;
+  bottom: 110px !important;
+  z-index: 35 !important;
+  display: none;
+  align-items: center !important;
+  gap: 8px !important;
+  background: rgba(15, 23, 42, 0.88) !important;
+  border: 1px solid rgba(255, 255, 255, 0.28) !important;
+  color: #ffffff !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  padding: 8px 18px !important;
+  border-radius: 24px !important;
+  cursor: pointer !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.6) !important;
+  transition: all 0.2s ease !important;
+}
+
+.btn-skip-intro-floating:hover {
+  background: #E50914 !important;
+  border-color: #E50914 !important;
+  transform: scale(1.06) !important;
+  box-shadow: 0 4px 20px rgba(229, 9, 20, 0.6) !important;
+}
+
+/* Bottom Bar nền mờ điện ảnh */
+.player-bottom-bar {
+  padding: 24px 32px 18px 32px !important;
+  background: linear-gradient(0deg, rgba(0,0,0,0.65) 0%, transparent 100%) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Volume Slider màu đỏ neon */
+.volume-slider {
+  accent-color: #E50914 !important;
+}
+
+/* Đảm bảo khi controls-hidden thì ẩn mượt mà, nhưng không nuốt click */
+.player-overlay.controls-hidden {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transition: opacity 0.35s ease !important;
+}
+.player-overlay:not(.controls-hidden) {
+  opacity: 1 !important;
+  transition: opacity 0.2s ease !important;
+}
+
+/* ==========================================================================
+   TỐI ƯU HÓA TOÀN DIỆN CHO MÀN HÌNH DỌC, NÚT BỎ QUA INTRO & ĐẾM NGƯỢC BÓNG ĐÁ
+   ========================================================================== */
+
+/* 1. NÚT BỎ QUA INTRO: NHỎ GỌN, VỪA PHẢI, TINH TẾ CHUẨN NETFLIX (KHÔNG TO TỔ BỐ) */
+.btn-skip-intro-floating {
+  position: absolute !important;
+  right: 18px !important;
+  bottom: 110px !important;
+  z-index: 35 !important;
+  display: none;
+  align-items: center !important;
+  gap: 5px !important;
+  background: rgba(15, 23, 42, 0.85) !important;
+  border: 1px solid rgba(255, 255, 255, 0.22) !important;
+  color: #ffffff !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  padding: 4px 11px !important;
+  border-radius: 14px !important;
+  cursor: pointer !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.45) !important;
+  transition: all 0.15s ease !important;
+}
+
+.btn-skip-intro-floating:hover {
+  background: #E50914 !important;
+  border-color: #E50914 !important;
+  transform: scale(1.05) !important;
+  box-shadow: 0 2px 14px rgba(229, 9, 20, 0.6) !important;
+}
+
+.btn-skip-intro-floating svg {
+  width: 12px !important;
+  height: 12px !important;
+}
+
+/* 2. CHẾ ĐỘ MÀN HÌNH DỌC (PHIM NGẮN 9:16 & SMARTPHONE DỌC): MỞ RỘNG TOÀN BỘ KHÔNG GIAN */
+.player-container.player-vertical-mode .player-overlay {
+  padding: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.player-container.player-vertical-mode .player-top {
+  padding: 10px 12px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.player-container.player-vertical-mode .player-bottom-bar {
+  padding: 6px 10px calc(14px + env(safe-area-inset-bottom, 0px)) 10px !important;
+  background: linear-gradient(0deg, rgba(0, 0, 0, 0.5) 0%, transparent 100%) !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  gap: 4px !important;
+}
+
+.player-container.player-vertical-mode .progress-track-wrapper {
+  height: 16px !important;
+  padding: 0 !important;
+  width: 100% !important;
+}
+
+.player-container.player-vertical-mode .player-controls-row {
+  width: 100% !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  gap: 3px !important;
+  flex-wrap: nowrap !important;
+  box-sizing: border-box !important;
+}
+
+.player-container.player-vertical-mode .controls-left {
+  display: flex !important;
+  align-items: center !important;
+  gap: 3px !important;
+  min-width: 0 !important;
+  flex-shrink: 1 !important;
+}
+
+.player-container.player-vertical-mode .controls-right {
+  display: flex !important;
+  align-items: center !important;
+  gap: 3px !important;
+  min-width: 0 !important;
+  flex-shrink: 0 !important;
+}
+
+/* Nút Play/Pause chính chuẩn 36px đỏ neon */
+.player-container.player-vertical-mode .btn-play-pause-cinematic {
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px !important;
+  box-shadow: 0 0 10px rgba(229, 9, 20, 0.6) !important;
+}
+.player-container.player-vertical-mode .ctrl-icon-play,
+.player-container.player-vertical-mode .ctrl-icon-pause {
+  width: 16px !important;
+  height: 16px !important;
+}
+
+/* Các nút điều khiển chuẩn 30px */
+.player-container.player-vertical-mode .btn-ctrl-action {
+  width: 30px !important;
+  height: 30px !important;
+  min-width: 30px !important;
+  padding: 2px !important;
+  border-radius: 6px !important;
+}
+.player-container.player-vertical-mode .btn-ctrl-action .ctrl-icon {
+  width: 16px !important;
+  height: 16px !important;
+}
+
+/* Ẩn chữ dài trên nút để icon tỏa sáng */
+.player-container.player-vertical-mode .btn-ctrl-text {
+  display: none !important;
+}
+
+/* Ẩn thanh kéo slider âm lượng, giữ icon loa */
+.player-container.player-vertical-mode .volume-control-wrapper .volume-slider {
+  display: none !important;
+}
+
+/* Đồng hồ thời lượng font 10px */
+.player-container.player-vertical-mode .player-time-display {
+  font-size: 10px !important;
+  margin-left: 1px !important;
+  gap: 2px !important;
+  white-space: nowrap !important;
+}
+
+/* Badge tốc độ 1.0x */
+.player-container.player-vertical-mode .btn-ctrl-badge {
+  padding: 2px 5px !important;
+  font-size: 10px !important;
+  min-height: 26px !important;
+  border-radius: 6px !important;
+}
+
+/* Nút Bỏ qua intro trên màn dọc: siêu nhỏ gọn tinh tế */
+.player-container.player-vertical-mode .btn-skip-intro-floating {
+  right: 12px !important;
+  bottom: 58px !important;
+  padding: 3px 8px !important;
+  font-size: 10px !important;
+}
+
+/* Trên màn hình hẹp (< 480px), ẩn nút tua 10s (người dùng Double-Tap 2 bên màn hình để tua) để các nút khác không bị tràn */
+@media (max-width: 480px) {
+  .player-container.player-vertical-mode #btnCenterRewind,
+  .player-container.player-vertical-mode #btnCenterForward,
+  #btnCenterRewind,
+  #btnCenterForward,
+  .player-container.player-vertical-mode #btnPipPlayer,
+  #btnPipPlayer {
+    display: none !important;
+  }
+}
+
+/* 3. ĐỒNG BỘ MEDIA QUERY (MAX-WIDTH: 800PX) TRÊN TOÀN BỘ MOBILE DỌC */
+@media (max-width: 800px) {
+  .player-overlay {
+    padding: 0 !important;
+  }
+  .player-top {
+    padding: 10px 12px !important;
+  }
+  .player-bottom-bar {
+    padding: 6px 10px calc(14px + env(safe-area-inset-bottom, 0px)) 10px !important;
+  }
+  .btn-skip-intro-floating {
+    right: 12px !important;
+    bottom: 58px !important;
+    padding: 3px 8px !important;
+    font-size: 10px !important;
+  }
+  .btn-skip-intro-floating svg {
+    width: 10px !important;
+    height: 10px !important;
+  }
+  .player-controls-row {
+    width: 100% !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    gap: 3px !important;
+    flex-wrap: nowrap !important;
+  }
+  .controls-left {
+    display: flex !important;
+    align-items: center !important;
+    gap: 3px !important;
+    min-width: 0 !important;
+    flex-shrink: 1 !important;
+  }
+  .controls-right {
+    display: flex !important;
+    align-items: center !important;
+    gap: 3px !important;
+    min-width: 0 !important;
+    flex-shrink: 0 !important;
+  }
+  .btn-play-pause-cinematic {
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+  }
+  .ctrl-icon-play,
+  .ctrl-icon-pause {
+    width: 16px !important;
+    height: 16px !important;
+  }
+  .btn-ctrl-action {
+    width: 30px !important;
+    height: 30px !important;
+    min-width: 30px !important;
+    padding: 2px !important;
+  }
+  .btn-ctrl-action .ctrl-icon {
+    width: 16px !important;
+    height: 16px !important;
+  }
+  .btn-ctrl-text {
+    display: none !important;
+  }
+  .volume-control-wrapper .volume-slider {
+    display: none !important;
+  }
+  .player-time-display {
+    font-size: 10px !important;
+    margin-left: 1px !important;
+    gap: 2px !important;
+  }
+  .btn-ctrl-badge {
+    padding: 2px 5px !important;
+    font-size: 10px !important;
+    min-height: 26px !important;
+  }
+}
+
+/* 4. NÚT CHUÔNG THÔNG BÁO BÓNG ĐÁ TRÊN THẺ LỊCH THI ĐẤU */
+.match-card {
+  position: relative !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  padding: 12px 16px !important;
+  gap: 10px !important;
+}
+
+.match-card-content {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  flex: 1 !important;
+  min-width: 0 !important;
+}
+
+.match-card-side {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  flex-shrink: 0 !important;
+}
+
+.btn-match-reminder {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 34px !important;
+  height: 34px !important;
+  min-width: 34px !important;
+  border-radius: 50% !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: #94a3b8 !important;
+  cursor: pointer !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  flex-shrink: 0 !important;
+}
+
+.btn-match-reminder:hover {
+  background: rgba(250, 204, 21, 0.2) !important;
+  border-color: #facc15 !important;
+  color: #facc15 !important;
+  transform: scale(1.1) !important;
+}
+
+.btn-match-reminder.is-reminded {
+  background: rgba(250, 204, 21, 0.25) !important;
+  border-color: #facc15 !important;
+  color: #facc15 !important;
+  box-shadow: 0 0 12px rgba(250, 204, 21, 0.5) !important;
+  animation: bellRingPulse 2.5s infinite ease-in-out !important;
+}
+
+@keyframes bellRingPulse {
+  0%, 100% { transform: scale(1); }
+  10%, 30% { transform: scale(1.15) rotate(-10deg); }
+  20%, 40% { transform: scale(1.15) rotate(10deg); }
+  50% { transform: scale(1); }
+}
+
+.btn-match-reminder svg {
+  width: 17px !important;
+  height: 17px !important;
+  pointer-events: none !important;
+}
+
+/* 5. GIAO DIỆN CHỜ TRẬN ĐẤU & ĐẾM NGƯỢC ĐẲNG CẤP THỂ THAO */
+.match-countdown-overlay {
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 2002 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: radial-gradient(circle at 50% 40%, rgba(15, 23, 42, 0.95) 0%, rgba(3, 7, 18, 0.98) 100%) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  padding: 20px !important;
+  box-sizing: border-box !important;
+}
+
+.countdown-backdrop-glow {
+  position: absolute;
+  top: 30%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 500px;
+  height: 350px;
+  background: radial-gradient(circle, rgba(229, 9, 20, 0.25) 0%, rgba(250, 204, 21, 0.15) 50%, transparent 75%);
+  filter: blur(60px);
+  pointer-events: none;
+}
+
+.countdown-card {
+  position: relative;
+  z-index: 2;
+  max-width: 640px;
+  width: 100%;
+  background: rgba(18, 24, 38, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 24px;
+  padding: 32px 28px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(229, 9, 20, 0.2);
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.countdown-league-badge {
+  display: inline-block;
+  padding: 4px 14px;
+  background: rgba(250, 204, 21, 0.15);
+  border: 1px solid rgba(250, 204, 21, 0.4);
+  color: #facc15;
+  font-size: 13px;
+  font-weight: 800;
+  border-radius: 20px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+
+.countdown-teams-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.team-block {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.team-logo-wrap {
+  width: 72px;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 10px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+}
+
+.team-logo-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.6));
+}
+
+.team-name {
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 800;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.match-vs-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.vs-glow-text {
+  font-size: 26px;
+  font-weight: 900;
+  color: #facc15;
+  text-shadow: 0 0 16px rgba(250, 204, 21, 0.7);
+  letter-spacing: 2px;
+}
+
+.match-status-pill {
+  padding: 3px 10px;
+  background: rgba(239, 68, 68, 0.2);
+  border: 1px solid rgba(239, 68, 68, 0.6);
+  color: #f87171;
+  font-size: 11px;
+  font-weight: 800;
+  border-radius: 12px;
+  letter-spacing: 0.5px;
+}
+
+.countdown-notice {
+  color: #94a3b8;
+  font-size: 13.5px;
+  line-height: 1.5;
+  margin: 0 auto 18px auto;
+  max-width: 480px;
+}
+
+/* Hộp đồng hồ đếm ngược */
+.countdown-timer-box {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: rgba(0, 0, 0, 0.55);
+  border: 1px solid rgba(250, 204, 21, 0.25);
+  padding: 14px 24px;
+  border-radius: 18px;
+  margin-bottom: 12px;
+  box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.timer-unit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 52px;
+}
+
+.timer-num {
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-size: 32px;
+  font-weight: 900;
+  color: #facc15;
+  text-shadow: 0 0 14px rgba(250, 204, 21, 0.6);
+  line-height: 1;
+}
+
+.timer-label {
+  font-size: 11px;
+  color: #94a3b8;
+  text-transform: uppercase;
+  margin-top: 4px;
+  font-weight: 700;
+}
+
+.timer-sep {
+  font-size: 26px;
+  font-weight: 900;
+  color: rgba(250, 204, 21, 0.5);
+  margin-bottom: 16px;
+}
+
+.countdown-exact-time {
+  color: #38bdf8;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 22px;
+}
+
+.countdown-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.btn-cd-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 22px;
+  border-radius: 28px;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-sizing: border-box;
+}
+
+.btn-cd-bell {
+  background: linear-gradient(135deg, #facc15 0%, #eab308 100%);
+  color: #0b0f17;
+  border: none;
+  box-shadow: 0 4px 18px rgba(250, 204, 21, 0.4);
+}
+
+.btn-cd-bell:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(250, 204, 21, 0.6);
+  background: linear-gradient(135deg, #fde047 0%, #facc15 100%);
+}
+
+.btn-cd-bell.is-reminded {
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 18px rgba(34, 197, 94, 0.4) !important;
+}
+
+.btn-cd-bell svg {
+  width: 18px;
+  height: 18px;
+}
+
+.btn-cd-force {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #e2e8f0;
+}
+
+.btn-cd-force:hover {
+  background: rgba(229, 9, 20, 0.2);
+  border-color: #E50914;
+  color: #ffffff;
+  transform: translateY(-2px);
+}
+
+.btn-cd-force svg {
+  width: 16px;
+  height: 16px;
+}
+
+@media (max-width: 600px) {
+  .countdown-card {
+    padding: 22px 16px;
+  }
+  .team-logo-wrap {
+    width: 52px;
+    height: 52px;
+    padding: 6px;
+  }
+  .team-name {
+    font-size: 15px;
+  }
+  .vs-glow-text {
+    font-size: 20px;
+  }
+  .countdown-timer-box {
+    padding: 10px 14px;
+    gap: 6px;
+  }
+  .timer-num {
+    font-size: 24px;
+  }
+  .timer-unit {
+    min-width: 42px;
+  }
+  .btn-cd-action {
+    width: 100%;
+    justify-content: center;
+    padding: 10px 16px;
+    font-size: 13px;
+  }
+}
+
+.btn-cd-back {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: #94a3b8 !important;
+}
+
+.btn-cd-back:hover {
+  background: rgba(255, 255, 255, 0.18) !important;
+  color: #ffffff !important;
+  transform: translateY(-2px);
+}
+
+#matchWebPlayerContainer .player-top {
+  z-index: 2020 !important;
+  pointer-events: auto !important;
+}
+
+/* ==========================================================================
+   TOÀN MÀN HÌNH CỬA SỔ SẠCH BÓNG (PURE WINDOW FULLSCREEN - KHÔNG POPUP ESC)
+   ========================================================================== */
+.player-container.player-window-fullscreen {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: 100vw !important;
+  max-height: 100vh !important;
+  z-index: 999999 !important;
+  background: #000000 !important;
+  border-radius: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+body.has-window-fullscreen {
+  overflow: hidden !important;
+}
+
+
+/* Triệt tiêu 100% viền xanh/cyan khi trỏ chuột vào thanh play */
+.seek-bar,
+.seek-bar:hover,
+.seek-bar:focus,
+.seek-bar:active,
+.seek-bar.focused,
+.progress-track-wrapper:hover .seek-bar {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+/* ==========================================================================
+   CLEAN CINEMATIC PLAYER OVERLAY & SEAKBAR (CHUẨN YOUTUBE - KHÔNG MỜ, KHÔNG XANH)
+   ========================================================================== */
+.player-container.controls-hidden,
+.player-container.controls-hidden * {
+  cursor: none !important;
+}
+
+.player-overlay.controls-hidden,
+.player-overlay.hide {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transition: opacity 0.3s ease !important;
+}
+
+/* Triệt tiêu 100% outline/border/viền xanh lơ trên mọi trình duyệt */
+input[type="range"]::-moz-focus-outer {
+  border: 0 !important;
+}
+input[type="range"]:focus,
+input[type="range"]:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.seek-bar,
+.seek-bar:focus,
+.seek-bar:focus-visible,
+.seek-bar:hover,
+.seek-bar:active,
+.seek-bar::-webkit-slider-thumb,
+.seek-bar::-webkit-slider-runnable-track,
+.progress-track-wrapper:hover .seek-bar {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  accent-color: #E50914 !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+/* Fullscreen chuẩn YouTube: tràn 100vw x 100vh sạch */
+#playerContainer:fullscreen,
+#playerContainer:-webkit-full-screen {
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: 100vw !important;
+  max-height: 100vh !important;
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 999999 !important;
+  background: #000 !important;
+  transform: none !important;
 }

@@ -189,6 +189,9 @@ export default function App() {
         if (unl && unl.url) {
           videoUrl = unl.url;
           if (unl.subtitleUrl) subtitleUrl = unl.subtitleUrl;
+        } else {
+          alert('🔒 Tập này thuộc bản quyền VIP FreeReels (yêu cầu nạp xu trên app gốc). Bạn có thể xem các tập miễn phí (Tập 1 - 10)!');
+          return;
         }
       }
 

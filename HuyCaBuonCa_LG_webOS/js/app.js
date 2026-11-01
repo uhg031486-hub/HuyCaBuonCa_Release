@@ -856,8 +856,9 @@
           }
 
           let rawStream = el.external_audio_h264_m3u8 || el.m3u8_url || el.video_url || el.external_audio_h265_m3u8 || '';
+          let isLocked = !rawStream || !rawStream.startsWith('http');
           let finalLink = `freereels_unlock:${seriesId}:${epId}`;
-          if (rawStream && rawStream.startsWith('http')) {
+          if (!isLocked) {
             finalLink = this.getProxyUrl(rawStream);
           }
 
@@ -866,7 +867,8 @@
             slug: epId,
             filename: epName,
             link_m3u8: finalLink,
-            subtitleUrl: viSubUrl
+            subtitleUrl: viSubUrl,
+            isLocked: isLocked
           });
         });
 
@@ -875,10 +877,12 @@
           const unlockRes = await this.unlockEpisode(seriesId, epList[0].slug);
           if (unlockRes && unlockRes.streamUrl) {
             epList[0].link_m3u8 = unlockRes.streamUrl;
+            epList[0].isLocked = false;
             if (unlockRes.subtitleUrl) epList[0].subtitleUrl = unlockRes.subtitleUrl;
           }
         }
 
+        const freeCount = epList.filter(e => !e.isLocked).length;
         return {
           movie: {
             id: `freereels:${seriesId}`,
@@ -890,7 +894,10 @@
             year: '2026',
             time: `${epCount} tập`,
             quality: '9:16 Dọc HD',
-            lang: 'Vietsub / Thuyết Minh Tiếng Việt'
+            lang: 'Vietsub / Thuyết Minh Tiếng Việt',
+            freeCount: freeCount,
+            totalEpisodes: epList.length,
+            hasLocked: epList.some(e => e.isLocked)
           },
           episodes: [
             {
@@ -1260,6 +1267,7 @@
       toast.style.display = 'none';
     }, 2800);
   }
+  window.showToast = showToast;
 
   // --- Source Selection ---
   function initSources() {
@@ -2028,6 +2036,19 @@
     return list.some(item => String(item.id) === String(matchId));
   }
 
+  // Yêu cầu quyền thông báo hệ thống (Web Notification API)
+  function requestNotificationPermission() {
+    if ('Notification' in window) {
+      if (Notification.permission === 'default') {
+        Notification.requestPermission().then(perm => {
+          if (perm === 'granted') {
+            showToast('🔔 Đã bật thông báo trên trình duyệt!');
+          }
+        }).catch(() => {});
+      }
+    }
+  }
+
   function toggleMatchReminder(match) {
     let list = getMatchReminders();
     const idx = list.findIndex(item => String(item.id) === String(match.id));
@@ -2039,14 +2060,18 @@
     } else {
       list.push({
         id: match.id,
+        tournament: match.tournament || 'Bóng Đá Trực Tiếp',
         teamA: match.teamA,
         teamB: match.teamB,
-        kickoffTime: match.kickoffTime,
-        timeStr: match.timeStr,
+        teamALogo: match.teamALogo || '',
+        teamBLogo: match.teamBLogo || '',
+        kickoffTime: match.kickoffTime || (Date.now() + 2 * 3600 * 1000),
+        timeStr: match.timeStr || match.time,
         notified: false
       });
       added = true;
-      showToast(`🔔 Đã đặt chuông! App sẽ cảnh báo trước 15 phút khi trận "${match.teamA} vs ${match.teamB}" bắt đầu!`);
+      showToast(`🔔 Đã đặt chuông! Hệ thống sẽ thông báo khi trận "${match.teamA} vs ${match.teamB}" chuẩn bị bắt đầu!`);
+      requestNotificationPermission();
     }
     localStorage.setItem('huyca_match_reminders', JSON.stringify(list));
     return added;
@@ -2080,12 +2105,27 @@
 
   function showMatchAlertPopup(m) {
     showToast(`🔔⚽ SẮP BẮT ĐẦU: "${m.teamA} vs ${m.teamB}" trong 15 phút nữa! Bấm để chọn Server xem ngay!`);
+    
+    // Gửi thông báo hệ thống nếu có quyền
+    if ('Notification' in window && Notification.permission === 'granted') {
+      try {
+        new Notification(`🔔 BÓNG ĐÁ: ${m.teamA} vs ${m.teamB}`, {
+          body: `Trận đấu chuẩn bị bắt đầu trong 15 phút nữa! Bấm để xem trực tiếp.`,
+          icon: m.teamALogo || 'https://assets.stickpng.com/images/584a9b3bb080d76168e28253.png'
+        });
+      } catch (e) {}
+    }
+
     openMatchServerModal({
       id: m.id,
-      tournament: "🏴󠁧󠁢󠁥󠁮󠁧󠁿 Ngoại Hạng Anh",
+      tournament: m.tournament || "🏴󠁧󠁢󠁥󠁮󠁧󠁿 Ngoại Hạng Anh",
       teamA: m.teamA,
       teamB: m.teamB,
-      time: m.timeStr || "Sắp diễn ra"
+      teamALogo: m.teamALogo,
+      teamBLogo: m.teamBLogo,
+      time: m.timeStr || "Sắp diễn ra",
+      kickoffTime: m.kickoffTime,
+      isLive: true // Đã đến giờ thì đánh dấu live
     });
   }
 
@@ -2278,14 +2318,171 @@
     });
 
     // Toàn màn hình match web player
+    // Toàn màn hình match web player (Chặn đứng popup Chrome trên mobile)
     document.getElementById('btnFullscreenMatch')?.addEventListener('click', () => {
       const container = document.getElementById('matchWebPlayerContainer');
+      const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) || (window.innerWidth <= 800);
+      if (isMobile) {
+        if (document.fullscreenElement) {
+          try { document.exitFullscreen().catch(() => {}); } catch(e) {}
+        }
+        container.classList.toggle('player-forced-landscape');
+        try {
+          if (screen.orientation && screen.orientation.lock) {
+            screen.orientation.lock('landscape').catch(() => {});
+          }
+        } catch(e) {}
+        showToast('🗖 Đã bật toàn màn hình (Không popup)');
+        return;
+      }
       if (!document.fullscreenElement) {
         container.requestFullscreen().catch(() => {});
       } else {
         document.exitFullscreen().catch(() => {});
       }
     });
+  }
+
+  let matchCountdownInterval = null;
+
+  function startMatchCountdown(match, serverNum) {
+    const overlay = document.getElementById('matchCountdownOverlay');
+    const daysEl = document.getElementById('cdDays');
+    const hoursEl = document.getElementById('cdHours');
+    const minsEl = document.getElementById('cdMinutes');
+    const secsEl = document.getElementById('cdSeconds');
+    const exactEl = document.getElementById('cdExactTime');
+    const bellBtn = document.getElementById('btnMatchCountdownReminder');
+    const bellText = document.getElementById('cdBellText');
+    const forceBtn = document.getElementById('btnForceOpenStream');
+    const cdBackBtn = document.getElementById('btnCdBack');
+    if (cdBackBtn) {
+      cdBackBtn.onclick = (e) => {
+        e.stopPropagation();
+        closeMatchWebPlayer();
+      };
+    }
+
+    if (!overlay) return;
+
+    // Cập nhật thông tin giải đấu & đội bóng
+    const lgBadge = document.getElementById('cdTournamentBadge');
+    if (lgBadge) lgBadge.textContent = match.tournament || '🏴󠁧󠁢󠁥󠁮󠁧󠁿 TRỰC TIẾP BÓNG ĐÁ';
+
+    const logoA = document.getElementById('cdTeamALogo');
+    const logoB = document.getElementById('cdTeamBLogo');
+    const nameA = document.getElementById('cdTeamAName');
+    const nameB = document.getElementById('cdTeamBName');
+
+    if (logoA) {
+      if (match.teamALogo) {
+        logoA.src = match.teamALogo;
+        logoA.style.display = 'block';
+      } else {
+        logoA.style.display = 'none';
+      }
+    }
+    if (logoB) {
+      if (match.teamBLogo) {
+        logoB.src = match.teamBLogo;
+        logoB.style.display = 'block';
+      } else {
+        logoB.style.display = 'none';
+      }
+    }
+    if (nameA) nameA.textContent = match.teamA || 'Đội Nhà';
+    if (nameB) nameB.textContent = match.teamB || 'Đội Khách';
+
+    if (exactEl) exactEl.textContent = `Giờ bóng lăn: ${match.timeStr || match.time || 'Sắp diễn ra'}`;
+
+    // Cập nhật nút chuông
+    const updateBellUI = () => {
+      const isReminded = isMatchReminderSet(match.id);
+      if (bellBtn) {
+        if (isReminded) {
+          bellBtn.classList.add('is-reminded');
+          if (bellText) bellText.textContent = 'Đã Đặt Chuông Báo';
+        } else {
+          bellBtn.classList.remove('is-reminded');
+          if (bellText) bellText.textContent = 'Đặt Chuông Nhắc Nhở';
+        }
+      }
+    };
+    updateBellUI();
+
+    if (bellBtn) {
+      bellBtn.onclick = (e) => {
+        e.stopPropagation();
+        toggleMatchReminder(match);
+        updateBellUI();
+      };
+    }
+
+    // Nút Vẫn mở luồng phát sớm
+    if (forceBtn) {
+      forceBtn.onclick = (e) => {
+        e.stopPropagation();
+        if (matchCountdownInterval) clearInterval(matchCountdownInterval);
+        overlay.style.display = 'none';
+        
+        let streamUrl = 'https://thapcamtv.to/';
+        if (serverNum === 2) streamUrl = 'https://xoilac-tv.college/';
+        else if (serverNum === 3) streamUrl = 'https://vebotv.live/';
+        
+        const iframe = document.getElementById('matchIframe');
+        if (iframe) iframe.src = streamUrl;
+        const btnExt = document.getElementById('btnExternalMatch');
+        if (btnExt) btnExt.href = streamUrl;
+        showToast(`Đang mở sớm Server ${serverNum}...`);
+      };
+    }
+
+    overlay.style.display = 'flex';
+
+    if (matchCountdownInterval) clearInterval(matchCountdownInterval);
+
+    // Mốc thời gian đếm ngược
+    let targetTime = match.kickoffTime;
+    if (!targetTime || targetTime <= Date.now()) {
+      targetTime = Date.now() + (2 * 3600 + 45 * 60 + 30) * 1000;
+    }
+
+    const updateTimer = () => {
+      const now = Date.now();
+      const diff = targetTime - now;
+
+      if (diff <= 0) {
+        if (matchCountdownInterval) clearInterval(matchCountdownInterval);
+        if (daysEl) daysEl.textContent = '00';
+        if (hoursEl) hoursEl.textContent = '00';
+        if (minsEl) minsEl.textContent = '00';
+        if (secsEl) secsEl.textContent = '00';
+        
+        showToast('⚽ TRẬN ĐẤU ĐÃ BẮT ĐẦU! Tự động kết nối trực tiếp...');
+        overlay.style.display = 'none';
+        
+        let streamUrl = 'https://thapcamtv.to/';
+        if (serverNum === 2) streamUrl = 'https://xoilac-tv.college/';
+        else if (serverNum === 3) streamUrl = 'https://vebotv.live/';
+        
+        const iframe = document.getElementById('matchIframe');
+        if (iframe) iframe.src = streamUrl;
+        return;
+      }
+
+      const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
+      const m = Math.floor((diff / (1000 * 60)) % 60);
+      const s = Math.floor((diff / 1000) % 60);
+
+      if (daysEl) daysEl.textContent = String(d).padStart(2, '0');
+      if (hoursEl) hoursEl.textContent = String(h).padStart(2, '0');
+      if (minsEl) minsEl.textContent = String(m).padStart(2, '0');
+      if (secsEl) secsEl.textContent = String(s).padStart(2, '0');
+    };
+
+    updateTimer();
+    matchCountdownInterval = setInterval(updateTimer, 1000);
   }
 
   function playMatchViaServer(serverNum, match) {
@@ -2312,11 +2509,12 @@
       return;
     }
 
-    // Server 1, 2, 3: Mở Web Player không quảng cáo với domain đang hoạt động
+    // Server 1, 2, 3: Mở Web Player không quảng cáo
     const container = document.getElementById('matchWebPlayerContainer');
     const iframe = document.getElementById('matchIframe');
     const titleEl = document.getElementById('matchWebPlayerTitle');
     const subEl = document.getElementById('matchWebPlayerSub');
+    const overlay = document.getElementById('matchCountdownOverlay');
 
     if (!container || !iframe) return;
 
@@ -2334,10 +2532,25 @@
       streamEmbedUrl = 'https://vebotv.live/';
     }
 
-    showToast(`Đang kết nối Server ${serverNum} (Không quảng cáo)...`);
-    iframe.src = streamEmbedUrl;
     const btnExt = document.getElementById('btnExternalMatch');
     if (btnExt) btnExt.href = streamEmbedUrl;
+
+    // KIỂM TRA TRẬN ĐẤU SẮP DIỄN RA (CHƯA ĐẾN GIỜ BÓNG LĂN):
+    // Tránh nạp iframe gây lỗi "marineco.in refused to connect"
+    const now = Date.now();
+    const isUpcoming = (!match.isLive && !match.isFinished) || (match.kickoffTime && match.kickoffTime > now);
+
+    if (isUpcoming) {
+      iframe.src = 'about:blank';
+      startMatchCountdown(match, serverNum);
+      container.style.display = 'block';
+      return;
+    }
+
+    // NẾU ĐANG LIVE HOẶC ĐÃ DIỄN RA:
+    if (overlay) overlay.style.display = 'none';
+    showToast(`Đang kết nối Server ${serverNum} (Không quảng cáo)...`);
+    iframe.src = streamEmbedUrl;
     container.style.display = 'block';
 
     // Tiêm mã CSS/JS để xóa sạch 100% banner quảng cáo cá cược
@@ -2361,6 +2574,13 @@
   }
 
   function closeMatchWebPlayer() {
+    if (matchCountdownInterval) {
+      clearInterval(matchCountdownInterval);
+      matchCountdownInterval = null;
+    }
+    const overlay = document.getElementById('matchCountdownOverlay');
+    if (overlay) overlay.style.display = 'none';
+    
     const container = document.getElementById('matchWebPlayerContainer');
     const iframe = document.getElementById('matchIframe');
     if (iframe) iframe.src = 'about:blank';
@@ -2575,7 +2795,9 @@
   });
 
   // --- Detail Modal ---
+  window.openMovieDetail = (m) => openMovieDetail(m);
   async function openMovieDetail(movie) {
+    window.openMovieDetail = openMovieDetail;
     if (!movie) return;
     // BẢO VỆ CHỐNG NHẦM: Nếu là trận đấu bóng đá hoặc kênh TV, không bao giờ mở trang chi tiết phim!
     if (movie.isEplMatch || movie.rawMatch) {
@@ -2699,29 +2921,47 @@
 
         const server = data.episodes[0];
         const items = server.server_data || [];
+        // Chú thích VIP rõ ràng nếu nguồn FreeReels có tập bị khóa
+        const existingNote = document.getElementById('freereelsVipNote');
+        if (existingNote) existingNote.remove();
+        if (m.hasLocked) {
+          const noteEl = document.createElement('div');
+          noteEl.id = 'freereelsVipNote';
+          noteEl.style.cssText = 'margin: 10px 0 14px 0; padding: 10px 14px; background: rgba(245, 158, 11, 0.12); border-left: 4px solid #f59e0b; border-radius: 6px; font-size: 0.85rem; color: #fbbf24; line-height: 1.5; display: flex; align-items: flex-start; gap: 8px;';
+          noteEl.innerHTML = `<span style="font-size:1rem;line-height:1;">ℹ️</span> <span><b>Nguồn FreeReels:</b> Mở khóa miễn phí các tập đầu (<b>Tập 1 - ${m.freeCount || 10}</b>). Các tập có biểu tượng 🔒 thuộc bản quyền VIP của FreeReels (yêu cầu nạp xu trên app gốc).</span>`;
+          epGrid.parentNode.insertBefore(noteEl, epGrid);
+        }
+
         items.forEach((ep, idx) => {
           const btn = document.createElement('button');
-          btn.className = 'btn-episode focusable';
-          btn.textContent = ep.name;
+          btn.className = 'btn-episode focusable' + (ep.isLocked ? ' ep-vip-locked' : '');
+          if (ep.isLocked) {
+            btn.innerHTML = `${ep.name} <span class="lock-icon" style="font-size:0.75rem;margin-left:3px;color:#f59e0b;">🔒</span>`;
+            btn.title = 'Tập VIP (Bản quyền FreeReels)';
+          } else {
+            btn.textContent = ep.name;
+          }
           btn.addEventListener('click', async () => {
-            modal.style.display = 'none';
             let stream = ep.link_m3u8;
             let sub = ep.subtitleUrl;
             if (stream && stream.startsWith('freereels_unlock:')) {
-              showToast('🔓 Đang mở khóa tập...');
+              showToast('🔄 Đang thử mở khóa tập...');
               const unl = await FreeReelsClient.unlockEpisode(realId, ep.slug);
               if (unl && unl.streamUrl) {
                 stream = unl.streamUrl;
                 if (unl.subtitleUrl) sub = unl.subtitleUrl;
+              } else {
+                showToast(`🔒 Tập này thuộc bản quyền VIP của FreeReels (yêu cầu nạp xu trên app gốc). Bạn có thể xem miễn phí các Tập 1 - ${m.freeCount || 10}!`);
+                return;
               }
             }
+            modal.style.display = 'none';
             playVideo(stream, movie.name, ep.name, movie, data, idx, 0, sub);
           });
           epGrid.appendChild(btn);
         });
 
         document.getElementById('btnPlayFirst').onclick = async () => {
-          modal.style.display = 'none';
           const firstEp = items[0];
           if (firstEp) {
             let stream = firstEp.link_m3u8;
@@ -2732,8 +2972,12 @@
               if (unl && unl.streamUrl) {
                 stream = unl.streamUrl;
                 if (unl.subtitleUrl) sub = unl.subtitleUrl;
+              } else {
+                showToast('Không thể mở khóa tập 1!');
+                return;
               }
             }
+            modal.style.display = 'none';
             playVideo(stream, movie.name, firstEp.name, movie, data, 0, 0, sub, true);
           }
         };
@@ -3180,6 +3424,7 @@
   }
 
 function playVideo(streamUrl, title, subtitle, movie, detail, epIndex, serverIndex, isTv = false, customSubtitleUrl = null, forceStartFromBeginning = false) {
+  window.playVideo = playVideo;
     if (typeof isTv === 'string') {
       customSubtitleUrl = isTv;
       isTv = false;
@@ -3198,7 +3443,7 @@ function playVideo(streamUrl, title, subtitle, movie, detail, epIndex, serverInd
         if (unl && unl.streamUrl) {
           playVideo(unl.streamUrl, title, subtitle, movie, detail, epIndex, serverIndex, isTv, unl.subtitleUrl || customSubtitleUrl);
         } else {
-          showToast('Không thể mở khóa tập phim này!');
+          showToast('🔒 Tập này thuộc bản quyền VIP FreeReels (yêu cầu nạp xu). Vui lòng chọn các tập miễn phí!');
         }
       });
       return;
@@ -3230,6 +3475,7 @@ function playVideo(streamUrl, title, subtitle, movie, detail, epIndex, serverInd
 
     const container = document.getElementById('playerContainer');
     const miniBar = document.getElementById('miniPlayerBar');
+    const btnSkipInit = document.getElementById('btnSkipIntro'); if (btnSkipInit) btnSkipInit.style.display = 'none';
     const video = document.getElementById('videoPlayer');
     if (container) {
       container.classList.remove('player-floating-mini');
@@ -3267,7 +3513,7 @@ function playVideo(streamUrl, title, subtitle, movie, detail, epIndex, serverInd
       // Phim ngắn màn dọc (9:16): Tự động áp dụng chế độ dọc chuẩn TikTok/Reels!
       container.classList.remove('player-forced-landscape');
       container.classList.add('player-vertical-mode');
-      if (rotateBtnText) rotateBtnText.textContent = 'Phim Dọc (9:16)';
+      if (rotateBtnText) rotateBtnText.textContent = 'Xoay Ngang';
       if (isMobileDevice) {
         try {
           if (screen.orientation && screen.orientation.lock) {
@@ -3550,6 +3796,15 @@ function playVideo(streamUrl, title, subtitle, movie, detail, epIndex, serverInd
         }
       }
       const subUrl = customSubtitleUrl || (currentEp && currentEp.subtitleUrl);
+      if (window.updateSubtitlePosVisibility) {
+        const hasSoftSub = Boolean(subUrl);
+        const isShort = Boolean(
+          isVerticalShortDrama ||
+          (currentPlayingMovie && (currentPlayingMovie.isShortDrama || currentPlayingMovie.source === 'FREEREELS')) ||
+          currentSource === 'FREEREELS'
+        );
+        window.updateSubtitlePosVisibility(hasSoftSub, isShort);
+      }
       if (subUrl) {
         video.crossOrigin = 'anonymous';
         let fetchUrl = subUrl;
@@ -3602,6 +3857,8 @@ function playVideo(streamUrl, title, subtitle, movie, detail, epIndex, serverInd
       console.warn('Subtitle attach warning:', e);
     }
 
+
+
     // Đảm bảo video luôn bắt đầu từ targetStartTime (0s cho tập mới, vị trí cũ cho tập xem dở)
     let hasEnforcedStartTime = false;
     const enforceStart = () => {
@@ -3631,8 +3888,8 @@ function playVideo(streamUrl, title, subtitle, movie, detail, epIndex, serverInd
           if (playerCont) {
             playerCont.classList.remove('player-forced-landscape');
             playerCont.classList.add('player-vertical-mode');
-          }
-          if (rotateText) rotateText.textContent = 'Phim Dọc (9:16)';
+                }
+          if (rotateText) rotateText.textContent = 'Xoay Ngang';
           showToast('📱 Tự động nhận diện phim màn dọc (9:16) chuẩn Reels');
           if (isMobileDevice) {
             try { if (screen.orientation && screen.orientation.lock) screen.orientation.lock('portrait').catch(() => {}); } catch(e) {}
@@ -3640,7 +3897,7 @@ function playVideo(streamUrl, title, subtitle, movie, detail, epIndex, serverInd
         } else {
           if (playerCont) {
             playerCont.classList.remove('player-vertical-mode');
-          }
+                }
           if (rotateText) {
             const isForced = playerCont && playerCont.classList.contains('player-forced-landscape');
             rotateText.textContent = isForced ? 'Xoay Dọc' : 'Xoay Ngang';
@@ -3773,15 +4030,23 @@ function playVideo(streamUrl, title, subtitle, movie, detail, epIndex, serverInd
     if (video.duration) {
       const cur = video.currentTime;
       const dur = video.duration;
-      seekBar.value = (cur / dur) * 100;
+      const pct = (cur / dur) * 100;
+      seekBar.value = pct;
+      const playedBar = document.getElementById('seekPlayedBar');
+      if (playedBar) playedBar.style.width = pct + '%';
+      const bufferBar = document.getElementById('seekBufferBar');
+      if (bufferBar && video.buffered.length > 0) {
+        const bufEnd = video.buffered.end(video.buffered.length - 1);
+        bufferBar.style.width = ((bufEnd / dur) * 100) + '%';
+      }
       currentTimeLabel.textContent = formatTime(cur);
 
-      // Tự động hiện nút Bỏ qua Intro (+85s) chỉ cho phim dài (> 5 phút), ẩn trên Phim Ngắn
+      // Tự động hiện nút Bỏ qua Intro (+85s) chỉ cho phim dài (> 5 phút), ẩn trên Phim Ngắn và ẩn khi xem quá 3 phút (180s)
       const btnSkip = document.getElementById('btnSkipIntro');
       if (btnSkip) {
         const isShortEp = (dur < 300) || (currentPlayingMovie && (currentPlayingMovie.isShortDrama || currentPlayingMovie.source === 'FREEREELS'));
-        if (!isShortEp && cur >= 1 && cur <= 95) {
-          btnSkip.style.display = 'block';
+        if (!isShortEp && cur >= 2 && cur <= 180) {
+          btnSkip.style.display = 'inline-flex';
         } else {
           btnSkip.style.display = 'none';
         }
@@ -3805,7 +4070,11 @@ function playVideo(streamUrl, title, subtitle, movie, detail, epIndex, serverInd
 
   seekBar.addEventListener('input', () => {
     if (video.duration) {
-      video.currentTime = (seekBar.value / 100) * video.duration;
+      const pct = parseFloat(seekBar.value);
+      video.currentTime = (pct / 100) * video.duration;
+      const playedBar = document.getElementById('seekPlayedBar');
+      if (playedBar) playedBar.style.width = pct + '%';
+      resetOverlayTimer();
     }
   });
 
@@ -3887,6 +4156,9 @@ function playVideo(streamUrl, title, subtitle, movie, detail, epIndex, serverInd
         if (unl && unl.streamUrl) {
           stream = unl.streamUrl;
           if (unl.subtitleUrl) sub = unl.subtitleUrl;
+        } else {
+          showToast('🔒 Bạn đã xem hết các tập miễn phí của phim này trên FreeReels!');
+          return;
         }
       }
       showToast(`⏭️ Đang chuyển sang ${nextEp.name || `Tập ${currentEpisodeIndex + 2}`}`);
@@ -3936,31 +4208,48 @@ function playVideo(streamUrl, title, subtitle, movie, detail, epIndex, serverInd
   if (btnFullscreen) {
     btnFullscreen.addEventListener('click', () => {
       const container = document.getElementById('playerContainer');
-      const video = document.getElementById('videoPlayer');
+      const isFs = Boolean(document.fullscreenElement || document.webkitFullscreenElement || container.classList.contains('player-window-fullscreen'));
+      const enterSvg = document.getElementById('svgFullscreenEnter');
+      const exitSvg = document.getElementById('svgFullscreenExit');
 
-      // Tối ưu cho iPhone / iOS Safari: Dùng webkitEnterFullscreen của thẻ video
-      if (video && video.webkitEnterFullscreen) {
-        try {
-          video.webkitEnterFullscreen();
-          return;
-        } catch(e) {}
-      }
-
-      if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+      if (!isFs) {
         const req = container.requestFullscreen || container.webkitRequestFullscreen || container.mozRequestFullScreen || container.msRequestFullscreen;
         if (req) {
-          req.call(container).catch(() => {});
+          req.call(container).then(() => {
+            if (enterSvg) enterSvg.style.display = 'none';
+            if (exitSvg) exitSvg.style.display = 'block';
+            showToast('🎬 Toàn màn hình (Nhấn F hoặc Esc để thoát)');
+          }).catch(() => {
+            container.classList.add('player-window-fullscreen');
+            document.body.classList.add('has-window-fullscreen');
+            if (enterSvg) enterSvg.style.display = 'none';
+            if (exitSvg) exitSvg.style.display = 'block';
+            showToast('🎬 Toàn màn hình tràn viền');
+          });
+        } else {
+          container.classList.add('player-window-fullscreen');
+          document.body.classList.add('has-window-fullscreen');
+          if (enterSvg) enterSvg.style.display = 'none';
+          if (exitSvg) exitSvg.style.display = 'block';
+          showToast('🎬 Toàn màn hình tràn viền');
         }
       } else {
-        const exit = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen;
-        if (exit) {
-          exit.call(document).catch(() => {});
+        if (document.fullscreenElement || document.webkitFullscreenElement) {
+          const exit = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen;
+          if (exit) {
+            exit.call(document).catch(() => {});
+          }
         }
+        container.classList.remove('player-window-fullscreen');
+        container.classList.remove('player-forced-landscape');
+        document.body.classList.remove('has-window-fullscreen');
+        if (enterSvg) enterSvg.style.display = 'block';
+        if (exitSvg) exitSvg.style.display = 'none';
+        showToast('🖥️ Đã thu nhỏ màn hình');
       }
     });
   }
 
-  // Đồng bộ biểu tượng toàn màn hình khi trạng thái thay đổi
   document.addEventListener('fullscreenchange', () => {
     const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement);
     const enterSvg = document.getElementById('svgFullscreenEnter');
@@ -4197,18 +4486,50 @@ function playVideo(streamUrl, title, subtitle, movie, detail, epIndex, serverInd
       const card = document.createElement('div');
       card.className = 'match-card focusable';
       card.tabIndex = 0;
+      
+      const isReminded = isMatchReminderSet(m.id);
+      
       card.innerHTML = `
-        <div style="display:flex; align-items:center; gap:10px;">
-          ${m.teamALogo ? `<img src="${m.teamALogo}" style="width:24px; height:24px; object-fit:contain;" onerror="this.style.display='none'" />` : ''}
+        <div class="match-card-content">
+          ${m.teamALogo ? `<img src="${m.teamALogo}" style="width:28px; height:28px; object-fit:contain;" onerror="this.style.display='none'" />` : ''}
           <div>
             <div class="match-league">${m.tournament || 'Trực Tiếp Bóng Đá'}</div>
             <div class="match-teams">${m.teamA} vs ${m.teamB}</div>
             <div class="match-channel">📺 Kênh: ${m.channelName || 'Vệ Tinh Trực Tiếp'} • Bấm để xem</div>
           </div>
-          ${m.teamBLogo ? `<img src="${m.teamBLogo}" style="width:24px; height:24px; object-fit:contain; margin-left:auto;" onerror="this.style.display='none'" />` : ''}
+          ${m.teamBLogo ? `<img src="${m.teamBLogo}" style="width:28px; height:28px; object-fit:contain; margin-left:auto;" onerror="this.style.display='none'" />` : ''}
         </div>
-        <div class="match-time-badge" style="${m.isLive ? 'background:#d32f2f;' : (m.isFinished ? 'background:#37474f;' : '')}">${m.time || 'Trực Tiếp'}</div>
+        <div class="match-card-side">
+          <div class="match-time-badge" style="${m.isLive ? 'background:#d32f2f;' : (m.isFinished ? 'background:#37474f;' : '')}">${m.time || 'Trực Tiếp'}</div>
+          <button class="btn-match-reminder ${isReminded ? 'is-reminded' : ''}" title="${isReminded ? 'Hủy chuông thông báo' : 'Đặt chuông thông báo khi trận đấu bắt đầu'}">
+            <svg viewBox="0 0 24 24" fill="${isReminded ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+            </svg>
+          </button>
+        </div>
       `;
+
+      // Bắt sự kiện click chuông thông báo 1 chạm (không mở modal server)
+      const bellBtn = card.querySelector('.btn-match-reminder');
+      if (bellBtn) {
+        bellBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const added = toggleMatchReminder(m);
+          if (added) {
+            bellBtn.classList.add('is-reminded');
+            bellBtn.title = 'Hủy chuông thông báo';
+            const svg = bellBtn.querySelector('svg');
+            if (svg) svg.setAttribute('fill', 'currentColor');
+          } else {
+            bellBtn.classList.remove('is-reminded');
+            bellBtn.title = 'Đặt chuông thông báo khi trận đấu bắt đầu';
+            const svg = bellBtn.querySelector('svg');
+            if (svg) svg.setAttribute('fill', 'none');
+          }
+        });
+      }
+
       card.addEventListener('click', () => {
         modal.style.display = 'none';
         openMatchServerModal(m);
@@ -4653,6 +4974,26 @@ function playVideo(streamUrl, title, subtitle, movie, detail, epIndex, serverInd
       const zapBtn = document.getElementById('btnQuickZap');
       if (zapBtn) setFocus(zapBtn);
       return;
+    }
+
+    // 1.8. Nếu Video Player đang ở Fullscreen -> Thoát Fullscreen, giữ nguyên luồng phát (KHÔNG ĐƯỢC ĐÓNG PLAYER!)
+    if (player && player.style.display === 'flex') {
+      const isHtml5Fs = Boolean(document.fullscreenElement || document.webkitFullscreenElement);
+      const isWinFs = player.classList.contains('player-window-fullscreen') || player.classList.contains('player-forced-landscape');
+      if (isHtml5Fs || isWinFs) {
+        if (isHtml5Fs) {
+          try { (document.exitFullscreen || document.webkitExitFullscreen).call(document); } catch(err) {}
+        }
+        player.classList.remove('player-window-fullscreen');
+        player.classList.remove('player-forced-landscape');
+        document.body.classList.remove('has-window-fullscreen');
+        const enterSvg = document.getElementById('svgFullscreenEnter');
+        const exitSvg = document.getElementById('svgFullscreenExit');
+        if (enterSvg) enterSvg.style.display = 'block';
+        if (exitSvg) exitSvg.style.display = 'none';
+        showToast('🖥️ Đã thoát toàn màn hình');
+        return;
+      }
     }
 
     // 2. Nếu Video Player đang mở -> Đóng player dứt khoát
@@ -5206,7 +5547,7 @@ function playVideo(streamUrl, title, subtitle, movie, detail, epIndex, serverInd
       
       if (rotateBtnText) {
         if (isVertMode) {
-          rotateBtnText.textContent = isForced ? 'Xoay Dọc' : 'Phim Dọc (9:16)';
+          rotateBtnText.textContent = isForced ? 'Xoay Dọc' : 'Xoay Ngang';
         } else {
           rotateBtnText.textContent = isForced ? 'Xoay Dọc' : 'Xoay Ngang';
         }
@@ -5278,6 +5619,7 @@ function playVideo(streamUrl, title, subtitle, movie, detail, epIndex, serverInd
   function showPlayerControls() {
     if (!playerOverlayEl || isTouchLocked) return;
     playerOverlayEl.classList.remove('controls-hidden');
+    document.getElementById('playerContainer')?.classList.remove('controls-hidden');
     playerOverlayEl.classList.remove('hide');
     resetOverlayTimer();
   }
@@ -5287,13 +5629,15 @@ function playVideo(streamUrl, title, subtitle, movie, detail, epIndex, serverInd
     if (!playerOverlayEl || isTouchLocked) return;
     const v = document.getElementById('videoPlayer');
     playerOverlayEl.classList.add('controls-hidden');
+        document.getElementById('playerContainer')?.classList.add('controls-hidden');
     if (overlayHideTimeout) clearTimeout(overlayHideTimeout);
   }
   window.hidePlayerControls = hidePlayerControls;
 
-  function resetOverlayTimer(customDelay = 4500) {
+  function resetOverlayTimer(customDelay = 2500) {
     if (!playerOverlayEl || isTouchLocked) return;
     playerOverlayEl.classList.remove('controls-hidden');
+    document.getElementById('playerContainer')?.classList.remove('controls-hidden');
     playerOverlayEl.classList.remove('hide');
     if (overlayHideTimeout) clearTimeout(overlayHideTimeout);
     overlayHideTimeout = setTimeout(() => {
@@ -5442,7 +5786,7 @@ function playVideo(streamUrl, title, subtitle, movie, detail, epIndex, serverInd
   const touchTargetSurface = playerGestureSurfaceEl || playerMainAreaEl;
   if (touchTargetSurface) {
 
-    // 1. TOUCHSTART: Bắt đầu chạm
+    // 1. TOUCHSTART: Bắt đầu chạm trên điện thoại
     touchTargetSurface.addEventListener('touchstart', (e) => {
       if (!e.touches || e.touches.length === 0) return;
       lastTouchActionTimestamp = Date.now();
@@ -5467,7 +5811,7 @@ function playVideo(streamUrl, title, subtitle, movie, detail, epIndex, serverInd
       }
     }, { passive: true });
 
-    // 2. TOUCHMOVE: Vuốt ngón tay
+    // 2. TOUCHMOVE: Vuốt ngón tay chỉnh Độ Sáng / Âm Lượng
     touchTargetSurface.addEventListener('touchmove', (e) => {
       if (!e.touches || e.touches.length === 0) return;
       const t = e.touches[0];
@@ -5476,7 +5820,7 @@ function playVideo(streamUrl, title, subtitle, movie, detail, epIndex, serverInd
       const rect = touchTargetSurface.getBoundingClientRect();
       const height = rect.height || window.innerHeight;
 
-      // Nhận diện cử chỉ vuốt dọc khi deltaY vượt ngưỡng và lớn hơn deltaX
+      // Nhận diện cử chỉ vuốt dọc khi deltaY vượt ngưỡng 12px
       if (!touchStartData.isVerticalDrag) {
         if (Math.abs(deltaY) > 12 && Math.abs(deltaY) > Math.abs(deltaX) * 1.2) {
           touchStartData.isVerticalDrag = true;
@@ -5489,7 +5833,7 @@ function playVideo(streamUrl, title, subtitle, movie, detail, epIndex, serverInd
 
       if (touchStartData.isVerticalDrag) {
         if (e.cancelable) e.preventDefault();
-        // Vuốt lên (deltaY âm) -> Tăng giá trị | Vuốt xuống -> Giảm giá trị
+        // Vuốt lên -> Tăng | Vuốt xuống -> Giảm
         const change = -deltaY / (height * 0.65);
         if (touchStartData.gestureType === 'brightness') {
           applyBrightness(touchStartData.startValue + change);
@@ -5499,18 +5843,16 @@ function playVideo(streamUrl, title, subtitle, movie, detail, epIndex, serverInd
       }
     }, { passive: false });
 
-    // 3. TOUCHEND: Kết thúc chạm (Phân biệt Vuốt dọc, Double Tap tua 10s, Single Tap hiện controls)
+    // 3. TOUCHEND: Cảm ứng Mobile (Double Tap tua 10s / Single Tap bật tắt controls)
     touchTargetSurface.addEventListener('touchend', (e) => {
       lastTouchActionTimestamp = Date.now();
 
-      // Nếu vừa vuốt dọc -> Kết thúc vuốt, ẩn HUD OSD sau 850ms, không kích hoạt tap
       if (touchStartData.isVerticalDrag) {
         touchStartData.isVerticalDrag = false;
         hideGestureHud(850);
         return;
       }
 
-      // Kiểm tra khoảng cách di chuyển: Nếu di chuyển quá 14px -> Coi là cử chỉ lướt nhẹ, bỏ qua
       const touchEndItem = (e.changedTouches && e.changedTouches[0]) ? e.changedTouches[0] : null;
       if (touchEndItem) {
         const moveDist = Math.hypot(touchEndItem.clientX - touchStartData.x, touchEndItem.clientY - touchStartData.y);
@@ -5531,15 +5873,13 @@ function playVideo(streamUrl, title, subtitle, movie, detail, epIndex, serverInd
       const clickX = touchEndItem ? (touchEndItem.clientX - rect.left) : (rect.width * 0.5);
       const width = rect.width || window.innerWidth;
 
-      // KIỂM TRA DOUBLE TAP: Nếu 2 lần chạm liên tiếp trong vòng 280ms
+      // DOUBLE TAP TRÊN MOBILE: Tua -10s bên trái, +10s bên phải
       if (tapInterval > 40 && tapInterval < 280) {
         if (singleTapTimeout) {
           clearTimeout(singleTapTimeout);
           singleTapTimeout = null;
         }
-        lastTapTimestamp = 0; // Reset để tránh triple tap
-
-        // Double tap bên trái: Tua lùi 10s | Double tap bên phải: Tua tới 10s
+        lastTapTimestamp = 0;
         if (clickX < width * 0.48) {
           triggerDoubleTapSeek('left');
         } else {
@@ -5548,20 +5888,20 @@ function playVideo(streamUrl, title, subtitle, movie, detail, epIndex, serverInd
         return;
       }
 
-      // NẾU LÀ CÚ CHẠM ĐẦU TIÊN: Đợi 240ms để kiểm chứng có double tap không
+      // SINGLE TAP TRÊN MOBILE: Chạm vào màn hình -> Luôn BẬT hoặc TẮT controls
       lastTapTimestamp = now;
       if (singleTapTimeout) clearTimeout(singleTapTimeout);
       singleTapTimeout = setTimeout(() => {
         singleTapTimeout = null;
-        // SINGLE TAP: BẬT / TẮT THANH TIẾN TRÌNH VÀ THANH ĐIỀU HƯỚNG PHIM
         togglePlayerControls();
-      }, 240);
+      }, 220);
 
     }, { passive: false });
 
-    // 4. CLICK TRÊN DESKTOP:
+    // 4. CLICK & DOUBLE-CLICK TRÊN DESKTOP (CHUỘT):
+    let desktopClickTimer = null;
     touchTargetSurface.addEventListener('click', (e) => {
-      // Bỏ qua nếu là synthetic click từ điện thoại
+      // Bỏ qua synthetic click từ điện thoại
       if (Date.now() - lastTouchActionTimestamp < 650) return;
 
       const container = document.getElementById('playerContainer');
@@ -5576,20 +5916,58 @@ function playVideo(streamUrl, title, subtitle, movie, detail, epIndex, serverInd
         return;
       }
 
-      togglePlayerControls();
+      const rect = touchTargetSurface.getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      const width = rect.width || window.innerWidth;
+
+      // NẾU ĐÃ CÓ TIMER CHẠY -> ĐÂY LÀ DOUBLE-CLICK CHUỘT
+      if (desktopClickTimer) {
+        clearTimeout(desktopClickTimer);
+        desktopClickTimer = null;
+        // Double-click nửa trái: Tua -10s | Nửa phải: Tua +10s
+        if (clickX < width * 0.48) {
+          triggerDoubleTapSeek('left');
+        } else {
+          triggerDoubleTapSeek('right');
+        }
+        return;
+      }
+
+      // SINGLE-CLICK CHUỘT (Chờ 200ms để phân biệt double click):
+      desktopClickTimer = setTimeout(() => {
+        desktopClickTimer = null;
+        // BẤM VÀO MÀN HÌNH: LUÔN DỪNG / TIẾP TỤC VIDEO (PLAY/PAUSE) VÀ BẬT THANH TIẾN TRÌNH & CONTROLS!
+        togglePlayPause();
+        showPlayerControls();
+      }, 200);
     });
 
-    // 5. DOUBLE CLICK TRÊN DESKTOP: Bật / Tắt Toàn Màn Hình
-    touchTargetSurface.addEventListener('dblclick', (e) => {
-      if (Date.now() - lastTouchActionTimestamp < 650) return;
-      const fsBtn = document.getElementById('btnFullscreen');
-      if (fsBtn) fsBtn.click();
-    });
-
-    // 6. MOUSE MOVE TRÊN DESKTOP: Hiện controls và reset timer
+    // 5. MOUSE MOVE TRÊN DESKTOP: Hiện controls và tự động ẩn sau 4 giây
+    const pContainer = document.getElementById('playerContainer');
+    if (pContainer) {
+      pContainer.addEventListener('mousemove', () => {
+        if (!isTouchLocked) {
+          showPlayerControls();
+          resetOverlayTimer(2500);
+        }
+      });
+      pContainer.addEventListener('mouseleave', () => {
+        const v = document.getElementById('videoPlayer');
+        if (v && !v.paused && !isTouchLocked) {
+          hidePlayerControls();
+        }
+      });
+    }
     touchTargetSurface.addEventListener('mousemove', () => {
       if (Date.now() - lastTouchActionTimestamp < 1200) return;
-      if (!isTouchLocked) resetOverlayTimer();
+      if (!isTouchLocked) {
+        const isHidden = playerOverlayEl.classList.contains('controls-hidden') || playerOverlayEl.classList.contains('hide');
+        if (isHidden) {
+          showPlayerControls();
+        } else {
+          resetOverlayTimer();
+        }
+      }
     });
   }
 
@@ -5827,6 +6205,77 @@ function playVideo(streamUrl, title, subtitle, movie, detail, epIndex, serverInd
     });
   }
 
+  // ==========================================================================
+  // ĐIỀU CHỈNH VỊ TRÍ PHỤ ĐỀ CHO PHIM NGẮN (CHỈ HIỆN KHI CÓ SOFTSUB)
+  // ==========================================================================
+  const SUB_SHORT_LEVELS = [
+    { key: 'normal', label: 'Vừa', px: 90 },
+    { key: 'high',   label: 'Cao', px: 150 },
+    { key: 'low',    label: 'Thấp', px: 60 }
+  ];
+
+  window.applySubtitlePosition = function() {
+    const sub = document.getElementById('playerSubtitleOverlay');
+    if (!sub) return;
+    const saved = localStorage.getItem('huyca_short_sub_level') || 'normal';
+    const matched = SUB_SHORT_LEVELS.find(l => l.key === saved) || SUB_SHORT_LEVELS[0];
+    sub.style.setProperty('bottom', matched.px + 'px', 'important');
+    const badge = document.getElementById('subtitlePosBadgeText');
+    if (badge) badge.textContent = matched.label;
+  };
+
+  window.updateSubtitlePosVisibility = function(hasSoftSub, isShort) {
+    const btn = document.getElementById('btnSubtitlePos');
+    if (!btn) return;
+    // CHỈ hiện khi là phim ngắn VÀ có softsub
+    if (Boolean(hasSoftSub) && Boolean(isShort)) {
+      btn.style.display = 'inline-flex';
+      if (window.applySubtitlePosition) window.applySubtitlePosition();
+    } else {
+      btn.style.display = 'none';
+    }
+  };
+
+  const btnSubtitlePos = document.getElementById('btnSubtitlePos');
+  if (btnSubtitlePos) {
+    btnSubtitlePos.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const cur = localStorage.getItem('huyca_short_sub_level') || 'normal';
+      let nextIdx = 0;
+      if (cur === 'normal') nextIdx = 1;
+      else if (cur === 'high') nextIdx = 2;
+      else nextIdx = 0;
+
+      const nextItem = SUB_SHORT_LEVELS[nextIdx];
+      localStorage.setItem('huyca_short_sub_level', nextItem.key);
+      if (window.applySubtitlePosition) window.applySubtitlePosition();
+      showToast('💬 Vị trí phụ đề: ' + nextItem.label);
+      resetOverlayTimer();
+    });
+  }
+
+  // Lắng nghe phím Escape và F trên bàn phím để toggle / thoát Toàn màn hình sạch không popup
+  window.addEventListener('keydown', (e) => {
+    const container = document.getElementById('playerContainer');
+    if (!container || container.style.display === 'none') return;
+    if (e.key === 'Escape') {
+      if (container.classList.contains('player-window-fullscreen')) {
+        e.preventDefault();
+        container.classList.remove('player-window-fullscreen');
+        document.body.classList.remove('has-window-fullscreen');
+        const enterSvg = document.getElementById('svgFullscreenEnter');
+        const exitSvg = document.getElementById('svgFullscreenExit');
+        if (enterSvg) enterSvg.style.display = 'block';
+        if (exitSvg) exitSvg.style.display = 'none';
+        showToast('🖥️ Đã thoát toàn màn hình');
+      }
+    } else if ((e.key === 'f' || e.key === 'F') && !['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) {
+      e.preventDefault();
+      const btnFs = document.getElementById('btnFullscreen');
+      if (btnFs) btnFs.click();
+    }
+  });
+
   // Nút Khóa cảm ứng (Ảnh 2)
   const btnLockPlayer = document.getElementById('btnLockPlayer');
   if (btnLockPlayer) {
@@ -5847,6 +6296,7 @@ function playVideo(streamUrl, title, subtitle, movie, detail, epIndex, serverInd
       window.isTouchLocked = false;
       btnUnlockTouchEl.style.display = 'none';
       if (playerOverlayEl) playerOverlayEl.classList.remove('controls-hidden');
+    document.getElementById('playerContainer')?.classList.remove('controls-hidden');
       showToast('🔓 Đã mở khóa cảm ứng');
       resetOverlayTimer();
     });
@@ -5938,6 +6388,11 @@ function playVideo(streamUrl, title, subtitle, movie, detail, epIndex, serverInd
       }
       epBtn.textContent = epLabel;
 
+      if (ep.isLocked || (ep.link_m3u8 && ep.link_m3u8.startsWith('freereels_unlock:'))) {
+        epBtn.innerHTML = `${epLabel} <span style="font-size:0.65rem;color:#f59e0b;">🔒</span>`;
+        epBtn.title = `${ep.name} (Tập VIP FreeReels)`;
+      }
+
       epBtn.addEventListener('click', async () => {
         let stream = ep.link_m3u8;
         let sub = ep.subtitleUrl;
@@ -5948,6 +6403,9 @@ function playVideo(streamUrl, title, subtitle, movie, detail, epIndex, serverInd
           if (unl && unl.streamUrl) {
             stream = unl.streamUrl;
             if (unl.subtitleUrl) sub = unl.subtitleUrl;
+          } else {
+            showToast('🔒 Tập này thuộc bản quyền VIP FreeReels (yêu cầu nạp xu). Vui lòng chọn các tập miễn phí!');
+            return;
           }
         }
         playVideo(stream, movie.name, ep.name, movie, detail, idx, serverIndex || 0, false, sub, true);
