@@ -856,9 +856,8 @@
           }
 
           let rawStream = el.external_audio_h264_m3u8 || el.m3u8_url || el.video_url || el.external_audio_h265_m3u8 || '';
-          let isLocked = !rawStream || !rawStream.startsWith('http');
           let finalLink = `freereels_unlock:${seriesId}:${epId}`;
-          if (!isLocked) {
+          if (rawStream && rawStream.startsWith('http')) {
             finalLink = this.getProxyUrl(rawStream);
           }
 
@@ -867,8 +866,7 @@
             slug: epId,
             filename: epName,
             link_m3u8: finalLink,
-            subtitleUrl: viSubUrl,
-            isLocked: isLocked
+            subtitleUrl: viSubUrl
           });
         });
 
@@ -877,12 +875,10 @@
           const unlockRes = await this.unlockEpisode(seriesId, epList[0].slug);
           if (unlockRes && unlockRes.streamUrl) {
             epList[0].link_m3u8 = unlockRes.streamUrl;
-            epList[0].isLocked = false;
             if (unlockRes.subtitleUrl) epList[0].subtitleUrl = unlockRes.subtitleUrl;
           }
         }
 
-        const freeCount = epList.filter(e => !e.isLocked).length;
         return {
           movie: {
             id: `freereels:${seriesId}`,
@@ -894,10 +890,7 @@
             year: '2026',
             time: `${epCount} tập`,
             quality: '9:16 Dọc HD',
-            lang: 'Vietsub / Thuyết Minh Tiếng Việt',
-            freeCount: freeCount,
-            totalEpisodes: epList.length,
-            hasLocked: epList.some(e => e.isLocked)
+            lang: 'Vietsub / Thuyết Minh Tiếng Việt'
           },
           episodes: [
             {
@@ -1267,7 +1260,6 @@
       toast.style.display = 'none';
     }, 2800);
   }
-  window.showToast = showToast;
 
   // --- Source Selection ---
   function initSources() {
@@ -2795,9 +2787,7 @@
   });
 
   // --- Detail Modal ---
-  window.openMovieDetail = (m) => openMovieDetail(m);
   async function openMovieDetail(movie) {
-    window.openMovieDetail = openMovieDetail;
     if (!movie) return;
     // BẢO VỆ CHỐNG NHẦM: Nếu là trận đấu bóng đá hoặc kênh TV, không bao giờ mở trang chi tiết phim!
     if (movie.isEplMatch || movie.rawMatch) {
@@ -2921,47 +2911,29 @@
 
         const server = data.episodes[0];
         const items = server.server_data || [];
-        // Chú thích VIP rõ ràng nếu nguồn FreeReels có tập bị khóa
-        const existingNote = document.getElementById('freereelsVipNote');
-        if (existingNote) existingNote.remove();
-        if (m.hasLocked) {
-          const noteEl = document.createElement('div');
-          noteEl.id = 'freereelsVipNote';
-          noteEl.style.cssText = 'margin: 10px 0 14px 0; padding: 10px 14px; background: rgba(245, 158, 11, 0.12); border-left: 4px solid #f59e0b; border-radius: 6px; font-size: 0.85rem; color: #fbbf24; line-height: 1.5; display: flex; align-items: flex-start; gap: 8px;';
-          noteEl.innerHTML = `<span style="font-size:1rem;line-height:1;">ℹ️</span> <span><b>Nguồn FreeReels:</b> Mở khóa miễn phí các tập đầu (<b>Tập 1 - ${m.freeCount || 10}</b>). Các tập có biểu tượng 🔒 thuộc bản quyền VIP của FreeReels (yêu cầu nạp xu trên app gốc).</span>`;
-          epGrid.parentNode.insertBefore(noteEl, epGrid);
-        }
-
         items.forEach((ep, idx) => {
           const btn = document.createElement('button');
-          btn.className = 'btn-episode focusable' + (ep.isLocked ? ' ep-vip-locked' : '');
-          if (ep.isLocked) {
-            btn.innerHTML = `${ep.name} <span class="lock-icon" style="font-size:0.75rem;margin-left:3px;color:#f59e0b;">🔒</span>`;
-            btn.title = 'Tập VIP (Bản quyền FreeReels)';
-          } else {
-            btn.textContent = ep.name;
-          }
+          btn.className = 'btn-episode focusable';
+          btn.textContent = ep.name;
           btn.addEventListener('click', async () => {
+            modal.style.display = 'none';
             let stream = ep.link_m3u8;
             let sub = ep.subtitleUrl;
             if (stream && stream.startsWith('freereels_unlock:')) {
-              showToast('🔄 Đang thử mở khóa tập...');
+              showToast('🔓 Đang mở khóa tập...');
               const unl = await FreeReelsClient.unlockEpisode(realId, ep.slug);
               if (unl && unl.streamUrl) {
                 stream = unl.streamUrl;
                 if (unl.subtitleUrl) sub = unl.subtitleUrl;
-              } else {
-                showToast(`🔒 Tập này thuộc bản quyền VIP của FreeReels (yêu cầu nạp xu trên app gốc). Bạn có thể xem miễn phí các Tập 1 - ${m.freeCount || 10}!`);
-                return;
               }
             }
-            modal.style.display = 'none';
             playVideo(stream, movie.name, ep.name, movie, data, idx, 0, sub);
           });
           epGrid.appendChild(btn);
         });
 
         document.getElementById('btnPlayFirst').onclick = async () => {
+          modal.style.display = 'none';
           const firstEp = items[0];
           if (firstEp) {
             let stream = firstEp.link_m3u8;
@@ -2972,12 +2944,8 @@
               if (unl && unl.streamUrl) {
                 stream = unl.streamUrl;
                 if (unl.subtitleUrl) sub = unl.subtitleUrl;
-              } else {
-                showToast('Không thể mở khóa tập 1!');
-                return;
               }
             }
-            modal.style.display = 'none';
             playVideo(stream, movie.name, firstEp.name, movie, data, 0, 0, sub, true);
           }
         };
@@ -3443,7 +3411,7 @@ function playVideo(streamUrl, title, subtitle, movie, detail, epIndex, serverInd
         if (unl && unl.streamUrl) {
           playVideo(unl.streamUrl, title, subtitle, movie, detail, epIndex, serverIndex, isTv, unl.subtitleUrl || customSubtitleUrl);
         } else {
-          showToast('🔒 Tập này thuộc bản quyền VIP FreeReels (yêu cầu nạp xu). Vui lòng chọn các tập miễn phí!');
+          showToast('Không thể mở khóa tập phim này!');
         }
       });
       return;
@@ -4078,6 +4046,13 @@ function playVideo(streamUrl, title, subtitle, movie, detail, epIndex, serverInd
     }
   });
 
+  seekBar.addEventListener('change', () => {
+    seekBar.blur();
+  });
+  seekBar.addEventListener('mouseup', () => {
+    seekBar.blur();
+  });
+
   // --- Centralized Video Play/Pause Controller ---
   function togglePlayPause() {
     const v = document.getElementById('videoPlayer');
@@ -4156,9 +4131,6 @@ function playVideo(streamUrl, title, subtitle, movie, detail, epIndex, serverInd
         if (unl && unl.streamUrl) {
           stream = unl.streamUrl;
           if (unl.subtitleUrl) sub = unl.subtitleUrl;
-        } else {
-          showToast('🔒 Bạn đã xem hết các tập miễn phí của phim này trên FreeReels!');
-          return;
         }
       }
       showToast(`⏭️ Đang chuyển sang ${nextEp.name || `Tập ${currentEpisodeIndex + 2}`}`);
@@ -4811,6 +4783,7 @@ function playVideo(streamUrl, title, subtitle, movie, detail, epIndex, serverInd
   function getFocusableCandidates(scope) {
     const candidates = Array.from(scope.querySelectorAll('.focusable, button:not([disabled]), input:not([disabled]), [tabindex="0"]'));
     return candidates.filter(el => {
+      if (el.id === 'seekBar' || el.classList.contains('seek-bar') || el.getAttribute('tabindex') === '-1') return false;
       if (el.disabled || el.getAttribute('aria-hidden') === 'true') return false;
       const rect = el.getBoundingClientRect();
       if (rect.width <= 0 || rect.height <= 0) return false;
@@ -6388,11 +6361,6 @@ function playVideo(streamUrl, title, subtitle, movie, detail, epIndex, serverInd
       }
       epBtn.textContent = epLabel;
 
-      if (ep.isLocked || (ep.link_m3u8 && ep.link_m3u8.startsWith('freereels_unlock:'))) {
-        epBtn.innerHTML = `${epLabel} <span style="font-size:0.65rem;color:#f59e0b;">🔒</span>`;
-        epBtn.title = `${ep.name} (Tập VIP FreeReels)`;
-      }
-
       epBtn.addEventListener('click', async () => {
         let stream = ep.link_m3u8;
         let sub = ep.subtitleUrl;
@@ -6403,9 +6371,6 @@ function playVideo(streamUrl, title, subtitle, movie, detail, epIndex, serverInd
           if (unl && unl.streamUrl) {
             stream = unl.streamUrl;
             if (unl.subtitleUrl) sub = unl.subtitleUrl;
-          } else {
-            showToast('🔒 Tập này thuộc bản quyền VIP FreeReels (yêu cầu nạp xu). Vui lòng chọn các tập miễn phí!');
-            return;
           }
         }
         playVideo(stream, movie.name, ep.name, movie, detail, idx, serverIndex || 0, false, sub, true);

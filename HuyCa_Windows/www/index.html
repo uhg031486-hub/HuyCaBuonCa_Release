@@ -243,7 +243,9 @@
           
           <!-- Hàng 1: Thanh Scrubber tiến trình chuẩn rạp chiếu -->
           <div id="progressContainer" class="progress-track-wrapper">
-            <input type="range" id="seekBar" class="seek-bar focusable" min="0" max="100" value="0">
+            <div id="seekBufferBar" class="seek-buffer-bar" style="width: 0%;"></div>
+            <div id="seekPlayedBar" class="seek-played-bar" style="width: 0%;"></div>
+            <input type="range" id="seekBar" class="seek-bar" min="0" max="100" value="0" tabindex="-1">
             <div id="seekHoverTime" class="seek-hover-time" style="display: none;">00:00</div>
           </div>
 
