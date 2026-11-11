@@ -21,7 +21,7 @@
       document.documentElement.className = 'mode-' + mode;
     })();
   </script>
-  <link rel="stylesheet" href="css/style.css?v=3.3.11">
+  <link rel="stylesheet" href="css/style.css?v=3.4.0">
 </head>
 <body>
   <!-- Header Bar -->
@@ -31,7 +31,7 @@
         <img src="icon_256.png" class="brand-logo" alt="Logo">
         <span>HUY CÁ</span>
       </div>
-      <div class="brand-subtitle">Kho Phim & Truyền Hình Đẳng Cấp • Phiên Bản Web Trực Tuyến v3.3.8</div>
+      <div class="brand-subtitle">Kho Phim & Truyền Hình Đẳng Cấp • Phiên Bản Web Trực Tuyến v3.4.0</div>
       <div class="brand-slogan-mobile">Kho Phim Đẳng Cấp Di Động</div>
     </div>
     <div class="header-actions">
@@ -238,10 +238,16 @@
           </div>
         </div>
 
-        <!-- 2. Bottom Dock: Bảng điều khiển trung tâm rạp chiếu (Tất cả phím tích hợp dưới đáy, không che màn hình) -->
+        <!-- 2. Nút Bỏ qua Intro nổi tinh tế ở góc phải phía trên seekbar (Chuẩn Netflix Floating Pill) -->
+        <button id="btnSkipIntro" class="btn-skip-intro-floating" style="display: none;" title="Bỏ qua đoạn intro (+85s)">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 4 15 12 5 20 5 4"/><rect x="17" y="4" width="2" height="16"/></svg>
+          <span>Bỏ qua Intro</span>
+        </button>
+
+        <!-- 3. Bottom Dock: Bảng điều khiển trung tâm rạp chiếu chuẩn Cinematic -->
         <div class="player-bottom-bar">
           
-          <!-- Hàng 1: Thanh Scrubber tiến trình chuẩn rạp chiếu -->
+          <!-- Hàng 1: Thanh Scrubber tiến trình chuẩn Cinematic -->
           <div id="progressContainer" class="progress-track-wrapper">
             <div id="seekBufferBar" class="seek-buffer-bar" style="width: 0%;"></div>
             <div id="seekPlayedBar" class="seek-played-bar" style="width: 0%;"></div>
@@ -249,19 +255,19 @@
             <div id="seekHoverTime" class="seek-hover-time" style="display: none;">00:00</div>
           </div>
 
-          <!-- Hàng 2: Hàng nút điều khiển chuyên nghiệp -->
+          <!-- Hàng 2: Hàng nút điều khiển chuyên nghiệp chuẩn Cinematic -->
           <div class="player-controls-row">
             
             <!-- Nhóm phím bên trái: Phát, Tua, Tập, Âm lượng, Thời gian -->
             <div class="controls-left">
-              <!-- Nút Phát / Tạm dừng chính -->
-              <button id="btnPlayPause" class="btn-ctrl-action btn-play-pause-main" title="Phát / Tạm dừng (Space)">
-                <svg id="svgPlay" class="ctrl-icon" viewBox="0 0 24 24" fill="currentColor">
-                  <polygon points="5 3 19 12 5 21 5 3"/>
+              <!-- Nút Phát / Tạm dừng chính chuẩn Cinematic (Đỏ Neon) -->
+              <button id="btnPlayPause" class="btn-ctrl-action btn-play-pause-cinematic" title="Phát / Tạm dừng (Space)">
+                <svg id="svgPlay" class="ctrl-icon-play" viewBox="0 0 24 24" fill="currentColor">
+                  <polygon points="6 4 20 12 6 20 6 4"/>
                 </svg>
-                <svg id="svgPause" class="ctrl-icon" viewBox="0 0 24 24" fill="currentColor" style="display:none;">
-                  <rect x="6" y="4" width="4" height="16"/>
-                  <rect x="14" y="4" width="4" height="16"/>
+                <svg id="svgPause" class="ctrl-icon-pause" viewBox="0 0 24 24" fill="currentColor" style="display:none;">
+                  <rect x="6" y="4" width="4" height="16" rx="1"/>
+                  <rect x="14" y="4" width="4" height="16" rx="1"/>
                 </svg>
               </button>
 
@@ -323,14 +329,8 @@
               </div>
             </div>
 
-            <!-- Nhóm phím bên phải: Intro, Tốc độ, Danh sách tập, PiP, Khung hình, Toàn màn hình -->
+            <!-- Nhóm phím bên phải: Tốc độ, Danh sách tập, PiP, Khung hình, Toàn màn hình -->
             <div class="controls-right">
-              <!-- Nút Bỏ qua Intro -->
-              <button id="btnSkipIntro" class="btn-skip-intro-pill" style="display: none;" title="Bỏ qua đoạn intro (+85s)">
-                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 4 15 12 5 20 5 4"/><rect x="17" y="4" width="2" height="16"/></svg>
-                <span>Bỏ qua Intro</span>
-              </button>
-
               <!-- Chọn tốc độ phát -->
               <button id="btnSpeedPlayer" class="btn-ctrl-badge" title="Tốc độ phát">1.0x</button>
 
@@ -353,6 +353,18 @@
                 <span class="btn-ctrl-text">Đổi Kênh</span>
               </button>
 
+              <!-- Điều chỉnh vị trí phụ đề (Chỉ hiện khi xem Phim Ngắn có phụ đề rời) -->
+              <button id="btnSubtitlePos" class="btn-ctrl-action" style="display: none;" title="Vị trí phụ đề (Bấm để đổi nấc: Vừa / Cao / Thấp)">
+                <svg class="ctrl-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="2" y="4" width="20" height="16" rx="2"/>
+                  <line x1="6" y1="14" x2="18" y2="14"/>
+                  <line x1="6" y1="10" x2="12" y2="10"/>
+                  <path d="M16 8l2-2 2 2"/>
+                  <path d="M18 6v4"/>
+                </svg>
+                <span id="subtitlePosBadgeText" class="btn-ctrl-text">Phụ Đề</span>
+              </button>
+
               <!-- Tỉ lệ khung hình -->
               <button id="btnAspectPlayer" class="btn-ctrl-action" title="Tỉ lệ khung hình (Fit / Fill / Căng)">
                 <svg class="ctrl-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -365,8 +377,8 @@
               <!-- Hình trong hình PiP -->
               <button id="btnPipPlayer" class="btn-ctrl-action" title="Thu nhỏ hình trong hình (Mini Player)">
                 <svg class="ctrl-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <rect x="2" y="4" width="20" height="16" rx="2"/>
-                  <rect x="12" y="11" width="8" height="7" rx="1"/>
+                  <rect x="2" y="3" width="20" height="14" rx="2"/>
+                  <rect x="12" y="9" width="8" height="6" rx="1" fill="currentColor"/>
                 </svg>
                 <span class="btn-ctrl-text">Thu Nhỏ</span>
               </button>
@@ -415,7 +427,7 @@
   </div>
 
   <div id="matchWebPlayerContainer" class="player-container" style="display: none; z-index: 2000; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000;">
-    <div class="player-top" style="position: absolute; top: 0; left: 0; width: 100%; z-index: 2005; background: linear-gradient(180deg, rgba(10,14,23,0.95), transparent); padding: 14px 28px; display: flex; justify-content: space-between; align-items: center;">
+    <div class="player-top" style="position: absolute; top: 0; left: 0; width: 100%; z-index: 2020; background: linear-gradient(180deg, rgba(10,14,23,0.95), transparent); padding: 14px 28px; display: flex; justify-content: space-between; align-items: center;">
       <div class="player-title-info" style="display: flex; align-items: center; gap: 16px;">
         <button id="btnCloseMatchWebPlayer" class="btn-player focusable">↩️ Thoát Trận Đấu</button>
         <div>
@@ -429,6 +441,89 @@
         <button id="btnFullscreenMatch" class="btn-player focusable">🗖 Toàn Màn Hình</button>
       </div>
     </div>
+    <!-- Màn hình chờ đếm ngược trận đấu & đặt chuông thông báo (Tránh hiểu lầm khi chưa đến giờ bóng lăn) -->
+    <div id="matchCountdownOverlay" class="match-countdown-overlay" style="display: none;">
+      <div class="countdown-backdrop-glow"></div>
+      
+      <div class="countdown-card">
+        <div id="cdTournamentBadge" class="countdown-league-badge">🏴󠁧󠁢󠁥󠁮󠁧󠁿 NGOẠI HẠNG ANH</div>
+        
+        <!-- Cụm đối đầu 2 đội bóng -->
+        <div class="countdown-teams-row">
+          <div class="team-block">
+            <div class="team-logo-wrap">
+              <img id="cdTeamALogo" src="" alt="Team A" onerror="this.style.display='none'">
+            </div>
+            <div id="cdTeamAName" class="team-name">Chelsea</div>
+          </div>
+          
+          <div class="match-vs-wrap">
+            <div class="vs-glow-text">VS</div>
+            <div id="cdMatchStatusBadge" class="match-status-pill">SẮP DIỄN RA</div>
+          </div>
+          
+          <div class="team-block">
+            <div class="team-logo-wrap">
+              <img id="cdTeamBLogo" src="" alt="Team B" onerror="this.style.display='none'">
+            </div>
+            <div id="cdTeamBName" class="team-name">Manchester United</div>
+          </div>
+        </div>
+
+        <!-- Thông điệp hướng dẫn rõ ràng -->
+        <p class="countdown-notice">
+          ⏱️ Trận đấu chưa bắt đầu! Luồng phát trực tiếp sẽ tự động phát sóng trước giờ bóng lăn 15 - 30 phút.
+        </p>
+
+        <!-- Đồng hồ đếm ngược sống động -->
+        <div id="matchCountdownTimer" class="countdown-timer-box">
+          <div class="timer-unit">
+            <span id="cdDays" class="timer-num">00</span>
+            <span class="timer-label">Ngày</span>
+          </div>
+          <span class="timer-sep">:</span>
+          <div class="timer-unit">
+            <span id="cdHours" class="timer-num">00</span>
+            <span class="timer-label">Giờ</span>
+          </div>
+          <span class="timer-sep">:</span>
+          <div class="timer-unit">
+            <span id="cdMinutes" class="timer-num">00</span>
+            <span class="timer-label">Phút</span>
+          </div>
+          <span class="timer-sep">:</span>
+          <div class="timer-unit">
+            <span id="cdSeconds" class="timer-num">00</span>
+            <span class="timer-label">Giây</span>
+          </div>
+        </div>
+
+        <div id="cdExactTime" class="countdown-exact-time">Bóng lăn: Hôm nay lúc 20:30</div>
+
+        <!-- Hàng nút hành động: Đặt chuông thông báo & Mở sớm luồng phát & Thoát -->
+        <div class="countdown-actions">
+          <button id="btnMatchCountdownReminder" class="btn-cd-action btn-cd-bell focusable">
+            <svg class="cd-bell-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+            </svg>
+            <span id="cdBellText">Đặt Chuông Nhắc Nhở</span>
+          </button>
+          
+          <button id="btnForceOpenStream" class="btn-cd-action btn-cd-force focusable" title="Vẫn mở luồng phát sớm nếu máy chủ đã mở phòng chờ">
+            <svg class="cd-play-icon" viewBox="0 0 24 24" fill="currentColor">
+              <polygon points="5 3 19 12 5 21 5 3"/>
+            </svg>
+            <span>Vẫn Mở Luồng Trực Tiếp</span>
+          </button>
+
+          <button id="btnCdBack" class="btn-cd-action btn-cd-back focusable" title="Quay lại lịch thi đấu">
+            <span>↩️ Thoát</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
     <iframe id="matchIframe" src="" style="width: 100%; height: 100%; border: none; background: #000;" allow="autoplay; fullscreen; encrypted-media"></iframe>
   </div>
 
@@ -553,48 +648,48 @@
         </div>
 
         <!-- 2. Android Mobile APK -->
-        <a href="/api/download?file=mobile" download="HuyCa_Mobile_v3.3.8.apk" class="install-platform-card focusable">
+        <a href="/api/download?file=mobile" download="HuyCa_Mobile_v3.4.0.apk" class="install-platform-card focusable">
           <div class="platform-card-left">
             <span class="platform-emoji">📱</span>
             <div>
               <div class="platform-title">Điện Thoại Android (Bản Native APK)</div>
-              <div class="platform-desc">Tệp cài đặt: <code>HuyCa_Mobile_v3.3.8.apk</code> • Tối ưu cảm ứng, tự xoay ngang, ExoPlayer</div>
+              <div class="platform-desc">Tệp cài đặt: <code>HuyCa_Mobile_v3.4.0.apk</code> • Tối ưu cảm ứng, tự xoay ngang, ExoPlayer</div>
             </div>
           </div>
           <span class="btn-platform-download">⬇️ TẢI APK</span>
         </a>
 
         <!-- 3. Android TV / Google TV / TV Box APK -->
-        <a href="/api/download?file=tv" download="HuyCa_TV_v3.3.8.apk" class="install-platform-card focusable">
+        <a href="/api/download?file=tv" download="HuyCa_TV_v3.4.0.apk" class="install-platform-card focusable">
           <div class="platform-card-left">
             <span class="platform-emoji">📺</span>
             <div>
               <div class="platform-title">Android TV / Sony / Casper / Xiaomi / TV Box</div>
-              <div class="platform-desc">Tệp cài đặt: <code>HuyCa_TV_v3.3.8.apk</code> • Giao diện 16:9 chuẩn điều khiển Remote D-Pad</div>
+              <div class="platform-desc">Tệp cài đặt: <code>HuyCa_TV_v3.4.0.apk</code> • Giao diện 16:9 chuẩn điều khiển Remote D-Pad</div>
             </div>
           </div>
           <span class="btn-platform-download">⬇️ TẢI APK TV</span>
         </a>
 
         <!-- 4. Windows PC -->
-        <a href="/api/download?file=windows" download="HuyCa_Windows_v3.3.8.zip" class="install-platform-card focusable">
+        <a href="/api/download?file=windows" download="HuyCa_Windows_v3.4.0.zip" class="install-platform-card focusable">
           <div class="platform-card-left">
             <span class="platform-emoji">💻</span>
             <div>
               <div class="platform-title">Máy Tính Windows PC / Laptop (Windows 10/11)</div>
-              <div class="platform-desc">Tệp cài đặt: <code>HuyCa_Windows_v3.3.8.zip</code> • Tích hợp vượt tường lửa DNS & chặn quảng cáo</div>
+              <div class="platform-desc">Tệp cài đặt: <code>HuyCa_Windows_v3.4.0.zip</code> • Tích hợp vượt tường lửa DNS & chặn quảng cáo</div>
             </div>
           </div>
           <span class="btn-platform-download">⬇️ TẢI ZIP PC</span>
         </a>
 
         <!-- 5. LG Smart TV (webOS) -->
-        <a href="/api/download?file=lg" download="HuyCa_LG_webOS_v3.3.8.ipk" class="install-platform-card focusable">
+        <a href="/api/download?file=lg" download="HuyCa_LG_webOS_v3.4.0.ipk" class="install-platform-card focusable">
           <div class="platform-card-left">
             <span class="platform-emoji">🖥️</span>
             <div>
               <div class="platform-title">Tivi LG Smart TV (Hệ điều hành webOS)</div>
-              <div class="platform-desc">Tệp cài đặt: <code>HuyCa_LG_webOS_v3.3.8.ipk</code> • Hỗ trợ chuột bay Magic Remote & phím số</div>
+              <div class="platform-desc">Tệp cài đặt: <code>HuyCa_LG_webOS_v3.4.0.ipk</code> • Hỗ trợ chuột bay Magic Remote & phím số</div>
             </div>
           </div>
           <span class="btn-platform-download">⬇️ TẢI IPK LG</span>
@@ -638,6 +733,6 @@
   <script src="data/tv_channels.js?v=3.3.1"></script>
   <script src="js/hls.min.js?v=3.3.1"></script>
   <script src="js/dash.all.min.js?v=3.3.1"></script>
-  <script src="js/app.js?v=3.3.11"></script>
+  <script src="js/app.js?v=3.4.0"></script>
 </body>
 </html>

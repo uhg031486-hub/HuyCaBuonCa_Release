@@ -355,39 +355,70 @@
       }
       return list;
     },
+    async fallbackGenreToFreeReels(genrePath, page = 1) {
+      const GENRE_FEED_MAP = {
+        'phim-moi': ['505', 0, 'foryou', 0],
+        'ban-xep-hang': ['503', 0, 'foryou', 10],
+        'the-loai/cuoi-truoc-yeu-sau': ['504', 0, '503', 10],
+        'the-loai/guong-vo-lai-lanh': ['504', 10, '505', 10],
+        'the-loai/yeu-tham': ['foryou', 0, '504', 20],
+        'the-loai/hien-dai': ['503', 10, '504', 0],
+        'the-loai/trong-sinh': ['503', 20, '506', 10],
+        'the-loai/xuyen-khong': ['506', 20, '547', 10],
+        'the-loai/co-trang': ['504', 30, '506', 20],
+        'the-loai/hai-huoc': ['503', 30, 'foryou', 20],
+        'the-loai/tra-xanh-nam': ['504', 20, '505', 20],
+        'the-loai/chua-lanh': ['foryou', 10, '504', 10],
+        'the-loai/thanh-xuan': ['foryou', 20, '504', 30],
+        'the-loai/dan-quoc': ['503', 40, '504', 40],
+        'the-loai/nien-dai': ['506', 30, '503', 20]
+      };
+      const rot = (FreeReelsClient.getRotationSeed() % 4) * 10;
+      const cfg = GENRE_FEED_MAP[genrePath] || ['503', 0, '504', 10];
+      const off1 = cfg[1] + rot + (page - 1) * 20;
+      const off2 = cfg[3] + rot + (page - 1) * 20;
+      const [b1, b2] = await Promise.all([
+        FreeReelsClient.fetchTabFeedOffset(cfg[0], off1),
+        FreeReelsClient.fetchTabFeedOffset(cfg[2], off2)
+      ]);
+      const combined = [...b1, ...b2];
+      const dubbed = combined.filter(m => m.name.toLowerCase().includes('lồng tiếng') || m.name.toLowerCase().includes('thuyết minh'));
+      return (dubbed.length >= 6 ? dubbed : combined).map(item => ({
+        ...item,
+        originName: 'Gà Mờ Mê Phim • Thuyết Minh'
+      }));
+    },
     async getDramaList(filterUrl, page = 1) {
+      const genrePath = filterUrl.replace('gamomephim://', '');
       try {
-        const genrePath = filterUrl.replace('gamomephim://', '');
         const targetUrl = page <= 1 ? `${this.BASE_URL}/${genrePath}` : `${this.BASE_URL}/${genrePath}?page=${page}`;
         const resp = await fetch(this.getProxyUrl(targetUrl));
-        if (!resp.ok) return [];
-        const html = await resp.text();
-        let list = this.parseHtmlItems(html);
-
-        // Tự động fallback sang Phim Mới nếu thể loại này ít phim và hết ở trang tiếp theo (chống lỗi kéo thêm không ra phim)
-        if (list.length === 0 && page > 1 && genrePath !== 'phim-moi') {
-          try {
-            const fbResp = await fetch(this.getProxyUrl(`${this.BASE_URL}/phim-moi?page=${page}`));
-            if (fbResp.ok) {
-              const fbHtml = await fbResp.text();
-              const fbList = this.parseHtmlItems(fbHtml);
-              if (fbList.length > 0) {
-                fbList.forEach(item => {
-                  item.originName = 'Gà Mờ Mê Phim • Mới Cập Nhật';
-                  list.push(item);
-                });
+        if (resp.ok) {
+          const html = await resp.text();
+          let list = this.parseHtmlItems(html);
+          if (list.length === 0 && page > 1 && genrePath !== 'phim-moi') {
+            try {
+              const fbResp = await fetch(this.getProxyUrl(`${this.BASE_URL}/phim-moi?page=${page}`));
+              if (fbResp.ok) {
+                const fbHtml = await fbResp.text();
+                const fbList = this.parseHtmlItems(fbHtml);
+                if (fbList.length > 0) {
+                  fbList.forEach(item => {
+                    item.originName = 'Gà Mờ Mê Phim • Mới Cập Nhật';
+                    list.push(item);
+                  });
+                }
               }
+            } catch(err) {
+              console.warn('GaMoMePhim fallback err:', err);
             }
-          } catch(err) {
-            console.warn('GaMoMePhim fallback err:', err);
           }
+          if (list.length > 0) return list;
         }
-
-        return list;
       } catch (e) {
         console.warn('GaMoMePhim getDramaList err:', e);
-        return [];
       }
+      return await this.fallbackGenreToFreeReels(genrePath, page);
     },
     async getDramaDetail(cleanSlug) {
       try {
@@ -521,17 +552,44 @@
     sessionId: '',
     oauthToken: '',
     oauthSecret: '',
+    manualRefreshOffset: 0,
+    _sessionSeed: null,
+
+    getRotationSeed() {
+      if (this._sessionSeed === null) {
+        let saved = 0;
+        try {
+          saved = parseInt(localStorage.getItem('huyca_short_rot_seed') || '0', 10) || 0;
+          const nextSeed = (saved + 1) % 12;
+          localStorage.setItem('huyca_short_rot_seed', String(nextSeed));
+        } catch (e) {}
+        const timeSlot = Math.floor(Date.now() / (4 * 3600 * 1000));
+        this._sessionSeed = timeSlot + saved;
+      }
+      return this._sessionSeed + this.manualRefreshOffset;
+    },
+
+    refreshSession() {
+      this.manualRefreshOffset += 1;
+      this.oauthToken = '';
+      this.oauthSecret = '';
+      this.deviceId = '';
+      this.sessionId = '';
+      this.tabFeedCache = {};
+      this.searchResultCache = {};
+    },
 
     async ensureLogin() {
       if (this.oauthToken && this.oauthSecret) return true;
       try {
+        const seedKey = `huyca_fr_device_id_${this.getRotationSeed() % 6}`;
         if (!this.deviceId) {
           try {
-            this.deviceId = localStorage.getItem('huyca_fr_device_id') || '';
+            this.deviceId = localStorage.getItem(seedKey) || '';
           } catch(e) {}
           if (!this.deviceId) {
             this.deviceId = 'fr_' + Math.random().toString(36).substring(2) + Date.now().toString(36);
-            try { localStorage.setItem('huyca_fr_device_id', this.deviceId); } catch(e) {}
+            try { localStorage.setItem(seedKey, this.deviceId); } catch(e) {}
           }
         }
         if (!this.sessionId) {
@@ -687,41 +745,45 @@
 
     async getDramaList(filterUrl, page = 1) {
       const baseOffset = (page - 1) * 20;
+      const rot = (this.getRotationSeed() % 4) * 10;
       if (filterUrl === 'freereels://foryou' || filterUrl.startsWith('freereels://foryou')) {
-        const [a, b] = await Promise.all([
-          this.fetchTabFeedOffset('503', baseOffset + 10),
-          this.fetchTabFeedOffset('504', baseOffset + 20)
+        const [a, b, c] = await Promise.all([
+          this.fetchTabFeedOffset('505', baseOffset + rot),
+          this.fetchTabFeedOffset('foryou', baseOffset + rot),
+          this.fetchTabFeedOffset('503', baseOffset + ((rot + 10) % 40))
         ]);
-        return [...a, ...b];
+        return [...a, ...b, ...c];
       }
       if (filterUrl === 'freereels://dubbed_vi') {
-        const [a, b, c] = await Promise.all([
-          this.fetchTabFeedOffset('503', baseOffset),
-          this.fetchTabFeedOffset('504', baseOffset),
-          this.fetchTabFeedOffset('506', baseOffset)
+        const [a, b, c, d] = await Promise.all([
+          this.fetchTabFeedOffset('foryou', baseOffset + rot),
+          this.fetchTabFeedOffset('503', baseOffset + rot),
+          this.fetchTabFeedOffset('504', baseOffset + rot),
+          this.fetchTabFeedOffset('506', baseOffset + rot)
         ]);
-        const combined = [...a, ...b, ...c];
+        const combined = [...a, ...b, ...c, ...d];
         const dubbed = combined.filter(m => m.name.toLowerCase().includes('lồng tiếng') || m.name.toLowerCase().includes('thuyết minh'));
         return dubbed.length > 0 ? dubbed : combined;
       }
       if (filterUrl.startsWith('freereels://tab_')) {
         const tabKey = filterUrl.replace('freereels://tab_', '');
         const [a, b] = await Promise.all([
-          this.fetchTabFeedOffset(tabKey, baseOffset),
-          this.fetchTabFeedOffset(tabKey, baseOffset + 10)
+          this.fetchTabFeedOffset(tabKey, baseOffset + rot),
+          this.fetchTabFeedOffset(tabKey, baseOffset + rot + 10)
         ]);
         return [...a, ...b];
       }
       const [a, b] = await Promise.all([
-        this.fetchTabFeedOffset('503', baseOffset),
-        this.fetchTabFeedOffset('foryou', baseOffset)
+        this.fetchTabFeedOffset('505', baseOffset + rot),
+        this.fetchTabFeedOffset('foryou', baseOffset + rot)
       ]);
       return [...a, ...b];
     },
 
     searchCursorMap: {},
     async search(keyword, page = 1) {
-      const cacheKey = `search_${keyword}_p${page}`;
+      const rot = (this.getRotationSeed() % 4) * 10;
+      const cacheKey = `search_${keyword}_p${page}_r${rot}`;
       if (this.searchResultCache[cacheKey] && this.searchResultCache[cacheKey].length > 0) {
         return this.searchResultCache[cacheKey];
       }
@@ -729,6 +791,7 @@
       const headers = await this.getAuthorizedHeaders();
       if (!headers) return [];
 
+      let directList = [];
       // Thử gọi /search/drama nếu không đang trong thời gian cooldown rate-limit
       if (!this.searchRateLimitedUntil || Date.now() > this.searchRateLimitedUntil) {
         const cursorKey = `cursor_${keyword}`;
@@ -748,11 +811,8 @@
             if (data.next) {
               this.searchCursorMap[cursorKey] = data.next;
             }
-            const list = this.parseDramaItems(data.items || data.list || []);
-            if (list.length > 0) {
-              this.searchResultCache[cacheKey] = list;
-              return list;
-            } else {
+            directList = this.parseDramaItems(data.items || data.list || []);
+            if (directList.length === 0) {
               // /search/drama trả rỗng do bị giới hạn tần suất -> kích hoạt fallback sang Tab Feed không giới hạn trong 90s
               this.searchRateLimitedUntil = Date.now() + 90000;
             }
@@ -762,7 +822,7 @@
         }
       }
 
-      // Fallback thông minh sang hệ thống Tab Feed & ForYou Feed (Mỗi nguồn & bộ lọc có danh sách phim riêng biệt, không trùng lặp!)
+      // Fallback & trộn thông minh sang hệ thống Tab Feed & ForYou Feed xoay vòng động theo phiên/ngày
       const kwLower = (keyword || '').toLowerCase().trim();
       const FALLBACK_FEED_MAP = {
         'người sói': ['505', 0, 'foryou', 10],
@@ -796,18 +856,21 @@
         'lồng tiếng': ['503', 0, '506', 0]
       };
 
-      const cfg = FALLBACK_FEED_MAP[kwLower] || ['503', (kwLower.length % 5) * 10, 'foryou', ((kwLower.length + 2) % 5) * 10];
-      const pOffset = cfg[1] + (page - 1) * 20;
-      const sOffset = cfg[3] + (page - 1) * 20;
+      const cfg = FALLBACK_FEED_MAP[kwLower] || ['505', (kwLower.length % 5) * 10, 'foryou', ((kwLower.length + 2) % 5) * 10];
+      const pOffset = cfg[1] + rot + (page - 1) * 20;
+      const sOffset = cfg[3] + rot + (page - 1) * 20;
       const [batch1, batch2] = await Promise.all([
         this.fetchTabFeedOffset(cfg[0], pOffset),
         this.fetchTabFeedOffset(cfg[2], sOffset)
       ]);
       const fallbackList = [...batch1, ...batch2];
-      if (fallbackList.length > 0) {
-        this.searchResultCache[cacheKey] = fallbackList;
+      const finalResult = (rot > 0 && fallbackList.length > 0)
+        ? [...fallbackList.slice(0, 8), ...directList, ...fallbackList.slice(8)]
+        : [...directList, ...fallbackList];
+      if (finalResult.length > 0) {
+        this.searchResultCache[cacheKey] = finalResult;
       }
-      return fallbackList;
+      return finalResult;
     },
 
     async getDramaDetail(seriesId) {
@@ -1741,8 +1804,14 @@
         };
 
         const kwList = SHORT_KW_MAP[kwType] || ['tiểu kịch', 'tổng tài', 'trọng sinh'];
-        const targetKw = kwList[(currentPage - 1) % kwList.length];
-        let newItems = await FreeReelsClient.search(targetKw, currentPage);
+        const seed = FreeReelsClient.getRotationSeed();
+        const targetKw1 = kwList[(currentPage - 1 + seed) % kwList.length];
+        const targetKw2 = kwList[(currentPage + seed) % kwList.length];
+        const [itemsA, itemsB] = await Promise.all([
+          FreeReelsClient.search(targetKw1, currentPage),
+          targetKw2 !== targetKw1 ? FreeReelsClient.search(targetKw2, currentPage) : Promise.resolve([])
+        ]);
+        let newItems = [...itemsA, ...itemsB];
         if (newItems.length < 6) {
           try {
             const fbItems = await GaMoMePhimClient.getDramaList('gamomephim://the-loai/hien-dai', 1);
@@ -4732,11 +4801,14 @@ function playVideo(streamUrl, title, subtitle, movie, detail, epIndex, serverInd
   const btnUpdateHeader = document.getElementById('btnUpdateHeader');
   if (btnUpdateHeader) {
     btnUpdateHeader.addEventListener('click', () => {
-      showToast('Đang kiểm tra bản cập nhật mới...');
+      FreeReelsClient.refreshSession();
+      currentPage = 1;
+      loadMovies(true);
       if (window.chrome && window.chrome.webview) {
         window.chrome.webview.postMessage('check_update');
+        showToast('🔄 Đã làm mới danh sách phim & kiểm tra cập nhật!');
       } else {
-        showToast('Tính năng cập nhật khả dụng trên ứng dụng Huy Cá Windows!');
+        showToast('🔄 Đã làm mới danh sách phim mới nhất!');
       }
     });
   }

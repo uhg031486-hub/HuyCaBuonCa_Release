@@ -1220,18 +1220,30 @@ object MovieRepository {
         }
 
         val result = mutableListOf<MovieItem>()
+        val allKws = listOf(frKeyword) + altKeywords
+        val seed = FreeReelsClient.getRotationSeed()
+        val kwIdx1 = (seed + page - 1) % allKws.size
+        val kwIdx2 = (seed + page) % allKws.size
+        val targetKw1 = allKws[kwIdx1]
+        val targetKw2 = allKws[kwIdx2]
 
-        // 1. Luôn truy vấn FreeReels theo page (mỗi page 20 phim vô cực chuẩn dọc 9:16)
+        // 1. Luôn truy vấn FreeReels theo page với từ khóa xoay vòng động để làm mới danh sách phim ngắn
         try {
-            val frItems = FreeReelsClient.search(client, gson, frKeyword, page)
+            val frItems = FreeReelsClient.search(client, gson, targetKw1, page)
             result.addAll(frItems)
 
-            // Nếu trang này FreeReels có ít hơn 10 phim, bổ sung thêm từ khóa phụ
-            if (frItems.size < 10) {
-                for (alt in altKeywords) {
+            if (targetKw2 != targetKw1) {
+                val altItems2 = FreeReelsClient.search(client, gson, targetKw2, page)
+                result.addAll(altItems2)
+            }
+
+            // Nếu trang này vẫn có ít hơn 15 phim, bổ sung thêm các từ khóa phụ còn lại
+            if (result.size < 15) {
+                for (alt in allKws) {
+                    if (alt == targetKw1 || alt == targetKw2) continue
                     val altItems = FreeReelsClient.search(client, gson, alt, page)
                     result.addAll(altItems)
-                    if (result.size >= 15) break
+                    if (result.size >= 20) break
                 }
             }
         } catch (e: Exception) {
@@ -1561,6 +1573,18 @@ object FreeReelsClient {
     private var sessionId: String = ""
     private var oauthToken: String = ""
     private var oauthSecret: String = ""
+    private var sessionSeed: Int = (System.currentTimeMillis() / (4 * 3600 * 1000L)).toInt() + kotlin.random.Random.nextInt(0, 4)
+
+    fun getRotationSeed(): Int = sessionSeed
+
+    fun refreshSession(): Int {
+        sessionSeed = (sessionSeed + 1) + kotlin.random.Random.nextInt(0, 3)
+        deviceId = java.util.UUID.randomUUID().toString()
+        sessionId = java.util.UUID.randomUUID().toString()
+        oauthToken = ""
+        oauthSecret = ""
+        return sessionSeed
+    }
 
     private fun md5(s: String): String {
         val md = java.security.MessageDigest.getInstance("MD5")
@@ -1770,30 +1794,33 @@ object FreeReelsClient {
     }
 
     fun getDramaList(client: OkHttpClient, gson: Gson, filterUrl: String, page: Int): List<MovieItem> {
+        val rot = (getRotationSeed() % 4) * 10
         val baseOffset = (page - 1) * 20
         return when {
             filterUrl == "freereels://foryou" || filterUrl.startsWith("freereels://foryou") -> {
-                val a = fetchTabFeedOffset(client, gson, "503", baseOffset + 10)
-                val b = fetchTabFeedOffset(client, gson, "504", baseOffset + 20)
-                (a + b).distinctBy { it.id }
+                val a = fetchTabFeedOffset(client, gson, "505", baseOffset + rot)
+                val b = fetchTabFeedOffset(client, gson, "foryou", baseOffset + rot)
+                val c = fetchTabFeedOffset(client, gson, "503", baseOffset + ((rot + 10) % 40))
+                (a + b + c).distinctBy { it.id }
             }
             filterUrl == "freereels://dubbed_vi" -> {
-                val a = fetchTabFeedOffset(client, gson, "503", baseOffset)
-                val b = fetchTabFeedOffset(client, gson, "504", baseOffset)
-                val c = fetchTabFeedOffset(client, gson, "506", baseOffset)
-                val combined = (a + b + c).distinctBy { it.id }
+                val a = fetchTabFeedOffset(client, gson, "503", baseOffset + rot)
+                val b = fetchTabFeedOffset(client, gson, "504", baseOffset + rot)
+                val c = fetchTabFeedOffset(client, gson, "506", baseOffset + rot)
+                val d = fetchTabFeedOffset(client, gson, "505", baseOffset + rot)
+                val combined = (a + b + c + d).distinctBy { it.id }
                 val dubbed = combined.filter { it.name.contains("lồng tiếng", ignoreCase = true) || it.name.contains("thuyết minh", ignoreCase = true) }
                 if (dubbed.isNotEmpty()) dubbed else combined
             }
             filterUrl.startsWith("freereels://tab_") -> {
                 val tabKey = filterUrl.removePrefix("freereels://tab_")
-                val a = fetchTabFeedOffset(client, gson, tabKey, baseOffset)
-                val b = fetchTabFeedOffset(client, gson, tabKey, baseOffset + 10)
+                val a = fetchTabFeedOffset(client, gson, tabKey, baseOffset + rot)
+                val b = fetchTabFeedOffset(client, gson, tabKey, baseOffset + rot + 10)
                 (a + b).distinctBy { it.id }
             }
             else -> {
-                val a = fetchTabFeedOffset(client, gson, "503", baseOffset)
-                val b = fetchTabFeedOffset(client, gson, "foryou", baseOffset)
+                val a = fetchTabFeedOffset(client, gson, "505", baseOffset + rot)
+                val b = fetchTabFeedOffset(client, gson, "foryou", baseOffset + rot)
                 (a + b).distinctBy { it.id }
             }
         }
@@ -1867,16 +1894,21 @@ object FreeReelsClient {
             e.printStackTrace()
         }
 
-        if (list.size < 4) {
+        if (list.size < 12) {
+            val rot = (getRotationSeed() % 4) * 10
             val kwLower = keyword.lowercase().trim()
-            val cfg = FALLBACK_FEED_MAP[kwLower] ?: listOf("503", ((kwLower.length % 5) * 10).toString(), "foryou", (((kwLower.length + 2) % 5) * 10).toString())
-            val pOffset = (cfg[1].toIntOrNull() ?: 0) + (page - 1) * 20
-            val sOffset = (cfg[3].toIntOrNull() ?: 0) + (page - 1) * 20
+            val cfg = FALLBACK_FEED_MAP[kwLower] ?: listOf("505", ((kwLower.length % 5) * 10).toString(), "foryou", (((kwLower.length + 2) % 5) * 10).toString())
+            val pOffset = ((cfg[1].toIntOrNull() ?: 0) + rot) % 60 + (page - 1) * 20
+            val sOffset = ((cfg[3].toIntOrNull() ?: 0) + rot) % 60 + (page - 1) * 20
             val batch1 = fetchTabFeedOffset(client, gson, cfg[0], pOffset)
             val batch2 = fetchTabFeedOffset(client, gson, cfg[2], sOffset)
             val combined = (batch1 + batch2).distinctBy { it.id }
             if (combined.isNotEmpty()) {
-                list.addAll(combined)
+                val merged = mutableListOf<MovieItem>()
+                merged.addAll(combined.take(6))
+                merged.addAll(list)
+                merged.addAll(combined.drop(6))
+                return merged.distinctBy { it.id }
             }
         }
 
@@ -2153,10 +2185,44 @@ object GaMoMePhimClient {
         return list
     }
 
+    private val GENRE_FALLBACK_CONFIG = mapOf(
+        "phim-moi" to listOf("505", "0", "503", "0", "lồng tiếng"),
+        "the-loai/trong-sinh" to listOf("503", "30", "504", "30", "trọng sinh"),
+        "the-loai/co-trang" to listOf("504", "10", "506", "20", "cổ trang"),
+        "the-loai/xuyen-khong" to listOf("506", "10", "505", "10", "xuyên không"),
+        "the-loai/he-thong" to listOf("547", "0", "506", "20", "hệ thống"),
+        "the-loai/tong-tai" to listOf("504", "0", "503", "10", "tổng tài"),
+        "the-loai/cuoi-truoc-yeu-sau" to listOf("504", "20", "foryou", "10", "cô dâu"),
+        "the-loai/yeu-tham" to listOf("foryou", "20", "504", "30", "ngọt sủng"),
+        "the-loai/hien-dai" to listOf("505", "20", "503", "20", "hào môn"),
+        "the-loai/do-thi" to listOf("506", "30", "503", "10", "chiến thần"),
+        "the-loai/huyen-huyen" to listOf("506", "0", "547", "10", "thần y"),
+        "the-loai/mat-the" to listOf("547", "20", "506", "40", "mạt thế"),
+        "the-loai/ung-ho-ngon-tinh" to listOf("foryou", "0", "504", "10", "cưng chiều"),
+        "the-loai/nguoc" to listOf("503", "20", "504", "40", "báo thù"),
+        "the-loai/sung" to listOf("foryou", "30", "505", "30", "bảo bối")
+    )
+
+    fun fallbackGenreToFreeReels(client: OkHttpClient, genrePath: String, page: Int = 1): List<MovieItem> {
+        val gson = Gson()
+        val rot = (FreeReelsClient.getRotationSeed() % 4) * 10
+        val cfg = GENRE_FALLBACK_CONFIG[genrePath] ?: GENRE_FALLBACK_CONFIG["phim-moi"]!!
+        val pOffset = ((cfg[1].toIntOrNull() ?: 0) + rot) % 60 + (page - 1) * 20
+        val sOffset = ((cfg[3].toIntOrNull() ?: 0) + rot) % 60 + (page - 1) * 20
+        val b1 = FreeReelsClient.fetchTabFeedOffset(client, gson, cfg[0], pOffset)
+        val b2 = FreeReelsClient.fetchTabFeedOffset(client, gson, cfg[2], sOffset)
+        val kwItems = FreeReelsClient.search(client, gson, cfg[4], page)
+        val combined = (kwItems + b1 + b2).distinctBy { it.id }
+        val dubbedFirst = combined.sortedByDescending {
+            it.name.contains("lồng tiếng", ignoreCase = true) || it.name.contains("thuyết minh", ignoreCase = true)
+        }
+        return dubbedFirst
+    }
+
     fun getDramaList(client: OkHttpClient, filterUrl: String, page: Int): List<MovieItem> {
         val list = mutableListOf<MovieItem>()
+        val genrePath = filterUrl.removePrefix("gamomephim://")
         try {
-            val genrePath = filterUrl.removePrefix("gamomephim://")
             val targetUrl = if (page <= 1) {
                 "$BASE_URL/$genrePath"
             } else {
@@ -2169,9 +2235,10 @@ object GaMoMePhimClient {
                 .build()
 
             client.newCall(req).execute().use { resp ->
-                if (!resp.isSuccessful) return emptyList()
-                val html = resp.body?.string() ?: return emptyList()
-                list.addAll(parseGaMoMeHtml(html))
+                if (resp.isSuccessful) {
+                    val html = resp.body?.string() ?: ""
+                    list.addAll(parseGaMoMeHtml(html))
+                }
 
                 // Tự động nạp thêm từ Phim Mới nếu thể loại này hết phim ở page > 1 (chống lỗi kéo thêm không ra phim)
                 if (list.isEmpty() && page > 1 && genrePath != "phim-moi") {
@@ -2197,6 +2264,9 @@ object GaMoMePhimClient {
             }
         } catch (e: Exception) {
             e.printStackTrace()
+        }
+        if (list.isEmpty()) {
+            return fallbackGenreToFreeReels(client, genrePath, page)
         }
         return list
     }
