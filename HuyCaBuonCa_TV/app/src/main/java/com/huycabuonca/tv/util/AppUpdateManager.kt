@@ -66,8 +66,9 @@ object AppUpdateManager {
                     .build()
 
                 val request = Request.Builder()
-                    .url(UPDATE_CONFIG_URL)
-                    .header("Cache-Control", "no-cache")
+                    .url("$UPDATE_CONFIG_URL?t=${System.currentTimeMillis()}")
+                    .header("Cache-Control", "no-cache, no-store, must-revalidate")
+                    .header("Pragma", "no-cache")
                     .build()
 
                 val response = client.newCall(request).execute()

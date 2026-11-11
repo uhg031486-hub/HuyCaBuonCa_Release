@@ -72,28 +72,28 @@ def update_version_json():
     with open("version.json", "w", encoding="utf-8") as vf:
         json.dump(new_version_info, vf, indent=2, ensure_ascii=False)
 
-    url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/contents/version.json"
-    res = requests.get(url, headers=HEADERS)
-    sha = None
-    if res.status_code == 200:
-        sha = res.json().get("sha")
-
     content_str = json.dumps(new_version_info, indent=2, ensure_ascii=False)
     b64_content = base64.b64encode(content_str.encode("utf-8")).decode("utf-8")
 
-    payload = {
-        "message": f"chore(release): bump version.json to {TAG}",
-        "content": b64_content,
-        "branch": "master"
-    }
-    if sha:
-        payload["sha"] = sha
+    for branch in ["main", "master"]:
+        url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/contents/version.json?ref={branch}"
+        res = requests.get(url, headers=HEADERS)
+        sha = res.json().get("sha") if res.status_code == 200 else None
 
-    put_res = requests.put(url, headers=HEADERS, json=payload)
-    if put_res.status_code in [200, 201]:
-        print(" -> Đã cập nhật version.json trên GitHub thành công!")
-    else:
-        print(" -> Lỗi cập nhật version.json:", put_res.status_code, put_res.text)
+        put_url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/contents/version.json"
+        payload = {
+            "message": f"chore(release): bump version.json to {TAG} on {branch}",
+            "content": b64_content,
+            "branch": branch
+        }
+        if sha:
+            payload["sha"] = sha
+
+        put_res = requests.put(put_url, headers=HEADERS, json=payload)
+        if put_res.status_code in [200, 201]:
+            print(f" -> Đã cập nhật version.json trên nhánh '{branch}' thành công!")
+        else:
+            print(f" -> Lỗi cập nhật version.json trên nhánh '{branch}':", put_res.status_code, put_res.text)
 
 def create_or_get_release():
     print(f"2. Tạo hoặc lấy thông tin GitHub Release cho tag {TAG}...")
