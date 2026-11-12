@@ -2,29 +2,42 @@ package com.huycabuonca.tv.util
 
 import android.app.Activity
 import android.app.AlertDialog
-import android.app.DownloadManager
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
+import android.graphics.Color
+import android.graphics.Typeface
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
+import android.provider.Settings
+import android.view.Gravity
+import android.widget.LinearLayout
+import android.widget.ProgressBar
+import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.FileProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONObject
 import java.io.File
+import java.io.FileOutputStream
 import java.util.concurrent.TimeUnit
 
 object AppUpdateManager {
 
-    private const val UPDATE_CONFIG_URL = "https://raw.githubusercontent.com/uhg031486-hub/HuyCaBuonCa_Release/main/version.json"
+    private val UPDATE_CONFIG_URLS = listOf(
+        "https://huyca.pages.dev/version.json",
+        "https://raw.githubusercontent.com/uhg031486-hub/HuyCaBuonCa_Release/main/version.json",
+        "https://raw.githubusercontent.com/uhg031486-hub/HuyCaBuonCa_Release/master/version.json"
+    )
+
+    private var pendingInstallFile: File? = null
+    private var activeDownloadJob: Job? = null
 
     data class UpdateInfo(
         val versionCode: Int,
@@ -57,68 +70,88 @@ object AppUpdateManager {
         }
     }
 
+    fun onActivityResume(activity: Activity) {
+        val file = pendingInstallFile ?: return
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (activity.packageManager.canRequestPackageInstalls() && file.exists()) {
+                pendingInstallFile = null
+                installApk(activity, file)
+            }
+        }
+    }
+
     fun checkForUpdate(activity: Activity, showToastIfLatest: Boolean = false) {
         CoroutineScope(Dispatchers.IO).launch {
-            try {
-                val client = OkHttpClient.Builder()
-                    .connectTimeout(10, TimeUnit.SECONDS)
-                    .readTimeout(10, TimeUnit.SECONDS)
-                    .build()
+            val client = OkHttpClient.Builder()
+                .connectTimeout(10, TimeUnit.SECONDS)
+                .readTimeout(10, TimeUnit.SECONDS)
+                .followRedirects(true)
+                .followSslRedirects(true)
+                .build()
 
-                val request = Request.Builder()
-                    .url("$UPDATE_CONFIG_URL?t=${System.currentTimeMillis()}")
-                    .header("Cache-Control", "no-cache, no-store, must-revalidate")
-                    .header("Pragma", "no-cache")
-                    .build()
+            var json: JSONObject? = null
+            for (baseUrl in UPDATE_CONFIG_URLS) {
+                try {
+                    val request = Request.Builder()
+                        .url("$baseUrl?t=${System.currentTimeMillis()}")
+                        .header("Cache-Control", "no-cache, no-store, must-revalidate")
+                        .header("Pragma", "no-cache")
+                        .build()
 
-                val response = client.newCall(request).execute()
-                if (response.isSuccessful) {
-                    val body = response.body?.string() ?: return@launch
-                    val json = JSONObject(body)
-                    val remoteVersionCode = json.optInt("versionCode", 0)
-                    val remoteVersionName = json.optString("versionName", "")
-                    val title = json.optString("title", "Phiên bản mới")
-                    val changelog = json.optString("changelog", "Cải tiến hiệu năng và cập nhật tính năng mới.")
-                    val apkUrl = json.optString("tvApkUrl").ifEmpty { json.optString("apkUrl", "") }
-                    val isMaintenanceLocked = json.optBoolean("isMaintenanceLocked", false)
-                    val maintenanceMessage = json.optString("maintenanceMessage", "Hệ thống đang bảo trì nội bộ. Vui lòng quay lại sau!")
-
-                    val currentVersionCode = getCurrentVersionCode(activity)
-                    val currentVersionName = getCurrentVersionName(activity)
-
-                    withContext(Dispatchers.Main) {
-                        if (!activity.isFinishing && !activity.isDestroyed) {
-                            if (isMaintenanceLocked) {
-                                showMaintenanceDialog(activity, maintenanceMessage)
-                                return@withContext
-                            }
-                            if (remoteVersionCode.toLong() > currentVersionCode && apkUrl.isNotEmpty()) {
-                                showUpdateDialog(
-                                    activity,
-                                    UpdateInfo(
-                                        versionCode = remoteVersionCode,
-                                        versionName = remoteVersionName,
-                                        title = title,
-                                        changelog = changelog,
-                                        apkUrl = apkUrl
-                                    )
-                                )
-                            } else if (showToastIfLatest) {
-                                Toast.makeText(activity, "Ứng dụng đang ở phiên bản mới nhất (v$currentVersionName)", Toast.LENGTH_SHORT).show()
+                    client.newCall(request).execute().use { response ->
+                        if (response.isSuccessful) {
+                            val body = response.body?.string()
+                            if (!body.isNullOrBlank()) {
+                                val parsed = JSONObject(body)
+                                if (parsed.optInt("versionCode", 0) > 0) {
+                                    json = parsed
+                                }
                             }
                         }
                     }
-                } else if (showToastIfLatest) {
-                    withContext(Dispatchers.Main) {
-                        Toast.makeText(activity, "Không thể kết nối máy chủ kiểm tra cập nhật.", Toast.LENGTH_SHORT).show()
+                    if (json != null) break
+                } catch (_: Exception) {
+                }
+            }
+
+            val validJson = json
+            if (validJson != null) {
+                val remoteVersionCode = validJson.optInt("versionCode", 0)
+                val remoteVersionName = validJson.optString("versionName", "")
+                val title = validJson.optString("title", "Phiên bản mới")
+                val changelog = validJson.optString("changelog", "Cải tiến hiệu năng và cập nhật tính năng mới.")
+                val apkUrl = validJson.optString("tvApkUrl").ifEmpty { validJson.optString("apkUrl", "") }
+                val isMaintenanceLocked = validJson.optBoolean("isMaintenanceLocked", false)
+                val maintenanceMessage = validJson.optString("maintenanceMessage", "Hệ thống đang bảo trì nội bộ. Vui lòng quay lại sau!")
+
+                val currentVersionCode = getCurrentVersionCode(activity)
+                val currentVersionName = getCurrentVersionName(activity)
+
+                withContext(Dispatchers.Main) {
+                    if (!activity.isFinishing && !activity.isDestroyed) {
+                        if (isMaintenanceLocked) {
+                            showMaintenanceDialog(activity, maintenanceMessage)
+                            return@withContext
+                        }
+                        if (remoteVersionCode.toLong() > currentVersionCode && apkUrl.isNotEmpty()) {
+                            showUpdateDialog(
+                                activity,
+                                UpdateInfo(
+                                    versionCode = remoteVersionCode,
+                                    versionName = remoteVersionName,
+                                    title = title,
+                                    changelog = changelog,
+                                    apkUrl = apkUrl
+                                )
+                            )
+                        } else if (showToastIfLatest) {
+                            Toast.makeText(activity, "✅ Ứng dụng đang ở phiên bản mới nhất (v$currentVersionName)", Toast.LENGTH_SHORT).show()
+                        }
                     }
                 }
-            } catch (e: Exception) {
-                if (showToastIfLatest) {
-                    withContext(Dispatchers.Main) {
-                        val currentVersionName = getCurrentVersionName(activity)
-                        Toast.makeText(activity, "Đang ở phiên bản mới nhất (v$currentVersionName)", Toast.LENGTH_SHORT).show()
-                    }
+            } else if (showToastIfLatest) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(activity, "Không thể kết nối máy chủ kiểm tra cập nhật.", Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -143,63 +176,190 @@ object AppUpdateManager {
             .setPositiveButton("CẬP NHẬT NGAY") { _, _ ->
                 downloadAndInstallApk(activity, info.apkUrl, "HuyCa_TV_v${info.versionName}.apk")
             }
+            .setNeutralButton("TẢI TRÌNH DUYỆT") { _, _ ->
+                openBrowserFallback(activity, info.apkUrl)
+            }
             .setNegativeButton("ĐỂ SAU", null)
             .show()
     }
 
     fun downloadAndInstallApk(context: Context, url: String, fileName: String) {
-        Toast.makeText(context, "Đang tải bản cập nhật mới trong nền...", Toast.LENGTH_LONG).show()
+        val activity = context as? Activity
+        if (activity == null || activity.isFinishing || activity.isDestroyed) {
+            openBrowserFallback(context, url)
+            return
+        }
 
-        try {
-            val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-            val destinationUri = Uri.fromFile(
-                File(context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), fileName)
-            )
+        val density = activity.resources.displayMetrics.density
+        val pad = (20 * density).toInt()
 
-            // Xóa file cũ nếu đã tồn tại
-            val targetFile = File(context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), fileName)
-            if (targetFile.exists()) {
-                targetFile.delete()
+        val container = LinearLayout(activity).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(pad, pad, pad, pad)
+        }
+
+        val txtStatus = TextView(activity).apply {
+            text = "Đang kết nối máy chủ tải bản cập nhật TV..."
+            textSize = 14f
+            setTextColor(Color.WHITE)
+            setTypeface(null, Typeface.BOLD)
+        }
+
+        val progressBar = ProgressBar(activity, null, android.R.attr.progressBarStyleHorizontal).apply {
+            isIndeterminate = false
+            max = 100
+            progress = 0
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                (12 * density).toInt()
+            ).apply {
+                topMargin = (14 * density).toInt()
+                bottomMargin = (8 * density).toInt()
+            }
+        }
+
+        val txtPercent = TextView(activity).apply {
+            text = "0%"
+            textSize = 13f
+            setTextColor(Color.parseColor("#FFD54F"))
+            gravity = Gravity.END
+        }
+
+        container.addView(txtStatus)
+        container.addView(progressBar)
+        container.addView(txtPercent)
+
+        val progressDialog = AlertDialog.Builder(activity)
+            .setTitle("⬇️ Đang Tải Bản Cập Nhật Huy Cá TV")
+            .setView(container)
+            .setCancelable(false)
+            .setNegativeButton("HỦY TẢI") { dialog, _ ->
+                activeDownloadJob?.cancel()
+                dialog.dismiss()
+            }
+            .setNeutralButton("MỞ TRÌNH DUYỆT") { dialog, _ ->
+                activeDownloadJob?.cancel()
+                dialog.dismiss()
+                openBrowserFallback(activity, url)
+            }
+            .create()
+
+        progressDialog.show()
+
+        activeDownloadJob?.cancel()
+        activeDownloadJob = CoroutineScope(Dispatchers.IO).launch {
+            val downloadDir = activity.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS) ?: activity.cacheDir
+            if (!downloadDir.exists()) downloadDir.mkdirs()
+
+            // Dọn dẹp các file APK cũ để giải phóng bộ nhớ TV Box
+            downloadDir.listFiles()?.forEach { f ->
+                if (f.name.endsWith(".apk", ignoreCase = true)) {
+                    try { f.delete() } catch (_: Exception) {}
+                }
             }
 
-            val request = DownloadManager.Request(Uri.parse(url))
-                .setTitle("Cập nhật Huy Cá TV")
-                .setDescription("Đang tải $fileName...")
-                .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-                .setDestinationUri(destinationUri)
-                .setMimeType("application/vnd.android.package-archive")
+            val targetFile = File(downloadDir, fileName)
+            val candidateUrls = listOf(
+                url,
+                "https://huyca.pages.dev/api/download?file=tv"
+            ).distinct()
 
-            val downloadId = downloadManager.enqueue(request)
+            val client = OkHttpClient.Builder()
+                .connectTimeout(20, TimeUnit.SECONDS)
+                .readTimeout(60, TimeUnit.SECONDS)
+                .followRedirects(true)
+                .followSslRedirects(true)
+                .build()
 
-            val onComplete = object : BroadcastReceiver() {
-                override fun onReceive(ctx: Context, intent: Intent) {
-                    val id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1L)
-                    if (id == downloadId) {
-                        try {
-                            ctx.unregisterReceiver(this)
-                        } catch (e: Exception) {}
+            var downloadedOk = false
+            var lastError = ""
 
-                        installApk(ctx, targetFile)
+            for (candidateUrl in candidateUrls) {
+                try {
+                    val req = Request.Builder()
+                        .url(candidateUrl)
+                        .header("User-Agent", "Mozilla/5.0 (Linux; Android 14; Android TV) HuyCaUpdater/3.5")
+                        .header("Accept", "*/*")
+                        .build()
+
+                    client.newCall(req).execute().use { resp ->
+                        if (!resp.isSuccessful) {
+                            lastError = "HTTP ${resp.code}"
+                            return@use
+                        }
+                        val body = resp.body ?: return@use
+                        val totalBytes = body.contentLength()
+                        val input = body.byteStream()
+                        FileOutputStream(targetFile).use { output ->
+                            val buffer = ByteArray(32 * 1024)
+                            var bytesRead: Int
+                            var downloadedBytes = 0L
+                            var lastUiUpdate = 0L
+
+                            while (input.read(buffer).also { bytesRead = it } != -1) {
+                                output.write(buffer, 0, bytesRead)
+                                downloadedBytes += bytesRead
+
+                                val now = System.currentTimeMillis()
+                                if (now - lastUiUpdate > 120 || downloadedBytes == totalBytes) {
+                                    lastUiUpdate = now
+                                    val pct = if (totalBytes > 0) ((downloadedBytes * 100) / totalBytes).toInt().coerceIn(0, 100) else -1
+                                    val mbDone = String.format("%.1f", downloadedBytes / (1024f * 1024f))
+                                    val mbTotal = if (totalBytes > 0) String.format("%.1f", totalBytes / (1024f * 1024f)) else "?"
+                                    withContext(Dispatchers.Main) {
+                                        if (progressDialog.isShowing) {
+                                            if (pct >= 0) {
+                                                progressBar.isIndeterminate = false
+                                                progressBar.progress = pct
+                                                txtStatus.text = "Đang tải: $fileName"
+                                                txtPercent.text = "$pct% ($mbDone MB / $mbTotal MB)"
+                                            } else {
+                                                progressBar.isIndeterminate = true
+                                                txtStatus.text = "Đang tải: $fileName ($mbDone MB)"
+                                                txtPercent.text = "Đang tải..."
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            output.flush()
+                        }
+
+                        if (targetFile.exists() && targetFile.length() > 1_000_000L) {
+                            downloadedOk = true
+                        } else {
+                            lastError = "Tệp tải về không hợp lệ (${targetFile.length()} bytes)"
+                        }
                     }
+                    if (downloadedOk) break
+                } catch (e: Exception) {
+                    lastError = e.message ?: "Lỗi kết nối mạng"
                 }
             }
 
-            val filter = IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                context.registerReceiver(onComplete, filter, Context.RECEIVER_NOT_EXPORTED)
-            } else {
-                context.registerReceiver(onComplete, filter)
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            try {
-                val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(url)).apply {
-                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            withContext(Dispatchers.Main) {
+                try {
+                    if (progressDialog.isShowing) progressDialog.dismiss()
+                } catch (_: Exception) {}
+
+                if (downloadedOk && targetFile.exists()) {
+                    installApk(activity, targetFile)
+                } else {
+                    Toast.makeText(activity, "Tải trực tiếp thất bại ($lastError). Đang chuyển sang trình duyệt...", Toast.LENGTH_LONG).show()
+                    openBrowserFallback(activity, url)
                 }
-                context.startActivity(browserIntent)
-            } catch (ex: Exception) {
-                Toast.makeText(context, "Lỗi tải cập nhật: ${e.message}", Toast.LENGTH_LONG).show()
             }
+        }
+    }
+
+    private fun openBrowserFallback(context: Context, url: String) {
+        try {
+            val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(url)).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            context.startActivity(browserIntent)
+        } catch (e: Exception) {
+            Toast.makeText(context, "Không thể mở trình duyệt tải: ${e.message}", Toast.LENGTH_LONG).show()
         }
     }
 
@@ -209,6 +369,39 @@ object AppUpdateManager {
             return
         }
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (!context.packageManager.canRequestPackageInstalls()) {
+                pendingInstallFile = file
+                val activity = context as? Activity
+                if (activity != null && !activity.isFinishing && !activity.isDestroyed) {
+                    AlertDialog.Builder(activity)
+                        .setTitle("🔓 Cấp Quyền Cài Đặt Bản Cập Nhật")
+                        .setMessage("Để cài đặt bản cập nhật mới trên Android TV / Điện thoại, vui lòng bật \"Cho phép cài đặt ứng dụng không rõ nguồn gốc\" cho Huy Cá, sau đó bấm nút Back (Quay lại).")
+                        .setCancelable(false)
+                        .setPositiveButton("MỞ CÀI ĐẶT NGAY") { _, _ ->
+                            try {
+                                val settingsIntent = Intent(
+                                    Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
+                                    Uri.parse("package:${context.packageName}")
+                                ).apply {
+                                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                }
+                                context.startActivity(settingsIntent)
+                            } catch (e: Exception) {
+                                launchPackageInstallerIntent(context, file)
+                            }
+                        }
+                        .setNegativeButton("ĐỂ SAU", null)
+                        .show()
+                    return
+                }
+            }
+        }
+
+        launchPackageInstallerIntent(context, file)
+    }
+
+    private fun launchPackageInstallerIntent(context: Context, file: File) {
         try {
             val apkUri = FileProvider.getUriForFile(
                 context,

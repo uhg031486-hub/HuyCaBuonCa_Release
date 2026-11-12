@@ -129,12 +129,18 @@ class MainActivity : AppCompatActivity() {
             showBackupSyncDialog()
         }
 
+        binding.txtCopyright.setOnClickListener {
+            Toast.makeText(this, "🔄 Đang kiểm tra bản cập nhật mới...", Toast.LENGTH_SHORT).show()
+            com.huycabuonca.mobile.util.AppUpdateManager.checkForUpdate(this, showToastIfLatest = true)
+        }
+
         // Tự động kiểm tra bản cập nhật mới (In-App Auto Update)
         com.huycabuonca.mobile.util.AppUpdateManager.checkForUpdate(this)
     }
 
     override fun onResume() {
         super.onResume()
+        com.huycabuonca.mobile.util.AppUpdateManager.onActivityResume(this)
         if (currentFilterUrl == "app://favorites" || currentFilterUrl == "tv://favorites" || currentFilterUrl == "app://history") {
             loadMovies(reset = true)
         } else {

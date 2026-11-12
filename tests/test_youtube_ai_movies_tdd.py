@@ -100,16 +100,16 @@ class TestYouTubeAIMoviesTDD(unittest.TestCase):
             self.assertIn("youtube", kt, f"{label} PlayerActivity.kt must allow youtube/youtube-nocookie in WebView")
             self.assertIn("Referer", kt, f"{label} PlayerActivity.kt must send Referer header for embed playback")
 
-    def test_05_version_bumped_to_3_4_1(self):
+    def test_05_version_bumped(self):
         for label, path in [("Mobile", MOBILE_GRADLE), ("TV", TV_GRADLE)]:
             with open(path, "r", encoding="utf-8") as f:
                 gradle = f.read()
-            self.assertIn("versionCode = 35", gradle, f"{label} build.gradle.kts must have versionCode = 35")
-            self.assertIn('versionName = "3.4.1"', gradle, f'{label} build.gradle.kts must have versionName = "3.4.1"')
+            self.assertIn("versionCode = 36", gradle, f"{label} build.gradle.kts must have versionCode = 36")
+            self.assertIn('versionName = "3.4.2"', gradle, f'{label} build.gradle.kts must have versionName = "3.4.2"')
 
         with open(WEBOS_APPINFO, "r", encoding="utf-8") as f:
             appinfo = f.read()
-        self.assertIn('"3.4.1"', appinfo, "LG webOS appinfo.json must have version 3.4.1")
+        self.assertIn('"3.4.2"', appinfo, "LG webOS appinfo.json must have version 3.4.2")
 
 
 if __name__ == "__main__":

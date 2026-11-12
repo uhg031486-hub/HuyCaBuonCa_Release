@@ -158,10 +158,16 @@ class MainActivity : AppCompatActivity() {
         binding.btnSearch.setOnClickListener {
             startActivity(Intent(this, SearchActivity::class.java))
         }
+
+        binding.txtBrandBadge.setOnClickListener {
+            Toast.makeText(this, "🔄 Đang kiểm tra bản cập nhật mới...", Toast.LENGTH_SHORT).show()
+            com.huycabuonca.tv.util.AppUpdateManager.checkForUpdate(this, showToastIfLatest = true)
+        }
     }
 
     override fun onResume() {
         super.onResume()
+        com.huycabuonca.tv.util.AppUpdateManager.onActivityResume(this)
         loadHistory()
         adapter.notifyDataSetChanged()
     }
