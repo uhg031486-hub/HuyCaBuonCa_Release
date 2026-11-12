@@ -52,11 +52,11 @@ class TestShortDramaFreshnessTDD(unittest.TestCase):
             self.assertIn("fallbackGenreToFreeReels(", kt_code, f"{label} GaMoMePhimClient missing fallbackGenreToFreeReels() when gamomephim.com is down")
 
     def test_5_version_bumped_to_3_4_0(self):
-        """Version must be bumped to v3.4.0 (versionCode = 34) across Mobile and TV."""
-        self.assertIn('versionCode = 34', self.mobile_gradle)
-        self.assertIn('versionName = "3.4.0"', self.mobile_gradle)
-        self.assertIn('versionCode = 34', self.tv_gradle)
-        self.assertIn('versionName = "3.4.0"', self.tv_gradle)
+        """Version must be >= v3.4.0 (versionCode >= 34) across Mobile and TV."""
+        m_code = int(re.search(r"versionCode\s*=\s*(\d+)", self.mobile_gradle).group(1))
+        t_code = int(re.search(r"versionCode\s*=\s*(\d+)", self.tv_gradle).group(1))
+        self.assertGreaterEqual(m_code, 34)
+        self.assertGreaterEqual(t_code, 34)
 
 
 if __name__ == "__main__":

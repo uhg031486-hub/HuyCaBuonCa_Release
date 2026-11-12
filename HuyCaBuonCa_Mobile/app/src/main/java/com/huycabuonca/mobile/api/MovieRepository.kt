@@ -682,6 +682,7 @@ object MovieRepository {
             "short_src://gamomephim" -> listOf(
                 FilterItem("🔥 Phim Mới Cập Nhật", "gamomephim://phim-moi"),
                 FilterItem("🏆 Bảng Xếp Hạng Thịnh Hành", "gamomephim://ban-xep-hang"),
+                FilterItem("📺 Phim Ngắn Gộp Trọn Bộ (Full 1-3h)", "yt_ai://short_full"),
                 FilterItem("👑 Cưới Trước Yêu Sau & Tổng Tài", "gamomephim://the-loai/cuoi-truoc-yeu-sau"),
                 FilterItem("🪞 Gương Vỡ Lại Lành & Ngược Tâm", "gamomephim://the-loai/guong-vo-lai-lanh"),
                 FilterItem("💘 Yêu Thầm & Ngọt Sủng", "gamomephim://the-loai/yeu-tham"),
@@ -699,11 +700,12 @@ object MovieRepository {
                 FilterItem("❤️ Yêu Thích", "app://favorites")
             )
             "short_src://aicinema" -> listOf(
-                FilterItem("🤖 Tất Cả Phim AI & Sora", "short_kw://ai_all"),
-                FilterItem("🦾 Thế Giới Robot & Cyborg", "short_kw://ai_robot"),
-                FilterItem("🌌 Khoa Học Viễn Tưởng (Sci-Fi)", "short_kw://ai_scifi"),
-                FilterItem("⏳ Du Hành Tương Lai", "short_kw://ai_future"),
-                FilterItem("🧬 Thực Tế Ảo & Huyền Huyễn AI", "short_kw://ai_fantasy"),
+                FilterItem("🤖 Phim Dài AI Trọn Bộ (Full 1-3 Giờ)", "yt_ai://ai_all"),
+                FilterItem("⚔️ AI 3D Tu Tiên & Huyền Huyễn (Full)", "yt_ai://ai_tutien"),
+                FilterItem("🎨 AI Hoạt Hình & Xuyên Không Hệ Thống", "yt_ai://ai_manhwa"),
+                FilterItem("🌌 AI Khoa Học Viễn Tưởng & Tương Lai", "yt_ai://ai_scifi"),
+                FilterItem("📺 Phim Ngắn Gộp Trọn Bộ (Full 1-3 Giờ)", "yt_ai://short_full"),
+                FilterItem("📱 Tiểu Kịch AI Ngắn Dọc (9:16)", "short_kw://ai_all"),
                 FilterItem("🕒 Lịch Sử Xem", "app://history"),
                 FilterItem("❤️ Yêu Thích", "app://favorites")
             )
@@ -720,6 +722,8 @@ object MovieRepository {
                 FilterItem("🔥 Đề Xuất Thịnh Hành", "freereels://foryou"),
                 FilterItem("🎙️ Phim Lồng Tiếng Việt", "freereels://dubbed_vi"),
                 FilterItem("⚡ Mới Lên Sóng", "freereels://tab_505"),
+                FilterItem("📺 Phim Ngắn Gộp Trọn Bộ (Full 1-3h)", "yt_ai://short_full"),
+                FilterItem("🤖 Phim Dài AI Trọn Bộ (Full 1-3h)", "yt_ai://ai_all"),
                 FilterItem("🎀 Tuyển Tập Phim Nữ", "freereels://tab_504"),
                 FilterItem("👑 Tuyển Tập Phim Nam", "freereels://tab_506"),
                 FilterItem("🎭 Hoạt Hình Ngắn 3D", "freereels://tab_547"),
@@ -890,6 +894,9 @@ object MovieRepository {
 
                 } else if (source == MovieSource.FREEREELS) {
                     when {
+                        filterUrl.startsWith("yt_ai://") -> {
+                            YouTubeAIClient.getMovieList(client, gson, filterUrl, page)
+                        }
                         filterUrl.startsWith("gamomephim://") -> {
                             GaMoMePhimClient.getDramaList(client, filterUrl, page)
                         }
@@ -903,6 +910,8 @@ object MovieRepository {
                             FreeReelsClient.getDramaList(client, gson, filterUrl, page)
                         }
                     }
+                } else if (filterUrl.startsWith("yt_ai://")) {
+                    YouTubeAIClient.getMovieList(client, gson, filterUrl, page)
                 } else if (filterUrl.startsWith("anime_dubbed://")) {
                     fetchPureAnimeDubbedList(filterUrl, page, source)
                 } else {
@@ -922,7 +931,9 @@ object MovieRepository {
     suspend fun getMovieDetail(source: MovieSource, slug: String): MovieDetail? {
         return withContext(Dispatchers.IO) {
             try {
-                if (slug.startsWith("nguonc:")) {
+                if (slug.startsWith("yt_ai:")) {
+                    YouTubeAIClient.getMovieDetail(slug.removePrefix("yt_ai:"))
+                } else if (slug.startsWith("nguonc:")) {
                     val realSlug = slug.removePrefix("nguonc:")
                     NguonCClient.getFilmDetail(client, gson, realSlug)
                 } else if (source == MovieSource.FREEREELS || slug.startsWith("freereels:") || slug.startsWith("gamomephim:")) {
@@ -988,6 +999,11 @@ object MovieRepository {
                     it.name.contains(keyword, ignoreCase = true) || it.group.contains(keyword, ignoreCase = true)
                 } ?: emptyList()
                 results.addAll(tvMatches.map { it.toMovieItem() })
+
+                // 1.2. Tim trong YouTube AI & Tron Bo
+                val ytQuery = if (keyword.lowercase().contains("trọn bộ") || keyword.lowercase().contains("full")) keyword else "$keyword trọn bộ thuyết minh"
+                val ytMatches = YouTubeAIClient.searchLongVideos(client, gson, ytQuery, 15).take(8)
+                results.addAll(ytMatches)
 
                 // 1.5. Tim trong Ga Mo Me Phim
                 val gaMoMatches = GaMoMePhimClient.search(client, keyword)
@@ -2465,5 +2481,213 @@ object GaMoMePhimClient {
             e.printStackTrace()
         }
         return list
+    }
+}
+
+object YouTubeAIClient {
+    private val CATEGORY_QUERIES = mapOf(
+        "ai_all" to listOf(
+            "phim AI trọn bộ thuyết minh",
+            "phim dài AI vietsub full",
+            "phim hoạt hình AI 3D trọn bộ thuyết minh",
+            "phim ngắn AI xuyên không hệ thống full bộ",
+            "phim AI tu tiên trọn bộ thuyết minh",
+            "phim AI sora việt nam thuyết minh full"
+        ),
+        "ai_tutien" to listOf(
+            "phim hoạt hình AI tu tiên trọn bộ thuyết minh",
+            "phim 3D AI huyền huyễn trọn bộ full",
+            "phim tu tiên hệ thống AI thuyết minh full bộ",
+            "phim hoạt hình 3D tu tiên full bộ thuyết minh mới nhất",
+            "phim AI xuyên không tu tiên trọn bộ"
+        ),
+        "ai_manhwa" to listOf(
+            "phim AI xuyên không hệ thống trọn bộ thuyết minh",
+            "phim hoạt hình AI manhwa thuyết minh full",
+            "phim AI mạt thế sinh tồn hệ thống full bộ",
+            "phim AI trọng sinh báo thù trọn bộ thuyết minh",
+            "phim hoạt hình AI thức tỉnh hệ thống full"
+        ),
+        "ai_scifi" to listOf(
+            "phim khoa học viễn tưởng AI thuyết minh full",
+            "phim AI thế giới tương lai robot trọn bộ",
+            "phim viễn tưởng không gian thuyết minh trọn bộ HD",
+            "phim AI tận thế sinh tồn thuyết minh full",
+            "phim người máy AI thuyết minh full bộ"
+        ),
+        "short_full" to listOf(
+            "phim ngắn trọn bộ thuyết minh mới nhất",
+            "phim ngắn tổng tài trọn bộ lồng tiếng full",
+            "phim ngắn xuyên không hệ thống trọn bộ thuyết minh",
+            "phim ngắn trọng sinh báo thù full bộ thuyết minh",
+            "tiểu kịch trọn bộ thuyết minh tiếng việt full",
+            "phim ngắn cổ trang xuyên không full bộ thuyết minh"
+        )
+    )
+
+    private val videoCache = java.util.concurrent.ConcurrentHashMap<String, MovieItem>()
+
+    private fun parseDurationToMinutes(durStr: String): Int {
+        if (durStr.isBlank()) return 0
+        val parts = durStr.trim().split(":").map { it.toIntOrNull() ?: 0 }
+        return when (parts.size) {
+            3 -> parts[0] * 60 + parts[1]
+            2 -> parts[0]
+            else -> 0
+        }
+    }
+
+    fun searchLongVideos(client: OkHttpClient, gson: Gson, query: String, minMinutes: Int = 15): List<MovieItem> {
+        val results = mutableListOf<MovieItem>()
+        try {
+            val encoded = java.net.URLEncoder.encode(query, "UTF-8")
+            // sp=EgIYAg%3D%3D filters YouTube search strictly to long videos (> 20 minutes)
+            val ytUrl = "https://www.youtube.com/results?search_query=$encoded&sp=EgIYAg%3D%3D&hl=vi&gl=VN"
+            val req = Request.Builder()
+                .url(ytUrl)
+                .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36")
+                .header("Accept-Language", "vi-VN,vi;q=0.9,en;q=0.8")
+                .build()
+
+            client.newCall(req).execute().use { resp ->
+                if (!resp.isSuccessful) return emptyList()
+                val html = resp.body?.string() ?: return emptyList()
+                val pattern = java.util.regex.Pattern.compile("""var ytInitialData = (\{.*?\});</script>""", java.util.regex.Pattern.DOTALL)
+                val matcher = pattern.matcher(html)
+                if (!matcher.find()) return emptyList()
+                val jsonStr = matcher.group(1) ?: return emptyList()
+
+                val root = gson.fromJson(jsonStr, JsonObject::class.java) ?: return emptyList()
+                val contents = root.getAsJsonObject("contents")
+                    ?.getAsJsonObject("twoColumnSearchResultsRenderer")
+                    ?.getAsJsonObject("primaryContents")
+                    ?.getAsJsonObject("sectionListRenderer")
+                    ?.getAsJsonArray("contents") ?: return emptyList()
+
+                val seenIds = mutableSetOf<String>()
+                for (secEl in contents) {
+                    if (!secEl.isJsonObject) continue
+                    val itemsArr = secEl.asJsonObject.getAsJsonObject("itemSectionRenderer")?.getAsJsonArray("contents") ?: continue
+                    for (itemEl in itemsArr) {
+                        if (!itemEl.isJsonObject) continue
+                        val v = itemEl.asJsonObject.getAsJsonObject("videoRenderer") ?: continue
+                        val vid = if (v.has("videoId") && !v.get("videoId").isJsonNull) v.get("videoId").asString else ""
+                        if (vid.isEmpty() || seenIds.contains(vid)) continue
+
+                        var title = ""
+                        val titleObj = v.getAsJsonObject("title")
+                        if (titleObj != null) {
+                            val runs = titleObj.getAsJsonArray("runs")
+                            if (runs != null && runs.size() > 0) {
+                                title = runs[0].asJsonObject.get("text")?.asString ?: ""
+                            } else if (titleObj.has("simpleText")) {
+                                title = titleObj.get("simpleText").asString
+                            }
+                        }
+
+                        val durText = v.getAsJsonObject("lengthText")?.get("simpleText")?.asString ?: ""
+                        if (title.isBlank() || durText.isBlank()) continue
+
+                        val mins = parseDurationToMinutes(durText)
+                        if (mins < minMinutes) continue
+
+                        val channel = v.getAsJsonObject("ownerText")?.getAsJsonArray("runs")?.get(0)?.asJsonObject?.get("text")?.asString
+                            ?: v.getAsJsonObject("longBylineText")?.getAsJsonArray("runs")?.get(0)?.asJsonObject?.get("text")?.asString
+                            ?: "AI Cinema Studio"
+
+                        val pubTime = v.getAsJsonObject("publishedTimeText")?.get("simpleText")?.asString ?: "2026"
+                        val thumb = "https://i.ytimg.com/vi/$vid/hq720.jpg"
+                        val poster = "https://i.ytimg.com/vi/$vid/hqdefault.jpg"
+
+                        val item = MovieItem(
+                            id = "yt_ai:$vid",
+                            name = title.trim(),
+                            slug = "yt_ai:$vid",
+                            originName = "🤖 $channel • Full $durText",
+                            thumbUrl = thumb,
+                            posterUrl = poster,
+                            year = pubTime,
+                            quality = "Full HD AI ($durText)",
+                            episodeCurrent = "Full $durText",
+                            source = MovieSource.FREEREELS
+                        )
+                        seenIds.add(vid)
+                        videoCache[vid] = item
+                        results.add(item)
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return results
+    }
+
+    fun getMovieList(client: OkHttpClient, gson: Gson, filterUrl: String, page: Int = 1): List<MovieItem> {
+        val catKey = filterUrl.removePrefix("yt_ai://").trim().ifEmpty { "ai_all" }
+        val queries = CATEGORY_QUERIES[catKey] ?: CATEGORY_QUERIES["ai_all"]!!
+        val seed = FreeReelsClient.getRotationSeed()
+        val q1 = queries[(page - 1 + seed) % queries.size]
+        val q2 = queries[(page + seed) % queries.size]
+
+        val listA = searchLongVideos(client, gson, q1, 15)
+        val listB = if (q2 != q1) searchLongVideos(client, gson, q2, 15) else emptyList()
+        return (listA + listB).distinctBy { it.id }
+    }
+
+    fun getMovieDetail(videoId: String): MovieDetail {
+        val cleanId = videoId.removePrefix("yt_ai:").trim()
+        val cached = videoCache[cleanId]
+        val title = cached?.name ?: "Phim Dài AI Trọn Bộ ($cleanId)"
+        val origin = cached?.originName ?: "🤖 AI Cinema Trọn Bộ"
+        val thumb = cached?.thumbUrl ?: "https://i.ytimg.com/vi/$cleanId/hq720.jpg"
+        val poster = cached?.posterUrl ?: "https://i.ytimg.com/vi/$cleanId/hqdefault.jpg"
+        val dur = cached?.episodeCurrent ?: "Full Bộ"
+        val embedUrl = "https://www.youtube-nocookie.com/embed/$cleanId?autoplay=1&rel=0&modestbranding=1&playsinline=1"
+
+        val epList = mutableListOf(
+            EpisodeItem(
+                name = "🎬 Bản Full Trọn Bộ ($dur)",
+                slug = cleanId,
+                filename = title,
+                linkM3u8 = null,
+                linkEmbed = embedUrl
+            )
+        )
+
+        videoCache.values.filter { it.id != "yt_ai:$cleanId" }.take(11).forEachIndexed { idx, rel ->
+            val relVid = rel.id.removePrefix("yt_ai:")
+            val relEmbed = "https://www.youtube-nocookie.com/embed/$relVid?autoplay=1&rel=0&modestbranding=1&playsinline=1"
+            epList.add(
+                EpisodeItem(
+                    name = "Phần ${idx + 2}: ${rel.name.take(25)}...",
+                    slug = relVid,
+                    filename = rel.name,
+                    linkM3u8 = null,
+                    linkEmbed = relEmbed
+                )
+            )
+        }
+
+        return MovieDetail(
+            id = "yt_ai:$cleanId",
+            name = title,
+            slug = "yt_ai:$cleanId",
+            originName = origin,
+            content = "$title — Phim dài AI / Tiểu kịch gộp trọn bộ thuyết minh tiếng Việt Full HD (16:9).",
+            thumbUrl = thumb,
+            posterUrl = poster,
+            year = cached?.year ?: "2026",
+            time = dur,
+            quality = "Full HD AI",
+            lang = "Thuyết Minh / Vietsub",
+            source = MovieSource.FREEREELS,
+            servers = listOf(
+                ServerGroup(
+                    serverName = "🤖 YouTube AI Cinema (Trọn Bộ)",
+                    episodes = epList
+                )
+            )
+        )
     }
 }

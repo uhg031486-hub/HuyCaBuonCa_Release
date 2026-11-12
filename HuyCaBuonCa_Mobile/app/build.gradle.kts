@@ -11,8 +11,8 @@ android {
         applicationId = "com.huycabuonca.mobile"
         minSdk = 21
         targetSdk = 34
-        versionCode = 34
-        versionName = "3.4.0"
+        versionCode = 35
+        versionName = "3.4.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

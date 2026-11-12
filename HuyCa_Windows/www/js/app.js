@@ -1010,6 +1010,220 @@
 
   };
 
+  // --- YouTube Long-Form AI Movies & Full Compiled Short Dramas Client ---
+  const YouTubeAIClient = {
+    CATEGORY_QUERIES: {
+      'ai_all': [
+        'phim AI trọn bộ thuyết minh',
+        'phim dài AI vietsub full',
+        'phim hoạt hình AI 3D trọn bộ thuyết minh',
+        'phim ngắn AI xuyên không hệ thống full bộ',
+        'phim AI tu tiên trọn bộ thuyết minh',
+        'phim AI sora việt nam thuyết minh full'
+      ],
+      'ai_tutien': [
+        'phim hoạt hình AI tu tiên trọn bộ thuyết minh',
+        'phim 3D AI huyền huyễn trọn bộ full',
+        'phim tu tiên hệ thống AI thuyết minh full bộ',
+        'phim hoạt hình 3D tu tiên full bộ thuyết minh mới nhất',
+        'phim AI xuyên không tu tiên trọn bộ'
+      ],
+      'ai_manhwa': [
+        'phim AI xuyên không hệ thống trọn bộ thuyết minh',
+        'phim hoạt hình AI manhwa thuyết minh full',
+        'phim AI mạt thế sinh tồn hệ thống full bộ',
+        'phim AI trọng sinh báo thù trọn bộ thuyết minh',
+        'phim hoạt hình AI thức tỉnh hệ thống full'
+      ],
+      'ai_scifi': [
+        'phim khoa học viễn tưởng AI thuyết minh full',
+        'phim AI thế giới tương lai robot trọn bộ',
+        'phim viễn tưởng không gian thuyết minh trọn bộ HD',
+        'phim AI tận thế sinh tồn thuyết minh full',
+        'phim người máy AI thuyết minh full bộ'
+      ],
+      'short_full': [
+        'phim ngắn trọn bộ thuyết minh mới nhất',
+        'phim ngắn tổng tài trọn bộ lồng tiếng full',
+        'phim ngắn xuyên không hệ thống trọn bộ thuyết minh',
+        'phim ngắn trọng sinh báo thù full bộ thuyết minh',
+        'tiểu kịch trọn bộ thuyết minh tiếng việt full',
+        'phim ngắn cổ trang xuyên không full bộ thuyết minh'
+      ]
+    },
+    cachedItemsByCat: {},
+    videoCache: {},
+
+    parseDurationToMinutes(durStr) {
+      if (!durStr || typeof durStr !== 'string') return 0;
+      const parts = durStr.trim().split(':').map(n => parseInt(n, 10) || 0);
+      if (parts.length === 3) {
+        return parts[0] * 60 + parts[1] + (parts[2] / 60);
+      } else if (parts.length === 2) {
+        return parts[0] + (parts[1] / 60);
+      }
+      return 0;
+    },
+
+    async searchLongVideos(query, minMinutes = 15) {
+      try {
+        // sp=EgIYAg%3D%3D filters YouTube search strictly to long videos (> 20 minutes)
+        const ytUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}&sp=EgIYAg%3D%3D&hl=vi&gl=VN`;
+        const proxyUrl = getAppProxyUrl(ytUrl);
+        const resp = await fetch(proxyUrl);
+        if (!resp.ok) return [];
+        const html = await resp.text();
+        const match = html.match(/var ytInitialData = (\{.*?\});<\/script>/s);
+        if (!match || !match[1]) return [];
+
+        const data = JSON.parse(match[1]);
+        const contents = data?.contents?.twoColumnSearchResultsRenderer?.primaryContents?.sectionListRenderer?.contents || [];
+        const results = [];
+        const seenIds = new Set();
+
+        for (const section of contents) {
+          const items = section?.itemSectionRenderer?.contents || [];
+          for (const item of items) {
+            const v = item.videoRenderer;
+            if (!v || !v.videoId) continue;
+            const vid = v.videoId;
+            if (seenIds.has(vid)) continue;
+
+            const titleRuns = v.title?.runs || [];
+            const title = (titleRuns[0]?.text || v.title?.simpleText || '').trim();
+            const durText = (v.lengthText?.simpleText || '').trim();
+            if (!title || !durText) continue; // Bỏ qua livestream (không có lengthText)
+
+            const mins = this.parseDurationToMinutes(durText);
+            if (mins < minMinutes) continue;
+
+            const channel = v.ownerText?.runs?.[0]?.text || v.longBylineText?.runs?.[0]?.text || 'AI Cinema Studio';
+            const viewsText = v.shortViewCountText?.simpleText || v.viewCountText?.simpleText || '';
+            const pubTime = v.publishedTimeText?.simpleText || '2026';
+            const descSnippet = (v.detailedMetadataSnippets?.[0]?.snippetText?.runs || [])
+              .map(r => r.text || '')
+              .join('') || `${title} - Phim dài AI trọn bộ thuyết minh Full HD trên kênh ${channel}.`;
+
+            const landscapeImg = `https://i.ytimg.com/vi/${vid}/hq720.jpg`;
+            const fallbackImg = `https://i.ytimg.com/vi/${vid}/hqdefault.jpg`;
+
+            const movieObj = {
+              id: `yt_ai:${vid}`,
+              slug: `yt_ai:${vid}`,
+              videoId: vid,
+              name: title,
+              originName: `🤖 ${channel}${viewsText ? ' • ' + viewsText : ''}`,
+              thumbUrl: landscapeImg,
+              posterUrl: fallbackImg,
+              portraitUrl: fallbackImg,
+              landscapeUrl: landscapeImg,
+              year: pubTime,
+              quality: 'Full HD AI',
+              episodeCurrent: `Full ${durText}`,
+              duration: durText,
+              description: descSnippet,
+              source: 'AICINEMA',
+              isShortDrama: false
+            };
+
+            seenIds.add(vid);
+            this.videoCache[vid] = movieObj;
+            results.push(movieObj);
+          }
+        }
+        return results;
+      } catch (e) {
+        console.warn('YouTubeAIClient.searchLongVideos error:', e);
+        return [];
+      }
+    },
+
+    async getMovieList(filterUrl, page = 1) {
+      const catKey = (filterUrl || 'yt_ai://ai_all').replace('yt_ai://', '').trim() || 'ai_all';
+      const queries = this.CATEGORY_QUERIES[catKey] || this.CATEGORY_QUERIES['ai_all'];
+      const seed = (typeof FreeReelsClient !== 'undefined' && FreeReelsClient.getRotationSeed)
+        ? FreeReelsClient.getRotationSeed()
+        : 0;
+
+      const q1 = queries[(page - 1 + seed) % queries.length];
+      const q2 = queries[(page + seed) % queries.length];
+
+      const [listA, listB] = await Promise.all([
+        this.searchLongVideos(q1, 15),
+        q2 !== q1 ? this.searchLongVideos(q2, 15) : Promise.resolve([])
+      ]);
+
+      const combined = [...listA, ...listB];
+      const unique = [];
+      const seen = new Set();
+      for (const it of combined) {
+        if (!seen.has(it.id)) {
+          seen.add(it.id);
+          unique.push(it);
+        }
+      }
+
+      if (unique.length > 0) {
+        this.cachedItemsByCat[catKey] = unique;
+      }
+      return unique;
+    },
+
+    async getMovieDetail(videoId, fallbackMovie = null) {
+      const cleanId = (videoId || '').replace('yt_ai:', '').trim();
+      let cached = this.videoCache[cleanId] || fallbackMovie || {};
+      const title = cached.name || `Phim Dài AI Trọn Bộ (${cleanId})`;
+      const desc = cached.description || `${title} — Phim dài AI / Tiểu kịch gộp trọn bộ thuyết minh tiếng Việt chất lượng cao Full HD (16:9).`;
+      const dur = cached.duration || cached.episodeCurrent || 'Full Bộ';
+      const thumb = cached.landscapeUrl || `https://i.ytimg.com/vi/${cleanId}/hq720.jpg`;
+
+      const embedUrl = `https://www.youtube-nocookie.com/embed/${cleanId}?autoplay=1&rel=0&modestbranding=1&playsinline=1`;
+
+      // Tạo danh sách tập: Tập 1 là bản Full Trọn Bộ, kèm theo các phim AI liên quan để người dùng chuyển tập dễ dàng
+      const epList = [
+        {
+          name: `🎬 Bản Full Trọn Bộ (${dur})`,
+          slug: cleanId,
+          link_m3u8: embedUrl,
+          embed: embedUrl
+        }
+      ];
+
+      const allCached = Object.values(this.videoCache).filter(v => v.videoId && v.videoId !== cleanId).slice(0, 11);
+      allCached.forEach((rel, idx) => {
+        const relEmbed = `https://www.youtube-nocookie.com/embed/${rel.videoId}?autoplay=1&rel=0&modestbranding=1&playsinline=1`;
+        epList.push({
+          name: `Phần Phụ ${idx + 2}: ${rel.name.slice(0, 28)}...`,
+          slug: rel.videoId,
+          link_m3u8: relEmbed,
+          embed: relEmbed
+        });
+      });
+
+      return {
+        isShortDrama: false,
+        movie: {
+          name: title,
+          origin_name: cached.originName || '🤖 AI Cinema (Phim Dài Trọn Bộ)',
+          content: desc,
+          thumb_url: thumb,
+          poster_url: thumb,
+          year: cached.year || '2026',
+          quality: 'Full HD 1080p',
+          time: dur,
+          lang: 'Thuyết Minh / Vietsub',
+          episode_current: dur
+        },
+        episodes: [
+          {
+            server_name: '🤖 YouTube AI Cinema (Trọn Bộ Không Quảng Cáo)',
+            server_data: epList
+          }
+        ]
+      };
+    }
+  };
+
   let currentSubSource = 'movie_sub://kkphim';
   const SUB_SOURCES = {
     KKPHIM: [
@@ -1121,6 +1335,8 @@
       { name: "🔥 Đề Xuất Thịnh Hành", url: "freereels://foryou" },
       { name: "🎙️ Phim Lồng Tiếng Việt", url: "freereels://dubbed_vi" },
       { name: "⚡ Mới Lên Sóng", url: "freereels://tab_505" },
+      { name: "📺 Phim Ngắn Gộp Trọn Bộ (Full 1-3h)", url: "yt_ai://short_full" },
+      { name: "🤖 Phim Dài AI Trọn Bộ (Full 1-3h)", url: "yt_ai://ai_all" },
       { name: "🎀 Tuyển Tập Phim Nữ", url: "freereels://tab_504" },
       { name: "👑 Tuyển Tập Phim Nam", url: "freereels://tab_506" },
       { name: "🎭 Hoạt Hình Ngắn 3D", url: "freereels://tab_547" },
@@ -1131,6 +1347,7 @@
     'short_src://gamomephim': [
       { name: "🔥 Phim Mới Cập Nhật", url: "gamomephim://phim-moi" },
       { name: "🏆 Bảng Xếp Hạng Thịnh Hành", url: "gamomephim://ban-xep-hang" },
+      { name: "📺 Phim Ngắn Gộp Trọn Bộ (Full 1-3h)", url: "yt_ai://short_full" },
       { name: "👑 Cưới Trước Yêu Sau & Tổng Tài", url: "gamomephim://the-loai/cuoi-truoc-yeu-sau" },
       { name: "🪞 Gương Vỡ Lại Lành & Ngược Tâm", url: "gamomephim://the-loai/guong-vo-lai-lanh" },
       { name: "💘 Yêu Thầm & Ngọt Sủng", url: "gamomephim://the-loai/yeu-tham" },
@@ -1148,11 +1365,12 @@
       { name: "❤️ Yêu Thích", url: "app://favorites" }
     ],
     'short_src://aicinema': [
-      { name: "🤖 Tất Cả Phim AI & Sora", url: "short_kw://ai_all" },
-      { name: "🦾 Thế Giới Robot & Cyborg", url: "short_kw://ai_robot" },
-      { name: "🌌 Khoa Học Viễn Tưởng (Sci-Fi)", url: "short_kw://ai_scifi" },
-      { name: "⏳ Du Hành Tương Lai", url: "short_kw://ai_future" },
-      { name: "🧬 Thực Tế Ảo & Huyền Huyễn AI", url: "short_kw://ai_fantasy" },
+      { name: "🤖 Phim Dài AI Trọn Bộ (Full 1-3 Giờ)", url: "yt_ai://ai_all" },
+      { name: "⚔️ AI 3D Tu Tiên & Huyền Huyễn (Full)", url: "yt_ai://ai_tutien" },
+      { name: "🎨 AI Hoạt Hình & Xuyên Không Hệ Thống", url: "yt_ai://ai_manhwa" },
+      { name: "🌌 AI Khoa Học Viễn Tưởng & Tương Lai", url: "yt_ai://ai_scifi" },
+      { name: "📺 Phim Ngắn Gộp Trọn Bộ (Full 1-3 Giờ)", url: "yt_ai://short_full" },
+      { name: "📱 Tiểu Kịch AI Ngắn Dọc (9:16)", url: "short_kw://ai_all" },
       { name: "🕒 Lịch Sử Xem", url: "app://history" },
       { name: "❤️ Yêu Thích", url: "app://favorites" }
     ],
@@ -1753,6 +1971,50 @@
         });
         renderCards(distinct, reset);
         if (paginationContainer) paginationContainer.style.display = 'flex';
+        isLoading = false;
+        return;
+      }
+
+      // =========================================================================
+      // XỬ LÝ PHIM DÀI AI & TIỂU KỊCH GỘP TRỌN BỘ FULL 1-3 GIỜ (YOUTUBE AI CINEMA)
+      // =========================================================================
+      if (currentFilter.startsWith('yt_ai://')) {
+        let ytItems = await YouTubeAIClient.getMovieList(currentFilter, currentPage);
+        if (reqId !== activeRequestId) return;
+
+        // Nếu mạng chậm hoặc cần bổ sung thêm phim AI ngắn từ FreeReels để làm phong phú kệ phim
+        if (ytItems.length < 6) {
+          try {
+            const extraFr = await FreeReelsClient.search('hệ thống', currentPage);
+            if (extraFr && extraFr.length > 0) ytItems = ytItems.concat(extraFr);
+          } catch (e) {}
+        }
+
+        const seenIds = new Set(reset ? [] : currentMoviesList.map(m => m.id));
+        const uniqueItems = [];
+        for (const it of ytItems) {
+          if (!seenIds.has(it.id)) {
+            seenIds.add(it.id);
+            uniqueItems.push(it);
+          }
+        }
+
+        if (reset) {
+          currentMoviesList = uniqueItems;
+          renderCards(currentMoviesList, true);
+        } else {
+          currentMoviesList.push(...uniqueItems);
+          renderCards(uniqueItems, false);
+        }
+
+        if (paginationContainer) paginationContainer.style.display = 'flex';
+        if (paginationInfo) paginationInfo.textContent = `Đang hiển thị ${currentMoviesList.length} phim dài AI & Trọn bộ (Trang ${currentPage})`;
+        if (btnLoadMore) {
+          btnLoadMore.style.display = 'inline-flex';
+          const nextPageEl = document.getElementById('nextPageNum');
+          if (nextPageEl) nextPageEl.textContent = currentPage + 1;
+        }
+        if (spinner) spinner.style.display = 'none';
         isLoading = false;
         return;
       }
@@ -2892,6 +3154,58 @@
     }
 
     try {
+      if (movie.slug && movie.slug.startsWith('yt_ai:')) {
+        const realVid = movie.slug.replace('yt_ai:', '');
+        const data = await YouTubeAIClient.getMovieDetail(realVid, movie);
+        const m = data.movie;
+        currentPlayingDetail = data;
+
+        document.getElementById('detailTitle').textContent = m.name;
+        document.getElementById('detailSub').textContent = `${m.origin_name || 'AI Cinema'} • ${m.time || 'Full Bộ'}`;
+        document.getElementById('detailDesc').textContent = m.content;
+        document.getElementById('detailPoster').src = m.poster_url || movie.landscapeUrl || movie.posterUrl || DEFAULT_TV_LOGO;
+
+        const tags = document.getElementById('detailTags');
+        if (tags) {
+          tags.innerHTML = `
+            <span class="tag-badge">Chất lượng: ${m.quality || 'Full HD 1080p'}</span>
+            <span class="tag-badge">Thời lượng: ${m.time || 'Full Bộ'}</span>
+            <span class="tag-badge">Ngôn ngữ: Thuyết Minh / Vietsub</span>
+            <span class="tag-badge">Nguồn: 🤖 AI Cinema Trọn Bộ</span>
+          `;
+        }
+
+        const epGrid = document.getElementById('episodesGrid');
+        epGrid.innerHTML = '';
+
+        const server = data.episodes[0];
+        const items = server.server_data || [];
+        items.forEach((ep, idx) => {
+          const btn = document.createElement('button');
+          btn.className = `btn-episode focusable ${idx === 0 ? 'active' : ''}`;
+          btn.textContent = ep.name;
+          btn.addEventListener('click', () => {
+            modal.style.display = 'none';
+            playVideo(ep.link_m3u8, movie.name, ep.name, movie, data, idx, 0);
+          });
+          epGrid.appendChild(btn);
+        });
+
+        document.getElementById('btnPlayFirst').onclick = () => {
+          modal.style.display = 'none';
+          const first = items[0];
+          if (first) {
+            playVideo(first.link_m3u8, movie.name, first.name, movie, data, 0, 0, false, null, true);
+          }
+        };
+
+        setTimeout(() => {
+          const playFirst = document.getElementById('btnPlayFirst');
+          if (playFirst) setFocus(playFirst);
+        }, 50);
+        return;
+      }
+
       if (movie.slug && movie.slug.startsWith('gamomephim:')) {
         const realSlug = movie.slug.replace('gamomephim:', '');
         const data = await GaMoMePhimClient.getDramaDetail(realSlug);
@@ -3393,7 +3707,7 @@
 
     // CHỈ COI LÀ EMBED NẾU LÀ WEB PLAYER HOẶC TRANG WEB NHÚNG:
     const embedKeywords = [
-      '/embed/', '/videoembed/', 'player.html', 'embed.html', 'youtube.com', 'youtu.be',
+      '/embed/', '/videoembed/', 'player.html', 'embed.html', 'youtube.com', 'youtube-nocookie.com', 'youtu.be',
       'ok.ru', 'dailymotion.com/embed', 'vidsrc', '2embed', 'autoembed', 'streamtape.com/e/'
     ];
     if (embedKeywords.some(kw => u.includes(kw))) return true;
@@ -3536,13 +3850,16 @@ function playVideo(streamUrl, title, subtitle, movie, detail, epIndex, serverInd
     const iframe = document.getElementById('playerIframe');
     const isEmbed = isEmbedStreamUrl(streamUrl);
 
-    const isVerticalShortDrama = detail?.isShortDrama || movie?.isShortDrama || 
+    const isYtAIMovie = !!(movie?.id?.startsWith('yt_ai:') || movie?.slug?.startsWith('yt_ai:') || movie?.source === 'AICINEMA' || streamUrl.includes('youtube'));
+    const isVerticalShortDrama = !isYtAIMovie && (
+      detail?.isShortDrama || movie?.isShortDrama || 
       (movie?.source === 'FREEREELS' && !isTv) || 
       (movie?.source === 'GAMOMEPHIM' && !isTv) ||
       (movie?.source === 'DRAMABOX') ||
       (movie?.source === 'REELSHORT') ||
       (movie?.source === 'SHORTMAX') ||
-      (currentSource === 'FREEREELS' && !isTv);
+      (currentSource === 'FREEREELS' && !isTv)
+    );
 
     // TỰ ĐỘNG CHUYỂN HƯỚNG THEO PHIM: PHIM DỌC (9:16) VÀ PHIM NGANG (16:9)
     const rotateBtnText = document.getElementById('rotateBtnText');
@@ -3685,15 +4002,15 @@ function playVideo(streamUrl, title, subtitle, movie, detail, epIndex, serverInd
       ];
       let currentMirrorIdx = 0;
 
-      if (isNguonCEmbed) {
-        const hashMatch = streamUrl.match(/hash=([a-f0-9]+)/i);
-        const hash = hashMatch ? hashMatch[1] : '';
-        // Tự động chuyển đổi nếu là embed14 (thường bị nhà mạng VN lỗi DNS) sang embed17 hoặc embed1
-        if (streamUrl.includes('embed14.streamc.xyz') && hash) {
-          currentEmbedUrl = `https://embed17.streamc.xyz/embed.php?hash=${hash}`;
-        }
+      const showHelperBar = isEmbed;
+      const hashMatch = streamUrl.match(/hash=([a-f0-9]+)/i);
+      const hash = hashMatch ? hashMatch[1] : '';
+      if (isNguonCEmbed && streamUrl.includes('embed14.streamc.xyz') && hash) {
+        currentEmbedUrl = `https://embed17.streamc.xyz/embed.php?hash=${hash}`;
+      }
 
-        // Tạo hoặc cập nhật Embed Helper Toolbar trên Player (Bổ sung đầy đủ nút Thoát & Chọn Tập Phim)
+      if (showHelperBar) {
+        // Tạo hoặc cập nhật Embed Helper Toolbar trên Player (Bổ sung đầy đủ nút Thoát & Chọn Tập Phim cho mọi Embed bao gồm YouTube AI)
         let helperBar = document.getElementById('embedHelperBar');
         if (!helperBar) {
           helperBar = document.createElement('div');
@@ -3710,9 +4027,9 @@ function playVideo(streamUrl, title, subtitle, movie, detail, epIndex, serverInd
           <button id="btnEpisodeSheetEmbed" class="btn-embed-action focusable" title="Mở danh sách tập phim & Server">
             <span>📑</span> Chọn Tập
           </button>
-          <button id="btnSwitchEmbedMirror" class="btn-embed-action focusable" title="Chuyển sang Server Embed dự phòng khi bị lỗi DNS hoặc tải chậm">
+          ${isNguonCEmbed ? `<button id="btnSwitchEmbedMirror" class="btn-embed-action focusable" title="Chuyển sang Server Embed dự phòng khi bị lỗi DNS hoặc tải chậm">
             <span>🔄</span> Đổi Server
-          </button>
+          </button>` : ''}
           <button id="btnPopoutPlayer" class="btn-embed-action btn-popout-action focusable" title="Mở cửa sổ trình phát độc lập 16:9 sắc nét, sạch bóng quảng cáo">
             <span>🗔</span> Cửa Sổ Riêng
           </button>
@@ -3768,7 +4085,6 @@ function playVideo(streamUrl, title, subtitle, movie, detail, epIndex, serverInd
               const nextDomain = embedMirrors[currentMirrorIdx];
               currentEmbedUrl = `https://${nextDomain}/embed.php?hash=${hash}`;
               if (iframe) iframe.src = currentEmbedUrl;
-              // btnOpenEmbedNewTab đã được loại bỏ hoàn toàn để bảo vệ người dùng
               showToast(`🔄 Đang chuyển sang Server Embed dự phòng: ${nextDomain}...`);
             } else {
               showToast('⚠️ Không tìm thấy hash tập phim.');
@@ -4665,8 +4981,18 @@ function playVideo(streamUrl, title, subtitle, movie, detail, epIndex, serverInd
       });
     });
 
-    // Chạy song song tìm kiếm trên tất cả các nguồn trực tuyến (KKPhim, NguonC, FreeReels, GaMoMePhim)
+    // Chạy song song tìm kiếm trên tất cả các nguồn trực tuyến (KKPhim, NguonC, FreeReels, GaMoMePhim, YouTubeAIClient)
     await Promise.allSettled([
+      // 1.2. YouTube AI & Trọn Bộ
+      (async () => {
+        try {
+          const ytQuery = kw.toLowerCase().includes('trọn bộ') || kw.toLowerCase().includes('full')
+            ? kw
+            : `${kw} trọn bộ thuyết minh`;
+          const ytResults = await YouTubeAIClient.searchLongVideos(ytQuery, 15);
+          if (ytResults && ytResults.length > 0) results.push(...ytResults.slice(0, 8));
+        } catch (e) {}
+      })(),
       // 1.5. GaMoMePhim
       (async () => {
         try {

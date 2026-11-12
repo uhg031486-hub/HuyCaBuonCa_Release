@@ -10,6 +10,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.WebChromeClient
+import android.webkit.WebResourceRequest
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -585,11 +586,28 @@ class PlayerActivity : AppCompatActivity() {
 
         webView.webChromeClient = WebChromeClient()
         webView.webViewClient = object : WebViewClient() {
+            override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
+                val reqUrl = request?.url?.toString() ?: return false
+                val isSafeStream = reqUrl.contains("streamc.xyz") ||
+                                   reqUrl.contains("amass17.top") ||
+                                   reqUrl.contains("hihihoho4.top") ||
+                                   reqUrl.contains("jwpcdn.com") ||
+                                   reqUrl.contains("jwplayer.com") ||
+                                   reqUrl.contains("youtube.com") ||
+                                   reqUrl.contains("youtube-nocookie.com") ||
+                                   reqUrl.contains("googlevideo.com") ||
+                                   reqUrl.contains("ytimg.com")
+                if (!isSafeStream) {
+                    return true
+                }
+                return false
+            }
+
             override fun onPageFinished(view: WebView?, url: String?) {
                 binding.playerProgress.visibility = View.GONE
             }
         }
-        webView.loadUrl(url)
+        webView.loadUrl(url, mapOf("Referer" to "https://huyca.pages.dev/"))
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {

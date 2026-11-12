@@ -1,13 +1,13 @@
 {
-  "versionCode": 34,
-  "versionName": "3.4.0",
-  "title": "Bản Cập Nhật Huy Cá v3.4.0 - Tự Động Làm Mới Kho Phim Ngắn & Dự Phòng Toàn Diện",
-  "changelog": "1. Ưu tiên luồng Phim Mới Lên Sóng (Tab 505) và đề xuất động (/foryou/feed) xoay vòng tự động cho mục Phim Ngắn.\n2. Xoay vòng đa từ khóa động cho toàn bộ 5 nguồn phụ (ReelShort, DramaBox, ShortMax, AI Cinema, GoodShort).\n3. Bổ sung cơ chế dự phòng tự động fallbackGenreToFreeReels cho toàn bộ 15 thể loại Gà Mờ Mê Phim khi máy chủ gốc gặp sự cố.\n4. Hỗ trợ làm mới danh sách phim ngắn tức thì khi bấm nút Cập Nhật.",
-  "apkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.4.0/HuyCa_TV_v3.4.0.apk",
-  "mobileApkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.4.0/HuyCa_Mobile_v3.4.0.apk",
-  "tvApkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.4.0/HuyCa_TV_v3.4.0.apk",
-  "lgIpkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.4.0/HuyCa_LG_webOS_v3.4.0.ipk",
-  "windowsZipUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.4.0/HuyCa_Windows_v3.4.0.zip",
+  "versionCode": 35,
+  "versionName": "3.4.1",
+  "title": "Bản Cập Nhật Huy Cá v3.4.1 - Kho Phim Dài AI & Phim Ngắn Gộp Trọn Bộ (Full 1-3 Giờ)",
+  "changelog": "1. Tích hợp kho Phim Dài AI Trọn Bộ (Full 1-3 Giờ): AI 3D Tu Tiên, AI Manhwa Xuyên Không Hệ Thống, AI Khoa Học Viễn Tưởng.\n2. Bổ sung mục Phim Ngắn Gộp Trọn Bộ (Full 1-3 Giờ Thuyết Minh) xem liền mạch từ đầu đến cuối không khóa tập.\n3. Hỗ trợ tìm kiếm phim dài AI & phim trọn bộ trên toàn hệ thống (Web, Mobile, Android TV, LG webOS, Windows).",
+  "apkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.4.1/HuyCa_TV_v3.4.1.apk",
+  "mobileApkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.4.1/HuyCa_Mobile_v3.4.1.apk",
+  "tvApkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.4.1/HuyCa_TV_v3.4.1.apk",
+  "lgIpkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.4.1/HuyCa_LG_webOS_v3.4.1.ipk",
+  "windowsZipUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.4.1/HuyCa_Windows_v3.4.1.zip",
   "isMaintenanceLocked": false,
   "maintenanceMessage": "Hệ thống đang bảo trì định kỳ. Vui lòng quay lại sau!"
 }

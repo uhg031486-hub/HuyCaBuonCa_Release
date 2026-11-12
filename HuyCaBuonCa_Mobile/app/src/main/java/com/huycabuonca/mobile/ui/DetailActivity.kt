@@ -162,7 +162,9 @@ class DetailActivity : AppCompatActivity() {
             return
         }
 
-        if (movieItem?.source == MovieSource.FREEREELS || movieItem?.slug?.startsWith("freereels_") == true) {
+        if (movieItem?.slug?.startsWith("yt_ai:") == true) {
+            isVerticalVideo = false
+        } else if (movieItem?.source == MovieSource.FREEREELS || movieItem?.slug?.startsWith("freereels_") == true) {
             isVerticalVideo = true
         }
 
@@ -1521,7 +1523,11 @@ class DetailActivity : AppCompatActivity() {
                                    reqUrl.contains("amass17.top") || 
                                    reqUrl.contains("hihihoho4.top") ||
                                    reqUrl.contains("jwpcdn.com") ||
-                                   reqUrl.contains("jwplayer.com")
+                                   reqUrl.contains("jwplayer.com") ||
+                                   reqUrl.contains("youtube.com") ||
+                                   reqUrl.contains("youtube-nocookie.com") ||
+                                   reqUrl.contains("googlevideo.com") ||
+                                   reqUrl.contains("ytimg.com")
                 if (!isSafeStream) {
                     // CHẶN ĐỨNG TẤT CẢ CÁC LINK QUẢNG CÁO, CÁ ĐỘ, SHOPEE, TÀI XỈU, REDIRECT RA NGOÀI APP
                     return true
@@ -1583,7 +1589,7 @@ class DetailActivity : AppCompatActivity() {
                 view?.evaluateJavascript(antiAdScript, null)
             }
         }
-        webView.loadUrl(url)
+        webView.loadUrl(url, mapOf("Referer" to "https://huyca.pages.dev/"))
     }
 
     override fun onStop() {

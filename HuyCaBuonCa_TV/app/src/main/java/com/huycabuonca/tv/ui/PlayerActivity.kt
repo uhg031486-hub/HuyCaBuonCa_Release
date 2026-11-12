@@ -575,7 +575,11 @@ class PlayerActivity : AppCompatActivity() {
                                    reqUrl.contains("amass17.top") || 
                                    reqUrl.contains("hihihoho4.top") ||
                                    reqUrl.contains("jwpcdn.com") ||
-                                   reqUrl.contains("jwplayer.com")
+                                   reqUrl.contains("jwplayer.com") ||
+                                   reqUrl.contains("youtube.com") ||
+                                   reqUrl.contains("youtube-nocookie.com") ||
+                                   reqUrl.contains("googlevideo.com") ||
+                                   reqUrl.contains("ytimg.com")
                 if (!isSafeStream) {
                     // CHẶN ĐỨNG 100% CÁC LINK QUẢNG CÁO, CÁ ĐỘ, SHOPEE, TÀI XỈU, REDIRECT RA NGOÀI APP
                     return true
@@ -637,7 +641,7 @@ class PlayerActivity : AppCompatActivity() {
                 view?.evaluateJavascript(antiAdScript, null)
             }
         }
-        webView.loadUrl(url)
+        webView.loadUrl(url, mapOf("Referer" to "https://huyca.pages.dev/"))
     }
 
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
