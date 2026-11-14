@@ -2,12 +2,12 @@
   "versionCode": 37,
   "versionName": "3.4.3",
   "title": "Bản Cập Nhật Huy Cá v3.4.3 - Fix Phụ Đề Kép, Tua Phim AI & Trình Phát Android TV",
-  "changelog": "1. Sửa triệt để lỗi lồng 2 phụ đề đè nhau trên Web/Mobile/TV đối với nguồn Phim Ngắn & Lồng Tiếng.\n2. Tích hợp luồng phát trực tiếp (Native Stream) cho kho Phim Dài AI & Tiểu Kịch Trọn Bộ: hỗ trợ kéo thanh tua (Seekbar) mượt mà 100% trên Web và điều khiển tua bằng Remote trên Android TV.\n3. Sửa lỗi cập nhật ứng dụng bị xoay hoài trên Android 13/14+ với thanh tiến trình tải trực tiếp 0% - 100%.",
-  "apkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.4.3/HuyCa_TV_v3.4.3.apk",
-  "mobileApkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.4.3/HuyCa_Mobile_v3.4.3.apk",
-  "tvApkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.4.3/HuyCa_TV_v3.4.3.apk",
-  "lgIpkUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.4.3/HuyCa_LG_webOS_v3.4.3.ipk",
-  "windowsZipUrl": "https://github.com/uhg031486-hub/HuyCaBuonCa_Release/releases/download/v3.4.3/HuyCa_Windows_v3.4.3.zip",
+  "changelog": "1. Sửa triệt để lỗi lồng 2 phụ đề đè nhau trên Web/Mobile/TV đối với nguồn Phim Ngắn & Lồng Tiếng.\n2. Tích hợp luồng phát trực tiếp (Native Stream) cho kho Phim Dài AI & Tiểu Kịch Trọn Bộ: hỗ trợ kéo thanh tua (Seekbar) mượt mà 100% trên Web và điều khiển tua bằng Remote trên Android TV.\n3. Sửa lỗi cập nhật ứng dụng bị xoay hoài trên Android 13/14+ và tích hợp đường truyền tải trực tiếp qua Cloudflare CDN chống chặn mạng.",
+  "apkUrl": "https://huyca.pages.dev/api/download?file=tv",
+  "mobileApkUrl": "https://huyca.pages.dev/api/download?file=mobile",
+  "tvApkUrl": "https://huyca.pages.dev/api/download?file=tv",
+  "lgIpkUrl": "https://huyca.pages.dev/api/download?file=lg",
+  "windowsZipUrl": "https://huyca.pages.dev/api/download?file=windows",
   "isMaintenanceLocked": false,
   "maintenanceMessage": "Hệ thống đang bảo trì định kỳ. Vui lòng quay lại sau!"
 }
