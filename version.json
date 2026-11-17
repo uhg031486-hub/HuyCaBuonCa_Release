@@ -1,8 +1,8 @@
 {
-  "versionCode": 37,
-  "versionName": "3.4.3",
-  "title": "Bản Cập Nhật Huy Cá v3.4.3 - Fix Phụ Đề Kép, Tua Phim AI & Trình Phát Android TV",
-  "changelog": "1. Sửa triệt để lỗi lồng 2 phụ đề đè nhau trên Web/Mobile/TV đối với nguồn Phim Ngắn & Lồng Tiếng.\n2. Tích hợp luồng phát trực tiếp (Native Stream) cho kho Phim Dài AI & Tiểu Kịch Trọn Bộ: hỗ trợ kéo thanh tua (Seekbar) mượt mà 100% trên Web và điều khiển tua bằng Remote trên Android TV.\n3. Sửa lỗi cập nhật ứng dụng bị xoay hoài trên Android 13/14+ và tích hợp đường truyền tải trực tiếp qua Cloudflare CDN chống chặn mạng.",
+  "versionCode": 38,
+  "versionName": "3.4.4",
+  "title": "Bản Cập Nhật Huy Cá v3.4.4 - Khôi Phục NguonC Cinema (VIP HLS 1080p + Embed Sạch) & Tải Trực Tiếp CDN",
+  "changelog": "1. Sửa triệt để lỗi không xem được phim tại mục NguonC Cinema: Tự động tích hợp song song luồng phát VIP HLS 1080p siêu tốc và luồng NguonC Embed chuẩn không quảng cáo.\n2. Khắc phục lỗi lớp phủ điều khiển đè lên khung phát nhúng Iframe và tối ưu trình phát WebView trên Android TV / Mobile.\n3. Hỗ trợ tải trực tiếp bộ cài Windows, Android, LG webOS qua Cloudflare CDN không bị chặn mạng.",
   "apkUrl": "https://huyca.pages.dev/api/download?file=tv",
   "mobileApkUrl": "https://huyca.pages.dev/api/download?file=mobile",
   "tvApkUrl": "https://huyca.pages.dev/api/download?file=tv",
