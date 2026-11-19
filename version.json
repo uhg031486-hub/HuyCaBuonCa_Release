@@ -1,8 +1,8 @@
 {
-  "versionCode": 40,
-  "versionName": "3.4.6",
-  "title": "Bản Cập Nhật Huy Cá v3.4.6 - Khôi Phục Toàn Diện Phim Ngắn (ShortDrama Resilient Engine) & Tiểu Kịch Trọn Bộ",
-  "changelog": "1. Khôi phục hoàn toàn mục Phim Ngắn với động cơ ShortDrama đa nguồn dự phòng, giải quyết triệt để lỗi server FreeReels chặn quyền và GaMoMePhim lỗi tên miền.\n2. Tích hợp kho tiểu kịch trọn bộ Full HD chuẩn 16:9 & 9:16 cho đầy đủ các nguồn: ReelShort, DramaBox, ShortMax, Lồng Tiếng / Thuyết Minh, AI Cinema, GoodShort.\n3. Hỗ trợ tua seekbar trơn tru không quảng cáo, tối ưu tự xoay màn hình và tương thích hoàn hảo điều khiển Remote TV / Cảm ứng Mobile.",
+  "versionCode": 41,
+  "versionName": "3.4.7",
+  "title": "Bản Cập Nhật Huy Cá v3.4.7 - Tối Ưu Toàn Diện Trình Phát Phim Ngắn Trực Tiếp & Khắc Phục Lỗi Phụ Đề",
+  "changelog": "1. Khắc phục triệt để lỗi không xem được phim ngắn trên phiên bản Web: Chuyển toàn bộ luồng phát phim ngắn và tiểu kịch sang trình phát video HTML5 trực tiếp (/api/yt_stream) mượt mà 1080p, tua thanh Seekbar tự do không độ trễ.\n2. Chặn đứng hoàn toàn hiện tượng trùng lồng 2 lớp phụ đề và mất thanh điều khiển trên phiên bản Web.\n3. Chuẩn hóa định dạng số thứ tự tập phim [01], [02], [03]... không bị nhầm lẫn bởi thời lượng video.\n4. Đồng bộ luồng phát trực tiếp tốc độ cao chống chặn IP cho cả 4 nền tảng: Android TV, Mobile, LG webOS và Windows PC.",
   "apkUrl": "https://huyca.pages.dev/api/download?file=tv",
   "mobileApkUrl": "https://huyca.pages.dev/api/download?file=mobile",
   "tvApkUrl": "https://huyca.pages.dev/api/download?file=tv",
