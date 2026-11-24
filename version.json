@@ -1,8 +1,8 @@
 {
-  "versionCode": 41,
-  "versionName": "3.4.7",
-  "title": "Bản Cập Nhật Huy Cá v3.4.7 - Tối Ưu Toàn Diện Trình Phát Phim Ngắn Trực Tiếp & Khắc Phục Lỗi Phụ Đề",
-  "changelog": "1. Khắc phục triệt để lỗi không xem được phim ngắn trên phiên bản Web: Chuyển toàn bộ luồng phát phim ngắn và tiểu kịch sang trình phát video HTML5 trực tiếp (/api/yt_stream) mượt mà 1080p, tua thanh Seekbar tự do không độ trễ.\n2. Chặn đứng hoàn toàn hiện tượng trùng lồng 2 lớp phụ đề và mất thanh điều khiển trên phiên bản Web.\n3. Chuẩn hóa định dạng số thứ tự tập phim [01], [02], [03]... không bị nhầm lẫn bởi thời lượng video.\n4. Đồng bộ luồng phát trực tiếp tốc độ cao chống chặn IP cho cả 4 nền tảng: Android TV, Mobile, LG webOS và Windows PC.",
+  "versionCode": 42,
+  "versionName": "3.4.8",
+  "title": "Bản Cập Nhật Huy Cá v3.4.8 - Đưa AI Cinema Lên Đầu & Sửa Triệt Để Danh Sách Tập Phim Ngắn",
+  "changelog": "1. Đưa nguồn 🤖 AI Cinema (Phim AI & Sora) lên vị trí đầu tiên và mặc định trong mục Phim Ngắn trên cả 5 nền tảng (Web, Android TV, Điện thoại Android, LG webOS và Windows).\n2. Sửa triệt để lỗi phân bổ danh sách tập: loại bỏ hoàn toàn các Phần Phụ 2..12 ghép nhầm phim khác hoặc trùng lặp trên mọi phim ở TV/Mobile/Web.\n3. Khắc phục lỗi ảnh poster YouTube màu xám trên các video độ phân giải tiêu chuẩn và sửa proxy/tổng hợp gói cài đặt Windows & LG webOS.\n4. Đồng bộ phiên bản v3.4.8 kiểm thử đầy đủ trên Playwright và Giả lập Android TV/Mobile.",
   "apkUrl": "https://huyca.pages.dev/api/download?file=tv",
   "mobileApkUrl": "https://huyca.pages.dev/api/download?file=mobile",
   "tvApkUrl": "https://huyca.pages.dev/api/download?file=tv",
