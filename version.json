@@ -1,8 +1,8 @@
 {
-  "versionCode": 42,
-  "versionName": "3.4.8",
-  "title": "Bản Cập Nhật Huy Cá v3.4.8 - Đưa AI Cinema Lên Đầu & Sửa Triệt Để Danh Sách Tập Phim Ngắn",
-  "changelog": "1. Đưa nguồn 🤖 AI Cinema (Phim AI & Sora) lên vị trí đầu tiên và mặc định trong mục Phim Ngắn trên cả 5 nền tảng (Web, Android TV, Điện thoại Android, LG webOS và Windows).\n2. Sửa triệt để lỗi phân bổ danh sách tập: loại bỏ hoàn toàn các Phần Phụ 2..12 ghép nhầm phim khác hoặc trùng lặp trên mọi phim ở TV/Mobile/Web.\n3. Khắc phục lỗi ảnh poster YouTube màu xám trên các video độ phân giải tiêu chuẩn và sửa proxy/tổng hợp gói cài đặt Windows & LG webOS.\n4. Đồng bộ phiên bản v3.4.8 kiểm thử đầy đủ trên Playwright và Giả lập Android TV/Mobile.",
+  "versionCode": 43,
+  "versionName": "3.4.9",
+  "title": "Bản Cập Nhật Huy Cá v3.4.9 - Chuốt Giao Diện Đa Nền Tảng & Cài Đặt Nhanh iOS / Smart TV",
+  "changelog": "1. Chuốt lại toàn bộ giao diện Web/PC/LG webOS theo chuẩn Design Engineering: sửa triệt để lỗi chữ nút Cài Đặt App tràn khung và rớt dòng, tăng line-height & anti-aliasing chống mất nét dấu tiếng Việt trên mọi màn hình (1440px, 1280px, 1024px, Mobile).\n2. Nâng cấp hộp thoại Cài Đặt Ứng Dụng thông minh: tự động nhận diện iPhone/iPad để hiện hướng dẫn 2 chạm trực quan kèm tải cấu hình Apple Web Clip (.mobileconfig), và nhận diện Smart TV để hiện mã QR + link rút gọn huyca.pages.dev/tv cho ứng dụng Downloader.\n3. Chuốt lại giao diện Android TV & Android Mobile: mở rộng kích thước & khoảng đệm nút nguồn/thể loại chống chạm viền, bật includeFontPadding chống mất dấu tiếng Việt, và tự động co giãn lưới tập phim theo độ dài tên tập.\n4. Đồng bộ phiên bản v3.4.9 và kiểm thử thực tế trên Playwright đa kích thước + Giả lập Android TV/Mobile.",
   "apkUrl": "https://huyca.pages.dev/api/download?file=tv",
   "mobileApkUrl": "https://huyca.pages.dev/api/download?file=mobile",
   "tvApkUrl": "https://huyca.pages.dev/api/download?file=tv",
